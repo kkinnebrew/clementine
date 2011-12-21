@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<rss version="2.0">
+
+<channel>
+
+<title>Orange UI | Feed</title>
+<description>A Placeholder RSS Feed</description>
+<link>http://www.orangelit.com/orangeui/rss.xml</link>
+
+<item>
+	<title>A Test Entry</title>
+	<description>This is a test entry in our placeholder RSS feed.</description>
+	<link>http://www.google.com</link>
+</item>
+
+</channel>
+
+</rss>

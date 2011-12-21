@@ -2,8 +2,6 @@
  * ui-table-view.js | OrangeUI Framework 0.1 | 12.21.2011 
  */
  
-if(UI == undefined) var UI = {};
-
 if(UI.iOS == undefined) UI.iOS = {};
 
 UI.iOS.UITableView = Class.create({

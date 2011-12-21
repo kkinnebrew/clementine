@@ -57,8 +57,9 @@
 <!-- mobile js -->
 <script type="text/javascript" src="../src/js/mobile.js"></script>
 
-<!-- common.js -->
+<!-- Common Modules -->
 <script type="text/javascript" src="../src/js/common.js"></script>
+<script type="text/javascript" src="../src/js/engine.js"></script>
 
 <!-- iOS Modules -->
 <script type="text/javascript" src="../src/js/ios/ui-table-view.js"></script>
@@ -67,7 +68,7 @@
 
 $(document).ready(function() {
 
-	var table = new UI.iOS.UITableView($('.ios-ui-table-view').get(0));
+	var engine = new UI.Engine();
 
 });
 

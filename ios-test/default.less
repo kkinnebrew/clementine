@@ -1,0 +1,280 @@
+/**
+ * default.less | iOS Test | 12.21.2011 
+ */
+
+.border-radius (@radius) {
+  border-radius: @radius;
+  -moz-border-radius: @radius;
+  -webkit-border-radius: @radius;
+}
+
+.background-clip (@clip) {
+	-webkit-background-clip: @clip;
+	-moz-background-clip: @clip;
+}
+
+.box-sizing (@sizing) {
+	-webkit-box-sizing: @sizing;
+	-moz-box-sizing: @sizing;
+}
+
+.disable-select {
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+
+/* standard styling */
+html, body {
+
+	font: normal 100% "Helvetica Neue", Helvetica, Arial;
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	width: 100%;
+	-webkit-user-select:none;
+	-webkit-text-size-adjust:none;
+	overflow-y: hidden;
+		
+}
+
+/* standard iOS gradients and colors */
+
+.ios-bar-gradient-light-blue {
+
+	// borders
+	border-top: 1px solid #C7CFDA;
+	border-bottom: 1px solid #000000;
+	
+	// text color
+	color: #FFF;
+	
+	// background images
+	background-image: linear-gradient(bottom, rgb(110,132,162) 0%, rgb(127,148,176) 50%, rgb(137,155,178) 51%, rgb(180,191,205) 100%);
+	background-image: -o-linear-gradient(bottom, rgb(110,132,162) 0%, rgb(127,148,176) 50%, rgb(137,155,178) 51%, rgb(180,191,205) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(110,132,162) 0%, rgb(127,148,176) 50%, rgb(137,155,178) 51%, rgb(180,191,205) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(110,132,162) 0%, rgb(127,148,176) 50%, rgb(137,155,178) 51%, rgb(180,191,205) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(110,132,162) 0%, rgb(127,148,176) 50%, rgb(137,155,178) 51%, rgb(180,191,205) 100%);
+	
+	// text shadows
+    text-shadow:0 -1px 0 rgba(0, 0, 0, 0.35);
+
+}
+
+.ios-bar-button-gradient-light-blue {
+	
+	// background images
+	background-image: linear-gradient(bottom, rgb(74,106,155) 0%, rgb(72,106,154) 50%, rgb(89,119,162) 50%, rgb(133,157,188) 100%);
+	background-image: -o-linear-gradient(bottom, rgb(74,106,155) 0%, rgb(72,106,154) 50%, rgb(89,119,162) 50%, rgb(133,157,188) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(74,106,155) 0%, rgb(72,106,154) 50%, rgb(89,119,162) 50%, rgb(133,157,188) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(74,106,155) 0%, rgb(72,106,154) 50%, rgb(89,119,162) 50%, rgb(133,157,188) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(74,106,155) 0%, rgb(72,106,154) 50%, rgb(89,119,162) 50%, rgb(133,157,188) 100%);
+	
+	// borders
+	border:solid 1px;
+	border-color:#2a3349 #2a3a64 #253662;
+	
+	// styles
+	color:#FFFFFF;
+	cursor: pointer;
+	font-size: 0.75em;
+	font-weight: bold;
+	height: 30px;
+	line-height: 30px;
+	padding: 0px 15px;
+	overflow:hidden;
+	text-align:center;
+	text-overflow:ellipsis;
+	text-shadow: 0px -1px 0 rgba(0, 0, 0, 0.35);
+	white-space:nowrap;
+	z-index: 2;
+
+	// shadowing
+	-webkit-box-shadow:inset 0px 1px 1px rgba(0, 0, 0, .21), 0px 1px 0px rgba(255, 255, 255, .17);
+	-moz-box-shadow:inset 0px 1px 1px rgba(0, 0, 0, .21), 0px 1px 0px rgba(255, 255, 255, .17);
+	
+}
+
+/* standard iOS elements */
+
+.ios-ui-navigation-bar {
+	
+	.ios-bar-gradient-light-blue;
+	
+	h1 {
+		color: #FFF;
+		font-size: 1.125em; /* 18px / 16px */
+		font-weight: bold;
+		line-height: 42px;
+		margin: 0 auto;
+		padding: 0;
+		position: absolute;
+		text-align: center;
+		width: 100%;
+		z-index: 1;
+	}
+	
+	h2 {
+		display: none;
+	}
+	
+	height: 42px;
+	width: 100%;
+	
+}
+
+.ios-ui-bar-button-item {
+	
+	.ios-bar-button-gradient-light-blue;
+	
+	.border-radius(5px);
+	.background-clip (padding-box);
+	.box-sizing (border-box);
+	
+	.disable-select;
+	
+	position: absolute;
+	
+	&.left {
+		top: 7px;
+		left: 7px;
+	}
+	
+	&.right {
+		top: 7px;
+		right: 7px;
+	}
+		
+}
+
+.ios-scroller {
+	-webkit-tap-highlight-color:rgba(0,0,0,0);
+}
+
+.ios-ui-table-view {
+	
+	background-color: #666;
+	bottom: 44px;
+	left:-9999px;
+	overflow: auto;
+	position: absolute;
+	top: 44px;
+	width: 100%;
+
+	ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		text-align:left;
+		min-height: 100%;
+		width:100%;
+		z-index:1;
+		-webkit-tap-highlight-color:rgba(0,0,0,0);
+	}
+
+}
+
+.ios-ui-table-view-cell {
+
+	background-color: #FFF;
+	border-bottom: 0.0625em solid #EEE; /* 1px / 16px */
+	cursor: pointer;
+	font-size: 1em; /* 16px / 16px */
+	height: 43px;
+	line-height: 44px;
+	position: relative;
+	width: 100%; /* 307px / 320px */
+	-webkit-transition: background-image .2s ease-in-out;
+	-moz-transition: background-image .2s ease-in-out;
+	
+	span {
+		padding-left: 15px;
+	}
+	
+}
+
+.ios-ui-table-view-cell.selected {
+	background-image:-webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #058CF5), color-stop(1, #015DE6)) !important;
+	background-image:-moz-linear-gradient(top, #058CF5, #015DE6) !important;
+	background-image:-o-linear-gradient(top, #058CF5, #015DE6) !important;
+	border-top-color: #058CF5 !important;
+	color:#FFF !important;
+}
+
+.ios-ui-toolbar {
+	
+	// background gradient
+	background-image: linear-gradient(bottom, rgb(109,131,161) 0%, rgb(126,146,172) 49%, rgb(138,157,181) 50%, rgb(175,188,205) 100%, rgb(216,222,230) 100%);
+	background-image: -o-linear-gradient(bottom, rgb(109,131,161) 0%, rgb(126,146,172) 49%, rgb(138,157,181) 50%, rgb(175,188,205) 100%, rgb(216,222,230) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(109,131,161) 0%, rgb(126,146,172) 49%, rgb(138,157,181) 50%, rgb(175,188,205) 100%, rgb(216,222,230) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(109,131,161) 0%, rgb(126,146,172) 49%, rgb(138,157,181) 50%, rgb(175,188,205) 100%, rgb(216,222,230) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(109,131,161) 0%, rgb(126,146,172) 49%, rgb(138,157,181) 50%, rgb(175,188,205) 100%, rgb(216,222,230) 100%);
+	
+	
+	border-top: 1px solid #6d83a1;
+	bottom: 0px;
+	height: 43px;
+	overflow: hidden;
+	position: absolute;
+	width: 100%;
+	
+}
+
+/* pull down to refresh */
+
+.ios-pull-down-to-refresh {
+	background:#E2E7ED;
+	height:44px;
+	line-height:16px;
+	padding:5px 10px;
+	border-bottom:1px solid #ccc;
+	font-weight:bold;
+	font-size:13px;
+	text-align: center;
+	color:#5B6F8B;
+}
+
+.ios-pull-down-to-refresh .pullDownIcon {
+	display:block; float:left;
+	width:40px; height:40px;
+	background:url(../src/img/ios-pull-icon.png) 0 0 no-repeat;
+	-webkit-background-size:40px 80px; background-size:40px 80px;
+	-webkit-transition-property:-webkit-transform;
+	-webkit-transition-duration:250ms;	
+}
+
+.ios-pull-down-to-refresh .pullDownIcon {
+	-webkit-transform:rotate(0deg) translateZ(0);
+}
+
+.ios-pull-down-to-refresh.flip .pullDownIcon {
+	-webkit-transform:rotate(-180deg) translateZ(0);
+}
+
+.pullDownIcon {
+	margin-top: 3px;
+}
+
+.pullDownLabel {
+	padding-top: 7px;
+	display: block;
+}
+
+.pullDownUpdated {
+	display: block;
+	font-size: 11px;
+	font-weight: normal;
+}
+
+.ios-pull-down-to-refresh.loading .pullDownIcon {
+	background-position:0 100%;
+	-webkit-transform:rotate(0deg) translateZ(0);
+	-webkit-transition-duration:0ms;
+
+	-webkit-animation-name:loading;
+	-webkit-animation-duration:2s;
+	-webkit-animation-iteration-count:infinite;
+	-webkit-animation-timing-function:linear;
+}

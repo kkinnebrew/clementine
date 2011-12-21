@@ -1,0 +1,88 @@
+/**
+ * hack.css | iOS Test | 12.21.2011 
+ */
+ 
+@-moz-document url-prefix() {
+	
+	.ios-ui-bar-button-item {
+		line-height: 28px;
+	}
+	
+}
+
+@media only screen and (min-device-width: 769px) {
+	
+	.ios-ui-bar-button-item:hover {
+	
+		background-image: linear-gradient(bottom, rgb(60,89,127) 0%, rgb(56,82,120) 50%, rgb(76,101,137) 50%, rgb(115,136,163) 100%);
+		background-image: -o-linear-gradient(bottom, rgb(60,89,127) 0%, rgb(56,82,120) 50%, rgb(76,101,137) 50%, rgb(115,136,163) 100%);
+		background-image: -moz-linear-gradient(bottom, rgb(60,89,127) 0%, rgb(56,82,120) 50%, rgb(76,101,137) 50%, rgb(115,136,163) 100%);
+		background-image: -webkit-linear-gradient(bottom, rgb(60,89,127) 0%, rgb(56,82,120) 50%, rgb(76,101,137) 50%, rgb(115,136,163) 100%);
+		background-image: -ms-linear-gradient(bottom, rgb(60,89,127) 0%, rgb(56,82,120) 50%, rgb(76,101,137) 50%, rgb(115,136,163) 100%);
+	
+	}
+	
+	.ios-ui-bar-button-item:active {
+		
+		background-image: linear-gradient(bottom, rgb(76,103,138) 100%, rgb(89,114,146) 0%);
+		background-image: -o-linear-gradient(bottom, rgb(76,103,138) 100%, rgb(89,114,146) 0%);
+		background-image: -moz-linear-gradient(bottom, rgb(76,103,138) 100%, rgb(89,114,146) 0%);
+		background-image: -webkit-linear-gradient(bottom, rgb(76,103,138) 100%, rgb(89,114,146) 0%);
+		background-image: -ms-linear-gradient(bottom, rgb(76,103,138) 100%, rgb(89,114,146) 0%);
+		
+	}
+	
+	.ios-ui-table-view-cell:hover {
+		background-color: #F3F3F3;
+		-moz-transition-duration: .2s;
+		-webkit-transition-duration: .2s;
+	}
+	
+	.ios-ui-table-view-cell:active {
+		background-image:-webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #058CF5), color-stop(1, #015DE6));
+		background-image:-moz-linear-gradient(top, #058CF5, #015DE6);
+		background-image:-o-linear-gradient(top, #058CF5, #015DE6);
+		border-top-color: #058CF5 !important;
+		color:#FFF !important;
+	}
+
+}
+
+ 
+@-webkit-keyframes loading {
+	from { -webkit-transform:rotate(0deg) translateZ(0); }
+	to { -webkit-transform:rotate(360deg) translateZ(0); }
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
+	
+	.ios-ui-bar-button-item {    
+		border:none;
+		-webkit-box-shadow:	inset 0 0 1px rgba(0, 0, 0, .9),
+							inset 0px 1px 0px #FFFFFF,
+							0px 1px 2px -1px rgba(0, 0, 0, .2) !important;
+		-webkit-box-shadow:	inset 0 2px 1px -1px rgba(0, 0, 0, .45),
+							inset 0px 0px 1px rgba(0, 0, 0, 1.0),
+							0px 1px 0px rgba(255, 255, 255, .17) !important;
+	}
+	
+	.ios-ui-navigation-bar {
+		background: url(../src/img/ui-navigation-bar-background@2x.png) 0 0 repeat-x;
+		border: 0;
+		height: 44px;
+		-webkit-background-size: 10px 44px;
+	}
+	
+	.ios-ui-toolbar {
+		background: url(../src/img/ui-toolbar-background@2x.png) 0 0 repeat-x;
+		border: 0;
+		height: 44px;
+		-webkit-background-size: 10px 44px;
+	}
+	
+	.ios-pull-down-to-refresh .pullDownIcon {
+		background:url(../src/img/ios-pull-icon@2x.png) 0 0 no-repeat;
+		-webkit-background-size:40px 80px; background-size:40px 80px;
+	}
+
+}

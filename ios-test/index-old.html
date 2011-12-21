@@ -1,0 +1,340 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>OrangeUI | Mobile Template</title>
+
+<!-- rss/atom feed links -->
+
+<link rel="alternate" type="application/atom+xml" title="OrangeUI | Feed" href="rss.xml" />
+
+<!-- iOS meta rules -->
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+<!-- iOS touch images -->
+
+<link rel="apple-touch-icon" href="../src/img/touch-icon-iphone.png" />
+<link rel="apple-touch-icon" sizes="72x72" href="../src/img/touch-icon-ipad.png" />
+<link rel="apple-touch-icon" sizes="114x114" href="../src/img/touch-icon-iphone4.png" />
+
+<link rel="apple-touch-startup-image" href="../src/img/touch-startup.png">
+
+<!-- iOS viewport rules -->
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+
+<!-- Normalize CSS -->
+<link rel="stylesheet" href="../lib/css/normalize.css" type="text/css" /> 
+
+<!-- less stylesheets -->
+<link rel="stylesheet/less" type="text/css" href="default.less">
+<link rel="stylesheet/less" type="text/css" href="../src/css/common.less">
+<link rel="stylesheet/less" type="text/css" media="print" href="print.less">
+
+<!-- mobile stylesheet -->
+<link rel="stylesheet/less" type="text/css" href="../src/css/mobile.less" media="only screen and (max-device-width: 768px)"/>
+
+<!-- jQuery -->
+<script type="text/javascript" src="../lib/js/jquery-1.7.1.min.js"></script>
+
+<!-- LessCSS -->
+<script type="text/javascript" src="../lib/js/less-1.1.5.min.js"></script>
+
+<!-- iScroll -->
+<script type="text/javascript" src="../lib/js/iscroll.js"></script>
+
+<!-- Modernizr -->
+<script type="text/javascript" src="../lib/js/modernizr-2.0.6.js"></script>
+
+<!-- mobile js -->
+<script type="text/javascript" src="../src/js/mobile.js"></script>
+
+<!-- common.js -->
+<script type="text/javascript" src="../src/js/common.js"></script>
+
+<script type="text/javascript">
+
+var UI = {};
+
+UI.iOS = {};
+
+UI.iOS.UITableView = Class.create({
+
+	initialize: function(selector) {
+				
+		// lookup selector
+		if(typeof selector != 'object') return;
+		this.target = selector;
+			
+		// calculate dimensions
+		this.pullDownEl = $(selector).find('.ios-pull-down-to-refresh').get(0);
+		this.pullDownOffset = this.pullDownEl.offsetHeight;	
+
+		this.generatedCount = 0;
+		
+		// setup iScroll
+		this.myScroll = new iScroll(this.target, {
+				
+			useTransition: true,
+			topOffset: this.pullDownOffset,
+			pullDownEl: this.pullDownEl,
+			
+			onBeforeScrollStart: this.onBeforeScrollStart,
+			onRefresh: this.onRefresh,
+			onScrollMove: this.onScrollMove,
+			onScrollEnd: this.onScrollEnd,
+			onBeforeScrollEnd: this.onRowUnselected
+			
+		});
+		
+		var that = this.target;
+		
+		setTimeout(function () { that.style.left = '0'; }, 800);
+		
+	},
+	
+	onBeforeScrollStart: function(e) {
+		
+		var target = e.target;
+		clearTimeout(this.hoverTimeout);
+	
+		while (target.nodeType != 1) target = target.parentNode;
+				
+		var hoverRegex = new RegExp('(^|\\s)selected(\\s|$)');
+				
+		this.hoverTimeout = setTimeout(function () {
+			if (!hoverRegex.test(target.className)) target.className = target.className ? target.className + ' selected' : 'selected';
+		}, 80);
+	
+		this.hoverTarget = target;
+		
+		e.preventDefault();
+	},
+	
+	onRefresh: function() {
+				
+		if (this.pullDownEl.className.match('loading')) {
+			this.pullDownEl.className = 'ios-pull-down-to-refresh';
+			this.pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Pull down to refresh...';
+		}
+	
+	},
+
+	onScrollMove: function() {
+	
+		if (this.hoverTarget) {
+			clearTimeout(this.hoverTimeout);
+			this.hoverTarget.className = this.hoverTarget.className.replace(new RegExp('(^|\\s)selected(\\s|$)'), '');
+			this.target = null;
+		}
+				
+		if (this.y > 5 && !this.pullDownEl.className.match('flip')) {
+			this.pullDownEl.className = 'ios-pull-down-to-refresh flip';
+			this.pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Release to refresh...';
+			this.minScrollY = 0;
+		} else if (this.y < 5 && this.pullDownEl.className.match('flip')) {
+			this.pullDownEl.className = 'ios-pull-down-to-refresh ';
+			this.pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Pull down to refresh...';
+			this.minScrollY = -pullDownOffset;
+		}
+	
+	},
+
+	onScrollEnd: function() {
+			
+		if (this.pullDownEl.className.match('flip')) {
+			this.pullDownEl.className = 'ios-pull-down-to-refresh loading';
+			this.pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Loading...';				
+			
+			var el, li, i;
+									
+			el = $(this.wrapper).find('ul').get(0);
+				
+			for (i=0; i<3; i++) {
+				li = document.createElement('li');
+				li.className = 'ios-ui-table-view-cell';
+				li.innerHTML = '<span>Generated row ' + 1 + '</span>';
+				el.insertBefore(li, el.childNodes[0]);
+			}
+			
+			this.refresh();		// Remember to refresh when contents are loaded (ie: on ajax completion)
+			
+		} 
+		
+	},
+	
+	onRowUnselected: function() {
+		
+		if (this.hoverTarget) {
+			clearTimeout(this.hoverTimeout);
+			this.hoverTarget.className = this.hoverTarget.className.replace(new RegExp('(^|\\s)selected(\\s|$)'), '');
+			this.target = null;
+		}
+		
+	}
+
+});
+
+document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
+
+$(document).ready(function() {
+
+	var table = new UI.iOS.UITableView($('.ios-ui-table-view').get(0));
+
+});
+
+
+/**
+var this.pullDownEl, pullDownOffset,
+	generatedCount = 0;
+
+var myScroll,
+	hoverClassRegEx = new RegExp('(^|\\s)selected(\\s|$)'),
+	removeClass = function () {
+		if (this.hoverTarget) {
+			clearTimeout(this.hoverTimeout);
+			this.hoverTarget.className = this.hoverTarget.className.replace(hoverClassRegEx, '');
+			this.target = null;
+		}
+	};
+	
+function pullDownAction () {
+	setTimeout(function () {	// <-- Simulate network congestion, remove setTimeout from production!
+		var el, li, i;
+		el = $('.ios-ui-table-view ul').get(0);
+
+		for (i=0; i<3; i++) {
+			li = document.createElement('li');
+			li.className = 'ios-ui-table-view-cell';
+			li.innerHTML = '<span>Generated row ' + (++generatedCount) + '</span>';
+			el.insertBefore(li, el.childNodes[0]);
+		}
+		
+		myScroll.refresh();		// Remember to refresh when contents are loaded (ie: on ajax completion)
+	}, 1000);	// <-- Simulate network congestion, remove setTimeout from production!
+};
+
+function loaded() {
+	
+	this.pullDownEl = $('.ios-ui-table-view .ios-pull-down-to-refresh').get(0);
+	pullDownOffset = this.pullDownEl.offsetHeight;
+
+	myScroll = new iScroll($('.ios-ui-table-view').get(0), {
+		
+		useTransition: true,
+		topOffset: pullDownOffset,
+		
+		onBeforeScrollStart: function (e) {
+			var target = e.target;
+
+			clearTimeout(this.hoverTimeout);
+
+			while (target.nodeType != 1) target = target.parentNode;
+
+			this.hoverTimeout = setTimeout(function () {
+				if (!hoverClassRegEx.test(target.className)) target.className = target.className ? target.className + ' selected' : 'selected';
+			}, 80);
+
+			this.hoverTarget = target;
+			
+			e.preventDefault();
+		},
+		onRefresh: function () {
+			if (this.pullDownEl.className.match('loading')) {
+				this.pullDownEl.className = 'ios-pull-down-to-refresh';
+				this.pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Pull down to refresh...';
+			} 
+		},
+		onScrollMove: function () {
+			
+			removeClass();
+			
+			if (this.y > 5 && !this.pullDownEl.className.match('flip')) {
+				this.pullDownEl.className = 'ios-pull-down-to-refresh flip';
+				this.pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Release to refresh...';
+				this.minScrollY = 0;
+			} else if (this.y < 5 && this.pullDownEl.className.match('flip')) {
+				this.pullDownEl.className = 'ios-pull-down-to-refresh ';
+				this.pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Pull down to refresh...';
+				this.minScrollY = -pullDownOffset;
+			} 
+		},
+		onScrollEnd: function () {
+			if (this.pullDownEl.className.match('flip')) {
+				this.pullDownEl.className = 'ios-pull-down-to-refresh loading';
+				this.pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Loading...';				
+				pullDownAction();	// Execute custom function (ajax call?)
+			} 
+		},
+		onBeforeScrollEnd: removeClass
+	});
+	
+	setTimeout(function () { $('.ios-ui-table-view').get(0).style.left = '0'; }, 800);
+}
+
+**/
+
+//document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
+//document.addEventListener('DOMContentLoaded', loaded, false);
+
+</script>
+
+<style type="text/css">
+
+</style>
+
+<!-- CSS Stylesheets -->
+<link rel="stylesheet" type="text/css" href="hack.css">
+
+</head>
+
+<body>
+
+<header class="ios-ui-navigation-bar">
+
+	<h1>iOS Element Test</h1>
+	
+	<div class="ios-ui-bar-button-item left">Home</div>
+	
+	<div class="ios-ui-bar-button-item right">Email</div>
+
+</header>
+
+<div class="ios-ui-table-view">
+
+	<div class="ios-scroller">
+
+		<div class="ios-pull-down-to-refresh">
+			<span class="pullDownIcon"></span>
+			<span class="pullDownLabel">Pull down to refresh...</span>
+			<span class="pullDownUpdated">Last Updated: 12/20/2011 1:47PM</span>
+		</div>
+
+		<ul>
+	
+			<li class="ios-ui-table-view-cell"><span>One</span></li>
+			<li class="ios-ui-table-view-cell"><span>Two</span></li>
+			<li class="ios-ui-table-view-cell"><span>Three</span></li>
+			<li class="ios-ui-table-view-cell"><span>Four</span></li>
+			<li class="ios-ui-table-view-cell"><span>Five</span></li>
+			<li class="ios-ui-table-view-cell"><span>Six</span></li>
+			<li class="ios-ui-table-view-cell"><span>Seven</span></li>
+			<li class="ios-ui-table-view-cell"><span>Eight</span></li>
+			<li class="ios-ui-table-view-cell"><span>Nine</span></li>
+			<li class="ios-ui-table-view-cell"><span>Ten</span></li>
+			<li class="ios-ui-table-view-cell"><span>Eleven</span></li>
+			<li class="ios-ui-table-view-cell"><span>Twelve</span></li>
+			<li class="ios-ui-table-view-cell"><span>Thirteen</span></li>
+	
+		</ul>
+	
+	</div>
+
+</div>
+
+<footer class="ios-ui-toolbar"></footer>
+
+</body>
+</html>

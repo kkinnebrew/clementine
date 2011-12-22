@@ -1,0 +1,13 @@
+/**
+ * web-quirks.css | OrangeUI Framework 0.1 | 12.21.2011 
+ * 
+ * handles all browser quirks with css fixes for behavior oddities
+ * 
+ */
+
+/* Firefox only */
+@-moz-document url-prefix() {
+	
+	
+	
+}

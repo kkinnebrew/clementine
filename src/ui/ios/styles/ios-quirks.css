@@ -9,7 +9,9 @@
 /* Firefox only */
 @-moz-document url-prefix() {
 	
-	
+	.ios-ui-bar-button-item {
+		line-height: 28px;
+	}
 	
 }
 

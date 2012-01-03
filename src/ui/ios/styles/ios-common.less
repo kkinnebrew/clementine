@@ -6,3 +6,26 @@
  * 
  */
 
+.border-radius (@radius) {
+	border-radius: @radius;
+	-moz-border-radius: @radius;
+	-webkit-border-radius: @radius;
+}
+
+.background-clip (@clip) {
+	-webkit-background-clip: @clip;
+	-moz-background-clip: @clip;
+}
+
+.box-sizing (@sizing) {
+	-webkit-box-sizing: @sizing;
+	-moz-box-sizing: @sizing;
+}
+
+.disable-select {
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}

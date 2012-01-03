@@ -1,0 +1,103 @@
+/**
+ * ios-elements.css | OrangeUI Framework 0.1 | 12.21.2011 
+ * 
+ * all common stylings used in both desktop and mobile
+ * stylesheet versions
+ * 
+ */
+
+@import "ios-common.less";
+
+.ios-ui-navigation-bar {
+	
+	// borders
+	border-top: 1px solid #C7CFDA;
+	border-bottom: 1px solid #000000;
+	
+	// text color
+	color: #FFF;
+	
+	// background images
+	background-image: linear-gradient(bottom, rgb(110,132,162) 0%, rgb(127,148,176) 50%, rgb(137,155,178) 51%, rgb(180,191,205) 100%);
+	background-image: -o-linear-gradient(bottom, rgb(110,132,162) 0%, rgb(127,148,176) 50%, rgb(137,155,178) 51%, rgb(180,191,205) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(110,132,162) 0%, rgb(127,148,176) 50%, rgb(137,155,178) 51%, rgb(180,191,205) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(110,132,162) 0%, rgb(127,148,176) 50%, rgb(137,155,178) 51%, rgb(180,191,205) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(110,132,162) 0%, rgb(127,148,176) 50%, rgb(137,155,178) 51%, rgb(180,191,205) 100%);
+	
+	// text shadows
+	text-shadow:0 -1px 0 rgba(0, 0, 0, 0.35);
+
+	// title
+	h1 {
+		color: #FFF;
+		font-size: 1.125em; /* 18px / 16px */
+		font-weight: bold;
+		line-height: 42px;
+		margin: 0 auto;
+		padding: 0;
+		position: absolute;
+		text-align: center;
+		width: 100%;
+		z-index: 1;
+	}
+	
+	h2 {
+		display: none;
+	}
+	
+	height: 42px;
+	width: 100%;
+	
+}
+
+.ios-ui-bar-button-item {
+	
+	// background images
+	background-image: linear-gradient(bottom, rgb(74,106,155) 0%, rgb(72,106,154) 50%, rgb(89,119,162) 50%, rgb(133,157,188) 100%);
+	background-image: -o-linear-gradient(bottom, rgb(74,106,155) 0%, rgb(72,106,154) 50%, rgb(89,119,162) 50%, rgb(133,157,188) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(74,106,155) 0%, rgb(72,106,154) 50%, rgb(89,119,162) 50%, rgb(133,157,188) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(74,106,155) 0%, rgb(72,106,154) 50%, rgb(89,119,162) 50%, rgb(133,157,188) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(74,106,155) 0%, rgb(72,106,154) 50%, rgb(89,119,162) 50%, rgb(133,157,188) 100%);
+	
+	// borders
+	border:solid 1px;
+	border-color: #2a3349 #2a3a64 #253662;
+	
+	// styles
+	color: #FFFFFF;
+	cursor: pointer;
+	font-size: 0.75em;
+	font-weight: bold;
+	height: 30px;
+	line-height: 30px;
+	padding: 0px 15px;
+	overflow: hidden;
+	text-align: center;
+	text-overflow: ellipsis;
+	text-shadow: 0px -1px 0 rgba(0, 0, 0, 0.35);
+	white-space: nowrap;
+	z-index: 2;
+
+	// shadowing
+	-webkit-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, .21), 0px 1px 0px rgba(255, 255, 255, .17);
+	-moz-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, .21), 0px 1px 0px rgba(255, 255, 255, .17);
+
+	.border-radius(5px);
+	.background-clip (padding-box);
+	.box-sizing (border-box);
+	
+	//.disable-select;
+	
+	position: absolute;
+	
+	&.left {
+		top: 7px;
+		left: 7px;
+	}
+	
+	&.right {
+		top: 7px;
+		right: 7px;
+	}
+		
+}

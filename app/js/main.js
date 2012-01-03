@@ -22,5 +22,13 @@ $(document).ready(function() {
 	var rightButton = new Orange.UI.IOS.UIBarButtonItem();
 	rightButton.setLabel("Email");
 	navBar.setRightBarButtonItem(rightButton);
+	
+	var table = new Orange.UI.IOS.UITableView();
+	
+	for(var i=0; i<10; i++) {
+		table.appendCell(new Orange.UI.IOS.UITableViewCell());	
+	}
+	
+	engine.append(table.render());
 
 });

@@ -1,0 +1,331 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>OrangeUI | Mobile Template</title>
+
+<!-- rss/atom feed links -->
+<link rel="alternate" type="application/atom+xml" title="OrangeUI | Feed" href="rss.xml" />
+
+<!-- favicon -->
+<link rel="shortcut icon" href="favicon.ico">
+
+<!-- iOS meta rules -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+<!-- iOS touch images -->
+<link rel="apple-touch-icon" href="src/ui/ios/assets/touch-icon-iphone.png" />
+<link rel="apple-touch-icon" sizes="72x72" href="src/ui/ios/assets/touch-icon-ipad.png" />
+<link rel="apple-touch-icon" sizes="114x114" href="src/ui/ios/assets/touch-icon-iphone4.png" />
+
+<link rel="apple-touch-startup-image" href="src/ui/ios/assets/touch-startup.png">
+
+<!-- iOS viewport rules -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+
+<!-- Normalize CSS -->
+<link rel="stylesheet" href="lib/css/normalize.css" type="text/css" /> 
+
+<!-- UI stylesheets -->
+<link 	rel="stylesheet/less" 
+		type="text/css" 
+		href="src/ui/common/styles/common.less" />
+		
+<link 	rel="stylesheet/less" 
+		type="text/css" 
+		href="src/ui/ios/styles/ios-common.less" />
+
+<link 	rel="stylesheet/less" 
+		type="text/css" 
+		href="src/ui/ios/styles/ios-elements.less" />
+				
+<link 	rel="stylesheet/less" 
+		type="text/css" 
+		href="src/ui/ios/styles/ios-desktop.less" 
+		media="not screen and (min-device-width: 320px) and (max-device-width: 1024px)" />
+		
+<link 	rel="stylesheet/less" 
+		type="text/css" 
+		href="src/ui/ios/styles/ios-mobile.less" 
+		media="screen and (min-device-width: 320px) and (max-device-width: 1024px)" />
+
+<link 	rel="stylesheet/less" 
+		type="text/css" 
+		href="src/ui/ios/styles/ios-mobile-retina.less" 
+		media="only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5)" />
+		
+<link rel="stylesheet" type="text/css" href="src/ui/ios/styles/ios-quirks.css" />
+
+<!-- Application specific CSS -->
+
+<!-- External Libraries -->
+<script type="text/javascript" src="lib/js/lab.js"></script>
+<script type="text/javascript" src="lib/js/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="lib/js/less-1.1.5.min.js"></script>
+<script type="text/javascript" src="lib/js/iscroll.js"></script>
+<script type="text/javascript" src="lib/js/modernizr-2.0.6.js"></script>
+<script type="text/javascript" src="lib/js/respond.js"></script>
+<script type="text/javascript" src="lib/js/sizzle.js"></script>
+
+<!-- UI scripts -->
+<script type="text/javascript" src="src/util/common.js"></script>
+<script type="text/javascript" src="src/ui/engine/ui-engine.js"></script>
+<script type="text/javascript" src="src/ui/ios/scripts/ios-scripts.js"></script>
+<script type="text/javascript" src="src/ui/ios/scripts/ios-elements.js"></script>
+<script type="text/javascript" src="app/js/main.js"></script>
+
+<!-- Application specific scripts -->
+<script type="text/javascript">
+
+var myScroll,
+	pullDownEl, pullDownOffset,
+	generatedCount = 0;
+
+function pullDownAction () {
+	setTimeout(function () {	// <-- Simulate network congestion, remove setTimeout from production!
+		var el, li, i;
+		el = document.getElementById('thelist');
+
+		for (i=0; i<3; i++) {
+			li = document.createElement('li');
+			li.innerText = 'Generated row ' + (++generatedCount);
+			el.insertBefore(li, el.childNodes[0]);
+		}
+		
+		myScroll.refresh();		// Remember to refresh when contents are loaded (ie: on ajax completion)
+	}, 1000);	// <-- Simulate network congestion, remove setTimeout from production!
+}
+
+
+function loaded() {
+	pullDownEl = document.getElementById('pullDown');
+	pullDownOffset = pullDownEl.offsetHeight;
+	
+	myScroll = new iScroll('wrapper', { scrollbarClass: 'myScrollbar',
+		useTransition: true,
+		topOffset: pullDownOffset,
+		onRefresh: function () {
+			if (pullDownEl.className.match('loading')) {
+				pullDownEl.className = '';
+				pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Pull down to refresh...';
+			}
+		},
+		onScrollMove: function () {
+			if (this.y > 5 && !pullDownEl.className.match('flip')) {
+				pullDownEl.className = 'flip';
+				pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Release to refresh...';
+				this.minScrollY = 0;
+			} else if (this.y < 5 && pullDownEl.className.match('flip')) {
+				pullDownEl.className = '';
+				pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Pull down to refresh...';
+				this.minScrollY = -pullDownOffset;
+			}
+		},
+		onScrollEnd: function () {
+			if (pullDownEl.className.match('flip')) {
+				pullDownEl.className = 'loading';
+				pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Loading...';				
+				pullDownAction();	// Execute custom function (ajax call?)
+			}
+		}
+	});
+}
+
+document.addEventListener('DOMContentLoaded', loaded, false);
+
+</script>
+
+<style type="text/css" media="all">
+
+html, body {
+	height: 100%;
+	  overflow: hidden;
+}
+
+ul, li {
+	padding:0;
+	margin:0;
+	border:0;
+}
+
+#wrapper {
+	position:absolute; z-index:1;
+	top:44px; bottom:0px; left:0;
+	width:100%;
+	background:#555;
+	overflow:auto;
+}
+
+#scroller {
+	position:relative;
+/*	-webkit-touch-callout:none;*/
+	-webkit-tap-highlight-color:rgba(0,0,0,0);
+
+	float:left;
+	width:100%;
+	padding:0;
+}
+
+#scroller ul {
+	position:relative;
+	list-style:none;
+	padding:0;
+	margin:0;
+	width:100%;
+	text-align:left;
+}
+
+#scroller li {
+	padding:0 10px;
+	height:40px;
+	line-height:40px;
+	border-bottom:1px solid #ccc;
+	border-top:1px solid #fff;
+	background-color:#fafafa;
+	font-size:14px;
+}
+
+#scroller li > a {
+	display:block;
+}
+
+</style>
+
+<style type="text/css">
+
+/**
+ *
+ * Horizontal Scrollbar
+ *
+ */
+.myScrollbarH {
+	position:absolute;
+	z-index:100;
+	height:5px;
+	bottom:1px;
+	left:2px;
+	right:7px
+}
+
+.myScrollbarH > div {
+	height:100%;
+}
+
+
+/**
+ *
+ * Vertical Scrollbar
+ *
+ */
+.myScrollbarV {
+	position:absolute;
+	z-index:100;
+	width:5px;bottom:7px;top:2px;right:1px
+}
+
+.myScrollbarV > div {
+	width:100%;
+}
+
+
+/**
+ *
+ * Both Scrollbars
+ *
+ */
+.myScrollbarH > div,
+.myScrollbarV > div {
+	position:absolute;
+	z-index:100;
+	background: rgba(0, 0, 0, .5);
+	border-radius: 8px;
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+}
+
+/* pull down */
+
+/**
+ *
+ * Pull down styles
+ *
+ */
+#pullDown {
+	background:#fff;
+	height:40px;
+	line-height:40px;
+	padding:5px 10px;
+	border-bottom:1px solid #ccc;
+	font-weight:bold;
+	font-size:14px;
+	color:#888;
+}
+#pullDown .pullDownIcon  {
+	display:block; float:left;
+	width:40px; height:40px;
+	background:url(src/ui/ios/assets/ios-pull-icon@2x.png) 0 0 no-repeat;
+	-webkit-background-size:40px 80px; background-size:40px 80px;
+	-webkit-transition-property:-webkit-transform;
+	-webkit-transition-duration:250ms;	
+}
+#pullDown .pullDownIcon {
+	-webkit-transform:rotate(0deg) translateZ(0);
+}
+
+#pullDown.flip .pullDownIcon {
+	-webkit-transform:rotate(-180deg) translateZ(0);
+}
+
+#pullDown.loading .pullDownIcon {
+	background-position:0 100%;
+	-webkit-transform:rotate(0deg) translateZ(0);
+	-webkit-transition-duration:0ms;
+
+	-webkit-animation-name:loading;
+	-webkit-animation-duration:2s;
+	-webkit-animation-iteration-count:infinite;
+	-webkit-animation-timing-function:linear;
+}
+
+@-webkit-keyframes loading {
+	from { -webkit-transform:rotate(0deg) translateZ(0); }
+	to { -webkit-transform:rotate(360deg) translateZ(0); }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="canvas"></div>
+
+<div id="wrapper">
+	<div id="scroller">
+		<div id="pullDown">
+			<span class="pullDownIcon"></span><span class="pullDownLabel">Pull down to refresh...</span>
+		</div>	
+		<ul id="thelist">
+			<li>Pretty row 1</li>
+			<li id="aaa">Pretty row 2</li>
+			<li>Pretty row 3</li>
+			<li>Pretty row 4</li>
+			<li>Pretty row 5</li>
+			<li>Pretty row 6</li>
+			<li>Pretty row 7</li>
+			<li>Pretty row 8</li>
+			<li>Pretty row 9</li>
+			<li>Pretty row 10</li>
+			<li>Pretty row 11</li>
+			<li>Pretty row 12</li>
+			<li>Pretty row 13</li>
+			<li>Pretty row 14</li>
+			<li>Pretty row 15</li>
+			<li>Pretty row 16</li>
+		</ul>
+	</div>
+</div>
+
+</body>
+</html>

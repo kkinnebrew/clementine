@@ -31,3 +31,22 @@
 	}
 	
 }
+
+.ios-ui-table-view-cell {
+
+	&:hover {
+		background-color: #F3F3F3;
+		cursor: pointer;
+		-moz-transition-duration: .2s;
+		-webkit-transition-duration: .2s;
+	}
+
+	&:active {
+		background-image:-webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #058CF5), color-stop(1, #015DE6));
+		background-image:-moz-linear-gradient(top, #058CF5, #015DE6);
+		background-image:-o-linear-gradient(top, #058CF5, #015DE6);
+		border-top-color: #058CF5 !important;
+		color:#FFF !important;
+		cursor: pointer;
+	}
+}

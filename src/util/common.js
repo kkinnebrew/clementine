@@ -56,5 +56,3 @@ var Class = {
   }
 
 };
-
-var UI = {};

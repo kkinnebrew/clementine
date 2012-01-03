@@ -15,56 +15,57 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
 <!-- iOS touch images -->
-<link rel="apple-touch-icon" href="dom/ios/assets/touch-icon-iphone.png" />
-<link rel="apple-touch-icon" sizes="72x72" href="dom/ios/assets/touch-icon-ipad.png" />
-<link rel="apple-touch-icon" sizes="114x114" href="dom/ios/assets/touch-icon-iphone4.png" />
+<link rel="apple-touch-icon" href="src/ui/ios/assets/touch-icon-iphone.png" />
+<link rel="apple-touch-icon" sizes="72x72" href="src/ui/ios/assets/touch-icon-ipad.png" />
+<link rel="apple-touch-icon" sizes="114x114" href="src/ui/ios/assets/touch-icon-iphone4.png" />
 
-<link rel="apple-touch-startup-image" href="dom/ios/assets/touch-startup.png">
+<link rel="apple-touch-startup-image" href="src/ui/ios/assets/touch-startup.png">
 
 <!-- iOS viewport rules -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
 
 <!-- Normalize CSS -->
-<link rel="stylesheet" href="../lib/css/normalize.css" type="text/css" /> 
+<link rel="stylesheet" href="lib/css/normalize.css" type="text/css" /> 
 
 <!-- UI stylesheets -->
 <link 	rel="stylesheet/less" 
 		type="text/css" 
-		href="dom/ios/styles/ios-desktop.less" 
+		href="src/ui/ios/styles/ios-desktop.less" 
 		media="not screen and (min-device-width: 320px) and (max-device-width: 1024px)" />
 		
 <link 	rel="stylesheet/less" 
 		type="text/css" 
-		href="dom/ios/styles/ios-mobile.less" 
+		href="src/ui/ios/styles/ios-mobile.less" 
 		media="screen and (min-device-width: 320px) and (max-device-width: 1024px)" />
 
 <link 	rel="stylesheet/less" 
 		type="text/css" 
-		href="dom/ios/styles/ios-mobile-retina.less" 
+		href="src/ui/ios/styles/ios-mobile-retina.less" 
 		media="only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5)" />
 		
-<link rel="stylesheet" type="text/css" href="dom/ios/styles/ios-quirks.css" />
+<link rel="stylesheet" type="text/css" href="src/ui/ios/styles/ios-quirks.css" />
 
 <!-- Application specific CSS -->
 
 <!-- External Libraries -->
-<script type="text/javascript" src="../lib/js/lab.js"></script>
-<script type="text/javascript" src="../lib/js/jquery-1.7.1.min.js"></script>
-<script type="text/javascript" src="../lib/js/less-1.1.5.min.js"></script>
-<script type="text/javascript" src="../lib/js/iscroll.js"></script>
-<script type="text/javascript" src="../lib/js/modernizr-2.0.6.js"></script>
-<script type="text/javascript" src="../lib/js/respond.js"></script>
-<script type="text/javascript" src="../lib/js/sizzle.js"></script>
+<script type="text/javascript" src="lib/js/lab.js"></script>
+<script type="text/javascript" src="lib/js/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="lib/js/less-1.1.5.min.js"></script>
+<script type="text/javascript" src="lib/js/iscroll.js"></script>
+<script type="text/javascript" src="lib/js/modernizr-2.0.6.js"></script>
+<script type="text/javascript" src="lib/js/respond.js"></script>
+<script type="text/javascript" src="lib/js/sizzle.js"></script>
 
 <!-- UI scripts -->
 <script>
    $LAB
-   .script("dom/ios/scripts/ios-scripts.js")
-   .script("dom/ios/scripts/ios-elements.js").wait()
+   .script("src/util/common.js")
+   .script("src/ui/engine/ui-engine.js").wait()
+   .script("src/ui/ios/scripts/ios-scripts.js").wait()
+   .script("src/ui/ios/scripts/ios-elements.js").wait()
 </script>
 
 <!-- Application specific scripts -->
-
 
 </head>
 

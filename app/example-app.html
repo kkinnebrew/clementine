@@ -5,7 +5,7 @@
 <title>OrangeUI | App Template</title>
 
 <!-- rss/atom feed links -->
-<link rel="alternate" type="application/atom+xml" title="OrangeUI | Feed" href="rss.xml" />
+<link rel="alternate" type="application/atom+xml" title="OrangeUI | Feed" href="../rss.xml" />
 
 <!-- favicon -->
 <link rel="shortcut icon" href="favicon.ico">
@@ -73,28 +73,11 @@
 <script type="text/javascript" src="controllers/example-controller.js"></script>
 <script type="text/javascript" src="controllers/example-table-controller.js"></script>
 
-<script type="text/javascript">
-
-$(document).ready(function() {
-	
-	// setup configuration
-	App.Config = new Orange.Configuration();
-	
-	App.Config.setRenderingMode(2);
-	App.Config.setRootElement(document.getElementById("canvas"));
-	
-	Orange.Initialize(document.getElementById("canvas"));
-});
-
-</script>
-
 </head>
 
 <body>
 
-<h1>Hello</h1>
-
-<div id="canvas">asdf</div>
+<div id="canvas"></div>
 
 </body>
 </html>

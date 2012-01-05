@@ -32,7 +32,7 @@ App.Controller.MainController = Class.extend(Orange.Controller, {
 		this.datasources.add("event-data-source", ds);
 		
 		// bind data source
-		this.elements.table.bindDataSource(ds);
+		this.elements.table.bindDataSource(ds);	
 		
 		// USE QUERIES HERE?
 		
@@ -43,7 +43,7 @@ App.Controller.MainController = Class.extend(Orange.Controller, {
 	
 	},
 
-	render: function() {
+	load: function() {
 	
 		// append elements
 		this.rootEl.appendChild(this.elements.navigationBar.render());

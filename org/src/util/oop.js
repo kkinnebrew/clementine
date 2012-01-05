@@ -56,3 +56,32 @@ var Class = {
   }
 
 };
+
+var Dictionary = Class.create({
+
+	initialize: function() {
+	
+		this.storage = {};
+	
+	},
+
+	add: function(name, value) {
+	
+		this.storage[name] = value;
+	
+	},
+	
+	get: function(name) {
+	
+		if(this.storage[name] != undefined) return this.storage[name];
+		else return null;
+	
+	},
+	
+	unset: function(name) {
+	
+		if(this.storage[name] != undefined) this.storage[name] = undefined;
+	
+	}
+
+});

@@ -1,0 +1,52 @@
+/**
+ * ios-mobile-desktop.css | OrangeUI Framework 0.1 | 12.21.2011 
+ * 
+ * extends ios-common.css, ios-mobile.css for all websites
+ * viewed in non-mobile browsers
+ *
+ * @media not screen and (min-device-width: 320px) and (max-device-width: 1024px)
+ * 
+ */
+
+/* UI Element Styles: Desktop Modifications */
+
+@import "ios-common.less";
+
+.ios-ui-bar-button-item {
+
+	&:hover {
+		background-image: linear-gradient(bottom, rgb(60,89,127) 0%, rgb(56,82,120) 50%, rgb(76,101,137) 50%, rgb(115,136,163) 100%);
+		background-image: -o-linear-gradient(bottom, rgb(60,89,127) 0%, rgb(56,82,120) 50%, rgb(76,101,137) 50%, rgb(115,136,163) 100%);
+		background-image: -moz-linear-gradient(bottom, rgb(60,89,127) 0%, rgb(56,82,120) 50%, rgb(76,101,137) 50%, rgb(115,136,163) 100%);
+		background-image: -webkit-linear-gradient(bottom, rgb(60,89,127) 0%, rgb(56,82,120) 50%, rgb(76,101,137) 50%, rgb(115,136,163) 100%);
+		background-image: -ms-linear-gradient(bottom, rgb(60,89,127) 0%, rgb(56,82,120) 50%, rgb(76,101,137) 50%, rgb(115,136,163) 100%);
+	}
+
+	&:active {
+		background-image: linear-gradient(bottom, rgb(76,103,138) 100%, rgb(89,114,146) 0%);
+		background-image: -o-linear-gradient(bottom, rgb(76,103,138) 100%, rgb(89,114,146) 0%);
+		background-image: -moz-linear-gradient(bottom, rgb(76,103,138) 100%, rgb(89,114,146) 0%);
+		background-image: -webkit-linear-gradient(bottom, rgb(76,103,138) 100%, rgb(89,114,146) 0%);
+		background-image: -ms-linear-gradient(bottom, rgb(76,103,138) 100%, rgb(89,114,146) 0%);
+	}
+	
+}
+
+.ios-ui-table-view-cell {
+
+	&:hover {
+		background-color: #F3F3F3;
+		cursor: pointer;
+		-moz-transition-duration: .2s;
+		-webkit-transition-duration: .2s;
+	}
+
+	&:active {
+		background-image:-webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #058CF5), color-stop(1, #015DE6));
+		background-image:-moz-linear-gradient(top, #058CF5, #015DE6);
+		background-image:-o-linear-gradient(top, #058CF5, #015DE6);
+		border-top-color: #058CF5 !important;
+		color:#FFF !important;
+		cursor: pointer;
+	}
+}

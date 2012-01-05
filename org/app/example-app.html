@@ -56,6 +56,9 @@
 <!-- UI scripts -->
 <script type="text/javascript" src="../src/util/dom-builder.js"></script>
 <script type="text/javascript" src="../src/util/oop.js"></script>
+<script type="text/javascript" src="../src/util/controller.js"></script>
+<script type="text/javascript" src="../src/util/configuration.js"></script>
+<script type="text/javascript" src="../src/core/core.js"></script>
 
 <script type="text/javascript" src="../src/db/requests/request-ajax.js"></script>
 <script type="text/javascript" src="../src/db/requests/request-ds.js"></script>
@@ -66,12 +69,32 @@
 <script type="text/javascript" src="../src/ui/library/web/app/scripts/app-elements.js"></script>
 
 <!-- Application specific scripts -->
+<script type="text/javascript" src="config/example-config.js"></script>
+<script type="text/javascript" src="controllers/example-controller.js"></script>
+<script type="text/javascript" src="controllers/example-table-controller.js"></script>
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+	
+	// setup configuration
+	App.Config = new Orange.Configuration();
+	
+	App.Config.setRenderingMode(2);
+	App.Config.setRootElement(document.getElementById("canvas"));
+	
+	Orange.Initialize(document.getElementById("canvas"));
+});
+
+</script>
 
 </head>
 
 <body>
 
 <h1>Hello</h1>
+
+<div id="canvas">asdf</div>
 
 </body>
 </html>

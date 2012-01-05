@@ -16,7 +16,6 @@ Orange.UI.RenderingEngine = Class.create({
 
 	initialize: function() {
 	
-	
 	}
 
 });

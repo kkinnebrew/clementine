@@ -6,11 +6,15 @@ if (typeof Orange === 'undefined') {
     var Orange = {};
 }
 
-if (typeof Orange.Request === 'undefined') {
-    Orange.Request = {};
+if (typeof Orange.DB === 'undefined') {
+    Orange.DB = {};
 }
 
-Orange.Request.Ajax = Class.create({
+if (typeof Orange.DB.Request === 'undefined') {
+    Orange.DB.Request = {};
+}
+
+Orange.DB.Request.Ajax = Class.create({
 
 	initialize: function() {
 	

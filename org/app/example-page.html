@@ -56,6 +56,9 @@
 <!-- UI scripts -->
 <script type="text/javascript" src="../src/util/dom-builder.js"></script>
 <script type="text/javascript" src="../src/util/oop.js"></script>
+<script type="text/javascript" src="../src/util/controller.js"></script>
+<script type="text/javascript" src="../src/util/configuration.js"></script>
+<script type="text/javascript" src="../src/core/core.js"></script>
 
 <script type="text/javascript" src="../src/db/requests/request-ajax.js"></script>
 <script type="text/javascript" src="../src/db/requests/request-ds.js"></script>
@@ -66,12 +69,21 @@
 <script type="text/javascript" src="../src/ui/library/web/page/scripts/page-elements.js"></script>
 
 <!-- Application specific scripts -->
+<script type="text/javascript">
+
+$(document).ready(function() {
+	Orange.Initialize();
+});
+
+</script>
 
 </head>
 
 <body>
 
 <h1>Hello</h1>
+
+<div id="canvas"></div>
 
 </body>
 </html>

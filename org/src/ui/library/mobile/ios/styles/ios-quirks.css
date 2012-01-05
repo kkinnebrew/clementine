@@ -1,0 +1,17 @@
+/**
+ * ios-quirks.css | OrangeUI Framework 0.1 | 12.21.2011 
+ * 
+ * handles all browser, mobile and desktop, quirks with css fixes
+ * for behavior oddities
+ * 
+ */
+
+/* Firefox only */
+@-moz-document url-prefix() {
+	
+	.ios-ui-bar-button-item {
+		line-height: 28px;
+	}
+	
+}
+

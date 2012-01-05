@@ -6,9 +6,17 @@ if (typeof Orange === 'undefined') {
     var Orange = {};
 }
 
-Orange.DataSource = Class.create({
+if (typeof Orange.DB === 'undefined') {
+    Orange.DB = {};
+}
+
+Orange.DB.DataSource = Class.create({
 
 	initialize: function() {
+	
+	},
+	
+	setNodeType: function(type) {
 	
 	}
 	

@@ -18,6 +18,8 @@ O.Controller = Class.create({
 		this._dataSources = new Dictionary();
 		this._elements = new Dictionary();
 		this._controllers = new Dictionary();
+		
+		this.setup();
 
 	},
 	
@@ -25,6 +27,8 @@ O.Controller = Class.create({
 	 * sets up all elements necessary for the controller
 	 */
 	setup: function() {
+	
+		this.setRootEl(O.DOM.DIV('container'));
 	
 	},
 	
@@ -51,14 +55,26 @@ O.Controller = Class.create({
 	},
 	
 	
-	getDS: function() {},
-	setDS: function() {},
+	getDS: function(name) {
+		return this._dataSources.get(name);
+	},
+	setDS: function(name, value) {
+		this._dataSources.set(name, value);
+	},
 	
-	getEl: function() {},
-	setEl: function() {},
+	getEl: function(name) {
+		return this._elements.get(name);
+	},
+	setEl: function(name, value) {
+		this._elements.set(name, value);
+	},
 	
-	getCtrl: function() {},
-	setCtrl: function() {},
+	getCtrl: function(name) {
+		return this._controllers.get(name);
+	},
+	setCtrl: function(name, value) {
+		this._controllers.set(name, value);
+	},
 	
 	
 	/**
@@ -66,9 +82,15 @@ O.Controller = Class.create({
 	 */
 	bindEvents: function() {
 	
+		
+	
 	},
 	
 	unbindEvents: function() {
+	
+		for(var i=0; i<this._elements.length; i++) {
+			this._elements[i].unbind();
+		}
 	
 	},
 	
@@ -76,8 +98,11 @@ O.Controller = Class.create({
 	 * gets the root element of the controller
 	 */
 	getRootEl: function() {
-	
+		return this._rootEl;
 	},
+	setRootEl: function(el) {
+		this._rootEl = el;
+	}
 	
 	/**
 	 * binds a managed event

@@ -14,6 +14,11 @@ O.UI.Element = Class.create({
 
 	initialize: function() {
 	
+		this._events = {};
+	
+		this._el = if(this.getSource == undefined) ? document.createElement('div') : this.getSource();
+		this._el.className = this.getClassName();
+			
 	},
 	
 	
@@ -22,6 +27,16 @@ O.UI.Element = Class.create({
 	 */
 	setup: function() {
 	
+		if(App.Config.getRenderingMode() == RenderMode.RENDER) {
+		
+			
+		
+		} else {
+		
+			
+		
+		}
+	
 	},
 	
 	/**
@@ -29,6 +44,11 @@ O.UI.Element = Class.create({
 	 */
 	render: function() {
 	
+		if(App.Config.getRenderingMode() != RenderMode.RENDER) {
+			O.Log.error('Method render() called in non-rendered context');
+			return false;
+		}
+		
 	},
 	
 	/**
@@ -36,6 +56,11 @@ O.UI.Element = Class.create({
 	 */
 	process: function() {
 	
+		if(App.Config.getRenderingMode() != RenderMode.PROCESS){
+			O.Log.error('Method process() called in non-processed context');
+			return false;
+		}
+		
 	},
 	
 	/**
@@ -49,7 +74,7 @@ O.UI.Element = Class.create({
 	 * returns the class name for the element
 	 */
 	getClassName: function() {
-	
+		return 'ui-element';
 	},
 	
 	
@@ -57,8 +82,17 @@ O.UI.Element = Class.create({
 	 * gets the root element of the element
 	 */
 	getRootEl: function() {
-	
+		return this._el;
 	},
+	
+	
+	unbindEvents: function() {
+		
+		for(var i=0; i<this._elements.length; i++) {
+			this._elements[i].unbind();
+		}
+		
+	}
 	
 	/**
 	 * binds a managed event

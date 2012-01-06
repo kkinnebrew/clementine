@@ -71,7 +71,7 @@ var Dictionary = Class.create({
 	
 	},
 
-	add: function(name, value) {
+	set: function(name, value) {
 	
 		this.storage[name] = value;
 	

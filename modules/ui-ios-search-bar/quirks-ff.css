@@ -1,6 +1,8 @@
-/* ui-ios-search-bar */
+/* Element: UISearchBar */
 
 @-moz-document url-prefix() {
+
+	/* Element: UISearchBar */
 	
 	.ui-ios-search-bar input[type=text]  {
 		/* correct firebox padding bug */
@@ -12,7 +14,7 @@
 	
 	.ui-ios-search-bar .ui-ios-search-button  {
 		/* correct firebox padding bug */
-		line-height: 27px;
+		line-height: 30px;
 	}
 	
 	.ui-ff-ios-search-bar-wrapper {
@@ -22,5 +24,12 @@
 		position: absolute;
 		
 	}
+	
+	/* Element: UIBarButtonItem */
+	
+	.ui-ios-bar-button-item {
+		line-height: 30px;
+	}
+			
 	
 }

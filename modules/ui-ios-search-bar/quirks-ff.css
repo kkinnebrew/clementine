@@ -1,0 +1,26 @@
+/* ui-ios-search-bar */
+
+@-moz-document url-prefix() {
+	
+	.ui-ios-search-bar input[type=text]  {
+		/* correct firebox padding bug */
+		padding: 6px 5px 4px 30px;
+		left: 0px;
+		width: 100%;
+		position: relative;
+	}
+	
+	.ui-ios-search-bar .ui-ios-search-button  {
+		/* correct firebox padding bug */
+		line-height: 27px;
+	}
+	
+	.ui-ff-ios-search-bar-wrapper {
+		height: 30px;
+		left: 7px;
+		right: 44px;
+		position: absolute;
+		
+	}
+	
+}

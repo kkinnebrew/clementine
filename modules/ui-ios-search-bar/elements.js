@@ -120,6 +120,28 @@ function applyBodyDelegates() {
 			
 		});
 		
+		
+		$(".event-pop-view").live('touchend', function(e) {
+		
+			var current = $(this).closest('.ui-ios-navigation-controller');
+			popNavigationView(current);
+		
+		});
+		
+		$(".event-push-view").live('touchend', function(e) {
+		
+			var current = $(this).closest('.ui-ios-navigation-controller');
+			pushNavigationView(current);
+		
+		});
+		
+		$(".event-pop-to-root-view").live('touchend', function(e) {
+		
+			var current = $(this).closest('.ui-ios-navigation-controller');
+			popToRootViewController(current);
+		
+		});
+		
 	}
 	else {
 		
@@ -134,6 +156,28 @@ function applyBodyDelegates() {
 			}
 			
 		});
+		
+		$(".event-pop-view").live('click', function(e) {
+		
+			var current = $(this).closest('.ui-ios-navigation-controller');
+			popNavigationView(current);
+		
+		});
+		
+		$(".event-push-view").live('click', function(e) {
+		
+			var current = $(this).closest('.ui-ios-navigation-controller');
+			pushNavigationView(current);
+		
+		});
+		
+		$(".event-pop-to-root-view").live('click', function(e) {
+		
+			var current = $(this).closest('.ui-ios-navigation-controller');
+			popToRootViewController(current);
+		
+		});
+		
 		
 	}
 	
@@ -273,4 +317,204 @@ function applyUIIOSScrollView() {
 	
 	});
 	
+}
+
+function applyUIIOSNavigationController() {
+
+	$(".ui-ios-navigation-controller").each(function() {
+		
+		var current = $(this).find('.ui-ios-view.active');
+		if(current.length == 0) {
+			var current = $(this).find('.ui-ios-view:first').addClass('active');
+		}
+		if(current.length == 0) return;
+		
+		var leftBtn = current.find('.ui-ios-bar-button-item.left');
+		var rightBtn = current.find('.ui-ios-bar-button-item.right');
+		var navigationBar = $(this).find('.ui-ios-navigation-bar');
+		
+		if(leftBtn.length != 0) {
+			var leftControlBtn = leftBtn.clone();
+			leftControlBtn.appendTo(navigationBar);
+		}
+		
+		if(rightBtn.length != 0) {
+			var rightControlBtn = rightBtn.clone();
+			rightControlBtn.appendTo(navigationBar);
+		}
+	
+	});
+
+}
+
+
+function popNavigationView(name) {
+	
+	var controller = typeof name == "object" ? name : $(".ui-ios-navigation-controller.name-" + name);
+	if(controller.length == 0) return;
+	
+	var current = controller.find('.ui-ios-view.active');
+	if(current.length == 0) return;
+	
+	var prev = current.prev('.ui-ios-view');
+		
+	if(prev.length != 0) {
+	
+		$("input").attr('disabled', 'disabled').blur();
+		$("select").attr('disabled', 'disabled').blur();
+	
+		var leftBtn = prev.children('.ui-ios-bar-button-item.left');
+		var rightBtn = prev.children('.ui-ios-bar-button-item.right');
+		var navigationBar = controller.find('.ui-ios-navigation-bar');
+		
+		// hide existing buttons
+		navigationBar.find('.ui-ios-bar-button-item').each(function() {
+			$(this).fadeOut(300, function() { $(this).remove(); });
+		});
+		
+		if(leftBtn.length != 0) {
+			var leftControlBtn = leftBtn.clone().hide();
+			leftControlBtn.appendTo(navigationBar);
+			leftControlBtn.fadeIn(300);
+		}
+		
+		if(rightBtn.length != 0) {
+			var rightControlBtn = rightBtn.clone().hide();
+			rightControlBtn.appendTo(navigationBar);
+			rightControlBtn.fadeIn(300);
+		}
+	
+		prev.addClass('unloading').removeClass('unloaded');
+		current.removeClass('active').addClass('preloaded');
+		setTimeout(function() {
+			prev.addClass('active').removeClass("unloading");
+		}, 400);
+		
+		prev.find("input").removeAttr('disabled');
+		prev.find("select").removeAttr('disabled');
+		
+	}
+	
+}
+
+function popToRootViewController(name) {
+	
+	var controller = typeof name == "object" ? name : $(".ui-ios-navigation-controller.name-" + name);
+	if(controller.length == 0) return;
+		
+	var current = controller.find('.ui-ios-view.active');
+	if(current.length == 0) return;
+		
+	var prev = controller.find('.ui-ios-view:first');
+				
+	if(prev.length != 0) {
+	
+		$("input").attr('disabled', 'disabled').blur();
+		$("select").attr('disabled', 'disabled').blur();
+	
+		var leftBtn = prev.children('.ui-ios-bar-button-item.left');
+		var rightBtn = prev.children('.ui-ios-bar-button-item.right');
+		var navigationBar = controller.find('.ui-ios-navigation-bar');
+		
+		// hide existing buttons
+		navigationBar.find('.ui-ios-bar-button-item').each(function() {
+			$(this).fadeOut(300, function() { $(this).remove(); });
+		});
+		
+		if(leftBtn.length != 0) {
+			var leftControlBtn = leftBtn.clone().hide();
+			leftControlBtn.appendTo(navigationBar);
+			leftControlBtn.fadeIn(300);
+		}
+		
+		if(rightBtn.length != 0) {
+			var rightControlBtn = rightBtn.clone().hide();
+			rightControlBtn.appendTo(navigationBar);
+			rightControlBtn.fadeIn(300);
+		}
+		
+		var notFirst = controller.find('.unloaded:not(:first)').css('display', 'none');
+		setTimeout(function() {
+			notFirst.css('display', 'block');
+		}, 400);
+		prev.addClass('unloading').removeClass('unloaded');
+		current.removeClass('active').addClass('preloaded');
+		setTimeout(function() {
+			prev.addClass('active').removeClass("unloading");
+		}, 400);
+		
+		controller.find('.unloaded').removeClass('unloaded').addClass('preloaded');
+		
+		prev.find("input").removeAttr('disabled');
+		prev.find("select").removeAttr('disabled');
+		
+	}
+	
+}
+
+function pushNavigationView(name, viewName) {
+		
+	var controller = typeof name == "object" ? name : $(".ui-ios-navigation-controller.name-" + name);
+	if(controller.length == 0) return;
+		
+	var current = controller.find('.ui-ios-view.active');
+	if(current.length == 0) var current = controller.find('.ui-ios-view:first');
+	if(current.length == 0) return;
+		
+	if(viewName == undefined) var next = current.next('.ui-ios-view');
+	else var next = controller.find('.ui-ios-view.name-' + viewName);
+			
+	if(next.length != 0) {
+	
+		$("input").attr('disabled', 'disabled').blur();
+		$("select").attr('disabled', 'disabled').blur();
+		
+		var leftBtn = next.children('.ui-ios-bar-button-item.left');
+		var rightBtn = next.children('.ui-ios-bar-button-item.right');
+		var navigationBar = controller.find('.ui-ios-navigation-bar');
+		
+		// hide existing buttons
+		navigationBar.find('.ui-ios-bar-button-item').each(function() {
+			$(this).fadeOut(300, function() { $(this).remove(); });
+		});
+				
+		if(leftBtn.length != 0) {
+			var leftControlBtn = leftBtn.clone().hide();
+			leftControlBtn.appendTo(navigationBar);
+			leftControlBtn.fadeIn(300);
+		}
+		
+		if(rightBtn.length != 0) {
+			var rightControlBtn = rightBtn.clone().hide();
+			rightControlBtn.appendTo(navigationBar);
+			rightControlBtn.fadeIn(300);
+		}
+		
+		var cursor = next.prev('.ios-ui-view');
+		
+		while(cursor.length != 0) {
+			if(cursor.hasClass('preloaded')) {
+				cursor.css('display', 'none').removeClass('preloaded').addClass('unloaded');
+				var currentCursor = cursor;
+				setTimeout(function() {
+					currentCursor.css('display', 'block')
+				}, 400);
+			}
+			
+			cursor = cursor.prev('.ios-ui-view');
+			
+		}
+		
+		next.addClass('loading').removeClass('preloaded');
+		current.removeClass('active').addClass('unloaded');
+	
+		setTimeout(function() {
+			next.addClass('active').removeClass("loading");
+		}, 400);
+		
+		next.find("input").removeAttr('disabled');
+		next.find("select").removeAttr('disabled');
+		
+	}
+
 }

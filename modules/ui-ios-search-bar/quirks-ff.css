@@ -30,6 +30,12 @@
 	.ui-ios-bar-button-item {
 		line-height: 30px;
 	}
+	
+	/* Container: UINavigationController */
+	
+	.ui-ios-navigation-controller .ui-ios-view h1 {
+		top: -43px;
+	}
 			
 	
 }

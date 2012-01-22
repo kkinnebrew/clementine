@@ -40,3 +40,10 @@
 	-o-border-image: @directive;
 	-webkit-border-image: @directive;
 }
+
+.webkit-transition (@property: all, @duration: 300ms, @easing: ease-in-out) {
+	-webkit-transition: @property @duration @easing;
+	-moz-transition: @property @duration @easing;
+	-o-transition: @property @duration @easing;
+	-ms-transition: @property @duration @easing;
+}

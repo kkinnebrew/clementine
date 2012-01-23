@@ -3,6 +3,10 @@
 @import "functions.less";
 @import "gradients.less";
 
+p, li {
+	-webkit-font-smoothing: antialiased;
+}
+
 .ui-ios-search-bar {
 	
 	.ui-ios-gradient-light-blue-search;
@@ -502,13 +506,6 @@
 	width: 100%;
 	z-index: 100;
 		
-	.ui-ios-navigation-bar {
-		
-		position: absolute;
-		z-index: 150;
-	
-	}
-	
 	.ui-ios-view {
 	
 		bottom: 0px;
@@ -517,7 +514,7 @@
 		width: 100%;
 		z-index: 150;
 		
-		.webkit-transition(all, 250ms, ease-in-out);
+		.webkit-transition(all, 300ms, ease-in-out);
 	
 		h1 {
 		
@@ -526,13 +523,15 @@
 			font-weight: bold;
 			height: 44px;
 			line-height: 44px;
-			margin: 0 auto;
+			margin: 0;
 			padding: 0;
 			position: absolute;
 			text-align: center;
 			text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.35);
 			top: -44px;
-			left: 50%;
+			left: 0px;
+			right: 0px;
+			width: 100%;
 			z-index: 200;
 		
 		}
@@ -620,6 +619,33 @@
 		
 		.ui-ios-bar-button-item {
 			display: none !important;
+		}
+	
+	}
+	
+}
+
+/* Container: UITableView */
+
+.ui-ios-table-view {
+	
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	
+	li {
+	
+		background: #FFF;
+		border-bottom: 1px solid #CCC;
+		cursor: pointer;
+		height: 43px;
+		line-height: 44px;
+		padding: 0px 10px;
+			
+		&.touched {
+			color: #FFF;
+			.ui-ios-gradient-blue-table-cell-selected;
 		}
 	
 	}

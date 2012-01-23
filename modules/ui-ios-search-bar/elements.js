@@ -92,7 +92,7 @@ function applyBodyDelegates() {
 		$("body").on("touchstart", function(e) {
 		
 			var el = $(e.target);
-			
+						
 			if(el.hasClass("ui-ios-search-button")) {
 				el.addClass("touched");
 			} else if(el.hasClass("ui-ios-bar-button-item")) {
@@ -104,10 +104,32 @@ function applyBodyDelegates() {
 			
 		});
 		
+		$(".ui-ios-table-view").on("touchstart", function(e) {
+		
+			var el = $(e.target);
+					
+			if(el.is("li")) {
+				el.addClass("touched");
+			}
+		
+		});
+		
+		$(".ui-ios-table-view").on("touchmove", function(e) {
+		
+			$(this).find("li").removeClass("touched");
+		
+		});
+		
+		$(".ui-ios-table-view").on("touchend", function(e) {
+				
+			$(this).find("li").removeClass("touched");
+		
+		});
+		
 		$("body").on("touchend", function(e) {
 			
 			var el = $(e.target);
-			
+						
 			if(el.hasClass("ui-ios-search-button")) {
 				el.removeClass("touched");
 			} else if(el.hasClass("ui-ios-bar-button-item")) {
@@ -116,7 +138,7 @@ function applyBodyDelegates() {
 				el.parent().find('.ui-ios-segment').removeClass('selected');
 				el.addClass('selected');
 				el.parent().trigger("touchend");
-			}
+			} 
 			
 		});
 		

@@ -16,6 +16,7 @@ p, li {
 	overflow: hidden;
 	padding: 6px 0px 7px 0px;
 	width: 100%;
+
 }
 
 .ui-ios-search-bar input[type=text] {
@@ -48,7 +49,6 @@ p, li {
 	
 	.ui-ios-gradient-light-blue-search-button;
 		
-/*	border: 1px solid #5C6B81;*/
 	color: #FFF;
 	cursor: pointer;
 	display: none;
@@ -292,12 +292,10 @@ p, li {
 			-webkit-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.3),
 								inset 0 2px 1px -1px rgba(0, 0, 0, .3),
 								inset -1px 0px 0px rgba(40, 74, 124, 0.4),
-								inset -1px 0px 0px rgba(40, 74, 124, 0.4),
 								inset 0px 1px 0px rgba(0, 0, 0, .2),
 								inset 0px -1px 0px rgba(0, 0, 0, .2);
 			-moz-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.3),
 								inset 0 2px 1px -1px rgba(0, 0, 0, .3),
-								inset -1px 0px 0px rgba(40, 74, 124, 0.4),
 								inset -1px 0px 0px rgba(40, 74, 124, 0.4),
 								inset 0px 1px 0px rgba(0, 0, 0, .2),
 								inset 0px -1px 0px rgba(0, 0, 0, .2);
@@ -369,6 +367,7 @@ p, li {
 
 .ui-ios-scroll-view  {
 
+	background: #E2E7ED;
 	bottom: 0px;
 	overflow: auto;
 	position: absolute;
@@ -378,6 +377,7 @@ p, li {
 	
 	.scroller {
 	
+		background: #FFF;
 		padding: 0;
 		position: absolute; 
 		width: 100%;
@@ -386,13 +386,15 @@ p, li {
 	
 	.ui-ios-pull-to-refresh {
 	
-		background: none;
+		background: #E2E7ED url(img-default/ui-ios-retina-line-light-blue.png) bottom repeat-x;
 		color: #707B8D;
 		font-size: 14px;
 		font-weight: bold;
 		height: 40px;
-		padding: 5px 10px;
+		padding: 10px 10px;
 		text-align: center;
+		
+		.background-size(5px 5px);
 		
 		.icon  {
 		

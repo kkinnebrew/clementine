@@ -380,10 +380,7 @@ function popNavigationView(name) {
 	
 	var prev = current.prev('.ui-ios-view');
 		
-	if(prev.length != 0) {
-	
-		$("input").attr('disabled', 'disabled').blur();
-		$("select").attr('disabled', 'disabled').blur();
+	if(prev.length != 0) {		
 	
 		var leftBtn = prev.children('.ui-ios-bar-button-item.left');
 		var rightBtn = prev.children('.ui-ios-bar-button-item.right');
@@ -409,6 +406,8 @@ function popNavigationView(name) {
 		prev.addClass('unloading').removeClass('unloaded');
 		current.removeClass('active').addClass('preloaded');
 		setTimeout(function() {
+			current.find("input").attr('disabled', 'disabled').blur();
+			current.find("select").attr('disabled', 'disabled').blur();
 			prev.addClass('active').removeClass("unloading");
 		}, 400);
 		
@@ -430,9 +429,6 @@ function popToRootViewController(name) {
 	var prev = controller.find('.ui-ios-view:first');
 				
 	if(prev.length != 0) {
-	
-		$("input").attr('disabled', 'disabled').blur();
-		$("select").attr('disabled', 'disabled').blur();
 	
 		var leftBtn = prev.children('.ui-ios-bar-button-item.left');
 		var rightBtn = prev.children('.ui-ios-bar-button-item.right');
@@ -462,6 +458,8 @@ function popToRootViewController(name) {
 		prev.addClass('unloading').removeClass('unloaded');
 		current.removeClass('active').addClass('preloaded');
 		setTimeout(function() {
+			current.find("input").attr('disabled', 'disabled').blur();
+			current.find("select").attr('disabled', 'disabled').blur();
 			prev.addClass('active').removeClass("unloading");
 		}, 400);
 		
@@ -487,9 +485,6 @@ function pushNavigationView(name, viewName) {
 	else var next = controller.find('.ui-ios-view.name-' + viewName);
 			
 	if(next.length != 0) {
-	
-		$("input").attr('disabled', 'disabled').blur();
-		$("select").attr('disabled', 'disabled').blur();
 		
 		var leftBtn = next.children('.ui-ios-bar-button-item.left');
 		var rightBtn = next.children('.ui-ios-bar-button-item.right');
@@ -531,6 +526,8 @@ function pushNavigationView(name, viewName) {
 		current.removeClass('active').addClass('unloaded');
 	
 		setTimeout(function() {
+			current.find("input").attr('disabled', 'disabled').blur();
+			current.find("select").attr('disabled', 'disabled').blur();
 			next.addClass('active').removeClass("loading");
 		}, 400);
 		

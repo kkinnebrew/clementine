@@ -1,0 +1,656 @@
+/* Element: UISearchBar */
+
+@import "functions.less";
+@import "gradients.less";
+
+p, li {
+	-webkit-font-smoothing: antialiased;
+}
+
+.ui-ios-search-bar {
+	
+	.ui-ios-gradient-light-blue-search;
+	
+	border-bottom: 1px solid #8D9CA8;
+	height: 30px;
+	overflow: hidden;
+	padding: 6px 0px 7px 0px;
+	width: 100%;
+
+}
+
+.ui-ios-search-bar input[type=text] {
+	
+	background: #FFF url(src/images/ui-ios-search-bar-icon.png) no-repeat left;
+	border: 1px solid #9AA9B3;
+	font-size: 14px;
+	height: 20px;
+	left: 7px;
+	outline: none;
+	overflow: hidden;
+	padding: 5px 5px 5px 30px;
+	position: absolute;
+	right: 7px;
+			
+	.border-radius(15px);
+	.box-shadow(inset 0 2px 3px rgba(0, 0, 0, .4));
+		
+	-webkit-tap-highlight-color: rgba(0,0,0,0); 
+	
+}
+
+.ui-ios-search-bar input[type=text]:focus {
+	/* correct webkit outline bug */
+	outline-color: rgba(255,255,255,0);
+	outline-offset: 10px;
+}
+
+.ui-ios-search-bar .ui-ios-search-button {
+	
+	.ui-ios-gradient-light-blue-search-button;
+		
+	color: #FFF;
+	cursor: pointer;
+	display: none;
+	font-weight: bold;
+	font-size: 12px;
+	line-height: 30px;
+	padding: 0px 10px;
+	position: absolute;
+	height: 30px;
+	margin-top: 1px;
+	overflow: hidden;
+	right: -64px;
+	text-align: center;
+	text-shadow: 0px -1px 0 rgba(0, 0, 0, .4);
+	width: 60px;
+	
+	.border-radius (5px);
+	.background-clip (padding-box);
+	.box-sizing (border-box);
+	.user-select (none);
+	
+	-webkit-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset -1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset 0px 1px 1px rgba(0, 0, 0, .6),
+						inset 0px -1px 1px rgba(0, 0, 0, .2),
+						0px 1px 0px rgba(255, 255, 255, .3);
+	-moz-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset -1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset 0px 1px 1px rgba(0, 0, 0, .6),
+						inset 0px -1px 1px rgba(0, 0, 0, .2),
+						0px 1px 0px rgba(255, 255, 255, .3);
+				
+	-webkit-tap-highlight-color: rgba(0,0,0,0); 
+
+}
+
+.ui-ios-search-bar .ui-ios-search-button.touched {
+	.ui-ios-gradient-light-blue-search-button-selected;
+}
+
+::-webkit-input-placeholder {  -webkit-appearance: none; -moz-appearance: none; }
+
+::-webkit-search-cancel-button { -webkit-appearance: none; -moz-appearance: none; }
+
+
+/* Element: UIToolbar */
+
+.ui-ios-toolbar {
+	
+	.ui-ios-gradient-light-blue;
+	
+	border-top: 1px solid #7C92AF;
+	height: 44px;
+	overflow: hidden;
+	width: 100%;
+	
+	.background-clip (padding-box);
+	.box-sizing (border-box);
+	.user-select (none);
+	
+	h1 {
+		color: #FFF;
+		font-size: 20px;
+		font-weight: bold;
+		height: 44px;
+		line-height: 46px;
+		margin: 0px;
+		padding: 0px;
+		position: absolute;
+		text-align: center;
+		text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.35);
+		width: 100%;
+	}
+	
+	.ui-ios-segmented-control {
+		left: 6px;
+		position: absolute;
+		right: 6px;
+		top: 6px;
+	}
+	
+}
+
+/* Element: UINavigationBar */
+
+.ui-ios-navigation-bar {
+	
+	.ui-ios-gradient-light-blue;
+	
+	border-bottom: 1px solid #2D3033;
+	height: 43px;
+	overflow: hidden;
+	width: 100%;
+	
+	.user-select (none);
+	
+	h1 {
+		color: #FFF;
+		font-size: 20px;
+		font-weight: bold;
+		height: 44px;
+		line-height: 46px;
+		margin: 0px;
+		padding: 0px;
+		position: absolute;
+		text-align: center;
+		text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.35);
+		width: 100%;
+	}
+	
+}
+
+/* Element: UIBarButtonItem */
+
+.ui-ios-bar-button-item {
+	
+	.ui-ios-gradient-light-blue-button;
+			
+	color: #FFF;
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: bold;
+	height: 30px;
+	line-height: 30px;
+	min-width: 35px;
+	padding: 0px 12px;
+	position: absolute;
+	overflow: hidden;
+	text-align: center;
+	text-overflow: ellipsis;
+	text-shadow: 0px -1px 0 rgba(0, 0, 0, .5);
+	z-index: 1000;
+		
+	-webkit-tap-highlight-color: rgba(0,0,0,0); 
+
+	.border-radius;
+	.user-select (none);
+				
+	-webkit-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset -1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0px -1px 0px rgba(0, 0, 0, .2),
+						0px 1px 0px rgba(255, 255, 255, .3);
+	-moz-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset -1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0px -1px 0px rgba(0, 0, 0, .2),
+						0px 1px 0px rgba(255, 255, 255, .3);	
+				
+	&.icon {
+		padding: 0px 5px;
+	}
+	
+	&.left {
+		top: 7px;
+		left: 7px;
+	}
+	
+	&.right {
+		top: 7px;
+		right: 7px;
+	}
+	
+	&.touched {
+		.ui-ios-gradient-light-blue-button-selected;
+	}
+	
+}
+
+/* Element: UISegmentedControl */
+
+.ui-ios-segmented-control {
+	
+	background-color: #354F72;
+	border: none;
+	color: #FFF;
+	font-size: 12px;
+	font-weight: bold;
+	height: 30px;
+	line-height: 30px;
+	list-style: none;
+	margin: 0px;
+	overflow: hidden;
+	padding: 0;
+	text-align: center;
+	text-overflow: ellipsis;
+	text-shadow: 0px -1px 0 rgba(0, 0, 0, .5);
+	
+	-webkit-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, .2), 
+				0px 1px 0px rgba(255, 255, 255, .3);
+	-moz-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, .2), 
+				0px 1px 0px rgba(255, 255, 255, .3);
+	
+	.border-radius(7px);
+	
+	.ui-ios-segment {
+			
+		.ui-ios-gradient-light-blue;
+		
+		border: none;
+		cursor: pointer;
+		float: left;
+		height: 30px;
+		margin: 0;
+		min-width: 35px;
+		padding: 0px 12px;
+		
+		-webkit-tap-highlight-color: rgba(0,0,0,0); 
+		
+		.user-select (none);
+		
+		-webkit-box-shadow:	inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+							inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+							inset 0px 1px 0px rgba(0, 0, 0, .2),
+							inset 0px -1px 0px rgba(0, 0, 0, .2);
+		-moz-box-shadow:	inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+							inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+							inset 0px 1px 0px rgba(0, 0, 0, .2),
+							inset 0px -1px 0px rgba(0, 0, 0, .2);
+		
+		&.selected {
+				
+			.ui-ios-gradient-light-blue-button;
+			border: none;
+			-webkit-box-shadow: inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+								inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+								inset 0px 1px 0px rgba(0, 0, 0, .4),
+								inset 0px -1px 0px rgba(0, 0, 0, .2);
+			-moz-box-shadow: inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+								inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+								inset 0px 1px 0px rgba(0, 0, 0, .4),
+								inset 0px -1px 0px rgba(0, 0, 0, .2);
+							
+		}
+	
+		&:first-child {	
+			
+			border: none;
+			-webkit-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.3),
+								inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+								inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+								inset 0px 1px 0px rgba(0, 0, 0, .2),
+								inset 0px -1px 0px rgba(0, 0, 0, .2);
+			-moz-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.3),
+								inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+								inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+								inset 0px 1px 0px rgba(0, 0, 0, .2),
+								inset 0px -1px 0px rgba(0, 0, 0, .2);
+			
+			-webkit-border-top-left-radius: 5px;
+			-webkit-border-bottom-left-radius: 5px;
+			-moz-border-radius-topleft: 5px;
+			-moz-border-radius-bottomleft: 5px;
+			border-top-left-radius: 5px;
+			border-bottom-left-radius: 5px;
+			
+			&.selected {
+				
+				border: none;
+				-webkit-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.3),
+									inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+									inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+									inset 0px 1px 0px rgba(0, 0, 0, .2),
+									inset 0px -1px 0px rgba(0, 0, 0, .2);
+				-moz-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.3),
+									inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+									inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+									inset 0px 1px 0px rgba(0, 0, 0, .2),
+									inset 0px -1px 0px rgba(0, 0, 0, .2);
+				
+			}
+			
+		}
+		
+		&:last-child {
+		
+			border: none;
+			-webkit-box-shadow:	inset -1px 0px 1px rgba(0, 0, 0, 0.3),
+								inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+								inset 0px 1px 0px rgba(0, 0, 0, .2),
+								inset 0px -1px 0px rgba(0, 0, 0, .2);
+			-moz-box-shadow:	inset -1px 0px 1px rgba(0, 0, 0, 0.3),
+								inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+								inset 0px 1px 0px rgba(0, 0, 0, .2),
+								inset 0px -1px 0px rgba(0, 0, 0, .2);
+								
+			-webkit-border-top-right-radius: 5px;
+			-webkit-border-bottom-right-radius: 5px;
+			-moz-border-radius-topright: 5px;
+			-moz-border-radius-bottomright: 5px;
+			border-top-right-radius: 5px;
+			border-bottom-right-radius: 5px;
+		
+			&.selected {
+			
+				border: none;
+				-webkit-box-shadow:	inset -1px 0px 1px rgba(0, 0, 0, 0.3),
+									inset 0px 1px 0px rgba(0, 0, 0, .2),
+									inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+									inset 0px -1px 0px rgba(0, 0, 0, .2);
+				-moz-box-shadow:	inset -1px 0px 1px rgba(0, 0, 0, 0.3),
+									inset 0px 1px 0px rgba(0, 0, 0, .2),
+									inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+									inset 0px -1px 0px rgba(0, 0, 0, .2);
+				
+			}	
+			
+		}
+	}	
+}
+
+/* Container: UIScrollView */
+
+
+.ui-ios-scroll-view  {
+
+	background: #E2E7ED;
+	bottom: 0px;
+	overflow: auto;
+	position: absolute;
+	top: 0px;
+	width: 100%;
+	z-index: 1;
+	
+	.scroller {
+	
+		background: #FFF;
+		padding: 0;
+		position: absolute; 
+		width: 100%;
+		z-index: 1;
+	}
+	
+	.ui-ios-pull-to-refresh {
+	
+		background: #E2E7ED url(src/images/ui-ios-retina-line-light-blue.png) bottom repeat-x;
+		color: #707B8D;
+		font-size: 14px;
+		font-weight: bold;
+		height: 40px;
+		padding: 10px 10px;
+		text-align: center;
+		
+		.background-size(5px 5px);
+		
+		.icon  {
+		
+			background: url(src/images/ui-ios-pull-icon.png) 0 0 no-repeat;
+			display: block; 
+			float: left;
+			height: 40px;
+			position: absolute;
+			width: 40px; 
+			
+			-webkit-transform: rotate(0deg) translateZ(0);
+			-webkit-transition-property: -webkit-transform;
+			-webkit-transition-duration: 250ms;
+			
+			.background-size (40px 80px);
+			
+		}
+		
+		.date {
+			display: block;
+			font-weight: normal;
+			font-size: 10px;
+			height: 18px;
+		}
+		
+		.message {
+			display: block;
+			height: 22px;
+			line-height: 28px;
+		}
+		
+		&.flip {
+		
+			.icon {
+				-webkit-transform:rotate(-180deg) translateZ(0);
+			}
+			
+		}
+		
+		&.loading {
+			
+			.icon {
+			
+				background-position:0 100%;
+				-webkit-transform:rotate(0deg) translateZ(0);
+				-webkit-transition-duration:0ms;
+			
+				-webkit-animation-name:loading;
+				-webkit-animation-duration:2s;
+				-webkit-animation-iteration-count:infinite;
+				-webkit-animation-timing-function:linear;
+				
+			}
+		
+		}
+
+	}
+	
+}
+
+@-webkit-keyframes loading {
+	from { -webkit-transform:rotate(0deg) translateZ(0); }
+	to { -webkit-transform:rotate(360deg) translateZ(0); }
+}
+
+.ui-ios-scrollbarH {
+	bottom: 1px;
+	height: 7px;
+	left: 2px;
+	position: absolute;
+	right: 7px;
+	z-index: 100;
+}
+
+.ui-ios-scrollbarH > div {
+	height:100%;
+}
+
+.ui-ios-scrollbarV {
+	bottom: 5px;
+	position: absolute;
+	right: 1px;
+	top: 2px;
+	width: 7px;
+	z-index: 100;
+}
+
+.ui-ios-scrollbarV > div {
+	width:100%;
+}
+
+.ui-ios-scrollbarH > div,
+.ui-ios-scrollbarV > div {
+
+	border-width: 3px;
+	positionn: absolute;
+	z-index: 100;
+	
+	.border-image (url(src/images/ui-ios-scroll-bar.png) 6 6 6 6);
+	.box-sizing (border-box);
+	
+}
+
+/* Container: UINavigationController */
+
+.ui-ios-navigation-controller {
+	
+	height: 100%;
+	overflow: hidden;
+	position: absolute;
+	width: 100%;
+	z-index: 100;
+		
+	.ui-ios-view {
+	
+		bottom: 0px;
+		position: absolute;
+		top: 44px;
+		width: 100%;
+		z-index: 150;
+		
+		.webkit-transition(all, 300ms, ease-in-out);
+	
+		h1 {
+		
+			color: #FFF;
+			font-size: 18px;
+			font-weight: bold;
+			height: 44px;
+			line-height: 44px;
+			margin: 0;
+			padding: 0;
+			position: absolute;
+			text-align: center;
+			text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.35);
+			top: -44px;
+			left: 0px;
+			right: 0px;
+			width: 100%;
+			z-index: 200;
+		
+		}
+		
+		&.active {
+			
+			-webkit-transform: translate(0);
+			-moz-transform: translate(0);
+			-o-transform: translate(0);
+			-ms-transform: translate(0);
+			
+			h1 {
+				opacity: 1;
+			}
+			
+		}
+		
+		&.loading {
+			
+			-webkit-transform: translate(0);
+			-moz-transform: translate(0);
+			-o-transform: translate(0);
+			-ms-transform: translate(0);
+			
+			h1 {
+				
+				opacity: 1;
+				-webkit-transition-property: opacity;
+				-webkit-transition-delay: .25s;
+				-webkit-transition-duration: .1;
+				-webkit-transition-timing-function: ease-in-out;
+				
+			}
+			
+		}
+		
+		&.unloading {
+			
+			-webkit-transform: translate(0);
+			-moz-transform: translate(0);
+			-o-transform: translate(0);
+			-ms-transform: translate(0);
+			
+			h1 {
+			
+				opacity: 1;
+				-webkit-transition-property: opacity;
+				-webkit-transition-delay: .2s;
+				-webkit-transition-duration: .2s;
+				-webkit-transition-timing-function: ease-in-out;
+			
+			}
+			
+		}
+		
+		&.preloaded {
+			
+			-webkit-transform: translate(100%);
+			-moz-transform: translate(100%);
+			-o-transform: translate(100%);
+			-ms-transform: translate(100%);
+			
+			h1 {
+				opacity: 0;
+				-webkit-transition: opacity .2s ease-in-out 0s;
+			}
+			
+		}
+		
+		&.unloaded {
+		
+			-webkit-transform: translate(-100%);
+			-moz-transform: translate(-100%);
+			-o-transform: translate(-100%);
+			-ms-transform: translate(-100%);
+		
+			h1 {
+				
+				opacity: 0;
+				-webkit-transition: opacity .2s ease-in-out 0s;
+				
+			}
+			
+		}
+		
+		.ui-ios-bar-button-item {
+			display: none !important;
+		}
+	
+	}
+	
+}
+
+/* Container: UITableView */
+
+.ui-ios-table-view {
+	
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	
+	li {
+	
+		background: #FFF;
+		border-bottom: 1px solid #CCC;
+		cursor: pointer;
+		height: 43px;
+		line-height: 44px;
+		padding: 0px 10px;
+			
+		&.touched {
+			color: #FFF;
+			.ui-ios-gradient-blue-table-cell-selected;
+		}
+	
+	}
+	
+}
+

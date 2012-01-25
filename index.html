@@ -1,0 +1,256 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>OrangeUI</title>
+
+<!-- iOS meta rules -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="white">
+
+<!-- iOS touch images -->
+<link rel="apple-touch-icon-precomposed" href="img/touch-icon-iphone.png" />
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="img/touch-icon-ipad.png" />
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="img/touch-icon-iphone4.png" />
+
+<link rel="apple-touch-startup-image" href="img/touch-startup.png" />
+
+<!-- iOS viewport rules -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+
+<!-- Normalize CSS -->
+<link rel="stylesheet" href="lib/css/normalize.css" type="text/css" />
+
+
+<!-- UI stylesheets -->
+<link 	rel="stylesheet/less" 
+		type="text/css" 
+		href="src/styles/common.less" />
+
+<link 	rel="stylesheet/less" 
+		type="text/css" 
+		href="src/styles/desktop.less" 
+		media="not screen and (min-device-width: 320px) and (max-device-width: 1024px)" />
+		
+<link 	rel="stylesheet/less" 
+		type="text/css" 
+		href="src/styles/mobile.less"
+		media="screen and (min-device-width: 320px) and (max-device-width: 1024px)" />
+
+<link 	rel="stylesheet/less" 
+		type="text/css" 
+		href="src/styles/mobile-retina.less" 
+		media="only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5)" />
+
+<!-- External Libraries -->
+<script type="text/javascript" src="lib/js/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="lib/js/less-1.1.5.min.js"></script>
+<script type="text/javascript" src="lib/js/iscroll.js"></script>
+<script type="text/javascript" src="lib/js/modernizr-2.0.6.js"></script>
+<script type="text/javascript" src="lib/js/respond.js"></script>
+<script type="text/javascript" src="lib/js/spin.min.js"></script>
+
+<!-- Application specific scripts -->
+<script type="text/javascript" src="src/scripts/elements.js"></script>
+
+<link rel="stylesheet" type="text/css" href="src/styles/quirks.css" />
+		
+<link rel="stylesheet" type="text/css" href="src/styles/quirks-ff.css" />
+
+<!--[if IE]>
+<link rel="stylesheet" type="text/css" href="src/styles/quirks-ie.css" />
+<![endif]-->
+
+<!--[if IE 7]>
+<link rel="stylesheet" type="text/css" href="src/styles/quirks-ie7.css" />
+<![endif]-->
+
+<!--[if lt IE 9]>
+<link rel="stylesheet" type="text/css" href="src/styles/quirks-lt-ie9.css" />
+<![endif]-->
+
+<style type="text/css">
+
+html, body {
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+}
+
+@-webkit-keyframes loading {
+	from { -webkit-transform:rotate(0deg) translateZ(0); }
+	to { -webkit-transform:rotate(360deg) translateZ(0); }
+}
+
+
+</style>
+
+<!--[if !IE]> -->
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+	applyUIIOSSearchBar();
+	applyBodyDelegates();
+	applyUIIOSSegmentedControls();
+	applyUIIOSScrollView();
+	applyUIIOSNavigationController();
+});
+
+</script>
+
+<!-- <![endif]-->
+
+<!--[if IE]>
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+	applyUIIOSSearchBar();
+	//applyBodyDelegates();
+	applyUIIOSSegmentedControls();
+	applyUIIOSNavigationController();
+	if(Browser.Version() > 8) {
+		applyUIIOSScrollView();
+	}
+});
+
+</script>
+
+<![endif]-->
+
+
+</head>
+
+<body>
+
+<div class="ui-ios-navigation-controller">
+
+	<div class="ui-ios-navigation-bar"></div>
+	
+	<div class="ui-ios-view active">
+	
+		<h1>Inbox</h1>
+	
+		<div class="ui-ios-bar-button-item left">Mailboxes</div>
+		<div class="ui-ios-bar-button-item right event-push-view">Edit</div>
+	
+		<div class="ui-ios-search-bar">
+			<input type="text" name="search" autocomplete="false" spellcheck="false" placeholder="Search" />
+			<div class="ui-ios-search-button">Cancel</div>
+		</div>
+		
+		<div class="ui-ios-scroll-view" style="width: 100%; position: absolute; top: 44px; bottom: 44px; font-size: 40px;">
+			
+			<div class="ui-ios-pull-to-refresh">
+				<span class="icon"></span>
+				<span class="label">
+					<span class="message">Pull down to refresh</span>
+					<span class="date">Last Updated: 12/20/2011 1:47PM</span>
+				</span>
+			</div>
+			
+			<div style="padding: 10px; " class="ui-selectable">
+			<p style="margin-top: 0px; padding-top: 0px;">
+			
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ultricies felis at nisl gravida pretium. Morbi sagittis bibendum diam, in mattis diam fermentum non. Mauris eget sapien urna. Curabitur quam arcu, viverra et commodo ut, congue non velit. Aliquam ut gravida magna. Curabitur massa orci, blandit ut varius sed, auctor quis ante. Donec eget nulla nec massa luctus aliquam tempus blandit orci. In id lectus nisi, id gravida nisi. Quisque sed lacus eget libero volutpat congue. Aenean id urna a purus euismod faucibus eu vel elit. Suspendisse dapibus nibh nec odio pharetra sit amet vehicula velit ornare. Donec fermentum sapien id neque mattis eu eleifend risus consequat. Suspendisse luctus placerat lobortis.
+			</p><p>
+			Suspendisse eros enim, vulputate non imperdiet ac, consequat a lorem. Aenean non dui in dui porttitor porta. Fusce eget sapien eu odio dignissim convallis. Ut nisi leo, tincidunt nec imperdiet at, tempus ac tellus. Duis tincidunt consectetur rhoncus. Quisque aliquet, arcu sit amet sollicitudin consectetur, magna nulla gravida urna, quis aliquam dui leo vitae quam. Nullam pellentesque risus et nulla dignissim convallis. Sed vel urna arcu, at consectetur magna. Sed nec felis diam, et elementum sem. Quisque lacinia elementum arcu id lobortis. In hac habitasse platea dictumst.
+			</p><p>
+			Nullam a quam lectus, eget blandit risus. Sed leo quam, dignissim imperdiet tincidunt iaculis, euismod cursus erat. Nam volutpat gravida magna sed lobortis. Sed mattis lorem a libero viverra consectetur. Etiam quam leo, commodo eu tincidunt congue, hendrerit non nunc. Phasellus dictum, ligula pulvinar tincidunt facilisis, justo ante semper nibh, non dapibus lorem est quis risus. In auctor scelerisque consectetur. Suspendisse sit amet elit sem.
+			</p>
+			</div>
+		
+		</div>
+		
+		<div class="ui-ios-toolbar" style="position: absolute; bottom: 0px;">
+			
+			<div class="ui-ios-segmented-control">
+				<div class="ui-ios-segment selected">First</div>
+				<div class="ui-ios-segment">Second</div>
+				<div class="ui-ios-segment">Third</div>
+				<div class="ui-ios-segment">Fourth</div>
+			</div>
+			
+		</div>
+	
+	</div>
+	
+	<div class="ui-ios-view preloaded">
+	
+		<h1>Setup</h1>
+	
+		<div class="ui-ios-bar-button-item left event-pop-view">Back</div>
+		<div class="ui-ios-bar-button-item right event-push-view">Next</div>
+		
+		<div class="ui-ios-scroll-view" style="width: 100%; position: absolute; top: 0px; bottom: 0px;">
+		
+			<ul class="ui-ios-table-view">
+			
+				<li>Test One</li>
+				<li>Test Two</li>
+				<li>Test Three</li>
+				<li>Test Four</li>
+				<li>test Five</li>
+				<li>Test Six</li>
+				<li>Test Seven</li>
+				<li>Test Eight</li>
+				<li>Test One</li>
+				<li>Test Two</li>
+				<li>Test Three</li>
+				<li>Test Four</li>
+				<li>test Five</li>
+				<li>Test Six</li>
+				<li>Test Seven</li>
+				<li>Test Eight</li>
+			
+			</ul>
+		
+		</div>
+			
+	</div>
+	
+	<div class="ui-ios-view preloaded">
+	
+		<h1>Setup</h1>
+		
+		<div class="ui-ios-bar-button-item left event-pop-view">Back</div>
+		
+		<div class="ui-ios-search-bar">
+			<input type="text" name="search" autocomplete="false" spellcheck="false" placeholder="Search" />
+			<div class="ui-ios-search-button">Cancel</div>
+		</div>
+		
+		<div class="ui-ios-scroll-view" style="width: 100%; position: absolute; top: 44px; bottom: 0px;">
+		
+			<ul class="ui-ios-table-view">
+			
+				<li>Test One</li>
+				<li>Test Two</li>
+				<li>Test Three</li>
+				<li>Test Four</li>
+				<li>test Five</li>
+				<li>Test Six</li>
+				<li>Test Seven</li>
+				<li>Test Eight</li>
+				<li>Test One</li>
+				<li>Test Two</li>
+				<li>Test Three</li>
+				<li>Test Four</li>
+				<li>test Five</li>
+				<li>Test Six</li>
+				<li>Test Seven</li>
+				<li>Test Eight</li>
+			
+			</ul>
+		
+		</div>
+	
+	</div>
+
+
+</div>
+
+</body>
+
+</html>

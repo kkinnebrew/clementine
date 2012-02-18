@@ -60,8 +60,7 @@ OrangeUI.add('storage', function(O) {
 				O.Log.warn("Native JSON is not supported in your browser");
 			}
 					
-			if (isSupported) O.Log.info("Storage manager loaded successfully");
-			else O.Log.warn("Local storage could not be initialized");
+			if (!isSupported) O.Log.warn("Local storage could not be initialized");
 		};
 			
 			

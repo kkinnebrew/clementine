@@ -11,9 +11,6 @@
 	
 	OrangeUI = {},
 	
-	// tracks offline/online browsing
-	isOnline = false,
-	
 	/**
 	 * default module settings
 	 */
@@ -64,17 +61,18 @@
 				}
 			
 				if(modules[name] != undefined) {
+					
+					// set as loaded
+					OrangeUI.modules[name] = true;
 												
 					// load dependencies
 					for(var i = 0, len = modules[name].req.length; i < len; i++) {
+						if(modules[name].req[i] === name) continue;
 						this.loadModule(modules[name].req[i]);
 					}
 				
 					// load module
 					modules[name].fn.call(window, OrangeUI); // execute with OrangeUI as context
-					
-					// set as loaded
-					OrangeUI.modules[name] = true;
 					
 					console.log('[INFO] Module "' + name + '" loaded');
 				}

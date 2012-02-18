@@ -11,21 +11,40 @@ OrangeUI.add('app', function(O) {
 	
 		var App = {}
 		
+		App.isOnline = false;
 	
 		App.init = function(config) {
 		
 			// set logging
 			O.Log.setLevel(config.log);
 			
+			// setup location
+			O.Location.init();
+			
+			// setup cache
+			O.Cache.init();
+			
 			// initialize storage
 			if(config.useStorage) {
 				O.Storage.init(); 
-				O.Storage.goOnline();
 			}
+						
+		}
+		
+		App.goOnline = function() {
+			this.isOnline = true;
+			O.Log.info("Application went online");
+			O.Storage.goOnline();
+		},
+		
+		App.goOffline = function() {
+			this.isOnline = false;
+			O.Log.info("Application went offline");
+			O.Storage.goOffline();
 		}
 		
 		return App;
 	
 	})();
 	
-}, ['storage', 'cache', 'log']);
+}, ['cache', 'location', 'log', 'storage']);

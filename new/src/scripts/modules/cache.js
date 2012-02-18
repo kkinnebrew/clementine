@@ -38,10 +38,10 @@ OrangeUI.add('cache', function(O) {
 		
 		Cache.checkNetworkStatus = function(repeat) {
 			
-			O.Log.debug("Checking connection...");
+			O.Log.info("Checking connection...");
 					
 			// repeat on an interval
-			if(repeat) setTimeout($.proxy(this.checkNetworkStatusRepeat, this), 10 * 1000);
+			if(repeat) setTimeout($.proxy(this.checkNetworkStatusRepeat, this), 60 * 1000);
 			
 			// if the browser things we're online
 			if (navigator.onLine) {
@@ -108,8 +108,8 @@ OrangeUI.add('cache', function(O) {
 		},
 		
 		Cache.onUpdateReady = function() {
-		
-			this.cache.swapCache();
+				
+			window.applicationCache.swapCache();
 			O.Log.info("Cache: Updated cache is ready");
 		
 			// the new cache will not be used until the page refreshes

@@ -28,6 +28,12 @@ OrangeUI.add('app', function(O) {
 			if(config.useStorage) {
 				O.Storage.init(); 
 			}
+			
+			// setup requests
+			O.Request.init({
+				baseUrl: '',
+				timeout: 6000
+			});
 						
 		}
 		
@@ -47,4 +53,4 @@ OrangeUI.add('app', function(O) {
 	
 	})();
 	
-}, ['cache', 'location', 'log', 'storage']);
+}, ['cache', 'location', 'log', 'storage', 'request']);

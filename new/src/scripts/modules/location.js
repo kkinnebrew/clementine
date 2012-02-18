@@ -19,6 +19,8 @@ OrangeUI.add('location', function(O) {
 		
 		var _fetchLocation = function() {
 		
+			if(O.App.isOnline === false) return;
+		
 			if (navigator.geolocation) {
 			
 				navigator.geolocation.getCurrentPosition ( 

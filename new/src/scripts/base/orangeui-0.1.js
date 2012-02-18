@@ -5,7 +5,7 @@
  * @dependencies none
  */
  
- window.OrangeUI = (function (window, document, undefined) {
+(function (window, document, undefined) {
 
 	var version = '0.1.0',
 	
@@ -112,6 +112,6 @@
 		fn.call(window, OrangeUI);
 	}
 	
-	return OrangeUI;
+	window.OrangeUI = OrangeUI;
 
 })(this, this.document);

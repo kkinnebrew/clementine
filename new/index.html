@@ -1,5 +1,6 @@
 <!DOCTYPE HTML>
-<html lang="en" manifest="cache.manifest?v=43">
+<!--<html lang="en" manifest="cache.manifest?v=43">-->
+<html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>OrangeUI</title>
@@ -7,6 +8,7 @@
 <!-- External Libraries -->
 <script type="text/javascript" src="lib/jquery-1.7.1.js"></script>
 <script type="text/javascript" src="lib/modernizr.js"></script>
+<script type="text/javascript" src="lib/jsunity-0.6"></script>
 
 <!-- Application specific scripts -->
 <script type="text/javascript" src="src/scripts/base/common.js"></script>
@@ -18,16 +20,22 @@
 <script type="text/javascript" src="src/scripts/modules/request.js"></script>
 <script type="text/javascript" src="src/scripts/modules/app.js"></script>
 
+<script type="text/javascript" src="src/tests/storage-test.js"></script>
+
+<script type="text/javascript" src="js/feed.js"></script>
+
+
 <script type="text/javascript">
 
-OrangeUI.use('app', function(O) {
+OrangeUI.use('app', 'wmsocial-feed', function(O) {
 
 	O.App.init({
 		log: 2,
 		useStorage: true,
 		useLocation: false,
 		baseUrl: '',
-		timeout: 6000
+		timeout: 6000,
+		namespace: "WMSocial"
 	});
 	
 });

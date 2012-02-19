@@ -1,11 +1,12 @@
 CACHE MANIFEST
-# 10000 <== change this to force reloading cached resources
+# 103223124 <== change this to force reloading cached resources
 CACHE:
 
 index.html
 
 lib/jquery-1.7.1.js
 lib/modernizr.js
+lib/jsunity-0.6.js
 
 src/scripts/base/common.js
 src/scripts/base/orangeui-0.1.js
@@ -16,6 +17,10 @@ src/scripts/modules/location.js
 src/scripts/modules/log.js
 src/scripts/modules/request.js
 src/scripts/modules/storage.js
+
+src/tests/storage-test.js
+
+js/feed.js
 
 NETWORK:
 *

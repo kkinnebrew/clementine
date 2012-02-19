@@ -26,7 +26,9 @@
 	// stores application extension modules
 	OrangeUI.modules = {};
 	
-	
+	jsUnity.log = function (s) {
+	    console.log("[TEST] " + s);
+	};
 	
 	// internal classes
 	
@@ -108,6 +110,13 @@
 		}
 		
 		fn.call(window, OrangeUI);
+	}
+	
+	OrangeUI.namespace = function(name) {
+	
+		if(OrangeUI[name] == undefined) {
+			OrangeUI[name] = {};
+		}
 	}
 	
 	window.OrangeUI = OrangeUI;

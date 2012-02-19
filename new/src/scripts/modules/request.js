@@ -109,9 +109,7 @@ OrangeUI.add('request', function(O) {
 		initialize: function(data) {
 			this._data = data;
 		},
-		
-		destroy: function() {},
-		
+				
 		success: function(callback) {
 			callback(this._data);
 		},
@@ -127,9 +125,7 @@ OrangeUI.add('request', function(O) {
 		initialize: function(data) {
 			this._data = data;
 		},
-		
-		destroy: function() {},
-		
+				
 		success: function(callback) {},
 		
 		error: function(callback) {

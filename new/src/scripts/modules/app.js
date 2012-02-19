@@ -36,6 +36,22 @@ OrangeUI.add('app', function(O) {
 			});
 			
 			O.Log.info("Application loaded in " + (O.App.isOnline ? "online" : "offline") + " mode");
+			
+			// trigger state event
+			O.Handle = $('<div></div>');
+			
+			if(!O[config.namespace] || !O[config.namespace].RootController) {
+				O.Log.error("Missing root view controller");
+			} else {
+				// setup root view controller
+				O.RootViewController = new O[config.namespace].RootController();
+			}
+			
+			if(O.App.isOnline) {
+				O.Handle.trigger("online");
+			} else {
+				O.Handle.trigger("offline");
+			}
 						
 		}
 		
@@ -43,12 +59,14 @@ OrangeUI.add('app', function(O) {
 			this.isOnline = true;
 			O.Log.info("Application went online");
 			O.Storage.goOnline();
+			if(O.Handle != undefined) O.Handle.trigger("online");
 		},
 		
 		App.goOffline = function() {
 			this.isOnline = false;
 			O.Log.info("Application went offline");
 			O.Storage.goOffline();
+			if(O.Handle != undefined) O.Handle.trigger("offline");
 		}
 		
 		return App;

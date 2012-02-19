@@ -27,8 +27,8 @@ OrangeUI.add('cache', function(O) {
 			_cache.on("updateready", 	$.proxy(this.onUpdateReady, this));
 			
 			// bind network events
-			$(document.body).on("online", 	$.proxy(this.checkNetworkStatus, this));
-			$(document.body).on("offline", 	$.proxy(this.checkNetworkStatus, this));
+			window.addEventListener("offline", $.proxy(this.checkNetworkStatus, this), false);  
+			window.addEventListener("online", $.proxy(this.checkNetworkStatus, this), false); 
 			
 			Cache.checkNetworkStatusRepeat();
 			
@@ -41,7 +41,7 @@ OrangeUI.add('cache', function(O) {
 			O.Log.info("Checking connection...");
 					
 			// repeat on an interval
-			if(repeat) setTimeout($.proxy(this.checkNetworkStatusRepeat, this), 60 * 1000);
+			//if(repeat) setTimeout($.proxy(this.checkNetworkStatusRepeat, this), 60 * 1000);
 			
 			// if the browser things we're online
 			if (navigator.onLine) {

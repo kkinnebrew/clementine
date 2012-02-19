@@ -69,7 +69,6 @@ var Class = {
 
 };
 
-
 var Singleton = {
 
 	create: function(protoDef) {

@@ -28,7 +28,6 @@ OrangeUI.add('location', function(O) {
 					function (position) {
 						_coords = position.coords;
 						_timestamp = (new Date().getTime());
-						O.Log.info('Location services went online');
 					}, 
 					
 					// next function is the error callback
@@ -58,6 +57,7 @@ OrangeUI.add('location', function(O) {
 						
 			if (navigator.geolocation) {
 				_fetchLocation();
+				O.Log.info("Location services loaded in " + (O.App.isOnline ? "online" : "offline") + " mode");
 			} else {
 				O.Log.warn("Location services not supported");
 			}

@@ -32,7 +32,7 @@ OrangeUI.add('cache', function(O) {
 			
 			Cache.checkNetworkStatusRepeat();
 			
-			O.Log.info("Cache manager went online");
+			if(O.App.isOnline) O.Log.info("Cache manager loaded in " + (O.App.isOnline ? "online" : "offline") + " mode");
 		
 		};
 		
@@ -45,7 +45,7 @@ OrangeUI.add('cache', function(O) {
 			
 			// if the browser things we're online
 			if (navigator.onLine) {
-	
+			
 			    $.ajaxSetup({
 			        async: true,
 			        cache: false,
@@ -96,7 +96,7 @@ OrangeUI.add('cache', function(O) {
 		},
 		
 		Cache.onError = function() {
-			Log.error("Cache: There was an error in the manifest, downloading cached files or you're offline: " + e);
+			O.Log.warn("Cache: There was an error in the manifest, downloading cached files or you're offline");
 		},
 		
 		Cache.onNoUpdate = function() {

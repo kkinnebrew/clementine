@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 666 <== change this to force reloading cached resources
+# 10000 <== change this to force reloading cached resources
 CACHE:
 
 index.html

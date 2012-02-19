@@ -32,7 +32,7 @@ OrangeUI.add('storage', function(O) {
 		
 		var flushExpiredData = function() {
 			
-			for(var key in localStorage) {
+			for (var key in localStorage) {
 				Storage.get(key); // fetching data clears expired data
 			}
 				
@@ -61,6 +61,7 @@ OrangeUI.add('storage', function(O) {
 			}
 					
 			if (!isSupported) O.Log.warn("Local storage could not be initialized");
+			else O.Log.info("Local storage loaded in " + (O.App.isOnline ? "online" : "offline") + " mode");
 		};
 			
 			
@@ -82,7 +83,7 @@ OrangeUI.add('storage', function(O) {
 			var obj = {
 				data: value,
 				timestamp: (new Date()).getTime(),
-				ttl: ttl ? ttl : (6 * 60 * 60 * 1000) // 6 hours
+				ttl: ttl ? ttl : (24 * 60 * 60 * 1000) // 6 hours
 			};
 		
 			try {
@@ -122,7 +123,7 @@ OrangeUI.add('storage', function(O) {
 					}
 					
 					O.Log.info("GET: Retrieved object for key (" + key.toString() + ") from local storage");
-					
+										
 					return item.data; // otherwise return data
 									
 				} else {
@@ -187,18 +188,13 @@ OrangeUI.add('storage', function(O) {
 		};
 			
 		Storage.goOffline = function () {
-			
 			isOnline = false; // set flag
-			
-			O.Log.info("Local storage went offline");
 		};
 			
 		Storage.goOnline = function () {
 		
 			isOnline = true; // set flag
-			
-			O.Log.info("Local storage went online");
-			
+						
 			flushExpiredData(); // clears expired data from cache
 		};
 		

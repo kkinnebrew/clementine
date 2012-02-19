@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" manifest="cache.manifest">
+<html lang="en" manifest="cache.manifest?v=43">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>OrangeUI</title>
@@ -23,9 +23,11 @@
 OrangeUI.use('app', function(O) {
 
 	O.App.init({
-		log: 1,
+		log: 2,
 		useStorage: true,
-		useLocation: false
+		useLocation: false,
+		baseUrl: '',
+		timeout: 6000
 	});
 	
 });

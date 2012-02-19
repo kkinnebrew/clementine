@@ -32,20 +32,20 @@ OrangeUI.add('request', function(O) {
 				url: _baseUrl + path,
 				
 				success: function(data) {
-		
+										
 					// parse response
 					var json = JSON.parse(data);
-													
+																		
 					// cache request
 					var key = this.path;
 				
 					// pass error if no data returned
 					if(json != undefined) {
-						O.Storage.set(key, json.data);
+						O.Storage.set(key, json);
 						O.Log.info("Retrieved data from " + path);
-						O.Log.debug(json.data);
+						O.Log.debug(json);
 					}
-					
+										
 				},
 				
 				error: function(data) {}
@@ -62,7 +62,7 @@ OrangeUI.add('request', function(O) {
 				_requestTimeout = (config.requestTimeout != undefined) ? timeout : _requestTimeout;
 				_supportsOffline = O.Storage.isSupported();
 				
-				O.Log.info("Request manager went online");
+				O.Log.info("Request manager loaded in " + (O.App.isOnline ? "online" : "offline") + " mode");
 				
 			},
 		

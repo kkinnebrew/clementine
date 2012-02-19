@@ -18,12 +18,12 @@ OrangeUI.add('app', function(O) {
 			// set logging
 			O.Log.setLevel(config.log);
 			
-			// setup location
-			O.Location.init();
-			
 			// setup cache
 			O.Cache.init();
 			
+			// setup location
+			O.Location.init();
+						
 			// initialize storage
 			if(config.useStorage) {
 				O.Storage.init(); 
@@ -31,9 +31,11 @@ OrangeUI.add('app', function(O) {
 			
 			// setup requests
 			O.Request.init({
-				baseUrl: '',
-				timeout: 6000
+				baseUrl: config.baseUrl,
+				timeout: config.timeout
 			});
+			
+			O.Log.info("Application loaded in " + (O.App.isOnline ? "online" : "offline") + " mode");
 						
 		}
 		

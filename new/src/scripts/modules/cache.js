@@ -26,9 +26,16 @@ OrangeUI.add('cache', function(O) {
 			_cache.on("progress", 		$.proxy(this.onProgress, this));
 			_cache.on("updateready", 	$.proxy(this.onUpdateReady, this));
 			
-			// bind network events
-			window.addEventListener("offline", $.proxy(this.checkNetworkStatus, this), false);  
-			window.addEventListener("online", $.proxy(this.checkNetworkStatus, this), false); 
+			// bind network events, check for IE compatibility
+			if (!window.addEventListener) {
+			    window.attachEvent("offline", $.proxy(this.checkNetworkStatus, this));  
+			    window.attachEvent("online", $.proxy(this.checkNetworkStatus, this)); 
+			}
+			else {
+			    window.addEventListener("offline", $.proxy(this.checkNetworkStatus, this), false);  
+			    window.addEventListener("online", $.proxy(this.checkNetworkStatus, this), false); 
+			}
+			
 			
 			Cache.checkNetworkStatusRepeat();
 			

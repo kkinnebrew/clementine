@@ -22,7 +22,6 @@ OrangeUI.add('storage', function(O) {
 		 */
 		var _isOnline = true,
 		_localStorage = null,
-		_uses = null,
 		
 		keyFilterRegex = /[^A-Za-z_]/g, // filters keys for special chars
 		
@@ -62,7 +61,6 @@ OrangeUI.add('storage', function(O) {
 					try {
 						if(window.localStorage) {
 						    _localStorage = window.localStorage;
-						    _uses = "localStorage";
 						}
 					} catch (e) {
 						// Firefox local storage bug when cookies are disabled
@@ -75,7 +73,6 @@ OrangeUI.add('storage', function(O) {
 					try {
 						if(window.globalStorage) {
 						    _localStorage = window.globalStorage[window.location.hostname];
-						    _uses = "globalStorage";
 						    this.isSupported = true;
 						}
 					} catch(e) {}

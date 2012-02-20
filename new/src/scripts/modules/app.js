@@ -26,7 +26,7 @@ OrangeUI.add('app', function(O) {
 						
 			// initialize storage
 			if(config.useStorage) {
-				O.Storage.init(); 
+				O.Storage.init(App.isOnline); 
 			}
 			
 			// setup requests

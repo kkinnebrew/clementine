@@ -60,7 +60,7 @@ OrangeUI.add('request', function(O) {
 			
 				_baseUrl = (config.baseUrl != undefined) ? config.baseUrl : _baseUrl;
 				_requestTimeout = (config.requestTimeout != undefined) ? timeout : _requestTimeout;
-				_supportsOffline = O.Storage.isSupported();
+				_supportsOffline = O.Storage.isSupported;
 				
 				O.Log.info("Request manager loaded in " + (O.App.isOnline ? "online" : "offline") + " mode");
 				

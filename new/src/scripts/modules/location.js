@@ -28,6 +28,7 @@ OrangeUI.add('location', function(O) {
 					function (position) {
 						_coords = position.coords;
 						_timestamp = (new Date().getTime());
+						O.Log.info('Location retrieved');
 					}, 
 					
 					// next function is the error callback
@@ -36,7 +37,7 @@ OrangeUI.add('location', function(O) {
 						switch (error.code) 
 						{
 							case error.TIMEOUT:
-								O.Log.error('Timeout');
+								O.Log.error('Location services timeout');
 								break;
 							case error.POSITION_UNAVAILABLE:
 								O.Log.error('Position unavailable');
@@ -44,8 +45,8 @@ OrangeUI.add('location', function(O) {
 							case error.PERMISSION_DENIED:
 								O.Log.error('Please Enable Location Services');
 								break;
-							case error.UNKNOWN_ERROR:
-								O.Log.error('Unknown error');
+							default:
+								O.Log.error('Unknown location services error');
 								break;
 						}
 					}

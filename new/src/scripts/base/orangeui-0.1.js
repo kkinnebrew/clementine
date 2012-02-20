@@ -99,11 +99,11 @@
 	};
 	
 	OrangeUI.use = function() {
-	
-		var args = [].splice.call(arguments, 0),
+		
+		var args = Array.prototype.slice.call(arguments),
 			fn = args[args.length-1],
 			req = clone(args).splice(0, args.length-1)
-					
+										
 		// load modules
 		for (var i = 0, len = req.length; i < len; i++) {
 			OrangeUI.Loader.loadModule(req[i]);

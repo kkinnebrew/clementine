@@ -9,25 +9,81 @@
 jsUnity.run({
 
 	suiteName: "StorageTestSuite",
-
+	
 	setUp: function() {
+	
+		// W3C local storage spec item
+		var dummyStorage = {
+		
+			_items: {},
+		
+			setItem: function(key, value) {
+				this._items[key] = value;
+			},
+			
+			getItem: function(key) {
+				return this._items[key];
+			},
+			
+			removeItem: function(key) {
+				delete this._items[key];
+			},
+			
+			clear: function() {
+				this._items = {};
+			}
+		
+		}
+	
+		// load the storage module
+		this.Storage = clone(OrangeUI.Storage).init(dummyStorage);
 	
 	},
 	
 	tearDown: function() {
 	
+		// remove storage instance
+		delete this.Storage;
+	
 	},
 
-	testA: function() {
+	SetTest: function() {
+	
+		// test data
+		var data = {
+			name: "Kevin",
+			date: new Date()
+		}
+		
+		this.Storage.set("test-123", data);
 	
 		jsUnity.assertions.assertTrue(true);
 	
 	},
 	
-	testB: function() {
+	GetTest: function() {
+	
+		jsUnity.assertions.assertEquals(Math.PI, 22 / 7);
+	
+	},
+	
+	RemoveTest: function() {
+	
+		jsUnity.assertions.assertEquals(Math.PI, 22 / 7);
+	
+	},
+	
+	FlushExpiredTest: function() {
+	
+		jsUnity.assertions.assertEquals(Math.PI, 22 / 7);
+	
+	},
+	
+	FlushTest: function() {
 	
 		jsUnity.assertions.assertEquals(Math.PI, 22 / 7);
 	
 	}
+	
 
 });

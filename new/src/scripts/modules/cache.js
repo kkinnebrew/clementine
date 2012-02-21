@@ -2,130 +2,121 @@
  * cache.js | OrangeUI Framework 0.1
  * @date 12.21.2011
  * @author Kevin Kinnebrew
- * @dependencies log.js, 
+ * @dependencies log.js
  */
 
 OrangeUI.add('cache', function(O) {
 
 	O.Cache = (function() {
 	
-		var Cache = {},
+		var _activeProcess = null, // process id for current request
 		
-		// stores the cache object
-		_cache = $(window.applicationCache);
+		_poll = false, // configuration for polling
 		
+		_isOnline = false,
+		
+		Cache = {}, // setup empty cache object
+		
+		_EventTarget = { fire: function(event) { console.log("Fire: " + event) } },
+	
+		/**
+		 * halts the execution of a status request, before executing another
+		 */
+		_stop = function() {
+			if(_activeProcess != null) {
+				clearTimeout(_activeProcess); // kill a active process
+				_activeProcess = null;
+			}
+		},
+		
+		_statusCallback = function() {
+			
+			// halt current process
+			_stop();
+						
+			// store process id to prevent concurrent runs
+			_activeProcess = setTimeout(function() {
+			
+				// preliminary check
+				if (navigator.onLine) {
+				  
+				  // attempt to confirm connection by polling server
+				  $.ajax({
+				      async: true,
+				      cache: false,
+				      context: this,
+				      dataType: "json",
+				      error: function (req, status, ex) {
+				      	if(_isOnline === true) _EventTarget.fire("offline"); // connection is not online
+				      	_isOnline = false;
+				      },
+				      success: function (data, status, req) {
+				      	if(_isOnline === false) _EventTarget.fire("online"); // connection is online
+				      	_isOnline = true;
+				      },
+				      timeout: 3000,
+				      type: "GET",
+				      url: "js/ping.js"
+				  });
+				  
+				  // TODO: we may need to handle edge cases where $.ajax fails sliently
+				  
+				} else {
+				  
+					// give the browse time to override request
+					setTimeout(function() {
+						if(_isOnline === true) _EventTarget.fire("offline"); // fire offline event
+						_isOnline = false;
+					}, 100);
+
+				}
+			
+				_activeProcess = null; // clear process and prepare for new execution
 				
-		Cache.init = function () {
-		
-			// bind events
-			_cache.on("cached", 		$.proxy(this.onCached, this));
-			_cache.on("checking", 		$.proxy(this.onChecking, this));
-			_cache.on("downloading", 	$.proxy(this.onDownloading, this));
-			_cache.on("error", 			$.proxy(this.onError, this));
-			_cache.on("noupdate", 		$.proxy(this.onNoUpdate, this));
-			_cache.on("progress", 		$.proxy(this.onProgress, this));
-			_cache.on("updateready", 	$.proxy(this.onUpdateReady, this));
-			
-			// bind network events, check for IE compatibility
-			if (!window.addEventListener) {
-			    window.attachEvent("offline", $.proxy(this.checkNetworkStatus, this));  
-			    window.attachEvent("online", $.proxy(this.checkNetworkStatus, this)); 
-			}
-			else {
-			    window.addEventListener("offline", $.proxy(this.checkNetworkStatus, this), false);  
-			    window.addEventListener("online", $.proxy(this.checkNetworkStatus, this), false); 
-			}
-			
-			
-			Cache.checkNetworkStatusRepeat();
-			
-			if(O.App.isOnline) O.Log.info("Cache manager loaded in " + (O.App.isOnline ? "online" : "offline") + " mode");
-		
-		};
-		
-		Cache.checkNetworkStatus = function(repeat) {
-			
-			O.Log.info("Checking connection...");
-					
-			// repeat on an interval
-			//if(repeat) setTimeout($.proxy(this.checkNetworkStatusRepeat, this), 60 * 1000);
-			
-			// if the browser things we're online
-			if (navigator.onLine) {
-			
-			    $.ajaxSetup({
-			        async: true,
-			        cache: false,
-			        context: this,
-			        dataType: "json",
-			        error: function (req, status, ex) {
-			        	if(O.App.isOnline) O.App.goOffline();
-			        	return false;
-			        },
-			        success: function (data, status, req) {
-			        	if(!O.App.isOnline) O.App.goOnline();
-			        	return true;
-			        },
-			        timeout: 5000,
-			        type: "GET",
-			        url: "js/ping.js"
-			    });
-			    $.ajax();
-			    if(!O.App.isOnline) O.App.goOnline();
-			    return true;
-			}
-			else {
-				if(O.App.isOnline) O.App.goOffline();
-			    return false;
-			}
-			if(O.App.isOnline) O.App.goOffline();
-			return false;
-			
-		};
-		
-		Cache.checkNetworkStatusRepeat = function() {
-			this.checkNetworkStatus(true);
-		};
-		
-		
-		/* event handlers */
-		
-		Cache.onCached = function(e) {
-			O.Log.info("Cache: All resources for this web app have now been downloaded. You can run this application while not connected to the internet");
-		},
-		
-		Cache.onChecking = function() {
-			O.Log.info("Cache: Checking manifest");
-		},
-		
-		Cache.onDownloading = function() {
-			O.Log.info("Cache: Starting download of cached files");
-		},
-		
-		Cache.onError = function() {
-			O.Log.warn("Cache: There was an error in the manifest, downloading cached files or you're offline");
-		},
-		
-		Cache.onNoUpdate = function() {
-			O.Log.info("Cache: There was no update needed");
-		},
-		
-		Cache.onProgress = function() {
-			O.Log.info("Cache: Downloading cached files");
-		},
-		
-		Cache.onUpdateReady = function() {
 				
-			window.applicationCache.swapCache();
-			O.Log.info("Cache: Updated cache is ready");
+				if(_poll) {
+					setTimeout(_statusCallback, 10 * 1000);
+				}
+			
+			}, 100);
+			
+		},
+	
+		Cache = {
+	
+			// reference to the private event target object
+			EventTarget: _EventTarget,
 		
-			// the new cache will not be used until the page refreshes
-			window.location.reload(true);
+			/**
+			 * binds event listeners for offline mode and cache events
+			 */
+			init: function(poll) {
+						
+				// set polling
+				_poll = poll;
+				
+				// check for support
+				if (!window.addEventListener) {
+				    window.attachEvent("offline", this.checkNetworkStatus);  
+				    window.attachEvent("online", this.checkNetworkStatus); 
+				}
+				else {
+				    window.addEventListener("offline", this.checkNetworkStatus, false);  
+				    window.addEventListener("online", this.checkNetworkStatus, false); 
+				}
+			},
+			
+			/**
+			 * checks the current browser's network status
+			 */
+			checkNetworkStatus: function() {
+				_statusCallback();
+			}
 		
-		}
+		};
 		
 		return Cache;
 	
 	})();
 
-}, ['log', 'app']);
+}, ['log']);

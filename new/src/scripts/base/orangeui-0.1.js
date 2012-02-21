@@ -26,6 +26,7 @@
 	// stores application extension modules
 	OrangeUI.modules = {};
 	
+	// standard log messages for unit tests
 	jsUnity.log = function (s) {
 	    console.log("[TEST] " + s);
 	};

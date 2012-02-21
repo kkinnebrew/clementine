@@ -55,4 +55,4 @@ OrangeUI.add('wmsocial-feed', function(O) {
 	
 	});
 
-}, ['request']);
+});

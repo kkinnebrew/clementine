@@ -1,5 +1,5 @@
 /**
- * orange-commons-0.1.js | OrangeUI Commons 0.1
+ * orangeui-commons-0.1.js | OrangeUI Commons 0.1
  * @date 12.21.2011
  * @author Kevin Kinnebrew
  * @dependencies none
@@ -83,7 +83,7 @@
       def.initialize = base.prototype.initialize;
     }
 
-    var c = Class.create(def);
+    var c = OrangeUI.define(def);
     
     for (property in base.prototype) {
       if (!c.prototype[property]) {
@@ -271,24 +271,24 @@
 			},
 			
 			loadModule: function(name) {
-				
-				if (OrangeUI.modules[name]) {
+								
+				if (typeof OrangeUI._modules[name] !== 'undefined') {
 					return; // module already loaded
 				}
 			
-				if(modules[name] != undefined) {
+				if(_modules[name] != undefined) {
 					
 					// set as loaded
-					OrangeUI.modules[name] = true;
+					OrangeUI._modules[name] = true;
 												
 					// load dependencies
-					for(var i = 0, len = modules[name].req.length; i < len; i++) {
+					for(var i = 0, len = _modules[name].req.length; i < len; i++) {
 						if(modules[name].req[i] === name) continue;
 						this.loadModule(modules[name].req[i]);
 					}
 				
 					// load module
-					modules[name].fn.call(window, OrangeUI); // execute with OrangeUI as context
+					_modules[name].fn.call(window, OrangeUI); // execute with OrangeUI as context
 					
 					OrangeUI.Log.info('Module "' + name + '" loaded');
 				}
@@ -305,7 +305,7 @@
 			name = args[0],
 			fn = ( typeof args[1] === 'function' ) ? args[1] : null,
 			req = args[2];
-				
+														
 		OrangeUI.Loader.addModule(name, fn, req);
 	
 	};
@@ -717,7 +717,7 @@
 		_fetchLocation = function(success, failure) {
 				
 			if(!_isExpired()) { // if location already fetched and not expired, return cache location
-				success(_location);
+				if(typeof success !== 'undefined') success(_location);
 			} 
 			else if(_isOnline) { // if location is expired or not fetched, and we're online fetch it
 				
@@ -791,12 +791,17 @@
 		
 		var config = OrangeUI._config;
 	
+		// load module
+		for(var i = 0, length = config.required.length; i < length; i++) {
+			OrangeUI.Loader.loadModule(config.required[i]);
+		}
+	
 		// bind event listeners
 		OrangeUI.Cache.on('statusChange', function(e) {
 			if(e.data == 1) {
 				OrangeUI.Location.goOnline();
 				OrangeUI.Storage.goOnline();
-				if(config.getLocationOnLaunch) OrangeUI.Location.getLocation(function() {});
+				if(config.location) OrangeUI.Location.getLocation(function() {});
 				OrangeUI.Log.info("Application went online");
 			} else {
 				OrangeUI.Log.info("Application went offline");
@@ -809,8 +814,10 @@
 		OrangeUI.Cache.init(config.poll);
 		OrangeUI.Storage.init();
 				
-		// set root controller
-		var root = new config.rootController('body');
+		// call root function
+		if(config.onLoad) {
+			config.onLoad();
+		}
 	
 	};
 	

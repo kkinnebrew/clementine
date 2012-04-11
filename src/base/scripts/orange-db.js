@@ -17,7 +17,7 @@ Orange.add('db', function(O) {
 	
 	})();
 	
-	O.DataSource = O.define({
+	O.DB.DataSource = O.define({
 	
 		initialize: function() {
 		
@@ -37,7 +37,7 @@ Orange.add('db', function(O) {
 	
 	});
 
-	O.Collection = O.define({
+	O.DB.Collection = O.define({
 	
 		initialize: function() {
 		
@@ -52,6 +52,18 @@ Orange.add('db', function(O) {
 		},
 		
 		clearFilters: function() {
+		
+		},
+		
+		destroy: function() {
+				
+		}
+	
+	});
+	
+	O.DB.Item = O.define({
+	
+		initialize: function() {
 		
 		},
 		

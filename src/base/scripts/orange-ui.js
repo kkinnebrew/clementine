@@ -6,159 +6,241 @@
  * @description adds base controller elements
  */
 
-Orange.add('ui', function(O) {
+OrangeUI.add('ui', function(O) {
 
 	O.namespace('UI');
 	
-	// stores a registry of view controllers by name
-	O.UI._views = {};
+	/* private view handling */
+	O._views = {};
 	
-	O.UI.define = function(name, def) {
+	O.View.define = function(def) {
+		if(typeof def.name !== 'string') throw 'Class missing name';
 		return O.UI._views[name] = O.extend(O.ViewController, def);
 	};
 	
-	O.UI.extend = function(name, base, def) {
+	O.View.extend = function(base, def) {
+		if(typeof def.name !== 'string') throw 'Class missing name';
 		return O.UI._views[name] = O.extend(base, def);
 	};
 	
+	O.View.load = function(type, target) {
+		var view;
+		if(typeof (view = O._views[O._config + '.' + type]) !== 'undefined') {
+			return new view(target);
+		} else if(typeof (view = O._views[type]) !== 'undefined') {
+			return new view(target);
+		} else throw "Error: View not found";
+	};
 	
-	// template manager
-	O.TemplateManager = O.define({
 	
-		initialize: function() {
+	/* template management */
+	O.Template = (function() {
+	
+		var _templates = {},
 		
+		_fetch = function(name) {
+			return $.ajax({
+					async: false,
+			    contentType: "text/html; charset=utf-8",
+			    dataType: "text",
+			    timeout: 10000,
+			    url: "/" + name + ".html",
+			    success: function (html) {},
+			    error: function (html) {
+						throw "Error: template not found";
+			    }
+			}).responseText;
+		};
+	
+		return {
+		
+			init: function(templates) {
 			
+				// loads all templates on init
+				for(var i = 0, length = templates.length; i < length; i++) {
+					_store(_fetch(templates[i]));
+				}
+			
+			},
 		
-		},
+			load: function(name) {
+			
+				if(typeof this._templates[name] !== 'undefined') {
+					return $(this._templates[name]);
+				} else {
+					var template = _fetch(name);
+					return $(template);
+				}
+				
+				// returns a jQuery object containing the source of the view
+				// throws template not found exception
+				return $.ajax({
+				    contentType: "text/html; charset=utf-8",
+				    dataType: "text",
+				    timeout: 10000,
+				    url: "/" + name + ".html",
+				    success: function (html) {
+				      callback(html);
+				    },
+				    error: function (html) {
+							throw "Error: template not found";
+				    }
+				});
+			
+			}
 		
-		destroy: function() {
-		
-		}
+		};
 	
-	});
-
+	})();
+	
+	
+	/* base view controller */	
 	O.ViewController = O.define({
 	
-		name: '',
-		target: null,
-		parent: null,
-		_source: '',
+		name: 'view',
+		
 		_views: {},
-		_forms: {}
+		_forms: {},
+		
+		_eventTarget: new O.EventTarget(),
 	
-		initialize: function(container) {
-			
-			// setup target
-			var target = $(container).find('[data-view="' + name + '"');
-			
-			if(!target.length) return;
-						
-			this.target = target;
-			this.container = container;
+		initialize: function(target) {
 		
-			// get all descendent views with data-view tag
-			$(target).find('[data-view]').each(function() {
-								
-				// get view type
-				var name = $(this).attr('data-view');
+			// store target
+			this.target = $(target);
+			this.name = this.target.attr('data-name');
+			
+			// process child views
+			this.target.find('[data-view]').each(function() {
 				
-				// check if remote
-				var isRemote = $(this).attr('data-remote');
-				if(isRemote == 'true') {
-					// fetch template
-					var source = O.TemplateManager.load('name');
-					$(this).replaceWith(source);
-				}
+				var view = $(this); // store reference
 				
-				if(typeof O.UI._views[type] !== 'undefined') {
-					var view = new O.UI._views[type](this);
-					this._views.push(view);
+				if(!view.parents('[data-view]').not(this.target).size()) {
+					
+					// read attributes
+					var name = view.attr('data-name'),
+					 		type = view.attr('data-view'),
+					 		isRemote = view.attr('data-remote') == 'true';
+					
+					// if view is remote, load and replace in DOM
+					var template = O.Template.load(name);
+					view.replaceWith(template);
+					 		
+					// instaniate view
+					var child = O.View.load(type, view);
+					
+					// push view to view list
+					this._views[name] = child;
+
 				}
 				
 			});
 			
-			$(target).find('form').each(function() {
-				var form = new O.Form(this);
-				this._forms.push(form);
+			// process form views
+			this.target.find('form').each(function() {
+				
+				var form = $(this); // store reference
+				
+				if(!form.parents('[data-view]').not(this.target).size()) {
+					
+					// read attributes
+					var name = view.attr('name');
+					 		
+					// instaniate view
+					var child = O.Form(form);
+					
+					// push view to view list
+					this._forms[name] = child;
+
+				}
+				
 			});
-			
-			this.onLoad();
 		
 		},
 		
-		onLoad: function() {},
+		onLoad: function() {
 		
-		set: function(name, value) {
-		
-		},
-		
-		setData: function(obj) {
+			// load views
+			for(var name in this._views) {
+				this._views[name].onLoad();
+			}
 		
 		},
 		
 		getView: function(name) {
-		
+			if(typeof this._views[name] !== 'undefined') {
+				return this._views[name];
+			} throw 'Error: View "' + name + '" not found';
 		},
 		
 		getForm: function(name) {
-		
+			if(typeof this._forms[name] !== 'undefined') {
+				return this._forms[name];
+			} throw 'Error: Form "' + name + '" not found';
 		},
 		
-		// binds live data to view
-		bind: function(name, datasource) {
-		
-			this.datasources.push(datasource);
-			datasource.on('refresh', this.onRefresh);
-		
+		on: function(type, listener) {
+			return this._eventTarget.addEventListener(type, listener);
 		},
 		
-		onRefresh: function() {
-		
+		fire: function(event, data) {
+			return this._eventTarget.fire(event, data);
 		},
 		
-		on: function() {
+		onUnload: function() {
 		
-		},
-		
-		fire: function() {
+			// unload views
+			for(var name in this._views) {
+				this._views[name].onUnload();
+			}
 		
 		},
 		
 		destroy: function() {
 		
-			// call unLoad
-		
-			// disable forms
-			// hide views
-			// unbind events from views
-			// call onUnload for forms
-			// call onUnload for views
-			// destroy forms
 			// destroy views
+			for(var name in this._views) {
+				this._views[name].destroy();
+			}
+			
+			// destroy forms
+			for(var name in this._forms) {
+				this._forms[name].destroy();
+			}
 		
-			this.target = null;
 		}
 	
 	});
 	
-	
-	// wrapper for form elements
+	// a reference management wrapper for form elements
 	O.Form = O.define({
 	
-		initialize: function() {
+		_fields: {}
+	
+		initialize: function(target) {
+		
+			this.target = $(target);
+			this.name = this.target.attr('name');
+			
+			target.find('input select textarea').each(function() {
+				var name = $(this).attr('name');
+				this._fields[name] = $(this);
+			});
 		
 		},
 		
-		get: function() {
-		
+		get: function(name) {
+			if(typeof this._fields[name] !== 'undefined') {
+				return this._fields[name];
+			}
 		},
 		
 		destroy: function() {
-		
-			// unbind events on fields
-		
+			for(var name in _fields) {
+				delete this._fields[name];
+			}
 		}
 	
 	});
 
-}, ['db'], '0.1');
+}, [], '0.1');

@@ -91,7 +91,7 @@
       }
     }
     
-    c.superclass = base.prototype;
+    c.super = base.prototype;
 
     return c;
 	
@@ -167,7 +167,7 @@
 	
 	OrangeUI.EventTarget.prototype = {
 		
-		constructor: OrangeUI._eventTarget,
+		constructor: OrangeUI.EventTarget,
 		
 		addEventListener: function(type, listener) {
 			

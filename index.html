@@ -1,55 +1,94 @@
-<style type="text/css">
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Views Test</title>
 
-html, body {
+<script src="lib/jquery-1.7.2.min.js" type="text/javascript"></script>
+<script src="lib/json-template.js" type="text/javascript"></script>
+<script src="src/commons.js" type="text/javascript"></script>
+<script src="src/ui.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+
+Orange.add('test', function(O) {
+
+	O.namespace('Test');
 	
-}
+		
+	O.Test.TestViewController = O.View.define({
+		
+		type: 'ui-test-view',
+		
+		onLoad: function() {
+						
+			console.log("test view loaded");	
+						
+		},
+		
+		onUnload: function() {
+					
+			console.log("test view unloaded");
+		
+		}
+		
+	});
+	
+	O.Test.TestViewController = O.View.define({
+		
+		type: 'ui-form-view',
+		
+		onLoad: function() {
+						
+			console.log("test view loaded");
+			
+			var field = this.getForm('testForm').get('first_name').val('Kevin');
+			
+			console.log(field);
+									
+		},
+		
+		onUnload: function() {
+					
+			console.log("test view unloaded");
+		
+		}
+		
+	});
+	
+		
+}, ['ui'], '0.1');
 
-.ui-view {
-	height: 620px;
-	width: 320px;
-}
+$(document).ready(function() {
 
-.ui-navigation-bar {
-	height: 44px;
-	width: 100%;
-}
+	Orange.app('test', {
+		location: true,
+		poll: false,
+		required: ['test'],
+		baseUrl: '/orangeui',
+		onLoad: function(O) {
+			
+			var root = $('[data-view="ui-test-view"]');
+			var test = new O.Test.TestViewController(null, root);
+			console.log(test);
+		}
+	});
+	
+	Orange.init('test');
 
-.ui-table-view {
-	width: 100%;
-}
+});
 
-.ui-table-view li {
-	height: 44px;
-	width: 100%;
-}
+</script>
 
-.ui-toolbar {
-	height: 44px;
-	width: 100%;
-}
-
-</style>
+</head>
 
 <body>
 
-<div data-view="ui-view" class="ui-view">
+<div data-view="ui-test-view" data-name="test">
 
-	<div data-view="ui-navigation-bar" class="ui-navigation-bar"></div>
-	
-	<ul data-view="ui-table-view">
-	
-		<li>Hello</li>
-		<li>One Two Three</li>
-		<li>Goodbye</li>
-		<li>Three Four Five</li>
-		<li>Orange</li>
-		<li>Computer</li>
-		<li>Sandwich</li>
-	
-	</ul>
-	
-	<div data-view="ui-toolbar" class="ui-toolbar"></div>
+	<div data-view="ui-form-view" data-name="home" data-remote="true"></div>
 
 </div>
 
 </body>
+</html>

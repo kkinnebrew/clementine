@@ -1,9 +1,9 @@
 /**
- * orangeui-commons-0.1.js | OrangeUI Commons 0.1
+ * commons.js | OrangeUI Commons 0.1
  * @date 12.21.2011
  * @author Kevin Kinnebrew
  * @dependencies none
- * @description commons for orange-ui adding module support and HTML5 extentions
+ * @description commons for adding module support and HTML5 extentions
  */
  
 (function (window, document) {
@@ -43,6 +43,14 @@
 		} return newObj;
 	}
 	
+	window.cloneAttributes = function(source, destination) {
+		var destination = $(destination).eq(0);
+    var source = $(source)[0];
+    for (i = 0; i < source.attributes.length; i++) {
+        var a = source.attributes[i];
+        destination.attr(a.name, a.value);
+    }
+	}
 	
 	/* OOP */
 	
@@ -50,50 +58,50 @@
 	
 		var c;
 		 
-    if (def.initialize) {
-      c = function() {
-        this.initialize.apply(this, arguments);
-      };
-    } else {
-      c = function() { };
-    }
-
-    c.prototype = def;
-
-    c.extend = function(def) { 
-      return Class.extend(this, def);
-    };
-    
-    c.prototype.loadProperties = function(defaults, user) {
-
-      this.properties = defaults;
-      for (key in user) {
-        this.properties[key] = user[key];
-      }
-
-    };
-
-    return c;
+	    if (def.initialize) {
+	      c = function() {
+	        this.initialize.apply(this, arguments);
+	      };
+	    } else {
+	      c = function() { };
+	    }
 	
+	    c.prototype = def;
+	
+	    c.extend = function(def) { 
+	      return Class.extend(this, def);
+	    };
+	    
+	    c.prototype.loadProperties = function(defaults, user) {
+	
+	      this.properties = defaults;
+	      for (key in user) {
+	        this.properties[key] = user[key];
+	      }
+	
+	    };
+	
+	    return c;
+		
 	};
 	
 	OrangeUI.extend = function(base, def) {
 	
 		if (!def.initialize) {
-      def.initialize = base.prototype.initialize;
-    }
-
-    var c = OrangeUI.define(def);
-    
-    for (property in base.prototype) {
-      if (!c.prototype[property]) {
-        c.prototype[property] = base.prototype[property];
-      }
-    }
-    
-    c.super = base.prototype;
-
-    return c;
+	      def.initialize = base.prototype.initialize;
+	    }
+	
+	    var c = OrangeUI.define(def);
+	    
+	    for (property in base.prototype) {
+	      if (!c.prototype[property]) {
+	        c.prototype[property] = base.prototype[property];
+	      }
+	    }
+	    	    
+	    c.super = base.prototype;
+	
+	    return c;
 	
 	};
 	
@@ -161,68 +169,74 @@
 	
 	/* Event Handling */
 	
-	OrangeUI.EventTarget = function() {
-		this._listeners = {};
+	var Event = function(type, currentTarget, target, data) {
+		this.bubbles = true;
+		this.type = type;
+		this.currentTarget = currentTarget;
+		this.target = target;
+		this.data = data;
 	};
 	
-	OrangeUI.EventTarget.prototype = {
+	Event.prototype.constructor = Event;
+	
+	Event.prototype.stopPropagation = function() {
+		this.bubbles = false;
+	};
+	
+	var EventTarget = function(parent, self) {
+		this._listeners = {};
+		this._parent = parent;
+		this._self = self;
+	};
+	
+	EventTarget.prototype.constructor = EventTarget;
+	
+	EventTarget.prototype.on = function(ev, call) {
+		if (typeof this._listeners[ev] === 'undefined'){
+			this._listeners[ev] = [];
+		}
+		this._listeners[ev].push(call);
+	};
+	
+	EventTarget.prototype.fire = function(ev, data) {
+
+		var parent = this._parent;
 		
-		constructor: OrangeUI.EventTarget,
+		if (typeof ev === 'string') ev = new Event(ev, this._self, this._self, data);
+		if (typeof ev.type !== 'string') throw "Error: Invalid 'type' when firing event";
 		
-		addEventListener: function(type, listener) {
-			
-			if (typeof this._listeners[type] == "undefined"){
-				this._listeners[type] = [];
+		if (this._listeners[ev.type] instanceof Array) {
+			var listeners = this._listeners[ev.type];
+			for (var i = 0, len = listeners.length; i < len; i++) listeners[i].call(this, ev);
+		}
+		if (parent != null && parent._eventTarget instanceof EventTarget && ev.bubbles) {
+			ev.currentTarget = this._parent;
+			parent._eventTarget.fire.call(parent._eventTarget, ev, data);
+		}
+
+	};
+	
+	EventTarget.prototype.detach = function(ev, call) {
+
+		if (this._listeners[ev] instanceof Array) {
+			var listeners = this._listeners[ev];
+			for (var i = 0, len = listeners.length; i < len; i++) {
+				if (typeof call !== 'undefined' && listeners[i] === call) {
+					listeners.splice(i, 1);
+					break;
+				} else listeners.splice(i, 1);
 			}
-			
-			this._listeners[type].push(listener);
-			
-		},
-		
-		fire: function(event, data) {
-			
-			if (typeof event == "string"){
-				event = { type: event };
-			}
-			if (!event.target){
-				event.target = this;
-			}
-			
-			if (!event.type){
-				throw "Error: Event object missing 'type' property";
-			}
-			
-			if(typeof data !== 'undefined') {
-				event.data = data;
-			}
-			
-			if (this._listeners[event.type] instanceof Array){
-				var listeners = this._listeners[event.type];
-				for (var i=0, len=listeners.length; i < len; i++){
-					listeners[i].call(this, event);
-				}
-			}
-			
-		},
-		
-		removeEventListener: function(type, listener) {
-			
-			if (this._listeners[type] instanceof Array){
-				var listeners = this._listeners[type];
-				for (var i=0, len=listeners.length; i < len; i++){
-					if (listeners[i] === listener){
-						listeners.splice(i, 1);
-						break;
-					}
-				}
-			}
-			
+		} else if (typeof ev === 'undefined') {
+			this._listeners = {};
 		}
 		
 	};
+		
+	OrangeUI.EventTarget = EventTarget;
 	
-	OrangeUI._target = new OrangeUI.EventTarget();
 	
+	OrangeUI._eventTarget = new OrangeUI.EventTarget(null, OrangeUI)
+		
 	var _bindEvent = function(obj, evt, fn) {
 	
 		if(obj.addEventListener) {
@@ -283,8 +297,8 @@
 												
 					// load dependencies
 					for(var i = 0, len = _modules[name].req.length; i < len; i++) {
-						if(modules[name].req[i] === name) continue;
-						this.loadModule(modules[name].req[i]);
+						if(_modules[name].req[i] === name) continue;
+						this.loadModule(_modules[name].req[i]);
 					}
 				
 					// load module
@@ -298,6 +312,9 @@
 		};
 	
 	})();
+	
+	
+	/* Module Handlers */
 	
 	OrangeUI.add = function() {
 	
@@ -341,9 +358,46 @@
 		OrangeUI.Log.info('Added application ' + name);
 	};
 	
+	OrangeUI.init = function(name) {
+	
+		var config = {}, name = name.replace(keyFilterRegex);
+	
+		if(OrangeUI._apps[name] != null) {
+			config = OrangeUI._apps[name];
+		}
+		
+		// load module
+		for(var i = 0, len = config.required.length; i < len; i++) {
+			OrangeUI.Loader.loadModule(config.required[i]);
+		}
+	
+		// bind event listeners
+		OrangeUI.Cache.on('statusChange', function(e) {
+			if(e.data == 1) {
+				OrangeUI.Location.goOnline();
+				OrangeUI.Storage.goOnline();
+				if(config.location) OrangeUI.Location.getLocation(function() {});
+				OrangeUI.Log.info("Application went online");
+			} else {
+				OrangeUI.Log.info("Application went offline");
+				OrangeUI.Location.goOffline();
+				OrangeUI.Storage.goOffline();
+			}
+		});
+		
+		// start modules
+		OrangeUI.Cache.init(config.poll);
+		OrangeUI.Storage.init();
+				
+		// call root function
+		if(config.onLoad) {
+			config.onLoad.call(window, OrangeUI);
+		}
+	
+	};
+	
 	
 	/* Request Handlers */
-	
 	var _request = (function() {
 	
 		var XMLHttpRequests = [
@@ -398,14 +452,13 @@
 	})();
 	
 	
-	/* Application Cache */
-		
+	/* Application Cache */		
 	OrangeUI.Cache = (function() {
 		
 		var _activeProcess = null,
 		_poll = false, // whether or not to poll
 		_isOnline = false, // if the connection is live
-		_isLoaded = false
+		_isLoaded = false,
 						
 		_stop = function() {
 			if(_activeProcess != null) {
@@ -497,10 +550,10 @@
 			OrangeUI.Log.info("Cache: Updated cache has been loaded and is ready");
 			window.location.reload(true);
 		},
-		
-		_target = new OrangeUI.EventTarget();
+						
+		_target = new OrangeUI.EventTarget(null, Cache),
 				
-		return {
+		Cache = {
 			
 			init: function (poll) {
 				
@@ -527,7 +580,7 @@
 			},
 			
 			on: function(event, callback) {
-				_target.addEventListener(event, callback);
+				_target.on(event, callback);
 			},
 			
 			isOnline: function() {
@@ -535,14 +588,13 @@
 			}
 		
 		};
+		
+		return Cache;
 	
 	})();
-	
-	OrangeUI.Cache.prototype = OrangeUI.EventTarget;
-	
+		
 	
 	/* Local Storage */
-	
 	OrangeUI.Storage = (function() {
 	
 		var _isOnline = false,
@@ -706,7 +758,6 @@
 	
 	
 	/* Geolocation */
-	
 	OrangeUI.Location = (function() {
 	
 		var _location = null, // stores most recent location
@@ -778,50 +829,9 @@
 		
 		};
 	
-	})();
-
-
-	/* Application Initializer */
+	})();	
 	
-	OrangeUI.init = function(app) {
-	
-		if(OrangeUI._apps[app] != null) {
-			OrangeUI._config = OrangeUI._apps[app];
-		}
-		
-		var config = OrangeUI._config;
-	
-		// load module
-		for(var i = 0, length = config.required.length; i < length; i++) {
-			OrangeUI.Loader.loadModule(config.required[i]);
-		}
-	
-		// bind event listeners
-		OrangeUI.Cache.on('statusChange', function(e) {
-			if(e.data == 1) {
-				OrangeUI.Location.goOnline();
-				OrangeUI.Storage.goOnline();
-				if(config.location) OrangeUI.Location.getLocation(function() {});
-				OrangeUI.Log.info("Application went online");
-			} else {
-				OrangeUI.Log.info("Application went offline");
-				OrangeUI.Location.goOffline();
-				OrangeUI.Storage.goOffline();
-			}
-		});
-		
-		// start modules
-		OrangeUI.Cache.init(config.poll);
-		OrangeUI.Storage.init();
-				
-		// call root function
-		if(config.onLoad) {
-			config.onLoad();
-		}
-	
-	};
 	
 	window.Orange = OrangeUI;	
-
 
 })(this, this.document);

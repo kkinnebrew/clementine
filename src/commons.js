@@ -99,7 +99,7 @@
 	      }
 	    }
 	    	    
-	    c.super = base.prototype;
+	    c.prototype.super = base.prototype;
 	
 	    return c;
 	

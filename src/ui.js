@@ -58,6 +58,7 @@ Orange.add('ui', function(O) {
 			
 			this._views = {};
 			this._forms = {};
+			this._elements = {};
 			this._eventTarget = new O.EventTarget(parent, this);
 			
 			var viewList = [];
@@ -79,7 +80,7 @@ Orange.add('ui', function(O) {
 				 		path = view.attr('data-template');
 				 						
 				if (isRemote) {
-					var source = O.TemplateManager.load(path);
+					var source = O.TemplateManager.load('templates/' + path);
 					view.html($(source).html());
 					cloneAttributes(source, view);
 					view.removeAttr('data-remote');
@@ -107,6 +108,37 @@ Orange.add('ui', function(O) {
 						name = form.attr('name'),
 						child = new O.Form(form);
 				this._forms[name] = child;
+			}
+			
+			var elementList = [];
+					
+			this.target.find('[data-element]').each(function() {
+				var count = 0, parent = $(this).parent().not(that.target);
+				while (parent.length != 0) {
+					if ($(parent).not('[data-view]').length === 0) count++;
+					parent = $(parent).parent().not(that.target);
+				}
+				if (count === 0) elementList.push(this);
+			});
+						
+			for(var i=0, len = elementList.length; i < len; i++) {
+				var el = $(elementList[i]),
+						name = el.attr('data-name'),
+				 		type = el.attr('data-element'),
+				 		isRemote = el.attr('data-template').length > 0,
+				 		path = el.attr('data-template');
+				 						
+				if (isRemote) {
+					var source = O.TemplateManager.load('elements/' + path);
+					el.html($(source).html());
+					cloneAttributes(source, el);
+					el.removeAttr('data-template');
+				}
+														 		
+				var c = O.Element.load(type);
+				var child = new c(this, el);
+				
+				that._elements[name] = child;
 			}
 						
 			this.target.addClass(this.type);
@@ -143,6 +175,9 @@ Orange.add('ui', function(O) {
 			for (var name in this._views) {
 				this._views[name].onLoad();
 			}
+			for (var name in this._elements) {
+				this._elements[name].onLoad();
+			}
 		},
 		
 		onUnload: function() {
@@ -165,10 +200,75 @@ Orange.add('ui', function(O) {
 	
 	/* element handling */
 	
-	O.Element = O.define({
+	O.Element = (function() {
 	
-		initialize: function() {
+		var _elements = {};
 		
+		return {
+		
+			define: function(def) {
+				var c = O.extend(O.ElementController, def), type = def.type;
+				if(typeof type === 'undefined') throw "Error: Class not named";
+				return _elements[type] = c;
+			},
+			
+			extend: function(base, def) {
+				var c = O.extend(base, def), type = def.type;
+				if(typeof type === 'undefined') throw "Error: Class not named";
+				return _elements[type] = c;
+			},
+			
+			load: function(name) {
+				var el;
+				if (name === 'ui-element') {
+					return O.ElementController;
+				}
+				else if (typeof (el = _elements[name]) !== 'undefined') {
+					return el;
+				} else throw "Error: Element '" + name + "' not found";
+			}
+		
+		};
+	
+	})();
+	
+	O.ElementController = O.define({
+	
+		type: 'ui-element',
+	
+		initialize: function(parent, target) {
+		
+			var that = this;
+					
+			this.source = target;
+			this.data = {};
+			this.target = $(target);
+			this.name = this.target.attr('data-name');
+			
+			if (this.target.length === 0) throw 'Invalid view source';
+		
+		},
+		
+		onLoad: function() {
+		
+			this.data = { name: 'Kevin', food: [{ name: "Apple" }, { name: "Orange" }] };
+			this.processTemplate();
+			
+		},
+		
+		processTemplate: function() {
+		
+			// process source
+			var source = this.source.html(),
+			template = new jsontemplate.Template(source);
+			var output = '';
+			try {
+				output = template.expand(this.data);
+			} catch(e) {
+				output = source.replace(/{[^)]*}/, '[undefined]');
+			}
+			this.target.html(output);
+			
 		},
 		
 		destroy: function() {
@@ -221,7 +321,7 @@ Orange.add('ui', function(O) {
 		    contentType: "text/html; charset=utf-8",
 		    dataType: "text",
 		    timeout: 10000,
-		    url: "templates/" + path,
+		    url: path,
 		    success: function() {},
 		    error: function() {
 					throw "Error: template not found";

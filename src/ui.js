@@ -60,46 +60,57 @@ Orange.add('ui', function(O) {
 			this._forms = {};
 			this._eventTarget = new O.EventTarget(parent, this);
 			
-			this.target.find('[data-view]').each(function() {
-
-				var view = $(this);
-
-				if (!view.parent('[data-view]').not(that.target).size()) {
-											
-					var name = view.attr('data-name'),
-					 		type = view.attr('data-view'),
-					 		isRemote = view.attr('data-remote') == 'true';
-					
-					if (isRemote) {
-						var source = O.TemplateManager.load(name);
-						view.html($(source).html());
-						cloneAttributes(source, view);
-						view.removeAttr('data-remote');
-					}
-															 		
-					var c = O.View.load(type);
-					var child = new c(target, view);
-					
-					that._views[name] = child;
-				}
-				
-			});
+			var viewList = [];
 			
-			this.target.find('form').each(function() {
-				var form = $(this);
-				if (!form.parent('[data-view]').not(that.target).size()) {
-					var name = form.attr('name'),
-							child = new O.Form(form);
-					that._forms[name] = child;
+			this.target.find('[data-view]').each(function() {
+				var count = 0, parent = $(this).parent().not(that.target);
+				while (parent.length != 0) {
+					parent = $(parent).parent().not(that.target);
+					if ($(parent).not('[data-view]').length === 0) count++;
 				}
+				if (count === 0) viewList.push(this);
 			});
 						
+			for(var i=0, len = viewList.length; i < len; i++) {
+				var view = $(viewList[i]),
+						name = view.attr('data-name'),
+				 		type = view.attr('data-view'),
+				 		isRemote = view.attr('data-template').length > 0,
+				 		path = view.attr('data-template');
+				
+				if (isRemote) {
+					var source = O.TemplateManager.load(path);
+					view.html($(source).html());
+					cloneAttributes(source, view);
+					view.removeAttr('data-remote');
+				}
+														 		
+				var c = O.View.load(type);
+				var child = new c(target, view);
+				
+				that._views[name] = child;
+			}
+			
+			var formList = [];
+					
+			this.target.find('form').each(function() {
+				var count = 0, parent = $(this).parent().not(that.target);
+				while (parent.length != 0) {
+					if ($(parent).not('[data-view]').length === 0) count++;
+					parent = $(parent).parent().not(that.target);
+				}
+				if (count === 0) formList.push(this);
+			});
+						
+			for(var i=0, len = formList.length; i < len; i++) {
+				var form = $(formList[i]),
+						name = form.attr('name'),
+						child = new O.Form(form);
+				this._forms[name] = child;
+			}
+						
 			this.target.addClass(this.type);
-			this.target.removeAttr('data-name');
-			this.target.removeAttr('data-view');
-			
-			this.onLoad();
-			
+						
 			console.log("[INFO] Initialized view '" + this.name + "'");
 		
 		},
@@ -127,6 +138,8 @@ Orange.add('ui', function(O) {
 		},
 		
 		onLoad: function() {
+			this.target.removeAttr('data-name');
+			this.target.removeAttr('data-view');
 			for (var name in this._views) {
 				this._views[name].onLoad();
 			}
@@ -202,13 +215,13 @@ Orange.add('ui', function(O) {
 		
 		var _templates = {},
 		
-		_fetch = function(name) {
+		_fetch = function(path) {
 			return $.ajax({
 				async: false,
 		    contentType: "text/html; charset=utf-8",
 		    dataType: "text",
 		    timeout: 10000,
-		    url: "templates/" + name + ".html",
+		    url: "templates/" + path,
 		    success: function() {},
 		    error: function() {
 					throw "Error: template not found";
@@ -218,11 +231,11 @@ Orange.add('ui', function(O) {
 		
 		return {
 		
-			load: function(name) {
-				if (typeof _templates[name] !== 'undefined') {
-					return _templates[name];
+			load: function(path) {
+				if (typeof _templates[path] !== 'undefined') {
+					return _templates[path];
 				} else {
-					return _fetch(name);
+					return _fetch(path);
 				}				
 			}
 		

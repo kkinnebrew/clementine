@@ -21,36 +21,40 @@ Orange.add('test', function(O) {
 		type: 'ui-test-view',
 		
 		onLoad: function() {
-						
-			console.log("test view loaded");	
-						
-		},
-		
-		onUnload: function() {
-					
-			console.log("test view unloaded");
-		
-		}
-		
-	});
-	
-	O.Test.TestViewController = O.View.define({
-		
-		type: 'ui-form-view',
-		
-		onLoad: function() {
-						
-			console.log("test view loaded");
 			
-			var field = this.getForm('testForm').get('first_name').val('Kevin');
-			
-			console.log(field);
+			for (var name in this._views) {
+				this._views[name].onLoad();
+			}
 									
 		},
 		
 		onUnload: function() {
 					
-			console.log("test view unloaded");
+		
+		}
+		
+	});
+	
+	O.Test.FormViewController = O.View.define({
+		
+		type: 'ui-form-view',
+		
+		onLoad: function() {
+			
+			for (var name in this._views) {
+				this._views[name].onLoad();
+			}
+			
+			this.getForm('testForm').get('first_name').val('Kevin');
+			this.getForm('testForm').get('last_name').val('Kinnebrew');
+			
+			
+												
+		},
+		
+		onUnload: function() {
+					
+			//console.log("home view unloaded");
 		
 		}
 		
@@ -66,12 +70,8 @@ $(document).ready(function() {
 		poll: false,
 		required: ['test'],
 		baseUrl: '/orangeui',
-		onLoad: function(O) {
-			
-			var root = $('[data-view="ui-test-view"]');
-			var test = new O.Test.TestViewController(null, root);
-			console.log(test);
-		}
+		namespace: 'Test',
+		rootView: 'TestViewController'
 	});
 	
 	Orange.init('test');
@@ -84,9 +84,9 @@ $(document).ready(function() {
 
 <body>
 
-<div data-view="ui-test-view" data-name="test">
+<div data-view="ui-test-view" data-name="test" data-root="true">
 
-	<div data-view="ui-form-view" data-name="home" data-remote="true"></div>
+	<div data-view="ui-form-view" data-name="home" data-template="home.html"></div>
 
 </div>
 

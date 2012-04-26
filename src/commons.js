@@ -390,8 +390,10 @@
 		OrangeUI.Storage.init();
 				
 		// call root function
-		if(config.onLoad) {
-			config.onLoad.call(window, OrangeUI);
+		if(typeof config.rootView === 'string') {
+			var root = $('[data-root="true"]');
+			var controller = new OrangeUI[config.namespace][config.rootView](null, root);
+			controller.onLoad();
 		}
 	
 	};

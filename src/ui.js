@@ -76,7 +76,7 @@ Orange.add('ui', function(O) {
 				var view = $(viewList[i]),
 						name = view.attr('data-name'),
 				 		type = view.attr('data-view'),
-				 		isRemote = view.attr('data-template').length > 0,
+				 		isRemote = (typeof view.attr('data-template') !== 'undefined') ? view.attr('data-template').length > 0 : false,
 				 		path = view.attr('data-template');
 				 						
 				if (isRemote) {
@@ -125,7 +125,7 @@ Orange.add('ui', function(O) {
 				var el = $(elementList[i]),
 						name = el.attr('data-name'),
 				 		type = el.attr('data-element'),
-				 		isRemote = el.attr('data-template').length > 0,
+				 		isRemote = (typeof el.attr('data-template') !== 'undefined') ? el.attr('data-template').length > 0 : false,
 				 		path = el.attr('data-template');
 				 						
 				if (isRemote) {
@@ -169,6 +169,10 @@ Orange.add('ui', function(O) {
 			return this._eventTarget.fire.apply(this._eventTarget, arguments);
 		},
 		
+		find: function(selector) {
+			return $(this.target).find(selector);
+		},
+		
 		onLoad: function() {
 			this.target.removeAttr('data-name');
 			this.target.removeAttr('data-view');
@@ -192,6 +196,9 @@ Orange.add('ui', function(O) {
 			}
 			for (var name in this._forms) {
 				this._forms[name].destroy();
+			}
+			for (var name in this._elements) {
+				this._elements[name].destroy();
 			}
 		}
 	
@@ -239,11 +246,17 @@ Orange.add('ui', function(O) {
 		initialize: function(parent, target) {
 		
 			var that = this;
+			if(typeof target === 'undefined') {
+				target = O.TemplateManager.load('src/elements/' + this.type + '.html');
+			}
 					
-			this.source = target;
+			this.source = (target.html) ? target.html() : target;
 			this.data = {};
 			this.target = $(target);
+			this.parent = parent;
 			this.name = this.target.attr('data-name');
+			
+			this.target.addClass(this.type);
 			
 			if (this.target.length === 0) throw 'Invalid view source';
 		
@@ -251,15 +264,16 @@ Orange.add('ui', function(O) {
 		
 		onLoad: function() {
 		
-			this.data = { name: 'Kevin', food: [{ name: "Apple" }, { name: "Orange" }] };
+			//this.data = { name: 'Kevin', food: [{ name: "Apple" }, { name: "Orange" }] };
 			this.processTemplate();
+			this.target.removeAttr('data-element');
 			
 		},
 		
 		processTemplate: function() {
 		
 			// process source
-			var source = this.source.html(),
+			var source = this.source;
 			template = new jsontemplate.Template(source);
 			var output = '';
 			try {
@@ -271,8 +285,19 @@ Orange.add('ui', function(O) {
 			
 		},
 		
-		destroy: function() {
+		setData: function(data) {
+			this.data = data;
+		},
 		
+		destroy: function() {
+			this.data = null;
+			this.source = null;
+			this.target = null;
+			this.name = null;
+			delete this.data;
+			delete this.source;
+			delete this.target;
+			delete this.name;
 		}
 	
 	});
@@ -304,7 +329,11 @@ Orange.add('ui', function(O) {
 			}
 		},
 		
-		destroy: function() {}
+		destroy: function() {
+			for (var name in this._fields) {
+				this._fields[name].detach();
+			}
+		}
 		
 	});
 	

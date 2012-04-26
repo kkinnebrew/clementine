@@ -34,21 +34,34 @@ Orange.add('ios', function(O) {
 		leftBtn: null,
 		rightBtn: null,
 		navBar: null,
+		viewStack: [],
+		
+		initialize: function() {
+			
+			// call parent
+			this.super.initialize.apply(this, arguments);
+		
+			// get name of default view
+			var defaultView = this.target.attr('data-default');
+
+			// remove views from DOM
+			for (var i in this._views) {
+				if (this._views[i].name !== defaultView) {
+					this._views[i].target.remove();
+				} else {
+					this.viewStack.push(this._views[i]);
+					this.activeView = this._views[i];
+				}
+			}
+		
+		},
 		
 		onLoad: function() {
 
-			for(var i in this._views) {
-				this._views[i].target.addClass('inactive');
-			}
-
-			// get active view
-			var defaultView = this.target.attr('data-default');
-			this.activeView = this.getView(defaultView);
-			
 			// setup navigation bar
 			this.navBar = $('<div class="ios-ui-navigation-bar"></div>');
 			this.target.prepend(this.navBar);
-			
+
 			// setup buttons
 			var leftViewBtn = this.activeView.find('.ios-ui-bar-button-item.left');
 			var rightViewBtn = this.activeView.find('.ios-ui-bar-button-item.right');
@@ -64,15 +77,18 @@ Orange.add('ios', function(O) {
 			}
 			
 			// push active view
-			this.activeView.target.addClass('active').removeClass('inactive');
+			this.activeView.target.addClass('active');
 			
+			// call parent
 			this.super.onLoad.call(this);
-						
+			
+			// clear attributes
 			this.target.removeAttr('data-default');
 			
-//			$('body').on('click', $.proxy(function() {
-//				this.pushView('second');
-//			}, this));
+			// TEMP
+			$('body').on('click', $.proxy(function() {
+				this.pushView('second');
+			}, this));
 			
 		},
 		
@@ -84,8 +100,10 @@ Orange.add('ios', function(O) {
 
 			// fetch view, exception handled in getView()
 			view = this.getView(view);
-			if(this.activeView.target[0] == view.target[0]) {
-				return;
+			for(var i in this.viewStack) {
+				if(this.viewStack[i].target[0] == view.target[0]) {
+					throw "Can't repush view controller";
+				}
 			}
 							
 			// get buttons
@@ -93,6 +111,7 @@ Orange.add('ios', function(O) {
 			var rightViewBtn = view.find('.ios-ui-bar-button-item.right');
 	
 			// hide existing buttons
+			// TO DO: swap to css
 			this.leftBtn.fadeOut(100, function() { $(this).remove(); });
 			this.rightBtn.fadeOut(100, function() { $(this).remove(); });
 		
@@ -117,13 +136,23 @@ Orange.add('ios', function(O) {
 			
 			// unload existing view
 			if (this.activeView.length != 0) {
-				activeView.target.removeClass('active').addClass('inactive');
+				activeView.target.removeClass('active').addClass('unloading');
 			}
+			
+			setTimeout($.proxy(function() {
+				activeView.target.removeClass('unloading').addClass('inactive');
+			}, this), 200);
 			
 			// append new view
 			this.activeView = view;
-			view.target.removeClass('inactive').addClass('active');
-			this.target.append(view);
+			view.target.addClass('preloaded');
+			this.target.append(view.target);
+			view.target.removeClass('preloaded').addClass('loading');
+			this.viewStack.push(view);
+			
+			setTimeout($.proxy(function() {
+				view.target.removeClass('loading').addClass('active');
+			}, this), 200)
 
 		},
 		

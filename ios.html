@@ -24,6 +24,31 @@ Orange.add('test', function(O) {
 
 	O.namespace('Test');
 	
+	O.Test.TestNavigationView = O.View.extend(O.iOS.UINavigationView, {
+	
+		type: 'test-navigation-view',
+	
+		onLoad: function() {
+		
+			this.super.onLoad.apply(this, arguments);
+			this.target.on('click', $.proxy(this.onClick, this));
+		
+		},
+		
+		onClick: function(e) {
+			if ($(e.target).hasClass('.left')) {
+				this.pushViewController('second');
+			} else if ($(e.target).hasClass('.')) {
+				this.popViewController();
+			}
+		},
+		
+		onUnload: function() {
+			this.super.onUnload.apply(this, arguments);
+		}
+	
+	});
+	
 }, ['ui', 'ios']);
 
 $(document).ready(function() {
@@ -78,14 +103,47 @@ body {
 	position: absolute;
 	top: 44px;
 	width: 100%;
+	opacity: .5;
 }
 
 .ios-ui-navigation-view > .ios-ui-view.active {
 	display: block;
+	-webkit-transform: translate(0);
+	-moz-transform: translate(0);
+	-o-transform: translate(0);
+	-ms-transform: translate(0);
 }
 
 .ios-ui-navigation-view > .ios-ui-view.inactive {
 	display: none;
+	-webkit-transform: translate(-100%);
+	-moz-transform: translate(-100%);
+	-o-transform: translate(-100%);
+	-ms-transform: translate(-100%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.preloaded {
+	display: none;
+	-webkit-transform: translate(100%);
+	-moz-transform: translate(100%);
+	-o-transform: translate(100%);
+	-ms-transform: translate(100%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.loading {
+	display: block;
+	-webkit-transform: translate(0);
+	-moz-transform: translate(0);
+	-o-transform: translate(0);
+	-ms-transform: translate(0);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.unloading {
+	display: block;
+	-webkit-transform: translate(-100%);
+	-moz-transform: translate(-100%);
+	-o-transform: translate(-100%);
+	-ms-transform: translate(-100%);
 }
 
 .ios-ui-navigation-view > .ios-ui-view .ios-ui-navigation-bar {
@@ -266,21 +324,21 @@ body {
 
 <body>
 
-<div data-view="ios-ui-navigation-view" data-name="main" data-root="true" data-default="first">
+<div data-view="test-navigation-view" data-name="main" data-root="true" data-default="first">
 
 	<div data-view="ios-ui-view" data-name="first" style="background-color: #F0F;">
 	
 		<div data-element="ios-ui-navigation-bar">
-		
-			<div class="ios-ui-bar-button-item left">Back</div>
-		
+				
 			<div class="title">First View</div>
 		
-			<div class="ios-ui-bar-button-item right">Forward</div>
+			<div class="ios-ui-bar-button-item right">Next</div>
 		
 		</div>
 		
-		<div data-view="ios-ui-table-view" data-name="myTable">
+		<p>First View</p>
+		
+<!--		<div data-view="ios-ui-table-view" data-name="myTable">
 		
 			<div class="scroll-view">
 			
@@ -331,7 +389,7 @@ body {
 			
 			</div>
 		
-		</div>
+		</div>-->
 	
 	</div>
 	
@@ -339,12 +397,10 @@ body {
 	
 		<div data-element="ios-ui-navigation-bar">
 	
-			<div class="ios-ui-bar-button-item left">Prev</div>
+			<div class="ios-ui-bar-button-item left">Back</div>
 			
 			<div class="title">Second View</div>
-		
-			<div class="ios-ui-bar-button-item right">Next</div>
-	
+			
 		</div>
 		
 		<p>Second View</p>

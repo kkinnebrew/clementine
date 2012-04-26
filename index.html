@@ -101,16 +101,27 @@ Orange.add('test', function(O) {
 
 $(document).ready(function() {
 
-	Orange.app('test', {
-		location: true,
-		poll: false,
-		required: ['test'],
-		baseUrl: '/orangeui',
-		namespace: 'Test',
-		rootView: 'ui-test-view'
-	});
+//	Orange.app('test', {
+//		location: true,
+//		poll: false,
+//		required: ['test'],
+//		baseUrl: '/orangeui',
+//		namespace: 'Test',
+//		rootView: 'ui-test-view'
+//	});
+//	
+//	Orange.init('test');
+
+	var test = {
+		link: $("#hello")
+	}
 	
-	Orange.init('test');
+	console.log(test);
+
+	var el = test.link.remove();
+	console.log(el);
+	
+	console.log(test);
 
 });
 
@@ -120,11 +131,13 @@ $(document).ready(function() {
 
 <body>
 
-<div data-view="ui-test-view" data-name="test" data-root="true">
+<!--<div data-view="ui-test-view" data-name="test" data-root="true">
 
 	<div data-view="ui-form-view" data-name="home" data-template="home.html"></div>
 
-</div>
+</div>-->
+
+<div id="hello">Hello</div>
 
 </body>
 </html>

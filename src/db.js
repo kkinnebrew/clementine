@@ -10,26 +10,54 @@ Orange.add('db', function(O) {
 
 	/* abstract data access */
 	
-	O.Model = O.define({
+	O.Model = (function() {
+	
+		var _models = {},
 		
-		initialize: function() {
+		Model = O.define({
 		
-		},
+			name: '',
+			def: {},
+			path: '',
+			filters: [],
 		
-		refresh: function() {
-		
-			// refetch data
+			initialize: function(name, def, path, filters) {
 			
-			// onSuccess, send event down the DOM
-			// any viewcontroller can listen for changes
+			},
 			
-		},
+			refresh: function() {
+			
+				// refetch data
 				
-		destroy: function() {
-		
-		}
+				// onSuccess, send event down the DOM
+				// any viewcontroller can listen for changes
+				
+			},
+					
+			destroy: function() {
 			
-	});
+			}
+		
+		});
+		
+		return {
+		
+			define: function(name, def, path, filters) {
+				if(typeof name === 'undefined' || typeof def === 'undefined') throw "Error: Model definition invalid";
+				var c = new Model(name, def, path, filters);
+				return _models[name] = c;
+			},
+			
+			get: function(name) {
+				var model;
+				if (typeof (model = _models[name]) !== 'undefined') {
+					return model;
+				} else throw "Error: Model '" + name + "' not found";
+			}
+		
+		};
+	
+	})();
 
 
 	/* data containers */

@@ -77,7 +77,7 @@ Orange.add('ui', function(O) {
 				 		type = view.attr('data-view'),
 				 		isRemote = view.attr('data-template').length > 0,
 				 		path = view.attr('data-template');
-				
+				 						
 				if (isRemote) {
 					var source = O.TemplateManager.load(path);
 					view.html($(source).html());
@@ -86,7 +86,7 @@ Orange.add('ui', function(O) {
 				}
 														 		
 				var c = O.View.load(type);
-				var child = new c(target, view);
+				var child = new c(this, view);
 				
 				that._views[name] = child;
 			}
@@ -111,12 +111,12 @@ Orange.add('ui', function(O) {
 						
 			this.target.addClass(this.type);
 						
-			console.log("[INFO] Initialized view '" + this.name + "'");
+			console.log("[INFO] View '" + this.name + "' of type '" + this.type + "' initialized");
 		
 		},
 		
 		getView: function(name) {
-			if (this._views[name] instanceof O.ViewController) return this._views[name];
+			if (typeof this._views[name] !== 'undefined') return this._views[name];
 			throw 'Error: View "' + name + '" not found';
 		},
 		
@@ -126,15 +126,15 @@ Orange.add('ui', function(O) {
 		},
 		
 		on: function() {
-			return this._eventTarget.on.apply(this, arguments);
+			return this._eventTarget.on.apply(this._eventTarget, arguments);
 		},
 		
 		detach: function() {
-			return this._eventTarget.detach.apply(this, arguments);
+			return this._eventTarget.detach.apply(this._eventTarget, arguments);
 		},
 		
 		fire: function() {
-			return this._eventTarget.fire.apply(this, arguments);
+			return this._eventTarget.fire.apply(this._eventTarget, arguments);
 		},
 		
 		onLoad: function() {

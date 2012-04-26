@@ -26,6 +26,16 @@ Orange.add('test', function(O) {
 				this._views[name].onLoad();
 			}
 									
+			this.getView('home').on('change', $.proxy(this.onChange, this));
+			
+			this.on('updated', function(e) {
+				console.log(e.data);
+			});
+			
+		},
+		
+		onChange: function(e) {
+			this.getView('home').getView('info').target.css('background-color', e.data);			
 		},
 		
 		onUnload: function() {
@@ -41,6 +51,8 @@ Orange.add('test', function(O) {
 		
 		onLoad: function() {
 			
+			var that = this;
+			
 			for (var name in this._views) {
 				this._views[name].onLoad();
 			}
@@ -48,7 +60,14 @@ Orange.add('test', function(O) {
 			this.getForm('testForm').get('first_name').val('Kevin');
 			this.getForm('testForm').get('last_name').val('Kinnebrew');
 			
-			
+			this.target.css('background-color', '#F00');
+						
+			this.on('updated', function(e) {
+				console.log("updated");
+			});
+			setTimeout(function() {
+				that.fire('change', '#F0F');
+			}, 2000)
 												
 		},
 		
@@ -56,6 +75,29 @@ Orange.add('test', function(O) {
 					
 			//console.log("home view unloaded");
 		
+		}
+		
+	});
+	
+	O.Test.InfoViewController = O.View.define({
+		
+		type: 'test-info-view',
+		
+		onLoad: function() {
+			
+			var that = this;
+			
+			for (var name in this._views) {
+				this._views[name].onLoad();
+			}
+			setTimeout(function() {
+				that.fire('updated', 'Andy');
+			}, 4000)
+												
+		},
+		
+		onUnload: function() {
+					
 		}
 		
 	});

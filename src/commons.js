@@ -169,70 +169,74 @@
 	
 	/* Event Handling */
 	
-	var Event = function(type, currentTarget, target, data) {
-		this.bubbles = true;
-		this.type = type;
-		this.currentTarget = currentTarget;
-		this.target = target;
-		this.data = data;
-	};
+	OrangeUI.Event = OrangeUI.define({
 	
-	Event.prototype.constructor = Event;
-	
-	Event.prototype.stopPropagation = function() {
+		initialize: function(type, currentTarget, target, data) {
+			this.bubbles = true;
+			this.type = type;
+			this.currentTarget = currentTarget;
+			this.target = target;
+			this.data = data;
+		},
+		
+		stopPropagation: function() {
 		this.bubbles = false;
-	};
-	
-	var EventTarget = function(parent, self) {
-		this._listeners = {};
-		this._parent = parent;
-		this._self = self;
-	};
-	
-	EventTarget.prototype.constructor = EventTarget;
-	
-	EventTarget.prototype.on = function(ev, call) {
-		if (typeof this._listeners[ev] === 'undefined'){
-			this._listeners[ev] = [];
 		}
-		this._listeners[ev].push(call);
-	};
 	
-	EventTarget.prototype.fire = function(ev, data) {
-
-		var parent = this._parent;
-		
-		if (typeof ev === 'string') ev = new Event(ev, this._self, this._self, data);
-		if (typeof ev.type !== 'string') throw "Error: Invalid 'type' when firing event";
-		
-		if (this._listeners[ev.type] instanceof Array) {
-			var listeners = this._listeners[ev.type];
-			for (var i = 0, len = listeners.length; i < len; i++) listeners[i].call(this, ev);
-		}
-		if (parent != null && parent._eventTarget instanceof EventTarget && ev.bubbles) {
-			ev.currentTarget = this._parent;
-			parent._eventTarget.fire.call(parent._eventTarget, ev, data);
-		}
-
-	};
+	});
 	
-	EventTarget.prototype.detach = function(ev, call) {
-
-		if (this._listeners[ev] instanceof Array) {
-			var listeners = this._listeners[ev];
-			for (var i = 0, len = listeners.length; i < len; i++) {
-				if (typeof call !== 'undefined' && listeners[i] === call) {
-					listeners.splice(i, 1);
-					break;
-				} else listeners.splice(i, 1);
-			}
-		} else if (typeof ev === 'undefined') {
+	OrangeUI.EventTarget = OrangeUI.define({
+	
+		initialize: function(parent, self) {
 			this._listeners = {};
+			this._parent = parent;
+			this._self = self;
+		},
+		
+		on: function(ev, call) {
+		
+			if (typeof this._listeners[ev] === 'undefined'){
+				this._listeners[ev] = [];
+			}
+			this._listeners[ev].push(call);
+		
+		},
+		
+		fire: function(ev, data) {
+			
+			var parent = this._parent;
+
+			if (typeof ev === 'string') ev = new OrangeUI.Event(ev, this._self, this._self, data);
+			if (typeof ev.type !== 'string') throw "Error: Invalid 'type' when firing event";
+			
+			if (this._listeners[ev.type] instanceof Array) {
+				var listeners = this._listeners[ev.type];
+				for (var i = 0, len = listeners.length; i < len; i++) listeners[i].call(this, ev);
+			}
+			if (parent != null && parent._eventTarget instanceof OrangeUI.EventTarget && ev.bubbles) {
+				ev.currentTarget = this._parent;
+				parent._eventTarget.fire.call(parent._eventTarget, ev, data);
+			}
+		
+		},
+		
+		detach: function(ev, call) {
+			
+			if (this._listeners[ev] instanceof Array) {
+				var listeners = this._listeners[ev];
+				for (var i = 0, len = listeners.length; i < len; i++) {
+					if (typeof call !== 'undefined' && listeners[i] === call) {
+						listeners.splice(i, 1);
+						break;
+					} else listeners.splice(i, 1);
+				}
+			} else if (typeof ev === 'undefined') {
+				this._listeners = {};
+			}
+			
 		}
-		
-	};
-		
-	OrangeUI.EventTarget = EventTarget;
+	
+	});
 	
 	
 	OrangeUI._eventTarget = new OrangeUI.EventTarget(null, OrangeUI)

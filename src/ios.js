@@ -78,8 +78,15 @@ Orange.add('ios', function(O) {
 			// push active view
 			this.activeView.target.addClass('active');
 			
-			// call parent
-			this._super();
+			// override parent
+			this.target.removeAttr('data-name');
+			this.target.removeAttr('data-view');
+			
+			this.activeView.onLoad();
+			
+			for (var name in this._elements) {
+				this._elements[name].onLoad();
+			}
 			
 			// clear attributes
 			this.target.removeAttr('data-default');
@@ -118,6 +125,14 @@ Orange.add('ios', function(O) {
 				}, this), duration);
 			}
 			
+			if (leftViewBtn.length == 0 && rightViewBtn.length == 0 && navBar.length == 0) {
+				this.navBar.addClass('hidden');
+				view.target.css('top', '0px');
+			} else {
+				this.navBar.removeClass('hidden');
+				view.target.css('top', '44px');
+			}
+			
 			var activeView = this.activeView;
 			
 			// unload existing view
@@ -129,6 +144,7 @@ Orange.add('ios', function(O) {
 			setTimeout($.proxy(function() {
 				activeView.target.addClass('preloaded').removeClass('unloading');
 				activeView.target.remove();
+				activeView.onUnload();
 			}, this), duration);
 			
 			// append new view
@@ -156,10 +172,12 @@ Orange.add('ios', function(O) {
 			// append new view
 			view.target.addClass('preloaded');
 			this.target.append(view.target);
-										
+			view.onLoad();
+			
 			// get buttons
 			var leftViewBtn = view.find('.ios-ui-bar-button-item.left');
 			var rightViewBtn = view.find('.ios-ui-bar-button-item.right');
+			var navBar = view.find('ios-ui-navigation-bar');
 	
 			// hide existing buttons
 			if(this.leftBtn != null) this.leftBtn.fadeOut(duration+100, function() { $(this).remove(); });
@@ -180,6 +198,14 @@ Orange.add('ios', function(O) {
 				setTimeout($.proxy(function() {
 					this.rightBtn.fadeIn(duration);
 				}, this), duration-100);
+			}
+			
+			if (leftViewBtn.length == 0 && rightViewBtn.length == 0 && navBar.length == 0) {
+				this.navBar.addClass('hidden');
+				view.target.css('top', '0px');
+			} else {
+				this.navBar.removeClass('hidden');
+				view.target.css('top', '44px');
 			}
 			
 			var activeView = this.activeView;
@@ -273,13 +299,21 @@ Orange.add('ios', function(O) {
 	O.iOS.UIScrollView = O.View.define({
 		
 		type: 'ios-ui-scroll-view',
-		
+				
 		onLoad: function() {
+
+			// wrap the view
+			this.target.wrapInner('<div class="scroll-view"></div>');
+		
+			// setup iscroll
+			this.myScroll = new iScroll(this.target.get(0));
 			this._super();
+									
 		},
 		
 		onUnload: function() {
 			this._super();
+			this.myScroll.destroy();
 		}
 			
 	});
@@ -289,14 +323,18 @@ Orange.add('ios', function(O) {
 		type: 'ios-ui-table-view',
 		
 		onLoad: function() {
-		
+						
+			// wrap the view
+			this.target.wrapInner('<div class="scroll-view"></div>');
+
 			// setup iscroll
 			this.myScroll = new iScroll(this.target.get(0));
 			this._super();
+			
 		},
 		
 		onRefresh: function() {
-		
+			this.myScroll.refresh();
 		},
 		
 		bindData: function(data) {

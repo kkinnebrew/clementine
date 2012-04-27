@@ -10,36 +10,35 @@ Orange.add('db', function(O) {
 
 	/* abstract data access */
 	
+	O.ModelDefinition = Class.create({
+	
+		initialize: function(name, def, path, filters) {
+		
+			this.name = name;
+			this.def = def;
+			this.path = path;
+			this.filters = filters;
+		
+		},
+		
+		get: function() {
+		
+		},
+		
+		set: function() {
+		
+		},
+		
+		delete: function() {
+		
+		}
+	
+	});
+	
 	O.Model = (function() {
 	
 		var _models = {},
-		
-		Model = O.define({
-		
-			name: '',
-			def: {},
-			path: '',
-			filters: [],
-		
-			initialize: function(name, def, path, filters) {
-			
-			},
-			
-			refresh: function() {
-			
-				// refetch data
 				
-				// onSuccess, send event down the DOM
-				// any viewcontroller can listen for changes
-				
-			},
-					
-			destroy: function() {
-			
-			}
-		
-		});
-		
 		return {
 		
 			define: function(name, def, path, filters) {

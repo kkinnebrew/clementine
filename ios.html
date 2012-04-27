@@ -51,6 +51,25 @@ Orange.add('test', function(O) {
 				this.popView();
 			}, this));
 			
+			var contacts = O.Model.Contact.get({ userId: 'kevin' }); // returns a collection
+			var user = O.Model.User.get('kevin'); // returns a item by id
+			
+			// subscribe to any model changes
+			O.Mode.Contact.on('change', function(e) {
+				// e.data is data that changed
+				// do something
+			});
+			
+			// subscribes to specific collection changes
+			contacts.on('change', function(e) {
+				// do something
+			});
+			
+			// subscribes to specific item changes
+			user.on('change', function(e) {
+				// do something
+			});
+			
 			console.log(O.Browser.browser + ' ' + O.Browser.os + ' ' + O.Browser.version);
 		},
 		

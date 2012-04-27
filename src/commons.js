@@ -53,58 +53,15 @@
 	}
 	
 	/* OOP */
-	
-	OrangeUI.define = function(def) {
-	
-		var c;
-		 
-	    if (def.initialize) {
-	      c = function() {
-	        this.initialize.apply(this, arguments);
-	      };
-	    } else {
-	      c = function() { };
-	    }
-	
-	    c.prototype = def;
-	
-	    c.extend = function(def) { 
-	      return Class.extend(this, def);
-	    };
-	    
-	    c.prototype.loadProperties = function(defaults, user) {
-	
-	      this.properties = defaults;
-	      for (key in user) {
-	        this.properties[key] = user[key];
-	      }
-	
-	    };
-	
-	    return c;
 		
+	OrangeUI.define = function(def) {
+		return Class.extend(def);
 	};
 	
 	OrangeUI.extend = function(base, def) {
-	
-		if (!def.initialize) {
-	      def.initialize = base.prototype.initialize;
-	    }
-	
-	    var c = OrangeUI.define(def);
-	    
-	    for (property in base.prototype) {
-	      if (!c.prototype[property]) {
-	        c.prototype[property] = base.prototype[property];
-	      }
-	    }
-	    	    
-	    c.prototype.super = base.prototype;
-	
-	    return c;
-	
+		return base.extend(def);
 	};
-	
+
 	
 	/* Logging */
 	
@@ -194,7 +151,7 @@
 		},
 		
 		on: function(ev, call) {
-		
+				
 			if (typeof this._listeners[ev] === 'undefined'){
 				this._listeners[ev] = [];
 			}

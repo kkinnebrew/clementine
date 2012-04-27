@@ -17,11 +17,11 @@ Orange.add('ios', function(O) {
 		type: 'ios-ui-view',
 
 		onLoad: function() {
-			this.super.onLoad.call(this);
+			this._super();
 		},
 		
 		onUnload: function() {
-			this.super.onLoad.call(this);
+			this._super();
 		}
 			
 	});
@@ -36,10 +36,9 @@ Orange.add('ios', function(O) {
 		navBar: null,
 		viewStack: [],
 		
-		initialize: function() {
-			
-			// call parent
-			this.super.initialize.apply(this, arguments);
+		initialize: function(parent, target) {
+
+			this._super(parent, target);
 		
 			// get name of default view
 			var defaultView = this.target.attr('data-default');
@@ -53,7 +52,7 @@ Orange.add('ios', function(O) {
 					this.activeView = this._views[i];
 				}
 			}
-		
+					
 		},
 		
 		onLoad: function() {
@@ -71,7 +70,7 @@ Orange.add('ios', function(O) {
 				this.leftBtn.appendTo(this.navBar);
 			}
 			
-			if(leftViewBtn.length != 0) {
+			if(rightViewBtn.length != 0) {
 				this.rightBtn = rightViewBtn.clone();
 				this.rightBtn.appendTo(this.navBar);
 			}
@@ -80,24 +79,72 @@ Orange.add('ios', function(O) {
 			this.activeView.target.addClass('active');
 			
 			// call parent
-			this.super.onLoad.call(this);
+			this._super();
 			
 			// clear attributes
 			this.target.removeAttr('data-default');
 			
-			// TEMP
-			$('body').on('click', $.proxy(function() {
-				this.pushView('second');
-			}, this));
-			
 		},
 		
 		popView: function() {
+			
+			var duration = 200;
+			
+			// get previous view		
+			var view = this.viewStack[this.viewStack.length-2];
+
+			// get buttons
+			var leftViewBtn = view.find('.ios-ui-bar-button-item.left');
+			var rightViewBtn = view.find('.ios-ui-bar-button-item.right');
+			
+			// hide existing buttons
+			if(this.leftBtn != null) this.leftBtn.fadeOut(duration+100, function() { $(this).remove(); });
+			if(this.rightBtn != null) this.rightBtn.fadeOut(duration+100, function() { $(this).remove(); });
 		
+			// add new buttons
+			if (leftViewBtn.length != 0) {
+				this.leftBtn = leftViewBtn.clone().hide();
+				this.leftBtn.appendTo(this.navBar);
+				setTimeout($.proxy(function() {
+					this.leftBtn.fadeIn(duration+100);
+				}, this), duration);
+			}
+			
+			if (rightViewBtn.length != 0) {
+				this.rightBtn = rightViewBtn.clone().hide();
+				this.rightBtn.appendTo(this.navBar);
+				setTimeout($.proxy(function() {
+					this.rightBtn.fadeIn(duration+100);
+				}, this), duration);
+			}
+			
+			var activeView = this.activeView;
+			
+			// unload existing view
+			if (this.activeView.length != 0) {
+				activeView.target.addClass('unloading').removeClass('active');
+				this.viewStack.pop();
+			}
+			
+			setTimeout($.proxy(function() {
+				activeView.target.addClass('preloaded').removeClass('unloading');
+				activeView.target.remove();
+			}, this), duration);
+			
+			// append new view
+			this.activeView = view;
+			view.target.addClass('loading').removeClass('inactive');
+			
+			setTimeout($.proxy(function() {
+				view.target.addClass('active').removeClass('loading');
+			}, this), duration);
+					
 		},
 		
 		pushView: function(view) {
-
+				
+			var duration = 200;
+						
 			// fetch view, exception handled in getView()
 			view = this.getView(view);
 			for(var i in this.viewStack) {
@@ -105,63 +152,120 @@ Orange.add('ios', function(O) {
 					throw "Can't repush view controller";
 				}
 			}
-							
+			
+			// append new view
+			view.target.addClass('preloaded');
+			this.target.append(view.target);
+										
 			// get buttons
 			var leftViewBtn = view.find('.ios-ui-bar-button-item.left');
 			var rightViewBtn = view.find('.ios-ui-bar-button-item.right');
 	
 			// hide existing buttons
-			// TO DO: swap to css
-			this.leftBtn.fadeOut(100, function() { $(this).remove(); });
-			this.rightBtn.fadeOut(100, function() { $(this).remove(); });
+			if(this.leftBtn != null) this.leftBtn.fadeOut(duration+100, function() { $(this).remove(); });
+			if(this.rightBtn != null) this.rightBtn.fadeOut(duration+100, function() { $(this).remove(); });
 		
 			// add new buttons
 			if (leftViewBtn.length != 0) {
 				this.leftBtn = leftViewBtn.clone().hide();
 				this.leftBtn.appendTo(this.navBar);
 				setTimeout($.proxy(function() {
-					this.leftBtn.fadeIn(100);
-				}, this), 100);
+					this.leftBtn.fadeIn(duration);
+				}, this), duration-100);
 			}
 			
 			if (rightViewBtn.length != 0) {
 				this.rightBtn = rightViewBtn.clone().hide();
 				this.rightBtn.appendTo(this.navBar);
 				setTimeout($.proxy(function() {
-					this.rightBtn.fadeIn(100);
-				}, this), 100);
+					this.rightBtn.fadeIn(duration);
+				}, this), duration-100);
 			}
 			
 			var activeView = this.activeView;
 			
 			// unload existing view
 			if (this.activeView.length != 0) {
-				activeView.target.removeClass('active').addClass('unloading');
+					activeView.target.addClass('inactivating').removeClass('active');
 			}
 			
 			setTimeout($.proxy(function() {
-				activeView.target.removeClass('unloading').addClass('inactive');
-			}, this), 200);
+				activeView.target.addClass('inactive').removeClass('inactivating');
+			}, this), duration);
 			
-			// append new view
 			this.activeView = view;
-			view.target.addClass('preloaded');
-			this.target.append(view.target);
-			view.target.removeClass('preloaded').addClass('loading');
+			view.target.addClass('loading').removeClass('preloaded');;
 			this.viewStack.push(view);
 			
 			setTimeout($.proxy(function() {
-				view.target.removeClass('loading').addClass('active');
-			}, this), 200)
-
+				view.target.addClass('active').removeClass('loading');
+			}, this), duration);
+				
 		},
 		
 		popToRootView: function() {
 		
+			var duration = 100;
+			
+			// clear view stack
+			for(var i = 1; i < this.viewStack.length-1; i++) {
+				this.viewStack[i].target.remove();
+			}
+						
+			// get root view		
+			var view = this.viewStack[0];
+
+			// get buttons
+			var leftViewBtn = view.find('.ios-ui-bar-button-item.left');
+			var rightViewBtn = view.find('.ios-ui-bar-button-item.right');
+			
+			// hide existing buttons
+			if(this.leftBtn != null) this.leftBtn.fadeOut(duration, function() { $(this).remove(); });
+			if(this.rightBtn != null) this.rightBtn.fadeOut(duration, function() { $(this).remove(); });
+		
+			// add new buttons
+			if (leftViewBtn.length != 0) {
+				this.leftBtn = leftViewBtn.clone().hide();
+				this.leftBtn.appendTo(this.navBar);
+				setTimeout($.proxy(function() {
+					this.leftBtn.fadeIn(duration);
+				}, this), duration);
+			}
+			
+			if (rightViewBtn.length != 0) {
+				this.rightBtn = rightViewBtn.clone().hide();
+				this.rightBtn.appendTo(this.navBar);
+				setTimeout($.proxy(function() {
+					this.rightBtn.fadeIn(duration);
+				}, this), duration);
+			}
+			
+			var activeView = this.activeView;
+			
+			// unload existing view
+			if (this.activeView.length != 0) {
+				activeView.target.addClass('unloading');
+				this.viewStack.pop();
+			}
+			
+			setTimeout($.proxy(function() {
+				activeView.target.addClass('preloaded').removeClass('unloading').removeClass('active');
+				activeView.target.remove();
+			}, this), duration);
+			
+			// append new view
+			this.activeView = view;
+			view.target.addClass('loading');
+			
+			setTimeout($.proxy(function() {
+				view.target.addClass('active').removeClass('loading').removeClass('inactive');
+				this.viewStack = [this.viewStack[0]];
+			}, this), duration);
+		
 		},
 		
 		onUnload: function() {
-			this.super.onLoad.call(this);
+			this._super();
 		}
 			
 	});
@@ -171,11 +275,11 @@ Orange.add('ios', function(O) {
 		type: 'ios-ui-scroll-view',
 		
 		onLoad: function() {
-			this.super.onLoad.call(this);
+			this._super();
 		},
 		
 		onUnload: function() {
-			this.super.onLoad.call(this);
+			this._super();
 		}
 			
 	});
@@ -188,7 +292,7 @@ Orange.add('ios', function(O) {
 		
 			// setup iscroll
 			this.myScroll = new iScroll(this.target.get(0));
-			this.super.onLoad.call(this);
+			this._super();
 		},
 		
 		onRefresh: function() {
@@ -200,7 +304,7 @@ Orange.add('ios', function(O) {
 		},
 		
 		onUnload: function() {
-			this.super.onLoad.call(this);
+			this._super();
 			this.myScroll.destroy();
 		}
 			
@@ -208,8 +312,10 @@ Orange.add('ios', function(O) {
 	
 	O.iOS.UIModalView = O.View.define({
 		
+		type: 'ios-ui-modal-view',
+		
 		onLoad: function() {
-			this.super.onLoad.call(this);
+			this._super();
 		},
 		
 		activateModalView: function() {
@@ -221,15 +327,17 @@ Orange.add('ios', function(O) {
 		},
 		
 		onUnload: function() {
-			this.super.onLoad.call(this);
+			this._super();
 		}
 			
 	});
 	
 	O.iOS.UIFlipView = O.View.define({
 		
+		type: 'ios-ui-flip-view',
+				
 		onLoad: function() {
-			this.super.onLoad.call(this);
+			this._super();
 		},
 		
 		flipView: function() {
@@ -237,7 +345,7 @@ Orange.add('ios', function(O) {
 		},
 		
 		onUnload: function() {
-			this.super.onLoad.call(this);
+			this._super();
 		}
 			
 	});
@@ -271,11 +379,11 @@ Orange.add('ios', function(O) {
 		type: 'ios-ui-segmented-control',
 	
 		onLoad: function() {
-			this.super.onLoad.call(this);
+			this._super();
 		},
 		
 		onUnload: function() {
-			this.super.onLoad.call(this);
+			this._super();
 		}
 	
 	});
@@ -285,11 +393,11 @@ Orange.add('ios', function(O) {
 		type: 'ios-ui-navigation-bar',
 	
 		onLoad: function() {
-			this.super.onLoad.call(this);
+			this._super();
 		},
 		
 		onUnload: function() {
-			this.super.onLoad.call(this);
+			this._super();
 		}
 	
 	});

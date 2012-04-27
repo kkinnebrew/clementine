@@ -8,6 +8,7 @@
 <script src="lib/json-template.js" type="text/javascript"></script>
 <script src="lib/iscroll.js" type="text/javascript"></script>
 
+<script src="src/oop.js" type="text/javascript"></script>
 <script src="src/commons.js" type="text/javascript"></script>
 <script src="src/ui.js" type="text/javascript"></script>
 <script src="src/ios.js" type="text/javascript"></script>
@@ -28,19 +29,38 @@ Orange.add('test', function(O) {
 	
 		type: 'test-navigation-view',
 	
+		initialize: function(parent, target) {
+			this._super(parent, target);
+		},
+	
 		onLoad: function() {
-		
-			this.super.onLoad.apply(this, arguments);
+			this._super();
+			this.target.on('touchend', $.proxy(this.onClick, this));
 			this.target.on('click', $.proxy(this.onClick, this));
-		
+			this.target.on('touchstart', $.proxy(this.onTouchStart, this));
+			this.target.on('touchend', $.proxy(this.onTouchEnd, this));
 		},
 		
 		onClick: function(e) {
-			if ($(e.target).hasClass('.left')) {
-				this.pushViewController('second');
-			} else if ($(e.target).hasClass('.')) {
-				this.popViewController();
+			if ($(e.target).hasClass('right') && $(e.target).hasClass('one')) {
+				this.pushView('second');
+			} if ($(e.target).hasClass('right') && $(e.target).hasClass('two')) {
+				this.pushView('third');
+			} if ($(e.target).hasClass('right') && $(e.target).hasClass('three')) {
+				this.pushView('fourth');
+			} else if ($(e.target).hasClass('left')) {
+				this.popView();
 			}
+		},
+		
+		onTouchStart: function(e) {
+			if ($(e.target).hasClass('ios-ui-bar-button-item')) {
+				$(e.target).addClass('touched');
+			}
+		},
+		
+		onTouchEnd: function(e) {
+				$(this.target).find('ios-ui-bar-button-item').removeClass('touched');
 		},
 		
 		onUnload: function() {
@@ -95,6 +115,7 @@ body {
 .ios-ui-navigation-view {
 	position: relative;
 	height: 100%;
+	overflow: hidden;
 	width: 100%;
 }
 
@@ -104,46 +125,77 @@ body {
 	top: 44px;
 	width: 100%;
 	opacity: .5;
+	-webkit-backface-visibility: hidden;
+	-webkit-transition: -webkit-transform 200ms ease-in-out;
 }
 
-.ios-ui-navigation-view > .ios-ui-view.active {
-	display: block;
-	-webkit-transform: translate(0);
-	-moz-transform: translate(0);
-	-o-transform: translate(0);
-	-ms-transform: translate(0);
+.ios-ui-navigation-view > .ios-ui-view .title {
+	-webkit-transition: opacity 100ms ease-in-out;
 }
+
+/** panel states */
 
 .ios-ui-navigation-view > .ios-ui-view.inactive {
-	display: none;
+	opacity: 0;
 	-webkit-transform: translate(-100%);
 	-moz-transform: translate(-100%);
 	-o-transform: translate(-100%);
 	-ms-transform: translate(-100%);
 }
 
+.ios-ui-navigation-view > .ios-ui-view.active {
+	opacity: 1;
+	-webkit-transform: translate(0%);
+	-moz-transform: translate(0%);
+	-o-transform: translate(0%);
+	-ms-transform: translate(0%);
+}
+
 .ios-ui-navigation-view > .ios-ui-view.preloaded {
-	display: none;
+	opacity: 1;
 	-webkit-transform: translate(100%);
 	-moz-transform: translate(100%);
 	-o-transform: translate(100%);
 	-ms-transform: translate(100%);
 }
 
-.ios-ui-navigation-view > .ios-ui-view.loading {
-	display: block;
-	-webkit-transform: translate(0);
-	-moz-transform: translate(0);
-	-o-transform: translate(0);
-	-ms-transform: translate(0);
-}
+
+/** panel transitions **/
 
 .ios-ui-navigation-view > .ios-ui-view.unloading {
-	display: block;
+	opacity: 1;
+	-webkit-transform: translate(100%);
+	-moz-transform: translate(100%);
+	-o-transform: translate(100%);
+	-ms-transform: translate(100%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.unloading .title {
+	opacity: 0;
+}
+
+.ios-ui-navigation-view > .ios-ui-view.loading {
+	opacity: 1;
+	-webkit-transform: translate(0%);
+	-moz-transform: translate(0%);
+	-o-transform: translate(0%);
+	-ms-transform: translate(0%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.loading .title {
+	opacity: 1;
+}
+
+.ios-ui-navigation-view > .ios-ui-view.inactivating {
+	opacity: 1;
 	-webkit-transform: translate(-100%);
 	-moz-transform: translate(-100%);
 	-o-transform: translate(-100%);
 	-ms-transform: translate(-100%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.inactivating .title {
+	opacity: 0;
 }
 
 .ios-ui-navigation-view > .ios-ui-view .ios-ui-navigation-bar {
@@ -332,7 +384,7 @@ body {
 				
 			<div class="title">First View</div>
 		
-			<div class="ios-ui-bar-button-item right">Next</div>
+			<div class="ios-ui-bar-button-item right one">Next</div>
 		
 		</div>
 		
@@ -401,9 +453,41 @@ body {
 			
 			<div class="title">Second View</div>
 			
+			<div class="ios-ui-bar-button-item right two">Arg</div>
+			
 		</div>
 		
 		<p>Second View</p>
+	
+	</div>
+	
+	<div data-view="ios-ui-view" data-name="third" style="background-color: #FF0;">
+	
+		<div data-element="ios-ui-navigation-bar">
+	
+			<div class="ios-ui-bar-button-item left">Bhah</div>
+			
+			<div class="title">Third View</div>
+			
+			<div class="ios-ui-bar-button-item right three">Next</div>
+			
+		</div>
+		
+		<p>Third View</p>
+	
+	</div>
+	
+	<div data-view="ios-ui-view" data-name="fourth" style="background-color: #F05;">
+	
+		<div data-element="ios-ui-navigation-bar">
+	
+			<div class="ios-ui-bar-button-item left">EEEE</div>
+			
+			<div class="title">Fourth View</div>
+			
+		</div>
+		
+		<p>Fourth View</p>
 	
 	</div>
 

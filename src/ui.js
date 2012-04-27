@@ -18,12 +18,14 @@ Orange.add('ui', function(O) {
 		
 			define: function(def) {
 				var c = O.extend(O.ViewController, def), type = def.type;
+				c.prototype.typeList = 'ui-view ' + type;
 				if(typeof type === 'undefined') throw "Error: Class not named";
 				return _views[type] = c;
 			},
 			
 			extend: function(base, def) {
 				var c = O.extend(base, def), type = def.type;
+				c.prototype.typeList += ' ' + type;
 				if(typeof type === 'undefined') throw "Error: Class not named";
 				return _views[type] = c;
 			},
@@ -48,7 +50,7 @@ Orange.add('ui', function(O) {
 		type: 'ui-view',
 	
 		initialize: function(parent, target) {
-		
+				
 			var that = this;
 					
 			this.target = $(target);
@@ -141,7 +143,7 @@ Orange.add('ui', function(O) {
 				that._elements[name] = child;
 			}
 						
-			this.target.addClass(this.type);
+			this.target.addClass(this.typeList);
 						
 			console.log("[INFO] View '" + this.name + "' of type '" + this.type + "' initialized");
 		

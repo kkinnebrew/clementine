@@ -1,0 +1,299 @@
+/* UINavigationView Styles */
+
+.ios-ui-navigation-view {
+	position: relative;
+	height: 100%;
+	overflow: hidden;
+	width: 100%;
+}
+
+.ios-ui-navigation-view > .ios-ui-view {
+	bottom: 0px;
+	position: absolute;
+	top: 44px;
+	width: 100%;
+	opacity: .5;
+	-webkit-backface-visibility: hidden;
+	-webkit-transition: -webkit-transform 200ms ease-in-out;
+}
+
+.ios-ui-navigation-view > .ios-ui-view .title {
+	-webkit-transition: opacity 100ms ease-in-out;
+}
+
+.ios-ui-navigation-view > .ios-ui-view.inactive {
+	opacity: 0;
+	-webkit-transform: translate(-100%);
+	-moz-transform: translate(-100%);
+	-o-transform: translate(-100%);
+	-ms-transform: translate(-100%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.active {
+	opacity: 1;
+	-webkit-transform: translate(0%);
+	-moz-transform: translate(0%);
+	-o-transform: translate(0%);
+	-ms-transform: translate(0%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.preloaded {
+	opacity: 1;
+	-webkit-transform: translate(100%);
+	-moz-transform: translate(100%);
+	-o-transform: translate(100%);
+	-ms-transform: translate(100%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.unloading {
+	opacity: 1;
+	-webkit-transform: translate(100%);
+	-moz-transform: translate(100%);
+	-o-transform: translate(100%);
+	-ms-transform: translate(100%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.unloading .title {
+	opacity: 0;
+}
+
+.ios-ui-navigation-view > .ios-ui-view.loading {
+	opacity: 1;
+	-webkit-transform: translate(0%);
+	-moz-transform: translate(0%);
+	-o-transform: translate(0%);
+	-ms-transform: translate(0%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.loading .title {
+	opacity: 1;
+}
+
+.ios-ui-navigation-view > .ios-ui-view.inactivating {
+	opacity: 1;
+	-webkit-transform: translate(-100%);
+	-moz-transform: translate(-100%);
+	-o-transform: translate(-100%);
+	-ms-transform: translate(-100%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.inactivating .title {
+	opacity: 0;
+}
+
+.ios-ui-navigation-view > .ios-ui-view .ios-ui-navigation-bar {
+	height: 0;
+}
+
+.ios-ui-navigation-view > .ios-ui-view .ios-ui-bar-button-item {
+	display: none;
+}
+
+.ios-ui-navigation-view > .ios-ui-navigation-bar .ios-ui-bar-button-item {
+	z-index: 21;
+}
+
+.ios-ui-navigation-view > .ios-ui-navigation-bar.hidden {
+	-webkit-transform: translate(-100%);
+	-moz-transform: translate(-100%);
+	-o-transform: translate(-100%);
+	-ms-transform: translate(-100%);
+	-webkit-transition: -webkit-transform 200ms ease-in-out;
+}
+
+.ios-ui-navigation-view > .ios-ui-view .title {
+	top: -44px;
+	z-index: 20;
+}
+
+
+/* UINavigationBar Styles */
+
+.ios-ui-navigation-bar {
+	background: url(img/ios-ui-navigation-bar-bg.png) repeat-x;
+	height: 44px;
+	position: relative;
+	width: 100%;
+}
+
+.ios-ui-navigation-bar > .title {
+	color: #FFF;
+	font-size: 20px;
+	font-weight: bold;
+	height: 44px;
+	line-height: 44px;
+	margin: 0px;
+	padding: 0px;
+	position: absolute;
+	text-align: center;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.35);
+	width: 100%;
+	z-index: 1;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
+
+	.ios-ui-navigation-bar {
+		background-image: url(img/ios-ui-navigation-bar-bg@2x.png);
+		background-size: 5px 44px;
+		-moz-background-size: 5px 44px;
+		-webkit-background-size: 5px 44px;
+	}
+
+}
+
+
+/* UIToolbar Styles */
+
+.ios-ui-toolbar {
+	background: url(img/ios-ui-navigation-bar-bg.png) repeat-x;
+	height: 44px;
+	position: relative;
+	width: 100%;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
+
+	.ios-ui-toolbar {
+		background-image: url(img/ios-ui-navigation-bar-bg@2x.png);
+		background-size: 5px 44px;
+		-moz-background-size: 5px 44px;
+		-webkit-background-size: 5px 44px;
+	}
+
+}
+
+
+/* UIBarButtonItem Styles */
+
+.ios-ui-bar-button-item {
+	background: url(img/ios-ui-bar-button-item-bg.png) repeat-x;
+	color: #FFF;
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: bold;
+	height: 30px;
+	line-height: 30px;
+	min-width: 35px;
+	padding: 0px 12px;
+	position: absolute;
+	text-align: center;
+	text-overflow: ellipsis;
+	text-shadow: 0px -1px 0 rgba(0, 0, 0, .5);
+	z-index: 10;
+	
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+	
+	-webkit-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset -1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0px -1px 0px rgba(0, 0, 0, .2),
+						0px 1px 0px rgba(255, 255, 255, .3);
+	-moz-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset -1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0px -1px 0px rgba(0, 0, 0, .2),
+						0px 1px 0px rgba(255, 255, 255, .3);
+	
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	
+	user-select: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+}
+
+.ios-ui-bar-button-item.left {
+	top: 7px;
+	left: 7px;
+}
+
+.ios-ui-bar-button-item.right {
+	top: 7px;
+	right: 7px;
+}
+
+.ios-ui-bar-button-item.touched {
+	background: url(img/ios-ui-bar-button-item-bg-selected.png) repeat-x;
+}
+
+.ios-ui-bar-button-item:hover {
+	background: url(img/ios-ui-bar-button-item-bg-selected.png) repeat-x;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
+
+	.ios-ui-bar-button-item {
+		-webkit-box-shadow:	inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+							inset 0px 0px 2px rgba(0, 0, 0, 0.4),
+							inset 0px 1px 0px rgba(0, 0, 0, 0.2),
+							0px 1px 0px rgba(255, 255, 255, .2);
+		-moz-box-shadow:	inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+							inset 0px 0px 2px rgba(0, 0, 0, 0.4),
+							inset 0px 1px 0px rgba(0, 0, 0, 0.2),
+							0px 1px 0px rgba(255, 255, 255, .2);
+	}
+	
+}
+
+
+/* UITableView Styles */
+
+.ios-ui-table-view {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	width: 100%;
+	background: #aaa;
+	overflow: auto;
+}
+
+.ios-ui-table-view > .scroll-view {
+	position: absolute;
+	z-index: 1;
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+	width: 100%;
+	padding: 0;
+}
+
+.ios-ui-table-view > .scroll-view > ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	width: 100%;
+	text-align: left;
+}
+
+.ios-ui-table-view > .scroll-view li {
+	padding: 0 10px;
+	height: 40px;
+	line-height: 40px;
+	border-bottom: 1px solid #ccc;
+	border-top: 1px solid #fff;
+	background-color: #fafafa;
+	font-size: 14px;
+}
+
+
+/* UIScrollView Styles */
+
+.ios-ui-scroll-view {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	width: 100%;
+	overflow: auto;
+}
+
+.ios-ui-scroll-view > .scroll-view {
+	position: absolute;
+	z-index: 1;
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+	width: 100%;
+	padding: 0;
+}

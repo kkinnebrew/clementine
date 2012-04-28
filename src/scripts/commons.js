@@ -547,6 +547,10 @@
 				_target.on(event, callback);
 			},
 			
+			detach: function(event, callback) {
+				_target.detach(event, callback);
+			}
+			
 			isOnline: function() {
 				return _isOnline;
 			}

@@ -82,10 +82,10 @@ Orange.add('ui', function(O) {
 				 		path = view.attr('data-template');
 				 						
 				if (isRemote) {
-					var source = O.TemplateManager.load('templates/' + path);
+					var source = O.TemplateManager.load('app/views/' + path);
 					view.html($(source).html());
 					cloneAttributes(source, view);
-					view.removeAttr('data-remote');
+					view.removeAttr('data-template');
 				}
 														 		
 				var c = O.View.load(type);
@@ -131,7 +131,7 @@ Orange.add('ui', function(O) {
 				 		path = el.attr('data-template');
 				 						
 				if (isRemote) {
-					var source = O.TemplateManager.load('elements/' + path);
+					var source = O.TemplateManager.load('app/elements/' + path);
 					el.html($(source).html());
 					cloneAttributes(source, el);
 					el.removeAttr('data-template');
@@ -140,7 +140,8 @@ Orange.add('ui', function(O) {
 				var c = O.Element.load(type);
 				var child = new c(this, el);
 				
-				that._elements[name] = child;
+				if (typeof name !== 'undefined') that._elements[name] = child;
+				child.onLoad();
 			}
 						
 			this.target.addClass(this.typeList);
@@ -152,6 +153,11 @@ Orange.add('ui', function(O) {
 		getView: function(name) {
 			if (typeof this._views[name] !== 'undefined') return this._views[name];
 			throw 'Error: View "' + name + '" not found';
+		},
+		
+		getElement: function(name) {
+			if (typeof this._elements[name] !== 'undefined') return this._elements[name];
+			throw 'Error: Element "' + name + '" not found';
 		},
 		
 		getForm: function(name) {
@@ -217,12 +223,14 @@ Orange.add('ui', function(O) {
 		
 			define: function(def) {
 				var c = O.extend(O.ElementController, def), type = def.type;
+				c.prototype.typeList = 'ui-element ' + type;
 				if(typeof type === 'undefined') throw "Error: Class not named";
 				return _elements[type] = c;
 			},
 			
 			extend: function(base, def) {
 				var c = O.extend(base, def), type = def.type;
+				c.prototype.typeList += ' ' + type;
 				if(typeof type === 'undefined') throw "Error: Class not named";
 				return _elements[type] = c;
 			},
@@ -258,7 +266,8 @@ Orange.add('ui', function(O) {
 			this.parent = parent;
 			this.name = this.target.attr('data-name');
 			
-			this.target.addClass(this.type);
+			this.target.addClass(this.typeList);
+			console.log(this);
 			
 			if (this.target.length === 0) throw 'Invalid view source';
 		
@@ -269,6 +278,7 @@ Orange.add('ui', function(O) {
 			//this.data = { name: 'Kevin', food: [{ name: "Apple" }, { name: "Orange" }] };
 			this.processTemplate();
 			this.target.removeAttr('data-element');
+			this.target.removeAttr('data-name');
 			
 		},
 		
@@ -365,9 +375,11 @@ Orange.add('ui', function(O) {
 			load: function(path) {
 				if (typeof _templates[path] !== 'undefined') {
 					return _templates[path];
-				} else {
+				} else if (typeof path !== 'undefined' && path !== '') {
 					return _fetch(path);
-				}				
+				}	else {
+					throw 'Invalid template path';
+				}
 			}
 		
 		}

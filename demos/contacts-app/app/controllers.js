@@ -11,13 +11,15 @@ Orange.add('contacts-controllers', function(O) {
 		onLoad: function() {
 		
 			// instantiate modal view
-			this.modal = new O.Contacts.ContactModalView(this, O.Template.fetch('create-contact.html'));
+			this.modal = new O.Contacts.ContactModalView(this, O.TemplateManager.load('app/views/create-contact.html'));
 		
 			// bind create event
-			this.getView('contacts-list').on('create', $.proxy(this.onCreate, this));
-			this.getView('contacts-list').on('select', $.proxy(this.onSelect, this));
+			this.getView('contacts').on('create', $.proxy(this.onCreate, this));
+			this.getView('contacts').on('select', $.proxy(this.onSelect, this));
 			
 			this.getView('contact').on('back', $.proxy(this.onBack, this));
+			
+			this._super();
 		
 		},
 		
@@ -52,7 +54,7 @@ Orange.add('contacts-controllers', function(O) {
 		},
 		
 		onUnload: function() {
-		
+			this._super();
 		}
 	
 	});
@@ -66,14 +68,21 @@ Orange.add('contacts-controllers', function(O) {
 		
 		onLoad: function() {
 		
-			// setup models
-			this.getView('contact-list').bindData(O.Model.Contacts.get());
+			// fetch data
+			O.Model.get('Contact').get($.proxy(function(data) {
+			
+				// setup models
+				this.getView('contact-list').bindData(data);
+			
+			}, this), function() {});			
 		
 			// bind dom events
-			this.getElement('add-btn').target.on('click', $.proxy(this.onAdd, this));
-			
+			this.target.find('.ios-ui-bar-button-item.right').on('click', $.proxy(this.onAdd, this));
+									
 			// bind table select event
 			this.getView('contact-list').on('select', $.proxy(this.onSelect, this));
+			
+			this._super();
 		
 		},
 		
@@ -86,13 +95,16 @@ Orange.add('contacts-controllers', function(O) {
 			// get data model
 			var data = e.data;
 			
+			this.fire(
+			
 			// set data to view
 			this.getView('contact').setData(data);
 			
 		},
 		
 		onUnload: function() {
-		
+			this.target.find('.ios-ui-bar-button-item.right').off();
+			this._super();
 		}
 	
 	});
@@ -108,6 +120,8 @@ Orange.add('contacts-controllers', function(O) {
 		
 			// bind dom events
 			this.getElement('back-btn').target.on('click', $.proxy(this.onBack, this));
+			
+			this._super();
 		
 		},
 		
@@ -131,7 +145,7 @@ Orange.add('contacts-controllers', function(O) {
 		},
 		
 		onUnload: function() {
-		
+			this._super();
 		}
 	
 	});
@@ -147,6 +161,8 @@ Orange.add('contacts-controllers', function(O) {
 		
 			// bind events
 			this.getView('create-contact').on('create', $.proxy(this.onCreate, this));
+		
+			this._super();
 		
 		},
 		
@@ -168,10 +184,10 @@ Orange.add('contacts-controllers', function(O) {
 			// close the view
 			this.dismissModalView();
 		
-		}
+		},
 		
 		onUnload: function() {
-		
+			this._super();
 		}
 	
 	});
@@ -187,6 +203,8 @@ Orange.add('contacts-controllers', function(O) {
 		
 			// bind event handler to form submit
 			this.getForm('create-contact').get('submit').on('click', $.proxy(this.onSubmit, this));
+		
+			this._super();
 		
 		},
 		
@@ -231,7 +249,7 @@ Orange.add('contacts-controllers', function(O) {
 		},
 		
 		onUnload: function() {
-		
+			this._super();
 		}
 	
 	});

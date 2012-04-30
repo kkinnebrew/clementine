@@ -8,6 +8,8 @@
 <script src="lib/jquery-1.7.2.min.js" type="text/javascript"></script>
 <script src="lib/json-template.js" type="text/javascript"></script>
 <script src="lib/iscroll.js" type="text/javascript"></script>
+<script src="lib/underscore.js" type="text/javascript"></script>
+
 <script src="../../src/scripts/oop.js" type="text/javascript"></script>
 <script src="../../src/scripts/commons.js" type="text/javascript"></script>
 <script src="../../src/scripts/db.js" type="text/javascript"></script>
@@ -51,9 +53,9 @@ $(document).ready(function() {
 
 <body>
 
-<div data-view="contacts-app-view" data-name="contacts-app">
+<div data-view="contacts-app-view" data-name="contacts-app" data-root="true" data-default="contacts">
 
-	<div data-view="contacts-list-view" data-name="contacts-list" data-template="contacts.html"></div>
+	<div data-view="contacts-list-view" data-name="contacts" data-template="contacts.html"></div>
 	
 	<div data-view="contacts-view" data-name="contact" data-template="contact.html"></div>
 

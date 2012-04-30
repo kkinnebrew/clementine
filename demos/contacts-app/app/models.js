@@ -1,13 +1,13 @@
 Orange.add('contacts-models', function(O) {
 
-	O.Model.define({
+	O.Model.register({
 	
 		name: 'Contact', 
-		id: 'contactId',
-		path: '/contacts/', 
+		id: 'id',
+		path: '/contacts/contacts/', 
 		
 		fields: {
-			contactId: { type: 'int', name: 'contact_id', nullable: false },
+			contactId: { type: 'int', name: 'id', nullable: false },
 			firstName: { type: 'string', name: 'first_name', nullable: false  },
 			lastName: { type: 'string', name: 'last_name', nullable: false  },
 			email: { type: 'email', name: 'email', nullable: true  },
@@ -18,14 +18,14 @@ Orange.add('contacts-models', function(O) {
 
 		// map source into the form of a single json object
 		mapItem: function(data) {
-			return data;
+			return data['Contact'];
 		},
 		
 		// map source into the form of an array of source objects
 		mapItems: function(data) {
-			return data;
+			return data['contacts'];
 		}
 		
 	});
 
-});
+}, ['ui', 'ios', 'db'], '0.1');

@@ -1,33 +1,37 @@
-<div data-view="contacts-view" data-name="create-contact">
+<div data-view="contacts-modal-view" data-name="create-contact-modal">
 
-	<form name="create-contact">
+	<div data-view="contacts-create-view" data-name="create-contact">
 	
-		<label for="first_name">First Name</label>
+		<form name="create-contact">
 		
-		<input type="text" name="first_name" placeholder="First Name" />
+			<label for="first_name">First Name</label>
+			
+			<input type="text" name="first_name" placeholder="First Name" />
+			
+			<label for="last_name">Last Name</label>
+			
+			<input type="text" name="last_name" placeholder="Last Name" />
+			
+			<label for="email">Email</label>
+			
+			<input type="email" name="email" placeholder="Email" />
+			
+			<label for="phone">Phone</label>
+			
+			<input type="tel" name="phone" placeholder="Phone" />
+			
+			<label for="birthday">Birthday</label>
+			
+			<input type="date" name="birthday" placeholder="Birthday" />
+			
+			<label for="website">Website</label>
+			
+			<input type="url" name="website" placeholder="Website" />
+			
+			<input type="submit" name="submit" value="Create" />
 		
-		<label for="last_name">Last Name</label>
-		
-		<input type="text" name="last_name" placeholder="Last Name" />
-		
-		<label for="email">Email</label>
-		
-		<input type="email" name="email" placeholder="Email" />
-		
-		<label for="phone">Phone</label>
-		
-		<input type="tel" name="phone" placeholder="Phone" />
-		
-		<label for="birthday">Birthday</label>
-		
-		<input type="date" name="birthday" placeholder="Birthday" />
-		
-		<label for="website">Website</label>
-		
-		<input type="url" name="website" placeholder="Website" />
-		
-		<input type="submit" name="submit" value="Create" />
+		</form>
 	
-	</form>
+	</div>
 
 </div>

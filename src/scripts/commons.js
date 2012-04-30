@@ -17,7 +17,7 @@
 	
 	// global regular expressions
 	modFilterRegex = /[^-A-Za-z_]/g,
-	keyFilterRegex = /[^A-Za-z_]/g; // filters keys for special chars
+	keyFilterRegex = /[^A-Za-z0-9_\[\]]/g; // filters keys for special chars
 	
 	OrangeUI._modules = {}; // stores application extension modules
 	OrangeUI._apps = {}; // stores application settings
@@ -616,7 +616,7 @@
 			},
 			
 			set: function(key, value, ttl) {
-			
+						
 				if(!this.isSupported) return false; // don't do anything if not supported
 				key = key.replace(keyFilterRegex); // filter key for special chars
 				
@@ -632,13 +632,13 @@
 				
 				try {
 					_localStorage.setItem(key, JSON.stringify(obj)); // store object
-					OrangeUI.Log.info("Set: Inserted object with key (" + key.toString() + ") into local storage");
+					OrangeUI.Log.info("Set: Inserted object with key '" + key.toString() + "' into local storage");
 					return true;
 				} catch (e) {
 					if (e == QUOTA_EXCEEDED_ERR) {
 						OrangeUI.Log.error("Storage quota has been exceeded", e);
 					} else {
-						OrangeUI.Log.error("Could not insert item with key (" + key.toString() + ") into local storage");
+						OrangeUI.Log.error("Could not insert item with key '" + key.toString() + "' into local storage");
 					}
 				}
 				return false;
@@ -655,7 +655,7 @@
 							_localStorage.removeItem(key); // remove from local storage
 							throw EXPIRE_OBJ_ERR;
 						}
-						OrangeUI.Log.info("Get: Retrieved object for key (" + key.toString() + ") from local storage");
+						OrangeUI.Log.info("Get: Retrieved object for key '" + key.toString() + "' from local storage");
 						return item.data; // otherwise return data
 					} else {
 						throw UNPACK_OBJ_ERR;
@@ -679,7 +679,7 @@
 				
 				try {
 					_localStorage.removeItem(key); // remove item from local storage array
-					OrangeUI.Log.info("Remove: Object (" + key + ") removed from local storage");
+					OrangeUI.Log.info("Remove: Object '" + key + "' removed from local storage");
 					
 				} catch(e) {
 					OrangeUI.Log.error("Could not remove local storage object", e);

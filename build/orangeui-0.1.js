@@ -56,8 +56,6 @@
     return Class;
   };
 })();
-
-
 (function (window, document) {
 
 	/* Variable Definitions */
@@ -69,7 +67,7 @@
 	
 	// global regular expressions
 	modFilterRegex = /[^-A-Za-z_]/g,
-	keyFilterRegex = /[^A-Za-z_]/g; // filters keys for special chars
+	keyFilterRegex = /[^A-Za-z0-9_\[\]]/g; // filters keys for special chars
 	
 	OrangeUI._modules = {}; // stores application extension modules
 	OrangeUI._apps = {}; // stores application settings
@@ -599,6 +597,10 @@
 				_target.on(event, callback);
 			},
 			
+			detach: function(event, callback) {
+				_target.detach(event, callback);
+			},
+			
 			isOnline: function() {
 				return _isOnline;
 			}
@@ -664,7 +666,7 @@
 			},
 			
 			set: function(key, value, ttl) {
-			
+						
 				if(!this.isSupported) return false; // don't do anything if not supported
 				key = key.replace(keyFilterRegex); // filter key for special chars
 				
@@ -680,13 +682,13 @@
 				
 				try {
 					_localStorage.setItem(key, JSON.stringify(obj)); // store object
-					OrangeUI.Log.info("Set: Inserted object with key (" + key.toString() + ") into local storage");
+					OrangeUI.Log.info("Set: Inserted object with key '" + key.toString() + "' into local storage");
 					return true;
 				} catch (e) {
 					if (e == QUOTA_EXCEEDED_ERR) {
 						OrangeUI.Log.error("Storage quota has been exceeded", e);
 					} else {
-						OrangeUI.Log.error("Could not insert item with key (" + key.toString() + ") into local storage");
+						OrangeUI.Log.error("Could not insert item with key '" + key.toString() + "' into local storage");
 					}
 				}
 				return false;
@@ -703,7 +705,7 @@
 							_localStorage.removeItem(key); // remove from local storage
 							throw EXPIRE_OBJ_ERR;
 						}
-						OrangeUI.Log.info("Get: Retrieved object for key (" + key.toString() + ") from local storage");
+						OrangeUI.Log.info("Get: Retrieved object for key '" + key.toString() + "' from local storage");
 						return item.data; // otherwise return data
 					} else {
 						throw UNPACK_OBJ_ERR;
@@ -727,7 +729,7 @@
 				
 				try {
 					_localStorage.removeItem(key); // remove item from local storage array
-					OrangeUI.Log.info("Remove: Object (" + key + ") removed from local storage");
+					OrangeUI.Log.info("Remove: Object '" + key + "' removed from local storage");
 					
 				} catch(e) {
 					OrangeUI.Log.error("Could not remove local storage object", e);
@@ -851,7 +853,6 @@
 	window.Orange = OrangeUI;	
 
 })(this, this.document);
-
 /**
  * ui.js | OrangeUI 0.1
  * @date 12.21.2011
@@ -936,10 +937,10 @@ Orange.add('ui', function(O) {
 				 		path = view.attr('data-template');
 				 						
 				if (isRemote) {
-					var source = O.TemplateManager.load('templates/' + path);
+					var source = O.TemplateManager.load('app/views/' + path);
 					view.html($(source).html());
 					cloneAttributes(source, view);
-					view.removeAttr('data-remote');
+					view.removeAttr('data-template');
 				}
 														 		
 				var c = O.View.load(type);
@@ -985,7 +986,7 @@ Orange.add('ui', function(O) {
 				 		path = el.attr('data-template');
 				 						
 				if (isRemote) {
-					var source = O.TemplateManager.load('elements/' + path);
+					var source = O.TemplateManager.load('app/elements/' + path);
 					el.html($(source).html());
 					cloneAttributes(source, el);
 					el.removeAttr('data-template');
@@ -994,7 +995,8 @@ Orange.add('ui', function(O) {
 				var c = O.Element.load(type);
 				var child = new c(this, el);
 				
-				that._elements[name] = child;
+				if (typeof name !== 'undefined') that._elements[name] = child;
+				child.onLoad();
 			}
 						
 			this.target.addClass(this.typeList);
@@ -1004,8 +1006,14 @@ Orange.add('ui', function(O) {
 		},
 		
 		getView: function(name) {
-			if (typeof this._views[name] !== 'undefined') return this._views[name];
+			if (typeof name === 'object') return name;
+			else if (typeof this._views[name] !== 'undefined') return this._views[name];
 			throw 'Error: View "' + name + '" not found';
+		},
+		
+		getElement: function(name) {
+			if (typeof this._elements[name] !== 'undefined') return this._elements[name];
+			throw 'Error: Element "' + name + '" not found';
 		},
 		
 		getForm: function(name) {
@@ -1071,12 +1079,14 @@ Orange.add('ui', function(O) {
 		
 			define: function(def) {
 				var c = O.extend(O.ElementController, def), type = def.type;
+				c.prototype.typeList = 'ui-element ' + type;
 				if(typeof type === 'undefined') throw "Error: Class not named";
 				return _elements[type] = c;
 			},
 			
 			extend: function(base, def) {
 				var c = O.extend(base, def), type = def.type;
+				c.prototype.typeList += ' ' + type;
 				if(typeof type === 'undefined') throw "Error: Class not named";
 				return _elements[type] = c;
 			},
@@ -1112,7 +1122,7 @@ Orange.add('ui', function(O) {
 			this.parent = parent;
 			this.name = this.target.attr('data-name');
 			
-			this.target.addClass(this.type);
+			this.target.addClass(this.typeList);
 			
 			if (this.target.length === 0) throw 'Invalid view source';
 		
@@ -1123,6 +1133,7 @@ Orange.add('ui', function(O) {
 			//this.data = { name: 'Kevin', food: [{ name: "Apple" }, { name: "Orange" }] };
 			this.processTemplate();
 			this.target.removeAttr('data-element');
+			this.target.removeAttr('data-name');
 			
 		},
 		
@@ -1219,9 +1230,11 @@ Orange.add('ui', function(O) {
 			load: function(path) {
 				if (typeof _templates[path] !== 'undefined') {
 					return _templates[path];
-				} else {
+				} else if (typeof path !== 'undefined' && path !== '') {
 					return _fetch(path);
-				}				
+				}	else {
+					throw 'Invalid template path';
+				}
 			}
 		
 		}
@@ -1241,6 +1254,17 @@ Orange.add('ui', function(O) {
 					|| this.searchVersion(navigator.appVersion)
 					|| "an unknown version";
 				this.OS = this.searchString(this.dataOS) || "an unknown OS";
+				
+				// check if mobile
+				var useragent = navigator.userAgent.toLowerCase();
+				if( useragent.search("iphone") > 0)
+				    this.isMobile = true; // iphone
+				else if( useragent.search("ipod") > 0)
+				    this.isMobile = true; // ipod
+				else if( useragent.search("android") > 0)
+				    this.isMobile = true; // android
+				else this.isMobile = false;
+				
 			},
 			
 			searchString: function (data) {
@@ -1359,9 +1383,380 @@ Orange.add('ui', function(O) {
 		return {
 			browser: BrowserDetect.browser,
 			version: BrowserDetect.version,
-			os: BrowserDetect.OS
+			os: BrowserDetect.OS,
+			isMobile: BrowserDetect.isMobile
 		}
 	
 	})();
 
 }, ['db'], '0.1');
+/**
+ * db.js | OrangeUI DB 0.1
+ * @date 12.21.2011
+ * @author Kevin Kinnebrew
+ * @dependencies commons
+ * @description handles data requests and persistence
+ */
+ 
+Orange.add('db', function(O) {
+
+
+	/* abstract data access */
+	
+	O.ModelDefinition = O.define({
+	
+		type: 'model',
+	
+		initialize: function(config) {
+		
+			this.id = config.id;
+			this.name = config.name;
+			this.fields = config.fields;
+			this.path = config.path;
+			this.mapItem = config.mapItem;
+			this.mapItems = config.mapItems;
+			
+			// setup event target
+			this._eventTarget = new O.EventTarget(null, this);
+		
+		},
+		
+		get: function() {
+				
+			var args = arguments,
+					id = (typeof args[0] !== 'function') ? args[0] : null,
+					success = (!id) ? args[0] : args[1],
+					failure = (!id) ? args[1] : args[2];
+			
+			// call map function if it exists
+			var successItemFunc = function(data) {
+			
+				// process return data
+				data = this._processData($.parseJSON(data));
+				
+				// call success function
+				success.call(this, new O.Item(this, data));
+				
+				// fire changed event
+				this.fire('get', {
+					action: action,
+					ids: [id],
+					data: data
+				});
+				
+			};
+			
+			// call map function if it exists
+			var successItemsFunc = function(data) {
+										
+				// process return data
+				data = this._processItems($.parseJSON(data));
+							
+				// call success function
+				success.call(this, new O.Collection(this, data));
+				
+				// fire changed event
+				this.fire('datachange', {
+					action: 'get',
+					ids: data.ids,
+					data: {}
+				});
+				
+			};
+						
+			// fetch data
+			$.ajax({
+			  url: (!id) ? this.path : this.path + id,
+			  contentType: 'text/json',
+			  type: 'GET',
+			  success: (!id) ? $.proxy(successItemsFunc, this) : $.proxy(successItemFunc, this),
+			  error: failure
+			});
+		
+		},
+		
+		save: function(object, success, failure) {
+		
+			// calculation action
+			var action = (object[this.id ? this.id : 'id'] !== null) ? 'update' : 'create';
+		
+			// call map function if it exists
+			var successFunc = function(data) {
+			
+				// process data
+				data = this._processData($.parseJSON(data));
+				
+				// call success function
+				success.call(this, data);
+				
+				// get id
+				var id = data[this.id ? this.id : 'id'];
+				
+				// fire changed event
+				this.fire('datachange', {
+					action: action,
+					id: id,
+					data: data
+				});
+				
+			};
+			
+			// check if object has been saved
+			if (action === 'update') {
+			
+				$.ajax({
+				  url: (!id) ? this.path : this.path + id,
+				  contentType: 'text/json',
+				  type: 'PUT',
+				  data: object,
+			  	success: $.proxy(successFunc, this),
+				  error: failure
+				});
+			
+			} else {
+			
+				$.ajax({
+				  url: this.path,
+				  contentType: 'text/json',
+				  type: 'POST',
+				  data: object,
+				  success: $.proxy(successFunc, this),
+				  error: failure
+				});
+
+			}
+		
+		},
+		
+		delete: function(object, success, failure) {
+		
+			var key = data[this.id ? this.id : 'id'],
+					id = (typeof object === 'object') ? object[key] : object;
+			
+			// call map function if it exists
+			var successFunc = function(data) {
+				
+				// parse response
+				data = $.parseJSON(data);
+				
+				// clear from local storage
+				O.Storage.remove(this.name + '[' + id + ']');
+				
+				// call success function
+				success.call(this, data);
+				
+				// fire changed event
+				this.fire('datachange', {
+					action: 'delete',
+					id: id,
+					data: {}
+				});
+				
+			};
+			
+			$.ajax({
+			  url: (!id) ? this.path : this.path + id,
+			  contentType: 'text/json',
+			  type: 'DELETE',
+			  data: object,
+				success: $.proxy(successFunc, this),
+			  error: failure
+			});
+		
+		},
+		
+		_processItems: function(data) {
+		
+			// map the data if applicable
+			if (typeof this.mapItems === 'function') data = this.mapItems(data);
+						
+			// setup output
+			var models = [];
+			var ids = [];
+			
+			// get the id field
+			var id = this.id ? this.id : 'id';
+						
+			// map individual items			
+			for (var i = 0, len = data.length; i < len; i++) {
+				var model = this._processData(data[i]);
+				if (typeof model === 'object') {
+					ids.push(model[id]);
+					models.push(model);
+				}
+			}
+		
+			// return models
+			return {
+				ids: ids,
+				models: models
+			};
+			
+		},
+		
+		validate: function(data) {
+		
+			// compare data to our model
+			for(var field in this.fields) {
+			
+				// get source field name
+				var source = this.fields[field].name;
+				var nullable = (typeof this.fields[field].nullable !== undefined) ? this.fields[field].nullable : true;
+				var isNull = (typeof data[source] === 'undefined' || data[source] === '');
+			
+				// continue if field is not defined
+				if (isNull && !nullable) return false;
+			} 
+		
+		},
+		
+		_processData: function(data) {
+		
+			// map the data if applicable
+			if (typeof this.mapItem === 'function') data = this.mapItem(data);
+			
+			// create output object
+			var model = {};
+												
+			// map to our model
+			for(var field in this.fields) {
+			
+				// get source field name
+				var source = this.fields[field].name;
+				var value = (typeof data[source] !== 'undefined') ? data[source] : undefined;
+			
+				// continue if field is not defined
+				if (value === undefined) {
+					console.warn("[WARN] Could not parse JSON field '" + field + "' for " + this.name);
+					continue;
+				}
+			
+				// set field on output
+				model[field] = value;
+			}
+									
+			// get the id of the return
+			var id = data[this.id];
+			if(id === undefined) throw 'Invalid ID field for ' + this.name;
+									
+			// push to local storage
+			O.Storage.set(this.name + '[' + id + ']', model);
+			
+			// return model
+			return model;
+		
+		},
+		
+		on: function() {
+			return this._eventTarget.on.apply(this._eventTarget, arguments);
+		},
+		
+		detach: function() {
+			return this._eventTarget.detach.apply(this._eventTarget, arguments);
+		},
+		
+		fire: function() {
+			return this._eventTarget.fire.apply(this._eventTarget, arguments);
+		},
+	
+	});
+	
+	O.Model = (function() {
+	
+		var _models = {};
+				
+		return {
+		
+			define: function(def) {
+				var c = O.extend(O.ModelDefinition, def), type = def.type;
+				if(typeof type === 'undefined') throw "Error: Class not named";
+				return _views[type] = c;
+			},
+		
+			register: function(config) {
+				if (typeof config === 'undefined' || typeof config.name === 'undefined') throw "Error: Model definition invalid";
+				if (typeof config.type !== 'undefined' && typeof (model = _models[config.type]) !== 'undefined') {
+					var c = new model(config);
+				}
+				else var c = new O.ModelDefinition(config);
+				return _models[config.name] = c;
+			},
+			
+			get: function(name) {
+				var model;
+				if (typeof (model = _models[name]) !== 'undefined') {
+					return model;
+				} else throw "Error: Model '" + name + "' not found";
+			}
+		
+		};
+	
+	})();
+
+
+	/* data containers */
+
+	O.Collection = O.define({
+		
+		model: null,
+		data: [],
+		
+		initialize: function(model, data) {
+		
+			// set attributes
+			this.model = model;
+			this.data = data.models;
+			this.ids = data.ids;
+			this._data = {};
+			
+			// get key
+			var key = '';
+			for(var name in this.model.fields) {
+				if (this.model.fields[name].name == this.model.id) {
+					key = name;
+					break;
+				}
+			}
+						
+			// setup data
+			for(var i=0; i<data.models.length; i++) {
+				this._data[data.models[i][key]] = data.models[i];
+			}
+					
+		},
+		
+		get: function(id) {
+			return (typeof this._data[id] != undefined) ? this._data[id] : null;
+		},
+		
+		intersect: function(array) {
+			var int = _.intersection(this.ids, array);
+			return int.length;
+		},
+		
+		destroy: function() {
+		
+		}
+			
+	});
+		
+	O.Item = O.define({
+	
+		model: null,
+		item: {},
+	
+		initialize: function(model, data) {
+		
+			// set attributes
+			this.model = model;
+			this.item = data;
+		
+		},
+		
+		destroy: function() {
+		
+		}
+	
+	});
+	
+}, [], '0.1');

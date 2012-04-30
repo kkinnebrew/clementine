@@ -95,7 +95,7 @@ Orange.add('ios', function(O) {
 		
 		popView: function() {
 			
-			var duration = 200;
+			var duration = 300;
 			
 			// get previous view		
 			var view = this.viewStack[this.viewStack.length-2];
@@ -159,7 +159,7 @@ Orange.add('ios', function(O) {
 		
 		pushView: function(view) {
 				
-			var duration = 200;
+			var duration = 300;
 						
 			// fetch view, exception handled in getView()
 			view = this.getView(view);
@@ -231,7 +231,7 @@ Orange.add('ios', function(O) {
 		
 		popToRootView: function() {
 		
-			var duration = 100;
+			var duration = 300;
 			
 			// clear view stack
 			for(var i = 1; i < this.viewStack.length-1; i++) {
@@ -323,7 +323,10 @@ Orange.add('ios', function(O) {
 		type: 'ios-ui-table-view',
 		
 		onLoad: function() {
-						
+			
+			// get table cell template
+			this.tableCell = O.TemplateManager.load(this.target.attr('data-cell-template'));
+			
 			// wrap the view
 			this.target.wrapInner('<div class="scroll-view"></div>');
 
@@ -331,13 +334,86 @@ Orange.add('ios', function(O) {
 			this.myScroll = new iScroll(this.target.get(0));
 			this._super();
 			
+			// bind select event
+			this.target.on('click', $.proxy(this.onSelect, this));
+			
+		},
+		
+		setupTable: function() {
+		
+			// build temporary container
+			var target = this.target.find('ul')
+			var container = target.clone();
+			var source = this.tableCell;
+		
+			// iterate over collection
+			for(var i=0, len = this.collection.data.length; this.collection.data < len; i++) {
+				
+				// add templates to the container
+				template = new jsontemplate.Template(source);
+				var output = '';
+				try {
+					output = template.expand(this.data);
+				} catch(e) {
+					output = source.replace(/{[^)]*}/, '[undefined]');
+				}
+				container.append($(output));
+				
+			}
+			
+			// remove dom element
+			target.replaceWith(container);
+			
+			// refresh iScroll
+			this.myScroll.refresh();
+			
+		
 		},
 		
 		onRefresh: function() {
-			this.myScroll.refresh();
+			this.setupTable();
 		},
 		
 		bindData: function(data) {
+		
+			// store reference to collection
+			this.collection = data;
+			
+			// bind event on model
+			this.collection.model.on('datachange', $.proxy(this.onDataChange, this));
+		
+		},
+		
+		onDataChange: function(d) {
+		
+			// if fields have changed
+			if(this.collection.intersect(d.data) > 0) {
+				
+				// refresh collection
+				this.collection.refresh();
+				
+				// rebuild table
+				this.setupTable();
+				
+			}
+		
+		},
+		
+		onSelect: function(e) {
+		
+			// get target
+			var target = $(e.currentTarget);
+			
+			// check if target is a table cell
+			if (target.hasClass('ios-ui-table-cell')) {
+			
+				// stop propagation
+				e.stopPropagation();
+			
+				// get data id
+				var id = $(target).attr('itemid');
+			
+			}
 		
 		},
 		

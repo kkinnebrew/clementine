@@ -151,7 +151,8 @@ Orange.add('ui', function(O) {
 		},
 		
 		getView: function(name) {
-			if (typeof this._views[name] !== 'undefined') return this._views[name];
+			if (typeof name === 'object') return name;
+			else if (typeof this._views[name] !== 'undefined') return this._views[name];
 			throw 'Error: View "' + name + '" not found';
 		},
 		
@@ -267,7 +268,6 @@ Orange.add('ui', function(O) {
 			this.name = this.target.attr('data-name');
 			
 			this.target.addClass(this.typeList);
-			console.log(this);
 			
 			if (this.target.length === 0) throw 'Invalid view source';
 		
@@ -399,6 +399,17 @@ Orange.add('ui', function(O) {
 					|| this.searchVersion(navigator.appVersion)
 					|| "an unknown version";
 				this.OS = this.searchString(this.dataOS) || "an unknown OS";
+				
+				// check if mobile
+				var useragent = navigator.userAgent.toLowerCase();
+				if( useragent.search("iphone") > 0)
+				    this.isMobile = true; // iphone
+				else if( useragent.search("ipod") > 0)
+				    this.isMobile = true; // ipod
+				else if( useragent.search("android") > 0)
+				    this.isMobile = true; // android
+				else this.isMobile = false;
+				
 			},
 			
 			searchString: function (data) {
@@ -517,7 +528,8 @@ Orange.add('ui', function(O) {
 		return {
 			browser: BrowserDetect.browser,
 			version: BrowserDetect.version,
-			os: BrowserDetect.OS
+			os: BrowserDetect.OS,
+			isMobile: BrowserDetect.isMobile
 		}
 	
 	})();

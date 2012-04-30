@@ -34,11 +34,12 @@ Orange.add('contacts-controllers', function(O) {
 		},
 		
 		onSelect: function(e) {
-		
+			
 			// prevent bubbling
 			e.stopPropagation();
 			
 			// push the view
+			this.getView('contact').setData(e.data);
 			this.pushView(this.getView('contact'));
 		
 		},
@@ -77,7 +78,7 @@ Orange.add('contacts-controllers', function(O) {
 			}, this), function() {});			
 		
 			// bind dom events
-			this.target.find('.ios-ui-bar-button-item.right').on('click', $.proxy(this.onAdd, this));
+			this.target.find('.ios-ui-bar-button-item.right').on((O.Browser.isMobile ? 'touchend' : 'click'), $.proxy(this.onAdd, this));
 									
 			// bind table select event
 			this.getView('contact-list').on('select', $.proxy(this.onSelect, this));
@@ -91,14 +92,15 @@ Orange.add('contacts-controllers', function(O) {
 		},
 		
 		onSelect: function(e) {
+						
+			// stop propagation
+			e.stopPropagation();
 			
 			// get data model
 			var data = e.data;
-			
-			this.fire(
-			
+						
 			// set data to view
-			this.getView('contact').setData(data);
+			this.fire('select', data);
 			
 		},
 		
@@ -119,7 +121,7 @@ Orange.add('contacts-controllers', function(O) {
 		onLoad: function() {
 		
 			// bind dom events
-			this.getElement('back-btn').target.on('click', $.proxy(this.onBack, this));
+			this.target.find('.ios-ui-bar-button-item.left').on((O.Browser.isMobile ? 'touchend' : 'click'), $.proxy(this.onBack, this));
 			
 			this._super();
 		
@@ -130,21 +132,19 @@ Orange.add('contacts-controllers', function(O) {
 		},
 		
 		setData: function(data) {
-		
-			// get form
-			var form = this.getForm('create-contact');
-		
+				
 			// sets the values of the view
-			form.get('contact_id').val(data.contactId);
-			form.get('first_name').val(data.firstName);
-			form.get('last_name').val(data.lastName);
-			form.get('email').val(data.email);
-			form.get('phone').val(data.phone);
-			form.get('birthday').val(data.birthday);
+			this.target.find('[itemtype="Contact"]').attr('itemid', data.contactId);
+			this.target.find('[itemprop="firstName"]').text(data.firstName);
+			this.target.find('[itemprop="lastName"]').text(data.lastName);
+			this.target.find('[itemprop="email"]').text(data.email);
+			this.target.find('[itemprop="phone"]').text(data.phone);
+			this.target.find('[itemprop="birthday"]').text(data.birthday);
 		
 		},
 		
 		onUnload: function() {
+			this.target.find('.ios-ui-bar-button-item.left').off();
 			this._super();
 		}
 	
@@ -202,7 +202,7 @@ Orange.add('contacts-controllers', function(O) {
 		onLoad: function() {
 		
 			// bind event handler to form submit
-			this.getForm('create-contact').get('submit').on('click', $.proxy(this.onSubmit, this));
+			this.getForm('create-contact').get('submit').on((O.Browser.isMobile ? 'touchend' : 'click'), $.proxy(this.onSubmit, this));
 		
 			this._super();
 		

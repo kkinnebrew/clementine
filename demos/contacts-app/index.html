@@ -45,6 +45,12 @@ $(document).ready(function() {
 	
 	Orange.init('Contacts');
 
+	document.body.addEventListener('touchstart', function(e){ 
+		if($(e.target).get(0).tagName.toLowerCase() !== 'input') {
+			e.preventDefault();
+		}
+	});
+
 });
 
 </script>

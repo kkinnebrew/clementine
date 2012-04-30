@@ -163,7 +163,7 @@ Orange.add('ios', function(O) {
 		pushView: function(view) {
 				
 			var duration = 300;
-						
+									
 			// fetch view, exception handled in getView()
 			view = this.getView(view);
 			for(var i in this.viewStack) {
@@ -342,6 +342,27 @@ Orange.add('ios', function(O) {
 			// bind select event
 			this.target.on('click', $.proxy(this.onSelect, this));
 			this.target.removeAttr('data-cell-element');
+			
+			this.target.on('touchstart', $.proxy(function(e) {
+			
+				var target = $(e.target);
+			
+				// check if target is a table cell
+				if (target.hasClass('ios-ui-table-cell')) {
+					cell = target;
+				} else if (target.parent().hasClass('ios-ui-table-cell')) {	
+					cell = target.parent();
+				}
+				
+				if(cell != null) {
+					cell.addClass('touched');
+				}
+				
+			}, this));
+			
+			this.target.on('touchend', $.proxy(function(e) {
+				this.target.find('.ios-ui-table-cell').removeClass('touched');
+			}, this));
 						
 		},
 		
@@ -379,7 +400,7 @@ Orange.add('ios', function(O) {
 		},
 		
 		bindData: function(data) {
-		
+				
 			// store reference to collection
 			this.collection = data;
 						
@@ -410,22 +431,28 @@ Orange.add('ios', function(O) {
 				
 			// get target
 			var target = $(e.target);
-						
+			var cell = null;
+			
+			// stop propagation
+			e.stopPropagation();
+			
 			// check if target is a table cell
-			if (target.hasClass('ios-ui-table-cell') || target.parent().hasClass('ios-ui-table-cell')) {	
+			if (target.hasClass('ios-ui-table-cell')) {
+				cell = target;
+			} else if (target.parent().hasClass('ios-ui-table-cell')) {	
+				cell = target.parent();
+			}
 			
-				// stop propagation
-				e.stopPropagation();
-			
+			if(cell != null) {
+
 				// get data id
-				var id = $(target).attr('itemid');
+				var id = $(cell).attr('itemid');
 				
 				// get entry
 				var data = this.collection.get(id);
-				console.log(data);
 				
 				// fire event
-				this.fire('select', id);
+				this.fire('select', data);
 			
 			}
 		
@@ -448,6 +475,7 @@ Orange.add('ios', function(O) {
 		
 		presentModalView: function() {
 		
+			$('body').append(this.target);
 			console.log("presenting");
 		
 		},
@@ -455,6 +483,7 @@ Orange.add('ios', function(O) {
 		dismissModalView: function() {
 		
 			console.log("dismissing");
+			this.target.remove();
 		
 		},
 		

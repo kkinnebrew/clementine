@@ -315,15 +315,26 @@ Orange.add('db', function(O) {
 			this.model = model;
 			this.data = data.models;
 			this.ids = data.ids;
-		
+			this._data = {};
+			
+			// get key
+			var key = '';
+			for(var name in this.model.fields) {
+				if (this.model.fields[name].name == this.model.id) {
+					key = name;
+					break;
+				}
+			}
+						
+			// setup data
+			for(var i=0; i<data.models.length; i++) {
+				this._data[data.models[i][key]] = data.models[i];
+			}
+					
 		},
 		
 		get: function(id) {
-		
-			var key = this.model.id;
-			var finalKey = _.find(this.model.fields, function(data) { return data.name == key });
-			return _.find(this.data, function(data) { return data[key] == id });
-		
+			return (typeof this._data[id] != undefined) ? this._data[id] : null;
 		},
 		
 		intersect: function(array) {

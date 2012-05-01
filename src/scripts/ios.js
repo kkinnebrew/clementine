@@ -302,16 +302,19 @@ Orange.add('ios', function(O) {
 	O.iOS.UIScrollView = O.View.define({
 		
 		type: 'ios-ui-scroll-view',
-				
+		
+		initialize: function(parent, target) {
+			this._super(parent, target);
+			this.target.wrapInner('<div class="scroll-view"></div>');
+			this.myScroll = new iScroll(this.target.get(0));
+		},
+		
 		onLoad: function() {
 
-			// wrap the view
-			this.target.wrapInner('<div class="scroll-view"></div>');
-		
 			// setup iscroll
-			this.myScroll = new iScroll(this.target.get(0));
+			this.myScroll.refresh();
 			this._super();
-									
+												
 		},
 		
 		onUnload: function() {
@@ -345,22 +348,32 @@ Orange.add('ios', function(O) {
 			
 			this.target.on('touchstart', $.proxy(function(e) {
 			
-				var target = $(e.target);
-			
-				// check if target is a table cell
-				if (target.hasClass('ios-ui-table-cell')) {
-					cell = target;
-				} else if (target.parent().hasClass('ios-ui-table-cell')) {	
-					cell = target.parent();
-				}
+				this.timeout = setTimeout($.proxy(function() {
 				
-				if(cell != null) {
-					cell.addClass('touched');
-				}
+					var target = $(e.target);
+				
+					// check if target is a table cell
+					if (target.hasClass('ios-ui-table-cell')) {
+						cell = target;
+					} else if (target.parent().hasClass('ios-ui-table-cell')) {	
+						cell = target.parent();
+					}
+					
+					if(cell != null) {
+						cell.addClass('touched');
+					}
+				
+				}, this), 50);
 				
 			}, this));
 			
+			this.target.on('touchmove', $.proxy(function(e) {
+				clearTimeout(this.timeout);
+				this.target.find('.ios-ui-table-cell').removeClass('touched');
+			}, this));
+			
 			this.target.on('touchend', $.proxy(function(e) {
+				clearTimeout(this.timeout);
 				this.target.find('.ios-ui-table-cell').removeClass('touched');
 			}, this));
 						
@@ -474,16 +487,22 @@ Orange.add('ios', function(O) {
 		},
 		
 		presentModalView: function() {
-		
+			this.onLoad();
 			$('body').append(this.target);
-			console.log("presenting");
-		
+			
+			setTimeout($.proxy(function() {
+				this.target.addClass('visible');
+			}, this), 0);
+					
 		},
 		
 		dismissModalView: function() {
-		
-			console.log("dismissing");
-			this.target.remove();
+					
+			this.target.removeClass('visible');
+			setTimeout($.proxy(function() {
+				this.target.remove();
+				this.onUnload();
+			}, this), 300);
 		
 		},
 		

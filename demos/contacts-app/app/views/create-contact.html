@@ -1,16 +1,24 @@
 <div data-view="contacts-modal-view" data-name="create-contact-modal">
-
-	<div data-view="contacts-create-view" data-name="create-contact">
 	
-		<form name="create-contact">
+	<div class="ios-ui-navigation-bar">
+				
+		<div class="title">Create Contact</div>
 		
-			<label for="first_name">First Name</label>
+		<div class="ios-ui-bar-button-item right">Close</div>
 			
-			<input type="text" name="first_name" placeholder="First Name" />
+	</div>
+
+	<div data-view="contacts-create-view" data-name="create-contact" style="background-color: #F8F8F8;">
+
+		<form name="create-contact">
+				
+			<label for="firstName">First Name</label>
 			
-			<label for="last_name">Last Name</label>
+			<input type="text" name="firstName" placeholder="First Name" />
 			
-			<input type="text" name="last_name" placeholder="Last Name" />
+			<label for="lastName">Last Name</label>
+			
+			<input type="text" name="lastName" placeholder="Last Name" />
 			
 			<label for="email">Email</label>
 			
@@ -28,10 +36,10 @@
 			
 			<input type="url" name="website" placeholder="Website" />
 			
-			<input type="submit" name="submit" value="Create" />
+			<input type="submit" name="submit" class="ios-ui-button" value="Create" />
 		
 		</form>
-	
+		
 	</div>
 
 </div>

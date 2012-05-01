@@ -323,7 +323,7 @@ Orange.add('ui', function(O) {
 			
 			var that = this;
 			this._fields = {};
-			this._target = target;
+			this.target = target;
 			
 			var name = $(target).attr('name');
 
@@ -338,6 +338,8 @@ Orange.add('ui', function(O) {
 		get: function(name) {
 			if (typeof this._fields[name] !== 'undefined') {
 				return this._fields[name];
+			} else {
+				throw "Error: Form field '" + name + "' not found";
 			}
 		},
 		
@@ -407,6 +409,8 @@ Orange.add('ui', function(O) {
 				else if( useragent.search("ipod") > 0)
 				    this.isMobile = true; // ipod
 				else if( useragent.search("android") > 0)
+				    this.isMobile = true; // android
+				else if( useragent.search("ipad") > 0)
 				    this.isMobile = true; // android
 				else this.isMobile = false;
 				

@@ -50,6 +50,24 @@ $(document).ready(function() {
 			e.preventDefault();
 		}
 	});
+	
+	$.ajax({
+	  url: 'http://orangelit.com/contacts/contacts/',
+	  type: 'POST',
+	  data: {
+	  	'first_name': 'Kevin',
+	  	'last_name': 'Kinnebrew',
+	  	'email': 'kevin.kinnebrew@gmail.com'
+	  },
+	  success: function(data) {
+	  	alert('success');
+	  	alert(data);
+	  },
+	  error: function() {
+	  	alert('error');
+	  }
+	});
+	
 
 });
 

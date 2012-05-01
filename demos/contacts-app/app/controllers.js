@@ -20,7 +20,7 @@ Orange.add('contacts-controllers', function(O) {
 			this.getView('contact').on('back', $.proxy(this.onBack, this));
 			
 			this._super();
-		
+				
 		},
 		
 		onCreate: function(e) {
@@ -161,7 +161,8 @@ Orange.add('contacts-controllers', function(O) {
 		
 			// bind events
 			this.getView('create-contact').on('create', $.proxy(this.onCreate, this));
-		
+			this.target.find('.ios-ui-bar-button-item.right').on((O.Browser.isMobile ? 'touchend' : 'click'), $.proxy(this.onClose, this));
+			
 			this._super();
 		
 		},
@@ -170,6 +171,8 @@ Orange.add('contacts-controllers', function(O) {
 		
 			// prevent bubbling
 			e.stopPropagation();
+		
+			console.log('dismissing');
 		
 			// close the view
 			this.dismissModalView();
@@ -194,36 +197,38 @@ Orange.add('contacts-controllers', function(O) {
 	
 	
 	/* creating contact form */
-	O.Contacts.CreateContactView = O.View.extend(O.iOS.UIView, {
+	O.Contacts.CreateContactView = O.View.extend(O.iOS.UIScrollView, {
 		
 		type: 'contacts-create-view',
 		triggers: ['create', 'close'],
 		
 		onLoad: function() {
-		
+						
 			// bind event handler to form submit
 			this.getForm('create-contact').get('submit').on((O.Browser.isMobile ? 'touchend' : 'click'), $.proxy(this.onSubmit, this));
-		
+			this.getForm('create-contact').target.find('input').removeAttr('disabled');
+			
 			this._super();
 		
 		},
 		
 		onSubmit: function(e) {
 		
+			e.preventDefault();
+			
 			// get form data
 			var form = this.getForm('create-contact');
-		
+				
 			// sets the values of the view
 			var data = {
-				'contactId': form.get('contact_id'),
-				'firstName': form.get('first_name'),
-				'lastName': form.get('last_name'),
-				'email': form.get('email'),
-				'phone': form.get('phone'),
-				'birthday': form.get('birthday'),
-				'website': form.get('website')
+				'firstName': form.get('firstName').val(),
+				'lastName': form.get('lastName').val(),
+				'email': form.get('email').val(),
+				'phone': form.get('phone').val(),
+				'birthday': form.get('birthday').val(),
+				'website': form.get('website').val()
 			};
-		
+				
 			// validate model
 			if (O.Model.get('Contact').validate(data)) {
 			
@@ -232,7 +237,8 @@ Orange.add('contacts-controllers', function(O) {
 			
 			} else {
 			
-				// show validation error	
+				// show validation error
+				alert("Validation Error");
 			
 			}
 		

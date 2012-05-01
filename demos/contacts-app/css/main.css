@@ -9,3 +9,17 @@ html, body {
 body {
 	overflow: hidden;
 }
+
+label {
+	display: block;
+	margin-bottom: 10px;
+}
+
+input {
+	display: block;
+	margin-bottom: 10px;
+}
+
+.ios-ui-modal-view .ios-ui-scroll-view {
+	top: 44px;
+}

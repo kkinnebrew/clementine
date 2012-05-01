@@ -24,6 +24,14 @@ Orange.add('db', function(O) {
 			this.mapItem = config.mapItem;
 			this.mapItems = config.mapItems;
 			
+			for(var field in this.fields) {
+				if (this.fields[field].name == this.id) {
+					this.key = field;
+				}
+			}
+			
+			if (this.key == null) throw "Missing id field in model '" + this.name + "'";
+			
 			// setup event target
 			this._eventTarget = new O.EventTarget(null, this);
 		
@@ -84,12 +92,15 @@ Orange.add('db', function(O) {
 		},
 		
 		save: function(object, success, failure) {
-		
+				
 			// calculation action
-			var action = (object[this.id ? this.id : 'id'] !== null) ? 'update' : 'create';
-		
+			var action = (typeof object[this.key] !== 'undefined') ? 'update' : 'create';
+						
 			// call map function if it exists
 			var successFunc = function(data) {
+			
+				console.log('success');
+				console.log(data);
 			
 				// process data
 				data = this._processData($.parseJSON(data));
@@ -109,14 +120,16 @@ Orange.add('db', function(O) {
 				
 			};
 			
+			// process data
+			data = this._prepareData(object, action);
+						
 			// check if object has been saved
 			if (action === 'update') {
 			
 				$.ajax({
 				  url: (!id) ? this.path : this.path + id,
-				  contentType: 'text/json',
 				  type: 'PUT',
-				  data: object,
+				  data: data,
 			  	success: $.proxy(successFunc, this),
 				  error: failure
 				});
@@ -125,9 +138,8 @@ Orange.add('db', function(O) {
 			
 				$.ajax({
 				  url: this.path,
-				  contentType: 'text/json',
 				  type: 'POST',
-				  data: object,
+				  data: data,
 				  success: $.proxy(successFunc, this),
 				  error: failure
 				});
@@ -203,18 +215,21 @@ Orange.add('db', function(O) {
 		},
 		
 		validate: function(data) {
-		
+				
 			// compare data to our model
 			for(var field in this.fields) {
 			
+				if( this.fields[field].name == this.id) continue;
+							
 				// get source field name
-				var source = this.fields[field].name;
 				var nullable = (typeof this.fields[field].nullable !== undefined) ? this.fields[field].nullable : true;
-				var isNull = (typeof data[source] === 'undefined' || data[source] === '');
-			
+				var isNull = (typeof data[field] === 'undefined' || data[field] === '');
+						
 				// continue if field is not defined
 				if (isNull && !nullable) return false;
-			} 
+			}
+			
+			return true;
 		
 		},
 		
@@ -252,6 +267,38 @@ Orange.add('db', function(O) {
 			
 			// return model
 			return model;
+		
+		},
+		
+		_prepareData: function(object, action) {
+		
+			// create output object
+			var data = {};
+												
+			// map to our model
+			for(var field in this.fields) {
+			
+				// skip id if null
+				if (this.key == field && action == 'create') {
+					continue;
+				}
+			
+				// get source field name
+				var source = this.fields[field].name;
+				var value = (typeof object[field] !== 'undefined') ? object[field] : undefined;
+						
+				// continue if field is not defined
+				if (value === undefined && !this.fields[field].nullable) {
+					console.warn("[WARN] Could missing data for field '" + field + "' for " + this.name);
+					continue;
+				}
+			
+				// set field on output
+				data[source] = value;
+			}
+									
+			// return model
+			return data;
 		
 		},
 		

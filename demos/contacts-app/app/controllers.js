@@ -20,6 +20,8 @@ Orange.add('contacts-controllers', function(O) {
 			this.getView('contact').on('back', $.proxy(this.onBack, this));
 			
 			this._super();
+			
+			console.log(this);
 				
 		},
 		

@@ -2,37 +2,106 @@ Orange.add('wmsocial', function(O) {
 
 	O.namespace('WMSocial');
 	
+	O.UITableVIew = O.View.define({
+	
+		getType: function() {
+			return 'ui-table-view';
+		},
+		
+		getTriggers: function() {
+			return ['select']
+		},
+		
+		getEvents: function() {
+			return {}
+		}
+	
+	});
+	
+	O.FeedTableView = O.View.extend(O.UITableView, {
+	
+		getType: function() {
+			return 'feed-table-view';
+		},
+		
+		getTriggers: function() {
+			return ['select', 'delete'];
+		},
+		
+		getEvents: function() {
+			return {};
+		}
+	
+	});
+	
+	O.ParentController = O.View.define({
+	
+		getType: function() {
+			return 'parent-view';
+		},
+		
+		getTriggers: function() {
+			return [];
+		},
+		
+		getEvents: function() {
+			return {
+				'feed-table-view': { 'select': true, 'delete': true }
+			};
+		},
+		
+		onLoad: function() {		
+			this.find('back-btn').on('click', this.onClick);
+		},		
+		
+		onClick: function() {
+		
+			// get data
+			var data = O.Model.get('Event').get(id);
+		
+			this.fire('select', data);
+				
+		},
+		
+		onUnload: function() {
+			this.find('back-btn').off();
+		},
+		
+		onSelect: function(e) {
+		
+		},
+		
+		onDelete: function(e) {
+		
+		}
+	
+	});
+	
+	
+	
 	O.WMSocial.SocialAppController = O.View.extend(O.UIMultiViewController, {
 	
 		getType: function() {
 			return 'wm-social-app';
 		},
-	
-		onWillLoad: function() [
 		
+		getTriggers: function() {
+			return [];
 		},
 		
-		onDidLoad: function() {
-		
-			this.getView('social-home').on('authenticated', this.onAuthenticated, this);
-			this.getView('social-main').on('logout', this.onLogout, this);
-		
-		},
+		getEvents: function() {
+			return {
+				'social-home': { 'authenticated': true },
+				'social-main': { 'logout': true }
+			}
+		}
 		
 		onAuthenticated: function(e) {
-			this.activateView('social-main');
+			
 		},
 		
 		onLogout: function(e) {
-
-		},
-		
-		onWillUnload: function() {
-		
-		},
-		
-		onDidUnload: function() {
-		
+			
 		}
 	
 	});
@@ -43,40 +112,15 @@ Orange.add('wmsocial', function(O) {
 			return 'wm-home';
 		},
 		
-		onWillLoad: function() [
-		
+		getTriggers: function() {
+			return ['authenticated'];
 		},
 		
-		onDidLoad: function() {
-		
-			this.getView('social-home-multiview').on('login', this.onLogin, this);
-			this.getView('social-home-multiview').on('setup', this.onSetup, this);
-		
-		},
-		
-		onLogin: function(e) {
-			
-			if (e.data == 1) {
-			
-			} else if (e.data == 2) {
-			
-			} else {
-				this.getForm
+		getEvents: function() {
+			return {
+				'social-home-multiview': { 'login': true, 'setup': true }
 			}
-			
-		},
-		
-		onSetup: function(e) {
-		
-		},
-		
-		onWillUnload: function() {
-		
-		},
-		
-		onDidUnload: function() {
-		
-		}
+		} 
 		
 	});
 	

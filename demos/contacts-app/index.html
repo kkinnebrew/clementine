@@ -52,19 +52,12 @@ $(document).ready(function() {
 	});
 	
 	$.ajax({
-	  url: 'http://orangelit.com/contacts/contacts/',
-	  type: 'POST',
-	  data: {
-	  	'first_name': 'Kevin',
-	  	'last_name': 'Kinnebrew',
-	  	'email': 'kevin.kinnebrew@gmail.com'
-	  },
+	  url: 'cross.php?url=http://www.google.com',
 	  success: function(data) {
-	  	alert('success');
-	  	alert(data);
+	  	console.log(data);
 	  },
-	  error: function() {
-	  	alert('error');
+	  error: function(e) {
+	  	console.log(e);
 	  }
 	});
 	

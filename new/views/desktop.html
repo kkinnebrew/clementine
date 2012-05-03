@@ -1,24 +1,13 @@
 <!-- index.html -->
 <div data-view="wm-social-app" data-name="social-app" data-root="true">
 
-	<div data-view="wm-desktop" data-media="desktop" data-template="desktop.html"></div>
-	
-	<div data-view="wm-tablet" data-media="tablet" data-template="tablet.html"></div>
-	
-	<div data-view="wm-mobile" data-media="mobile" data-template="mobile.html"></div>
-
-</div>
-
-<!-- index.html -->
-<div data-view="wm-social-app" data-name="social-app" data-root="true">
-
-	<div data-view="wm-home" data-name="social-home" data-media="desktop tablet" data-fires="authenticated">
+	<div data-view="wm-home" data-name="social-home" data-media="desktop tablet">
 	
 		<h1>Welcome to WMSocial</h1>
 		
 		<p>Social lets you plan events with your coworkers in real-time.</p>
 		
-		<div data-view="wm-home-multiview" data-name="social-home-multiview" data-default="social-login" data-fires="login setup">
+		<div data-view="wm-home-multiview" data-name="social-home-multiview" data-default="social-login">
 	
 			<div data-view="wm-login" data-name="social-login" data-template="social-login.html"></div>
 			
@@ -29,7 +18,7 @@
 	</div>
 	
 	<!-- for mobile browsers -->
-	<div data-view="wm-mobile" data-name="social-main" data-media="mobile" data-default="social-login" data-fires="logout">
+	<div data-view="wm-mobile" data-name="social-main" data-media="mobile" data-default="social-login">
 	
 		<div data-view="wm-login" data-name="social-login" data-template="social-login.html"></div>
 
@@ -48,16 +37,12 @@
 	</div>
 	
 	<!-- for desktop and tablet browsers -->
-	<div data-view="wm-main" data-name="social-main" data-media="tablet desktop" data-fires="logout">
+	<div data-view="wm-main" data-name="social-main" data-media="tablet desktop">
+		
+		<div data-view="wm-feed" data-name="social-feed" data-template="social-feed.html"></div>
 	
-		<div data-view="ui-split-view" data-name="social-split-view" data-menu="social-feed" data-content="social-event">
+		<div data-view="wm-event" data-name="social-event" data-template="social-event.html"></div>
 		
-			<div data-view="wm-feed" data-name="social-feed" data-template="social-feed.html"></div>
-		
-			<div data-view="wm-event" data-name="social-event" data-template="social-event.html"></div>
-		
-		</div>
-	
 	</div>
 
 </div>
@@ -77,7 +62,7 @@
 		<label for="password" data-media="desktop"></label>
 		<input type="password" name="password" placeholder="Password" />
 		
-		<input type="submit" name="login" value="Login" data-fires="login firstLogin" />
+		<input type="submit" name="login" value="Login" />
 	
 	</form>
 
@@ -88,7 +73,7 @@
 
 	<div class="ios-ui-navigation-bar" data-media="mobile">
 	
-		<div class="ios-ui-bar-button-item left" data-name="back-btn" data-fires="back">Back</div>
+		<div class="ios-ui-bar-button-item left" data-name="back-btn">Back</div>
 		<div class="title">Setup</div>
 	
 	</div>
@@ -108,7 +93,7 @@
 			<option value="3">Seattle</option>
 		</select>
 		
-		<input type="submit" name="setup" value="Setup" data-fires="setup" />
+		<input type="submit" name="setup" value="Setup" />
 	
 	</form>
 
@@ -119,12 +104,12 @@
 
 	<div class="ios-ui-navigation-bar" data-media="tablet mobile">
 	
-		<div class="ios-ui-bar-button-item left" data-name="logout-btn" data-fires="logout">Logout</div>
+		<div class="ios-ui-bar-button-item left" data-name="logout-btn">Logout</div>
 		<div class="title">Feed</div>
 	
 	</div>
 	
-	<div data-view="ios-ui-table-view" data-name="social-events-list" data-cell="social-event-cell.html" data-fires="select"></div>
+	<div data-view="ios-ui-table-view" data-name="social-events-list" data-cell="social-event-cell.html"></div>
 
 </div>
 
@@ -133,9 +118,9 @@
 
 	<div class="ios-ui-navigation-bar" data-media="tablet mobile">
 	
-		<div class="ios-ui-bar-button-item left" data-name="back-btn" data-fires="back">Back</div>
+		<div class="ios-ui-bar-button-item left" data-name="back-btn" data-media="mobile">Back</div>
 		<div class="title">Feed</div>
-		<div class="ios-ui-bar-button-item right" data-name="flip-btn" data-media="mobile" data-fires="flip">Map</div>
+		<div class="ios-ui-bar-button-item right" data-name="flip-btn" data-media="mobile">Map</div>
 	
 	</div>
 
@@ -182,10 +167,3 @@
 	</div>
 
 </div>
-
-
-
-
-
-
-

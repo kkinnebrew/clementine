@@ -2,84 +2,7 @@ Orange.add('wmsocial', function(O) {
 
 	O.namespace('WMSocial');
 	
-	O.UITableVIew = O.View.define({
-	
-		getType: function() {
-			return 'ui-table-view';
-		},
-		
-		getTriggers: function() {
-			return ['select']
-		},
-		
-		getEvents: function() {
-			return {}
-		}
-	
-	});
-	
-	O.FeedTableView = O.View.extend(O.UITableView, {
-	
-		getType: function() {
-			return 'feed-table-view';
-		},
-		
-		getTriggers: function() {
-			return ['select', 'delete'];
-		},
-		
-		getEvents: function() {
-			return {};
-		}
-	
-	});
-	
-	O.ParentController = O.View.define({
-	
-		getType: function() {
-			return 'parent-view';
-		},
-		
-		getTriggers: function() {
-			return [];
-		},
-		
-		getEvents: function() {
-			return {
-				'feed-table-view': { 'select': true, 'delete': true }
-			};
-		},
-		
-		onLoad: function() {		
-			this.find('back-btn').on('click', this.onClick);
-		},		
-		
-		onClick: function() {
-		
-			// get data
-			var data = O.Model.get('Event').get(id);
-		
-			this.fire('select', data);
-				
-		},
-		
-		onUnload: function() {
-			this.find('back-btn').off();
-		},
-		
-		onSelect: function(e) {
-		
-		},
-		
-		onDelete: function(e) {
-		
-		}
-	
-	});
-	
-	
-	
-	O.WMSocial.SocialAppController = O.View.extend(O.UIMultiViewController, {
+		O.WMSocial.SocialAppController = O.View.extend(O.UIMultiViewController, {
 	
 		getType: function() {
 			return 'wm-social-app';
@@ -89,7 +12,7 @@ Orange.add('wmsocial', function(O) {
 			return [];
 		},
 		
-		getEvents: function() {
+		getBindings: function() {
 			return {
 				'social-home': { 'authenticated': true },
 				'social-main': { 'logout': true }
@@ -97,11 +20,11 @@ Orange.add('wmsocial', function(O) {
 		}
 		
 		onAuthenticated: function(e) {
-			
+			this.activateView('social-main');			
 		},
 		
 		onLogout: function(e) {
-			
+			this.activateView('social-home');
 		}
 	
 	});
@@ -118,9 +41,9 @@ Orange.add('wmsocial', function(O) {
 		
 		getEvents: function() {
 			return {
-				'social-home-multiview': { 'login': true, 'setup': true }
+				'social-home-multiview': { 'authenticated': true }
 			}
-		} 
+		}
 		
 	});
 	
@@ -130,38 +53,119 @@ Orange.add('wmsocial', function(O) {
 			return 'wm-home-multiview';
 		},
 		
-		onWillLoad: function() [
-		
+		getTriggers: function() {
+			return ['authenticated'];
 		},
 		
-		onDidLoad: function() {
-		
+		getEvents: function() {
+			return {
+				'social-login': { 'login': true, 'firstLogin': true },
+				'social-setup': { 'login': true }
+			}
 		},
 		
-		onWillUnload: function() {
-		
+		onLogin: function(e) {
+			this.fire('authenticated');
 		},
 		
-		onDidUnload: function() {
+		onFirstLogin: function(e) {
+			this.activateView('social-setup');
+		},
 		
+		onSetup: function(e) {
+			this.fire('authenticated');
+		}
+		
+	});
+	
+	O.WMSocial.MainViewController = O.View.extend(O.ViewController, {
+		
+		getType: function() {
+			return 'wm-main';
+		},
+		
+		getTriggers: function() {
+			return ['logout'];
+		},
+		
+		getEvents: function() {
+			return {
+				'social-feed': { 'logout': true, 'select': true }
+			}
+		},
+		
+		onSelect: function(e) {			
+			this.getView('social-event').setData(e.data);
+		}
+		
+	});
+	
+	O.WMSocial.MobileViewController = O.View.extend(O.UINavigationController, {
+		
+		getType: function() {
+			return 'wm-mobile';
+		},
+		
+		getTriggers: function() {
+			return ['logout'];
+		},
+		
+		getEvents: function() {
+			return {
+				'social-login': { 'login': true, 'firstLogin': true },
+				'social-setup': { 'login': true, 'back': true },
+				'social-feed': { 'back': true },
+				'social-flip-view': { 'back': true }
+			}
+		},
+		
+		onLogin: function(e) {
+			this.pushView(this.getView('social-feed'));
+		},
+		
+		onFirstLogin: function(e) {
+			this.pushView(this.getView('social-setup'));
+		},
+		
+		onBack: function(e) {
+			this.popView();
 		}
 		
 	});
 	
 	O.WMSocial.LoginController = O.View.define({
 		
-		onWillLoad: function() [
+		getType: function() {
+			return 'wm-login';
+		},
+		
+		getTriggers: function() {
+			return ['login', 'firstLogin'];
+		},
+		
+		getEvents: function() {
+			return {
+				'submit-btn': { 'click': true }
+			}
+		},
+		
+		onClick: function(e) {
+		
+			// get form data
+			var data = this.getForm('login').getData();
+			
+			// submit data
+			O.Request.post({
+				path: 'login/',
+				data: data,
+				success: $.proxy(this.onSubmitSuccess, this),
+				error: $.proxy(this.onSubmitError, this)
+			});
 		
 		},
 		
-		onDidLoad: function() {
-		
-			this.getForm('login').getField('login').on('login', this.onLogin, this);
-		
-		},
-		
-		onLogin: function() {
-		
+		onSubmitSuccess: function(e) {
+			
 			if (e.data == 1) {
 				this.fire('login');
 			} else if (e.data == 2) {
@@ -169,76 +173,124 @@ Orange.add('wmsocial', function(O) {
 			} else {
 				this.getForm('login').showError('Invalid Login');
 			}
-		
-		},
-		
-		onWillUnload: function() {
-		
-		},
-		
-		onDidUnload: function() {
-		
+			
 		}
 		
 	});
 	
 	O.WMSocial.SetupController = O.View.define({
 	
-		onWillLoad: function() [
+		getType: function() {
+			return 'wm-setup';
+		},
+		
+		getTriggers: function() {
+			return ['login'];
+		},
+		
+		getEvents: function() {
+			return {};
+		},
+		
+		onDidLoad: function() {		
+			this.getItem('submit-btn').on(O.Browser.isMobile ? 'touchend' : 'click', $.proxy(this.onClick, this));
+		},
+		
+		onSubmit: function(e) {
+		
+			// get form data
+			var data = this.getForm('setup').getData();
+			
+			// submit data
+			O.Request.post({
+				path: 'setup/',
+				data: data,
+				success: $.proxy(this.onSubmitSuccess, this),
+				error: $.proxy(this.onSubmitError, this)
+			});
 		
 		},
 		
-		onDidLoad: function() {
-		
+		onSubmitSuccess: function(e) {
+			this.fire('login');
 		},
 		
-		onWillUnload: function() {
-		
-		},
-		
-		onDidUnload: function() {
-		
+		onSubmitError: function(e) {
+			this.getForm('login').showError('Could not setup account');
 		}
 	
 	});
 	
 	O.WMSocial.FeedController = O.View.define({
 	
-		onWillLoad: function() [
+		getType: function() {
+			return 'wm-feed';
+		},
+		
+		getTriggers: function() {
+			return ['logout', 'select'];
+		},
+		
+		getEvents: function() {
+			return {
+				'social-events-list': { 'select': true }
+			};
+		},
+		
+		onDidLoad: function() {		
+			this.getItem('logout-btn').on(O.Browser.isMobile ? 'touchend' : 'click', $.proxy(this.onLogout, this));
+		},
+		
+		onLogout: function(e) {
+		
+			// get form data
+			var data = this.getForm('setup').getData();
+			
+			// submit data
+			O.Request.post({
+				path: 'logout/',
+				success: $.proxy(this.onSubmitSuccess, this)
+			});
 		
 		},
 		
-		onDidLoad: function() {
-		
-		},
-		
-		onWillUnload: function() {
-		
-		},
-		
-		onDidUnload: function() {
-		
+		onLogoutSuccess: function(e) {
+			this.fire('logout');
 		}
 	
 	});
 	
 	O.WMSocial.EventController = O.View.define({
 	
-		onWillLoad: function() [
-		
+		getType: function() {
+			return 'wm-event';
 		},
 		
-		onDidLoad: function() {
-		
-		
+		getTriggers: function() {
+			return ['back', 'flip'];
 		},
 		
-		onWillUnload: function() {
-		
+		getEvents: function() {
+			return {
+				'social-events-list': { 'select': true }
+			};
 		},
 		
-		onDidUnload: function() {
+		onDidLoad: function() {		
+			if(this.hasItem('back-btn')) this.getItem('back-btn').on(O.Browser.isMobile ? 'touchend' : 'click', $.proxy(this.onBack, this));
+			if(this.hasItem('flip-btn')) this.getItem('flip-btn').on(O.Browser.isMobile ? 'touchend' : 'click', $.proxy(this.onFlip, this));
+		},
 		
+		onBack: function(e) {
+			this.fire('back');
+		},
+		
+		onFlip: function(e) {
+			this.fire('flip');
+		},
+		
+		onLogoutSuccess: function(e) {
+			this.fire('logout');
 		}
 	
 	});

@@ -1,54 +1,54 @@
 <!-- index.html -->
-<div data-view="wm-social-app" data-name="social-app" data-root="true">
+<div data-control="wm-social-app" data-name="social-app" data-root="true">
 
-	<div data-view="wm-home" data-name="social-home" data-media="desktop tablet">
+	<div data-control="wm-home" data-name="social-home" data-media="desktop tablet">
 	
 		<h1>Welcome to WMSocial</h1>
 		
 		<p>Social lets you plan events with your coworkers in real-time.</p>
 		
-		<div data-view="wm-home-multiview" data-name="social-home-multiview" data-default="social-login">
+		<div data-control="wm-home-multiview" data-name="social-home-multiview" data-default="social-login">
 	
-			<div data-view="wm-login" data-name="social-login" data-template="social-login.html"></div>
+			<div data-control="wm-login" data-name="social-login" data-template="social-login.html"></div>
 			
-			<div data-view="wm-setup" data-name="social-setup" data-template="social-setup.html"></div>
+			<div data-control="wm-setup" data-name="social-setup" data-template="social-setup.html"></div>
 		
 		</div>
 	
 	</div>
 	
 	<!-- for mobile browsers -->
-	<div data-view="wm-mobile" data-name="social-main" data-media="mobile" data-default="social-login">
+	<div data-control="wm-mobile" data-name="social-main" data-media="mobile" data-default="social-login">
 	
-		<div data-view="wm-login" data-name="social-login" data-template="social-login.html"></div>
+		<div data-control="wm-login" data-name="social-login" data-template="social-login.html"></div>
 
-		<div data-view="wm-setup" data-name="social-setup" data-template="social-setup.html"></div>
+		<div data-control="wm-setup" data-name="social-setup" data-template="social-setup.html"></div>
 	
-		<div data-view="wm-feed" data-name="social-feed" data-template="social-feed.html"></div>
+		<div data-control="wm-feed" data-name="social-feed" data-template="social-feed.html"></div>
 
-		<div data-view="ui-flip-view" data-name="social-flip-view" data-default="social-event">
+		<div data-control="wm-flip-view" data-name="social-flip-view" data-default="social-event">
 
-			<div data-view="wm-event" data-name="social-event" data-template="social-event.html"></div>
+			<div data-control="wm-event" data-name="social-event" data-template="social-event.html"></div>
 			
-			<div data-view="ui-map-view" data-name="social-map"></div>
+			<div data-control="ui-map-view" data-name="social-map"></div>
 		
 		</div>
 			
 	</div>
 	
 	<!-- for desktop and tablet browsers -->
-	<div data-view="wm-main" data-name="social-main" data-media="tablet desktop">
+	<div data-control="wm-main" data-name="social-main" data-media="tablet desktop">
 		
-		<div data-view="wm-feed" data-name="social-feed" data-template="social-feed.html"></div>
+		<div data-control="wm-feed" data-name="social-feed" data-template="social-feed.html"></div>
 	
-		<div data-view="wm-event" data-name="social-event" data-template="social-event.html"></div>
+		<div data-control="wm-event" data-name="social-event" data-template="social-event.html"></div>
 		
 	</div>
 
 </div>
 
 <!-- social-login.html -->
-<div data-view="wm-login" data-name="social-login">
+<div data-control="wm-login" data-name="social-login">
 
 	<div class="ios-ui-navigation-bar" data-media="mobile">
 		<div class="title">Login</div>
@@ -57,7 +57,7 @@
 	<form name="login">
 	
 		<label for="username" data-media="desktop"></label>
-		<input type="name" name="username" placeholder="Username" />
+		<input type="text" name="username" placeholder="Username" />
 		
 		<label for="password" data-media="desktop"></label>
 		<input type="password" name="password" placeholder="Password" />
@@ -69,7 +69,7 @@
 </div>
 
 <!-- social-setup.html -->
-<div data-view="wm-setup" data-name="social-setup">
+<div data-control="wm-setup" data-name="social-setup">
 
 	<div class="ios-ui-navigation-bar" data-media="mobile">
 	
@@ -81,10 +81,10 @@
 	<form name="setup">
 	
 		<label for="firstName" data-media="desktop"></label>
-		<input type="name" name="firstName" placeholder="First Name" />
+		<input type="text" name="firstName" placeholder="First Name" />
 		
 		<label for="lastName" data-media="desktop"></label>
-		<input type="name" name="firstName" placeholder="Last Name" />
+		<input type="text" name="firstName" placeholder="Last Name" />
 		
 		<label for="region" data-media="desktop"></label>
 		<select name="region">
@@ -100,7 +100,7 @@
 </div>
 
 <!-- social-feed.html -->
-<div data-view="wm-feed" data-name="social-feed">
+<div data-control="wm-feed" data-name="social-feed">
 
 	<div class="ios-ui-navigation-bar" data-media="tablet mobile">
 	
@@ -109,12 +109,12 @@
 	
 	</div>
 	
-	<div data-view="ios-ui-table-view" data-name="social-events-list" data-cell="social-event-cell.html"></div>
+	<div data-control="ios-ui-table-view" data-name="social-events-list" data-cell="social-event-cell.html"></div>
 
 </div>
 
 <!-- social-event.html -->
-<div data-view="wm-event" data-name="social-event">
+<div data-control="wm-event" data-name="social-event">
 
 	<div class="ios-ui-navigation-bar" data-media="tablet mobile">
 	
@@ -124,7 +124,7 @@
 	
 	</div>
 
-	<div itemscope itemid>
+	<div itemscope data-name="event-info">
 	
 		<div itemprop="eventName"></div>
 		
@@ -141,29 +141,97 @@
 		</div>
 	
 	</div>
-
-	<div data-view="ui-map-view" data-name="social-map" data-media="desktop tablet"></div>
+	
+	<input type="button" name="attend" value="Attend" data-name="attend-btn" />
+	
+	<div data-control="ui-map-view" data-name="social-map" data-media="desktop tablet"></div>
 
 </div>
 
 <!-- social-event-cell.html -->
-<div data-element="wm-event-cell" data-name="social-event-cell">
-
-	<div itemscope itemid>
+<li data-control="wm-event-cell" data-name="social-event-cell" itemscope>
 	
-		<div itemprop="eventName"></div>
-		
-		<div itemprop="eventLocation" itemscope>
-			<span itemprop="locationName"></span>
-		</div>
-		
-		<div itemprop="eventDate"></div>
-		
-		<div itemprop="attendees" itemscope>
+	<div itemprop="eventName"></div>
+	
+	<div itemprop="eventLocation" itemscope>
+		<span itemprop="locationName"></span>
+	</div>
+	
+	<div itemprop="eventDate"></div>
+	
+	<ul itemprop="attendees">
+		<li itemscope>
 			<span itemprop="firstName"></span>
 			<span itemprop="lastName"></span>
-		</div>
+		</li>
+	</ul>
 	
+</li>
+
+<!-- social-search.html -->
+<div data-control="wm-search" data-name="social-search">
+
+	<div class="ios-ui-navigation-bar" data-media="tablet mobile">
+	
+		<div class="title">Search</div>
+		<div class="ios-ui-bar-button-item right" data-name="close-btn" data-media="mobile">Close</div>
+	
+	</div>
+	
+	<div data-control="ios-ui-table-view" data-name="social-search-results" data-cell="social-search-result-cell.html"></div>
+	
+	<div class="ios-ui-toolbar">
+		<span data-name="search-accuracy"></span>
 	</div>
 
 </div>
+
+
+<!-- social-create.html -->
+<div data-control="wm-create" data-name="social-create">
+
+	<div class="ios-ui-navigation-bar" data-media="tablet mobile">
+	
+		<div class="ios-ui-bar-button-item left" data-name="back-btn" data-media="mobile">Back</div>
+		<div class="title">Create Event</div>
+	
+	</div>
+	
+	<div class="location" itemscope data-binding="location">
+	
+		<div itemprop="locationName"></div>
+		<div itemprop="locationAddress"></div>
+		<div itemprop="locationCategory"></div>
+	
+	</div>
+	
+	<form name="create-event">
+	
+		<label for="description" data-media="desktop"></label>
+		<input type="text" name="description" placeholder="Description" />
+		
+		<label for="date" data-media="desktop"></label>
+		<div data-input="ui-date-picker" data-name="date" />
+		
+		<label for="time" data-media="desktop"></label>
+		<div data-input="ui-time-picker" data-name="time" />
+			
+		<label for="isPublic"></label>
+		<select name="isPublic">
+			<option value="0">No</option>
+			<option value="1" selected="selected">Yes</option>
+		</select>
+			
+		<input type="submit" name="create-event" value="Create"/>
+	
+	</form>
+
+</div>
+
+<!-- social-search-result-cell.html -->
+<li data-control="wm-event-cell" data-name="social-search-result-cell" itemscope>
+	
+	<div itemprop="locationName"></div>
+	<div itemprop="locationDistance"></div>
+	
+</li>

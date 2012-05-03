@@ -462,14 +462,16 @@ Orange.add('ios', function(O) {
 			var container = target.clone();
 			var source = this.tableCell;
 		
+			var data = (this.collection instanceof O.Collection) ? this.collection.data : this.collection;
+		
 			// iterate over collection
-			for(var i=0, len = this.collection.data.length; i < len; i++) {
+			for(var i=0, len = data.length; i < len; i++) {
 
 				// add templates to the container
 				template = new jsontemplate.Template(source);
 				var output = '';
 				try {
-					output = template.expand(this.collection.data[i]);
+					output = template.expand(data[i]);
 				} catch(e) {
 					output = source.replace(/{[^)]*}/, '[undefined]');
 				}
@@ -490,14 +492,27 @@ Orange.add('ios', function(O) {
 		
 		bindData: function(data) {
 				
-			// store reference to collection
-			this.collection = data;
-						
-			// bind event on model
-			this.collection.model.on('datachange', $.proxy(this.onDataChange, this));
+				
+			if (data instanceof O.Collection) {
+				
+				// store reference to collection
+				this.collection = data;
+							
+				// bind event on model
+				this.collection.model.on('datachange', $.proxy(this.onDataChange, this));
+				
+				// setup table
+				this.setupTable();
 			
-			// setup table
-			this.setupTable();
+			} else {
+			
+				// store reference to collection
+				this.collection = data;
+			
+				// setup table
+				this.setupTable();
+			
+			}
 		
 		},
 		

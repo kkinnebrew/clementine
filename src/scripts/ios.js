@@ -499,7 +499,7 @@ Orange.add('ios', function(O) {
 				this.collection = data;
 							
 				// bind event on model
-				this.collection.model.on('datachange', $.proxy(this.onDataChange, this));
+				//this.collection.model.on('datachange', $.proxy(this.onDataChange, this));
 				
 				// setup table
 				this.setupTable();
@@ -553,7 +553,7 @@ Orange.add('ios', function(O) {
 				var id = $(cell).attr('itemid');
 				
 				// get entry
-				var data = this.collection.get(id);
+				var data = this.collection[id];
 				
 				// fire event
 				this.fire('select', data);

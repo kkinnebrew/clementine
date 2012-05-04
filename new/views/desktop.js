@@ -83,14 +83,197 @@ Orange.add('wmsocial', function(O) {
 	
 	O.Model = O.define({
 	
+		/**
+		 * models must be registered to be used. a model can either take in a 
+		 * path to an API or otherwise will be defined as local models that can
+		 * get an set data on a specific device.
+		 */
 		initialize: function() {
+		
+		},
+		
+		destroy: function() {},
+		
+		/**
+		 * gets a collection of models by its id or query string
+		 */
+		get: function() {
+		
+			// edge cases
+			// INFO: FetchedModelCollection
+			// WARN: NoItemsReturned
+			// ERROR: MalformedQueryString
+		
+		},
+		
+		/**
+		 * get an individual item by its id or query string, if
+		 * the model returns multiples, only the first will be returned
+		 */
+		one: function() {
+		
+			// edge cases
+			// INFO: FetchedModelItem
+			// WARN: MultipleItemsReturnedOneExpected
+			// ERROR: ModelItemDoesNotExist
+			// ERROR: MalformedQueryString
+		
+		},
+		
+		/**
+		 * pass in an individual model item or even the raw json of a model
+		 * to save it to the data source. an array can be used to save a 
+		 * collection of items
+		 */
+		save: function() {
+		
+			// edge cases
+			// INFO: ModelItemSaved
+			// INFO: ModelItemsSaved
+			// ERROR: MissingPrimaryKey
+			// ERROR: MalformedInput
+		
+		},
+		
+		/**
+		 * delete an item based on either the item itself or the id of the
+		 * item to remove
+		 */
+		delete: function() {
+		
+			// edge cases
+			// INFO: ModelItemDeleted
+			// ERROR: ModelItemDoesNotExist
+			// ERROR: MalformedInput
+		
+		}
+	
+	});
+	
+	O.Collection = O.define({
+	
+		/**
+		 * takes in a reference to the model describing the
+		 * data as well as the collection data itself as an array []
+		 */
+		initialize: function() {
+		
+			// edge cases
+			// ERROR: InvalidModel
+			// ERROR: InvalidData
 		
 		},
 		
 		destroy: function() {
 		
+		},
+		
+		/**
+		 * returns a subset of the collection given a set of query parameters
+		 * or a given id
+		 */
+		get: function() {
+		
+			// edge cases
+			// INFO: FetchedModelCollection
+			// WARN: NoItemsReturned
+			// ERROR: MalformedQueryString
+		
+		},
+		
+		/**
+		 * returns an individual entry from the collection by id or query
+		 * parameters. if more than one result is returned, the first will
+		 * be returned.
+		 */
+		one: function() {
+		
+			// edge cases
+			// INFO: FetchedModelItem
+			// WARN: MultipleItemsReturnedOneExpected
+			// ERROR: ModelItemDoesNotExist
+			// ERROR: MalformedQueryString
+		
+		},
+		
+		/**
+		 * limits the query result to a set number of return values.
+		 * further pagination can be handled with the reset/next/prev
+		 * methods. when limit is called, the cursor is reset to zero.
+		 */
+		limit: function() {
+		
+			// edge cases
+			// INFO: LimitedCollection
+			// ERROR: InvalidLimitInteger
+		
+		},
+		
+		/**
+		 * handles pagination. resets the pagination cursor to zero
+		 */
+		reset: function() {
+		
+			// edge cases
+			// INFO: CursorReset
+			// WARN: CursorIsAlreadyReset
+		
 		}
+		
+		/**
+		 * returns the next set number of results as given by the limit count
+		 */
+		next: function() {
+		
+			// edge cases
+			// INFO: CursorChanged
+			// WARN: CursorHasReachedEnd
+			// ERROR: CursorAlreadyReachedEnd
+		
+		},
+		
+		/**
+		 * returns the prev set of results as given by the limit count
+		 */
+		prev: function() {
+		
+			// edge cases
+			// INFO: CursorChanged
+			// ERROR: CursorAlreadyAtIndex
+		
+		},
+		
+		/**
+		 * pass in callback to sort objects by. items with null/undefined fields will
+		 * be returned last. Also pass in DESC boolean.
+		 * if sort is called during pagination, the cursor will remain the same until
+		 * the cursor is reset manually
+		 */
+		sort: function() {
+		
+			// edge cases
+			// INFO: SortedCollection
+			// ERROR: InvalidSortCallback
+		
+		}
+		
 	
+	});
+	
+	O.Item = O.define({
+	
+		/**
+		 * takes in a model reference and the underlying item
+		 * data
+		 */
+		initialize: function() {
+		
+		},		
+		
+		destroy: function() {
+		
+		}
+		
 	});
 	
 	O.Binding = O.define({
@@ -626,7 +809,7 @@ Orange.add('wmsocial', function(O) {
 		},
 		
 		onDidLoad: function() {		
-			this.getItem('submit-btn').on(O.Browser.isMobile ? 'touchend' : 'click', $.proxy(this.onClick, this));
+			this.getItem('submit-btn').on('touchclick', $.proxy(this.onClick, this));
 		},
 		
 		onSubmit: function(e) {
@@ -681,7 +864,7 @@ Orange.add('wmsocial', function(O) {
 		},
 		
 		onDidLoad: function() {			
-			this.getItem('logout-btn').on(O.Browser.isMobile ? 'touchend' : 'click', $.proxy(this.onLogout, this));
+			this.getItem('logout-btn').on('touchclick', $.proxy(this.onLogout, this));
 		},
 		
 		onLogout: function(e) {
@@ -720,9 +903,9 @@ Orange.add('wmsocial', function(O) {
 		},
 		
 		onDidLoad: function() {		
-			if(this.hasItem('back-btn')) this.getItem('back-btn').on(O.Browser.isMobile ? 'touchend' : 'click', $.proxy(this.onBack, this));
-			if(this.hasItem('flip-btn')) this.getItem('flip-btn').on(O.Browser.isMobile ? 'touchend' : 'click', $.proxy(this.onFlip, this));
-			this.getItem('attend-btn').on(O.Browser.isMobile ? 'touchend' : 'click', $.proxy(this.onAttend, this));
+			if(this.hasItem('back-btn')) this.getItem('back-btn').on('touchclick', $.proxy(this.onBack, this));
+			if(this.hasItem('flip-btn')) this.getItem('flip-btn').on('touchclick', $.proxy(this.onFlip, this));
+			this.getItem('attend-btn').on('touchclick', $.proxy(this.onAttend, this));
 		},
 		
 		onBack: function(e) {

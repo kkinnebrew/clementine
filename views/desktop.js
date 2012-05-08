@@ -4,68 +4,289 @@ Orange.add('wmsocial', function(O) {
 	
 	/* base classes */
 
+	O.Application = (function() {
+	
+		var _apps = {};
+		
+		return {
+		
+			register: function(def) {},
+			
+			init: function(name) {}
+		
+		};
+	
+	})();
+
+	O.View = (function() {
+	
+		var _views = {};
+		
+		return {
+		
+			define: function(def) {
+				var c = O.extend(O.ViewController, def), type = def.type;
+				c.prototype.typeList = 'ui-view ' + type;
+				if(typeof type === 'undefined') throw "Error: View not named";
+				return _views[type] = c;
+			},
+			
+			extend: function(base, def) {
+				var c = O.extend(base, def), type = def.type;
+				c.prototype.typeList += ' ' + type;
+				if(typeof type === 'undefined') throw "Error: View not named";
+				return _views[type] = c;
+			},
+			
+			load: function(name) {
+				var view;
+				if (name === 'ui-view') {
+					return O.ViewController;
+				}
+				else if (typeof (view = _views[name]) !== 'undefined') {
+					return view;
+				} else throw "Error: View '" + name + "' not found";
+			}
+		
+		};
+	
+	})();
+	
+
 	O.Controller = O.define({
 		
-		initialize: function() {
+		initialize: function() {},
 		
-		},
-		
-		destroy: function() {
-		
-		}
+		destroy: function() {}
 		
 	});
 	
+		
 	O.ViewController = O.extend(O.Controller, {
 	
-		initialize: function(parent, target) {},
+		initialize: function(parent, target) {
+		
+			var that = this;
+					
+			this.target = $(target);
+			this.name = this.target.attr('data-name');
+			
+			if (this.target.length === 0) throw 'Invalid view source';
+			
+			this._views = {};
+			this._forms = {};
+			this._elements = {};
+			this._eventTarget = new O.EventTarget(parent, this);
+			
+			var viewList = [];
+			
+			this.target.find('[data-control]').each(function() {
+				var count = 0, parent = $(this).parent().not(that.target);
+				while (parent.length != 0) {
+					parent = $(parent).parent().not(that.target);
+					if ($(parent).not('[data-view]').length === 0) count++;
+				}
+				if (count === 0) viewList.push(this);
+			});
+						
+			for(var i=0, len = viewList.length; i < len; i++) {
+				var view = $(viewList[i]),
+						name = view.attr('data-name'),
+				 		type = view.attr('data-control'),
+				 		isRemote = (typeof view.attr('data-template') !== 'undefined') ? view.attr('data-template').length > 0 : false,
+				 		path = view.attr('data-template');
+				 						
+				if (isRemote) {
+					var source = O.TemplateManager.load('app/views/' + path);
+					view.html($(source).html());
+					cloneAttributes(source, view);
+					view.removeAttr('data-template');
+				}
+														 		
+				var c = O.View.load(type);
+				var child = new c(this, view);
+				
+				that._views[name] = child;
+			}
+			
+			delete viewList;
+			
+			var formList = [];
+					
+			this.target.find('form').each(function() {
+				var count = 0, parent = $(this).parent().not(that.target);
+				while (parent.length != 0) {
+					if ($(parent).not('[data-control]').length === 0) count++;
+					parent = $(parent).parent().not(that.target);
+				}
+				if (count === 0) formList.push(this);
+			});
+						
+			for(var i=0, len = formList.length; i < len; i++) {
+				var form = $(formList[i]),
+						name = form.attr('name'),
+						child = new O.Form(form);
+				this._forms[name] = child;
+			}
+			
+			delete formList;
+			
+			var elementList = [];
+					
+			this.target.find('[data-name]').not('[data-control]').each(function() {
+				var count = 0, parent = $(this).parent().not(that.target);
+				while (parent.length != 0) {
+					if ($(parent).not('[data-control]').length === 0) count++;
+					parent = $(parent).parent().not(that.target);
+				}
+				if (count === 0) elementList.push(this);
+			});
+						
+			for(var i=0, len = elementList.length; i < len; i++) {
+				var el = $(elementList[i]),
+						name = el.attr('data-name'),
+						child = new O.Element(el);
+				
+				if (typeof name !== 'undefined') that._elements[name] = child;
+			}
+			
+			delete elementList;
+						
+			this.target.addClass(this.typeList);
+						
+			console.log("[INFO] View '" + this.name + "' of type '" + this.type + "' initialized");
+		
+		},
 		
 		
-		getType: function() {},
+		getType: function() {
+			return 'ui-view';
+		},
 		
-		getTriggers: function() {},
+		getTriggers: function() {
+			return [];
+		},
 		
-		getBindings: function() {},
+		getBindings: function() {
+			return {};
+		},
 		
 		
 		onWillLoad: function() {},
 		
 		onDidLoad: function() {},
 		
-		onLoad: function() {},
+		onLoad: function() {
+		
+			this.target.removeAttr('data-name');
+			this.target.removeAttr('data-view');
+			
+			this.onWillLoad();
+			
+			for (var name in this._views) {
+				this._views[name].onLoad();
+			}
+			
+			this.onDidLoad();
+		
+		},
 		
 		onWillUnload: function() {},
 		
 		onDidUnload: function() {},
 		
+		onUnload: function() {
 		
-		getView: function(name) {},
+			this.onWillUnload();
+			
+			for (var name in this._views) {
+				this._views[name].onUnload();
+			}
+			
+			this.onDidUnload();
 		
-		getItem: function(name) {},
+		},
 		
-		getForm: function(name) {},
+		getView: function(name) {
+			if (name instanceof O.ViewController) return name;
+			else if (typeof this._views[name] !== 'undefined') return this._views[name];
+			throw 'Error: View "' + name + '" not found';
+		},
 		
-		getBinding: function(name) {},
+		getElement: function(name) {
+			if (typeof this._elements[name] !== 'undefined') return this._elements[name];
+			throw 'Error: Element "' + name + '" not found';
+		},
 		
-		
-		hasView: function(name) {},
-		
-		hasItem: function(name) {},
-		
-		hasForm: function(name {},
-		
-		
-		on: function(event, callback, context) {},
-		
-		detach: function(event, callback) {},
-		
-		fire: function(event, data) {},
-		
-		
-		bindData: function(data) {},	
+		getForm: function(name) {
+			if (this._forms[name] instanceof O.Form) return this._forms[name];
+			throw 'Error: Form "' + name + '" not found';
+		},
 				
 		
-		destroy: function() {}
+		hasView: function(name) {
+			return typeof this._views[name] !== 'undefined';
+		},
+		
+		hasElement: function(name) {
+			return typeof this._elements[name] !== 'undefined';
+		},
+		
+		hasForm: function(name {
+			return typeof this._forms[name] !== 'undefined';
+		},
+		
+		
+		on: function(event, callback, context) {
+			var proxy = (typeof context !== 'undefined') ? function() { callback.apply(context, arguments); } : callback;
+			return this._eventTarget.on.call(this._eventTarget, event, proxy);
+		},
+		
+		detach: function(event, callback) {
+			return this._eventTarget.detach.apply(this._eventTarget, arguments);
+		},
+		
+		fire: function(event, data) {
+			return this._eventTarget.fire.apply(this._eventTarget, arguments);
+		},
+		
+		
+		bindData: function(item, live) {
+			O.Binding.bindData(this.target, item);
+		},		
+		
+		destroy: function() {
+			for (var name in this._views) {
+				this._views[name].destroy();
+			}
+			for (var name in this._forms) {
+				this._forms[name].destroy();
+			}
+			for (var name in this._elements) {
+				this._elements[name].destroy();
+			}
+			delete this.target;
+			delete this.parent;
+			delete this._eventTarget;
+		},
+		
+		
+		onLoad: function() {
+			this.target.removeAttr('data-name');
+			this.target.removeAttr('data-view');
+			for (var name in this._views) {
+				this._views[name].onLoad();
+			}
+			for (var name in this._elements) {
+				this._elements[name].onLoad();
+			}
+		},
+		
+		onUnload: function() {
+			for (var name in this._views) {
+				this._views[name].onUnload();
+			}
+		}
 	
 	});
 	
@@ -81,6 +302,65 @@ Orange.add('wmsocial', function(O) {
 	
 	});
 	
+	O.Element = O.define({
+	
+		initialize: function() {
+		
+		},
+		
+		bindData: function() {
+		
+		},
+		
+		on: function() {
+		
+		},
+		
+		detach: function() {
+		
+		}
+		
+		destroy: function() {
+		
+		}
+	
+	});
+	
+	O.Binding = (function() {
+	
+		return {
+		
+			bindData: function(node, item) {
+			
+				var data = (item instanceof O.Item) ? item.data : item;
+			
+				if (node.hasAttribute('itemscope')) {
+					node.attr('itemid', data['id']);
+					for (var field in data) {
+						if (var el = node.find('[itemprop="' + field + '"]')) {
+							if (typeof data[field] === 'Array') {
+								el.html(O.Binding.bindData(el, data[field])
+							} else if (typeof item.data[field] === 'Object') {
+								
+							} else {
+								el.text(item.data);
+							}
+						}
+					}
+				}
+			
+			},
+			
+			bindList: function(node, list) {
+			
+				
+			
+			}
+			
+		}
+	
+	})();
+		
 	O.Model = O.define({
 	
 		/**
@@ -378,7 +658,7 @@ Orange.add('wmsocial', function(O) {
 	
 	/* UI related controllers */
 	
-	O.UI.NavigationController = O.extend(O.ViewController, {
+	O.UI.NavigationController = O.View.define({
 	
 		getType: function() { return 'ui-navigation-view' },
 	
@@ -392,7 +672,7 @@ Orange.add('wmsocial', function(O) {
 			
 	});
 	
-	O.UI.GridController = O.extend(O.ViewController, {
+	O.UI.GridController = O.View.define({
 	
 		getType: function() { return 'ui-grid-view' },
 	
@@ -406,7 +686,7 @@ Orange.add('wmsocial', function(O) {
 			
 	});
 	
-	O.UI.TableController = O.extend(O.ViewController, {
+	O.UI.TableController = O.View.define({
 	
 		getType: function() { return 'ui-table-view' },
 	
@@ -420,7 +700,7 @@ Orange.add('wmsocial', function(O) {
 			
 	});
 	
-	O.UI.ListController = O.extend(O.ViewController, {
+	O.UI.ListController = O.View.define({
 	
 		getType: function() { return 'ui-list-view' },
 	
@@ -434,7 +714,7 @@ Orange.add('wmsocial', function(O) {
 			
 	});
 	
-	O.UI.MultiViewController = O.extend(O.ViewController, {
+	O.UI.MultiViewController = O.View.define({
 	
 		getType: function() { return 'ui-multi-view' },
 	
@@ -450,7 +730,7 @@ Orange.add('wmsocial', function(O) {
 			
 	});
 	
-	O.UI.TabController = O.extend(O.ViewController, {
+	O.UI.TabController = O.View.define({
 	
 		getType: function() { return 'ui-tab-view' },
 	
@@ -466,7 +746,7 @@ Orange.add('wmsocial', function(O) {
 			
 	});
 	
-	O.UI.LightBoxController = O.extend(O.ViewController, {
+	O.UI.LightBoxController = O.View.define({
 	
 		getType: function() { return 'ui-lightbox-view' },
 	
@@ -491,7 +771,7 @@ Orange.add('wmsocial', function(O) {
 		
 	/* iOS related controllers */
 
-	O.iOS.UINavigationController = O.extend(O.NavigationController, {
+	O.iOS.UINavigationController = O.View.extend(O.NavigationController, {
 	
 		getType: function() { return 'ios-ui-navigation-view' },
 	
@@ -505,7 +785,7 @@ Orange.add('wmsocial', function(O) {
 	
 	});
 	
-	O.iOS.UIModalViewController = O.extend(O.ViewController, {
+	O.iOS.UIModalViewController = O.View.define({
 	
 		getType: function() { return 'ios-ui-modal-view' },
 	
@@ -519,7 +799,7 @@ Orange.add('wmsocial', function(O) {
 	
 	});
 	
-	O.iOS.UITabBarController = O.extend(O.ViewController, {
+	O.iOS.UITabBarController = O.View.define({
 	
 		getType: function() { return 'ios-ui-tab-bar-view' },
 	
@@ -535,7 +815,7 @@ Orange.add('wmsocial', function(O) {
 	
 	});
 
-	O.iOS.UISplitViewController = O.extend(O.ViewController, {
+	O.iOS.UISplitViewController = O.View.define({
 	
 		getType: function() { return 'ios-ui-split-view' },
 	
@@ -555,7 +835,7 @@ Orange.add('wmsocial', function(O) {
 	
 	});
 
-	O.iOS.UITableViewController = O.extend(O.ViewController, {
+	O.iOS.UITableViewController = O.View.define({
 	
 		getType: function() { return 'ios-ui-table-view' },
 	
@@ -577,7 +857,7 @@ Orange.add('wmsocial', function(O) {
 	
 	});
 	
-	O.iOS.UISearchBarController = O.extend(O.ViewController, {
+	O.iOS.UISearchBarController = O.View.define({
 	
 		getType: function() { return 'ios-ui-search-bar-view' },
 	
@@ -595,7 +875,7 @@ Orange.add('wmsocial', function(O) {
 	
 	/* WMSocial application controllers */
 
-	O.WMSocial.SocialAppController = O.Controller.extend(O.UIMultiViewController, {
+	O.WMSocial.SocialAppController = O.View.extend(O.UIMultiViewController, {
 	
 		getType: function() {
 			return 'wm-social-app';
@@ -622,7 +902,7 @@ Orange.add('wmsocial', function(O) {
 	
 	});
 	
-	O.WMSocial.HomeController = O.Controller.extend(O.UIMultiViewController, {
+	O.WMSocial.HomeController = O.View.extend(O.UIMultiViewController, {
 		
 		getType: function() {
 			return 'wm-home';
@@ -640,7 +920,7 @@ Orange.add('wmsocial', function(O) {
 		
 	});
 	
-	O.WMSocial.HomeMultiViewController = O.Controller.extend(O.UIMultiViewController, {
+	O.WMSocial.HomeMultiViewController = O.View.extend(O.UIMultiViewController, {
 		
 		getType: function() {
 			return 'wm-home-multiview';
@@ -671,7 +951,7 @@ Orange.add('wmsocial', function(O) {
 		
 	});
 	
-	O.WMSocial.MainController = O.Controller.extend(O.ViewController, {
+	O.WMSocial.MainController = O.View.define({
 		
 		getType: function() {
 			return 'wm-main';
@@ -693,7 +973,7 @@ Orange.add('wmsocial', function(O) {
 		
 	});
 	
-	O.WMSocial.MobileViewController = O.Controller.extend(O.UINavigationController, {
+	O.WMSocial.MobileViewController = O.View.extend(O.UINavigationController, {
 		
 		getType: function() {
 			return 'wm-mobile';
@@ -730,7 +1010,7 @@ Orange.add('wmsocial', function(O) {
 		
 	});
 	
-	O.WMSocial.FlipController = O.Controller.extend(O.iOS.UIFlipController, {
+	O.WMSocial.FlipController = O.View.extend(O.iOS.UIFlipController, {
 		
 		getType: function() {
 			return 'wm-flip-view';
@@ -753,7 +1033,7 @@ Orange.add('wmsocial', function(O) {
 		
 	});
 	
-	O.WMSocial.LoginController = O.Controller.extend(O.ViewController, {
+	O.WMSocial.LoginController = O.View.define({
 		
 		getType: function() {
 			return 'wm-login';
@@ -798,7 +1078,7 @@ Orange.add('wmsocial', function(O) {
 		
 	});
 	
-	O.WMSocial.SetupController = O.Controller.extend(O.ViewController, {
+	O.WMSocial.SetupController = O.View.define({
 	
 		getType: function() {
 			return 'wm-setup';
@@ -809,7 +1089,7 @@ Orange.add('wmsocial', function(O) {
 		},
 		
 		onDidLoad: function() {		
-			this.getItem('submit-btn').on('touchclick', $.proxy(this.onClick, this));
+			this.getElement('submit-btn').on('touchclick', $.proxy(this.onClick, this));
 		},
 		
 		onSubmit: function(e) {
@@ -837,7 +1117,7 @@ Orange.add('wmsocial', function(O) {
 	
 	});
 	
-	O.WMSocial.FeedController = O.Controller.extend(O.ViewController, {
+	O.WMSocial.FeedController = O.View.define({
 	
 		getType: function() {
 			return 'wm-feed';
@@ -864,7 +1144,7 @@ Orange.add('wmsocial', function(O) {
 		},
 		
 		onDidLoad: function() {			
-			this.getItem('logout-btn').on('touchclick', $.proxy(this.onLogout, this));
+			this.getElement('logout-btn').on('touchclick', $.proxy(this.onLogout, this));
 		},
 		
 		onLogout: function(e) {
@@ -886,7 +1166,7 @@ Orange.add('wmsocial', function(O) {
 	
 	});
 	
-	O.WMSocial.EventController = O.Controller.extend(O.ViewController, {
+	O.WMSocial.EventController = O.View.define({
 	
 		getType: function() {
 			return 'wm-event';
@@ -903,9 +1183,9 @@ Orange.add('wmsocial', function(O) {
 		},
 		
 		onDidLoad: function() {		
-			if(this.hasItem('back-btn')) this.getItem('back-btn').on('touchclick', $.proxy(this.onBack, this));
-			if(this.hasItem('flip-btn')) this.getItem('flip-btn').on('touchclick', $.proxy(this.onFlip, this));
-			this.getItem('attend-btn').on('touchclick', $.proxy(this.onAttend, this));
+			if(this.hasElement('back-btn')) this.getElement('back-btn').on('touchclick', $.proxy(this.onBack, this));
+			if(this.hasElement('flip-btn')) this.getElement('flip-btn').on('touchclick', $.proxy(this.onFlip, this));
+			this.getElement('attend-btn').on('touchclick', $.proxy(this.onAttend, this));
 		},
 		
 		onBack: function(e) {

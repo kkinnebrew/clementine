@@ -329,7 +329,7 @@ Orange.add('ios', function(O) {
 			type: 'ios-ui-tab-view',
 			
 			initialize: function(parent, target) {
-				
+								
 				this._super(parent, target);
 				
 				// get name of default view
@@ -351,7 +351,7 @@ Orange.add('ios', function(O) {
 				// get tab bar
 				this.tabBar = this.target.find('.ios-ui-tab-bar');
 				if(typeof this.tabBar === 'undefined') throw 'Tab bar element required in view';
-		
+
 				// get name of active view
 				var name = this.activeView.target.attr('data-name');
 	
@@ -499,7 +499,7 @@ Orange.add('ios', function(O) {
 				this.collection = data;
 							
 				// bind event on model
-				//this.collection.model.on('datachange', $.proxy(this.onDataChange, this));
+				this.collection.model.on('datachange', $.proxy(this.onDataChange, this));
 				
 				// setup table
 				this.setupTable();
@@ -645,52 +645,52 @@ Orange.add('ios', function(O) {
 	
 	/* element controls */
 	
-	O.iOS.UISegmentedControl = O.Element.define({
+//	O.iOS.UISegmentedControl = O.Element.define({
+//	
+//		type: 'ios-ui-segmented-control',
+//	
+//		onLoad: function() {
+//			this._super();
+//		},
+//		
+//		onUnload: function() {
+//			this._super();
+//		}
+//	
+//	});
+//	
+//	O.iOS.UINavigationBar = O.Element.define({
+//		
+//		type: 'ios-ui-navigation-bar',
+//	
+//		onLoad: function() {
+//			this._super();
+//		},
+//		
+//		onUnload: function() {
+//			this._super();
+//		}
+//	
+//	});
+//	
+//	O.iOS.UIBarButtonItem = O.Element.define({
+//		
+//		type: 'ios-ui-bar-button-item',
+//	
+//		onLoad: function() {
+//			this._super();
+//		},
+//		
+//		onUnload: function() {
+//			this._super();
+//		}
+//	
+//	});
+//	
+//	O.iOS.UITabBar = O.Element.define({
+//		
+//		type: 'ios-ui-tab-bar'
+//	
+//	});
 	
-		type: 'ios-ui-segmented-control',
-	
-		onLoad: function() {
-			this._super();
-		},
-		
-		onUnload: function() {
-			this._super();
-		}
-	
-	});
-	
-	O.iOS.UINavigationBar = O.Element.define({
-		
-		type: 'ios-ui-navigation-bar',
-	
-		onLoad: function() {
-			this._super();
-		},
-		
-		onUnload: function() {
-			this._super();
-		}
-	
-	});
-	
-	O.iOS.UIBarButtonItem = O.Element.define({
-		
-		type: 'ios-ui-bar-button-item',
-	
-		onLoad: function() {
-			this._super();
-		},
-		
-		onUnload: function() {
-			this._super();
-		}
-	
-	});
-	
-	O.iOS.UITabBar = O.Element.define({
-		
-		type: 'ios-ui-tab-bar'
-	
-	});
-	
-}, ['ui', 'db'], '0.1');
+}, ['mvc', 'db'], '0.1');

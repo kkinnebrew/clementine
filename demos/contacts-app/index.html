@@ -36,20 +36,20 @@
 
 $(document).ready(function() {
 
-	Orange.app('Contacts', {
-		location: false,
-		poll: false,
-		required: ['contacts-models', 'contacts-controllers'],
-		baseUrl: '/orangeui/demos/contacts-app'
-	});
-	
-	Orange.init('Contacts');
-
-	document.body.addEventListener('touchstart', function(e){ 
-		if($(e.target).get(0).tagName.toLowerCase() !== 'input') {
-			e.preventDefault();
-		}
-	});
+//	Orange.app('Contacts', {
+//		location: false,
+//		poll: false,
+//		required: ['contacts-models', 'contacts-controllers'],
+//		baseUrl: '/orangeui/demos/contacts-app'
+//	});
+//	
+//	Orange.init('Contacts');
+//
+//	document.body.addEventListener('touchstart', function(e){ 
+//		if($(e.target).get(0).tagName.toLowerCase() !== 'input') {
+//			e.preventDefault();
+//		}
+//	});
 	
 //	$.ajax({
 //	  url: 'cross.php?url=http://www.google.com',
@@ -60,7 +60,32 @@ $(document).ready(function() {
 //	  	console.log(e);
 //	  }
 //	});
+
+Orange.use(function(O) {
+
+	O.Controller = O.define({
+		
+		initialize: function() {
+		
+		},
+		
+		destroy: function() {
+		
+		}
+		
+	});
 	
+	O.Controller.extend = function() {
+		alert("!2#");
+	};
+	
+	console.log(O.Controller);
+	
+	O.Controller.extend();
+	
+	console.log(new O.Controller());
+
+});	
 
 });
 

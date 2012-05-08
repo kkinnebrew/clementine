@@ -191,6 +191,16 @@
 				this._listeners = {};
 			}
 			
+		},
+		
+		destroy: function() {
+		
+			for(var listener in this._listeners) {
+				listener.detach();
+			}
+			delete this._parent;
+			delete this._self;
+			
 		}
 	
 	});
@@ -352,7 +362,7 @@
 				
 		// call root function
 		var root = $('[data-root="true"]'),
-		type = root.attr('data-view');
+		type = root.attr('data-control');
 		root.removeAttr('data-root');
 		var c = OrangeUI.View.load(type);
 		var controller = new c(null, root);

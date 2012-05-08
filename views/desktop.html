@@ -109,7 +109,32 @@
 	
 	</div>
 	
-	<div data-control="ios-ui-table-view" data-name="social-events-list" data-cell="social-event-cell.html"></div>
+	<div data-control="ios-ui-table-view" data-name="social-events-list">
+	
+		<ul>
+		
+			<li class="ios-ui-table-view-cell" itemscope>
+				
+				<div itemprop="eventName"></div>
+				
+				<div itemprop="eventLocation" itemscope>
+					<span itemprop="locationName"></span>
+				</div>
+				
+				<div itemprop="eventDate"></div>
+				
+				<ul itemprop="attendees">
+					<li itemscope>
+						<span itemprop="firstName"></span>
+						<span itemprop="lastName"></span>
+					</li>
+				</ul>
+				
+			</li>
+			
+		</ul>
+	
+	</div>
 
 </div>
 
@@ -135,9 +160,11 @@
 		<div itemprop="eventDescription"></div>
 		<div itemprop="eventDate"></div>
 		
-		<div itemprop="attendees" itemscope>
-			<span itemprop="firstName"></span>
-			<span itemprop="lastName"></span>
+		<div itemprop="attendees">
+			<div class="attendee" itemscope>
+				<span itemprop="firstName"></span>
+				<span itemprop="lastName"></span>
+			</div>
 		</div>
 	
 	</div>
@@ -147,26 +174,6 @@
 	<div data-control="ui-map-view" data-name="social-map" data-media="desktop tablet"></div>
 
 </div>
-
-<!-- social-event-cell.html -->
-<li data-control="wm-event-cell" data-name="social-event-cell" itemscope>
-	
-	<div itemprop="eventName"></div>
-	
-	<div itemprop="eventLocation" itemscope>
-		<span itemprop="locationName"></span>
-	</div>
-	
-	<div itemprop="eventDate"></div>
-	
-	<ul itemprop="attendees">
-		<li itemscope>
-			<span itemprop="firstName"></span>
-			<span itemprop="lastName"></span>
-		</li>
-	</ul>
-	
-</li>
 
 <!-- social-search.html -->
 <div data-control="wm-search" data-name="social-search">
@@ -178,7 +185,18 @@
 	
 	</div>
 	
-	<div data-control="ios-ui-table-view" data-name="social-search-results" data-cell="social-search-result-cell.html"></div>
+	<div data-control="ios-ui-table-view" data-name="social-search-results">
+	
+		<ul>
+		
+			<li class="ios-ui-table-view-cell" itemscope>
+				<div itemprop="locationName"></div>
+				<div itemprop="locationDistance"></div>
+			</li>
+			
+		</ul>
+	
+	</div>
 	
 	<div class="ios-ui-toolbar">
 		<span data-name="search-accuracy"></span>
@@ -197,7 +215,7 @@
 	
 	</div>
 	
-	<div class="location" itemscope data-binding="location">
+	<div class="location" itemscope data-name="location">
 	
 		<div itemprop="locationName"></div>
 		<div itemprop="locationAddress"></div>
@@ -228,10 +246,4 @@
 
 </div>
 
-<!-- social-search-result-cell.html -->
-<li data-control="wm-event-cell" data-name="social-search-result-cell" itemscope>
-	
-	<div itemprop="locationName"></div>
-	<div itemprop="locationDistance"></div>
-	
-</li>
+

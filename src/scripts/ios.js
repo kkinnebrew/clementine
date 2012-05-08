@@ -326,79 +326,79 @@ Orange.add('ios', function(O) {
 	
 	O.iOS.UITabView = O.View.define({
 			
-			type: 'ios-ui-tab-view',
-			
-			initialize: function(parent, target) {
-				
-				this._super(parent, target);
-				
-				// get name of default view
-				var defaultView = this.target.attr('data-default');
-																										
-				// remove views from DOM
-				for (var i in this._views) {
-					if (this._views[i].name !== defaultView) {
-						this._views[i].target.addClass('hidden');
-					} else {
-						this.activeView = this._views[i];
-					}
-				}
-				
-			},
-			
-			onLoad: function() {
-	
-				// get tab bar
-				this.tabBar = this.target.find('.ios-ui-tab-bar');
-				if(typeof this.tabBar === 'undefined') throw 'Tab bar element required in view';
+		type: 'ios-ui-tab-view',
 		
-				// get name of active view
-				var name = this.activeView.target.attr('data-name');
-	
-				// set tab bar active
-				this.tabBar.find('.ios-ui-tab-bar-item').removeClass('active');
-				this.tabBar.find('.ios-ui-tab-bar-item:[data-tab="' + name + '"]').addClass('active');
-	
-				// bind events
-				this.tabBar.delegate('.ios-ui-tab-bar-item', O.Browser.isMobile ? 'touchend' : 'click', $.proxy(this.onClick, this));
-	
-				// load view
-				for (var i in this._views) {
-					this._views[i].onLoad();
+		initialize: function(parent, target) {
+			
+			this._super(parent, target);
+			
+			// get name of default view
+			var defaultView = this.target.attr('data-default');
+																									
+			// remove views from DOM
+			for (var i in this._views) {
+				if (this._views[i].name !== defaultView) {
+					this._views[i].target.addClass('hidden');
+				} else {
+					this.activeView = this._views[i];
 				}
-				
-				this.target.removeAttr('data-default');
-				
-				this._super();
-																	
-			},
-			
-			onClick: function(e) {
-			
-				var target = $(e.currentTarget);
-				var tab = target.attr('data-tab');
-								
-				this.activateTab(tab);
-			
-			},
-			
-			activateTab: function(name) {
-			
-				this.activeView.target.addClass('hidden');
-				this.getView(name).target.removeClass('hidden');
-				this.activeView = this.getView(name);
-				
-				this.tabBar.find('.ios-ui-tab-bar-item').removeClass('active');
-				this.tabBar.find('.ios-ui-tab-bar-item:[data-tab="' + name + '"]').addClass('active');
-			
-			},
-			
-			onUnload: function() {
-				this._super();
-				this.myScroll.destroy();
 			}
-				
-		});
+			
+		},
+		
+		onLoad: function() {
+
+			// get tab bar
+			this.tabBar = this.target.find('.ios-ui-tab-bar');
+			if(typeof this.tabBar === 'undefined') throw 'Tab bar element required in view';
+	
+			// get name of active view
+			var name = this.activeView.target.attr('data-name');
+
+			// set tab bar active
+			this.tabBar.find('.ios-ui-tab-bar-item').removeClass('active');
+			this.tabBar.find('.ios-ui-tab-bar-item:[data-tab="' + name + '"]').addClass('active');
+
+			// bind events
+			this.tabBar.delegate('.ios-ui-tab-bar-item', O.Browser.isMobile ? 'touchend' : 'click', $.proxy(this.onClick, this));
+
+			// load view
+			for (var i in this._views) {
+				this._views[i].onLoad();
+			}
+			
+			this.target.removeAttr('data-default');
+			
+			this._super();
+																
+		},
+		
+		onClick: function(e) {
+		
+			var target = $(e.currentTarget);
+			var tab = target.attr('data-tab');
+							
+			this.activateTab(tab);
+		
+		},
+		
+		activateTab: function(name) {
+		
+			this.activeView.target.addClass('hidden');
+			this.getView(name).target.removeClass('hidden');
+			this.activeView = this.getView(name);
+			
+			this.tabBar.find('.ios-ui-tab-bar-item').removeClass('active');
+			this.tabBar.find('.ios-ui-tab-bar-item:[data-tab="' + name + '"]').addClass('active');
+		
+		},
+		
+		onUnload: function() {
+			this._super();
+			this.myScroll.destroy();
+		}
+			
+	});
 	
 	O.iOS.UITableView = O.View.define({
 		

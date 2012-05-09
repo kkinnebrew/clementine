@@ -179,7 +179,7 @@ Orange.use(function(O) {
 			
 			this.onWillLoad();
 			
-			for (var name in this._views) {
+			for (var name in this.views) {
 				this.views[name].onLoad();
 			}
 			
@@ -211,7 +211,7 @@ Orange.use(function(O) {
 			}
 			
 			// unload children
-			for (var name in this._views) {
+			for (var name in this.views) {
 				this.views[name].onUnload();
 			}
 			

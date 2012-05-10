@@ -315,12 +315,33 @@ Orange.use(function(O) {
 			}
 		},
 		
-		getData: function() {
-
+		setField: function(name, value) {
+			try {
+				this.getField(name).val(value);
+			} catch(e) {
+				console.log('[WARN] Field "' + name +'" could not be fetched');
+			}
 		},
 		
-		setData: function(data) {
+		getData: function() {
+			var data = {};
+			for (var field in this.fields) {
+				var val = this.fields[field].val();
+				if (typeof val !== undefined && val !== null) {
+					data[field] = val;
+				}
+			}
+			return data;
+		},
 		
+		setData: function(item) {
+			var data = item;
+			if (item instanceof O.Item) data = item.toObject();
+			for (var field in this.fields) {
+				if (typeof data[field] !== undefined && data[field] !== null) {
+					this.fields[field].val(data[field]);
+				}
+			}
 		},
 		
 		detach: function() {

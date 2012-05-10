@@ -17,7 +17,7 @@
 	
 	// global regular expressions
 	modFilterRegex = /[^-A-Za-z_]/g,
-	keyFilterRegex = /[^A-Za-z0-9_\[\]]/g; // filters keys for special chars
+	keyFilterRegex = /[^A-Za-z:0-9_\[\]]/g; // filters keys for special chars
 	
 	OrangeUI._modules = {}; // stores application extension modules
 	OrangeUI._apps = {}; // stores application settings
@@ -70,6 +70,7 @@
 		var LOG_DEBUG = 1;
 		var	LOG_INFO 	= 2;
 		var	LOG_ERROR = 3;
+		var	LOG_WARN = 4;
 	
 		var _log = [],
 		_logLevel = LOG_DEBUG,
@@ -94,6 +95,9 @@
 					case LOG_INFO:
 						console.log("[INFO] " + message.toString());
 						break;
+					case LOG_WARN:
+						console.log("[WARN] " + message.toString());
+						break;
 					case LOG_ERROR:
 						console.log("[ERROR] " + message.toString());
 						break;
@@ -117,6 +121,10 @@
 			
 			error: function(message, ex) {
 				_writeLog(LOG_ERROR, message, ex);
+			},
+			
+			warn: function(message, ex) {
+				_writeLog(LOG_WARN, message, ex);
 			}
 	
 		}
@@ -331,7 +339,7 @@
 	
 	OrangeUI.init = function(name) {
 	
-		var config = {}, name = name.replace(keyFilterRegex);
+		var config = {}, name = name.replace(keyFilterRegex, '');
 	
 		if(OrangeUI._apps[name] != null) {
 			config = OrangeUI._apps[name];
@@ -433,6 +441,7 @@
 		_poll = false, // whether or not to poll
 		_isOnline = false, // if the connection is live
 		_isLoaded = false,
+		_isInit = false,
 						
 		_stop = function() {
 			if(_activeProcess != null) {
@@ -532,6 +541,7 @@
 			init: function (poll) {
 				
 				_poll = poll; // set polling
+				_isInit = true;
 
 				// bind event listeners
 				_bindEvent(window, "offline", _statusCallback);
@@ -563,6 +573,10 @@
 			
 			isOnline: function() {
 				return _isOnline;
+			},
+			
+			isActive: function() {
+				return _isInit;
 			}
 		
 		};
@@ -628,7 +642,7 @@
 			set: function(key, value, ttl) {
 						
 				if(!this.isSupported) return false; // don't do anything if not supported
-				key = key.replace(keyFilterRegex); // filter key for special chars
+				key = key.replace(keyFilterRegex, ''); // filter key for special chars
 				
 				if (value == undefined) {
 					return false;

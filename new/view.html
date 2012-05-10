@@ -18,14 +18,14 @@ Orange.use(function(O) {
 		return {
 		
 			define: function(def) {
-				var c = O.extend(O.UIView, def), type = def.type;
-				c.prototype.typeList = 'ui-view ' + type;
+				var c = O.extend(O.ViewController, def), type = def.prototype.getType();
+				c.prototype.typeList = type;
 				if(typeof type === 'undefined') throw "Error: View not named";
 				return _views[type] = c;
 			},
 			
 			extend: function(base, def) {
-				var c = O.extend(base, def), type = def.type;
+				var c = O.extend(base, def), type = def.prototype.getType();
 				c.prototype.typeList += ' ' + type;
 				if(typeof type === 'undefined') throw "Error: View not named";
 				return _views[type] = c;
@@ -33,8 +33,8 @@ Orange.use(function(O) {
 			
 			load: function(name) {
 				var view;
-				if (name === 'ui-view') {
-					return O.UIView;
+				if (name === 'view') {
+					return O.ViewController;
 				} else if (typeof (view = _views[name]) !== 'undefined') {
 					return view;
 				} else throw "Error: View '" + name + "' not found";
@@ -44,8 +44,15 @@ Orange.use(function(O) {
 	
 	})();
 	
+	O.Controller = O.define({
+		
+		initialize: function() {},
+		
+		destroy: function() {}
+		
+	});
 
-	O.UIView = O.define({
+	O.ViewController = O.extend(O.Controller, {
 	
 		initialize: function(parent, target) {
 		
@@ -142,7 +149,7 @@ Orange.use(function(O) {
 		},
 		
 		getClasses: function() {
-			var classes = typeof this.typeList !== 'undefined' ? this.typeList : 'ui-view';
+			var classes = typeof this.typeList !== 'undefined' ? this.typeList : '';
 			return classes + ' ' + this.data.name;
 		},
 
@@ -265,6 +272,14 @@ Orange.use(function(O) {
 		
 		bindData: function(item, live) {
 			O.Binding.bindData(this.target, item);
+			if (live && item instanceof O.Item) {
+				var id = item.id(),  model = item.getModel();
+				model.on('datachange', function(d) {
+					if ($.inArray(id, d.data.ids)) {
+						this.bindData(model.get(id), false);
+					}
+				}, this);
+			}
 		},
 		
 		toString: function() {
@@ -286,6 +301,14 @@ Orange.use(function(O) {
 			delete this._eventTarget;
 		}
 	
+	});
+	
+	O.UIView = O.View.define(O.ViewController, {
+		
+		getType: function() {
+			return 'ui-view';
+		}
+		
 	});
 
 	O.Form = O.define({
@@ -326,8 +349,8 @@ Orange.use(function(O) {
 		getData: function() {
 			var data = {};
 			for (var field in this.fields) {
-				var val = this.fields[field].val();
-				if (typeof val !== undefined && val !== null) {
+				var val = this.fields[field].val(), type = this.fields[field].attr('type');
+				if (typeof val !== undefined && val !== null && type !== 'submit' && type !== 'button') {
 					data[field] = val;
 				}
 			}
@@ -358,6 +381,508 @@ Orange.use(function(O) {
 		
 	});
 	
+	O.DB = (function() {
+	
+		var _sources = {},
+				_active = {},
+				_registered = {
+					'local': { type: 'local', path: '' }
+				};
+		
+		return {
+		
+			define: function(def) {
+				var c = Class.extend(def), type = def.getType();
+				if(typeof type === 'undefined') throw "Error: Data source not named";
+				return _sources[type] = c;
+			},
+			
+			extend: function(base, def) {
+				var c = O.extend(base, def), type = def.getType();
+				if(typeof type === 'undefined') throw "Error: Data source not named";
+				return _sources[type] = c;
+			},
+			
+			register: function(name, config) {
+				_registered[name] = config;
+			},
+			
+			load: function(name) {
+				var source;
+				if (typeof _registered[name] !== 'undefined') {
+					var reg = _registered[name];
+					if (typeof _active[name] === 'undefined') {
+						if (typeof _sources[reg.type] !== 'undefined') _active[name] = new _sources[reg.type](name, reg.path);
+					}
+					if (typeof _active[name] !== 'undefined') {
+						return _active[name];
+					} else throw "Error: Data source '" + name + "' could not be loaded";
+				}
+				else throw "Error: Data source '" + name + "' not found";
+			}
+		
+		};
+	
+	})();
+	
+	
+	O.Model = (function() {
+	
+		var _models = {};
+				
+		return {
+		
+			define: function(def) {
+				var c = O.extend(O.ModelDefinition, def), type = def.type;
+				if(typeof type === 'undefined') throw "Error: Model not named";
+				return _views[type] = c;
+			},
+		
+			register: function(config) {
+				if (typeof config === 'undefined' || typeof config.name === 'undefined') throw "Error: Model definition invalid";
+				if (typeof config.type !== 'undefined' && typeof (model = _models[config.type]) !== 'undefined') {
+					var c = new model(config);
+				}
+				else var c = new O.ModelDefinition(config);
+				return _models[config.name] = c;
+			},
+			
+			get: function(name) {
+				var model;
+				if (typeof (model = _models[name]) !== 'undefined') {
+					return model;
+				} else throw "Error: Model '" + name + "' not found";
+			}
+		
+		};
+	
+	})();
+	
+	
+	O.DataSource = O.DB.define({
+	
+		getType: function() {
+			return 'ajax';
+		},
+		
+		supportsModels: function() {
+			return false;
+		},
+		
+		isPersistent: function() {
+			return false;
+		},
+	
+		initialize: function(name, path) {
+			this.name = name;
+			this.path = (path.charAt(path.length-1) == '/') ? path : path + '/'; // path with ending slash
+		},
+		
+		request: function(config) {
+				
+			if (O.Cache.isActive() && !O.Cache.isOnline()) {
+				O.Log.warn('Could not connect to server');
+				return;
+			}
+		
+			var success = (typeof config.success === 'function') ? config.success : null;
+			var error = (typeof config.error === 'function') ? config.error : null;
+		
+			if (typeof config.context !== 'undefined') {
+				if (success !== null) success = function() { success.apply(context, arguments); };
+				if (error !== null) error = function() { error.apply(context, arguments); }
+			}
+			
+			var req = {
+				url: config.url,
+				type: config.type
+			};
+			
+			if (typeof config.async !== 'undefined') req.async = config.async;
+			if (typeof config.data !== 'undefined') req.data = config.data;
+			if (typeof config.contentType !== 'undefined') req.contentType = config.contentType;
+			if (success !== null) req.success = success;
+			if (error !== null) req.error = error;
+			
+			req.complete = function(t) {
+				O.Log.info('HTTP ' + t.status);
+			};
+			
+			return $.ajax(req).responseText;
+		
+		}
+	
+	});
+	
+	O.RestDataSource = O.DB.extend(O.DataSource, {
+	
+		getType: function() {
+			return 'rest';
+		},
+		
+		supportsModels: function() {
+			return true;
+		},
+		
+		isPersistent: function() {
+			return false;
+		},
+		
+		request: function(config) {
+			this._super(config);
+		},
+		
+		// model functions
+		
+		get: function(type, success, failure) {
+			
+			var successFunc = function(data) {
+				data = this.processItems(type, data);
+				success.call(this, data);
+			}
+						
+			this.request({
+				url: this.path + type,
+				contentType: 'text/json',
+				type: 'GET',
+				success: $.proxy(successFunc, this),
+				error: failure
+			});
+		
+		},
+		
+		one: function(type, id, success, failure) {
+					
+			var successFunc = function(data) {
+				data = this.processItem(type, data);
+				success.call(this, data);
+			}
+			
+			path = this.path + type;
+						
+			this.request({
+				url: (path.charAt(path.length-1) == '/') ? path + id : path + '/' + id,
+				contentType: 'text/json',
+				type: 'GET',
+				success: $.proxy(successFunc, this),
+				error: failure
+			});
+		
+		},
+		
+		create: function(type, object, success, failure) {
+		
+			var successFunc = function(data) {
+				data = this.processItem(type, data);
+				success.call(this, data);
+			}
+									
+			this.request({
+				url: this.path + type,
+				data: object,
+				type: 'POST',
+				dataType: 'text/json',
+				success: $.proxy(successFunc, this),
+				error: failure
+			});
+		
+		},
+		
+		update: function(type, object, id, success, failure) {
+		
+			var successFunc = function(data) {
+				data = this.processItem(type, data);
+				success.call(this, data);
+			}
+			
+			path = this.path + type;
+						
+			this.request({
+				url: (path.charAt(path.length-1) == '/') ? path + id : path + '/' + id,
+				data: object,
+				type: 'PUT',
+				contentType: 'text/json',
+				dataType: 'text/json',
+				success: $.proxy(successFunc, this),
+				error: failure
+			});
+		
+		},
+		
+		delete: function(type, id, success, failure) {
+			
+			path = this.path + type;
+			
+			this.request({
+				url: (path.charAt(path.length-1) == '/') ? path + id : path + '/' + id,
+				type: 'DELETE',
+				success: success,
+				error: failure
+			});
+		
+		},
+		
+		processItem: function(path, data) {
+			return $.parseJSON(data);
+		},
+		
+		processItems: function(path, data) {
+			return $.parseJSON(data);
+		}
+	
+	});
+	
+	O.LocalDataSource = O.DB.extend(O.DataSource, {
+	
+		getType: function() {
+			return 'local';
+		},
+		
+		isPersistent: function() {
+			return true;
+		},
+		
+		supportsModels: function() {
+			return true;
+		},
+		
+		request: function() {},
+		
+		get: function(type, success, failure) {
+			try {
+				var data = O.Storage.get('model:' + type);
+				if (data == undefined) return {};
+				success(data);
+			} catch(e) {
+				failure();
+			}
+		},
+		
+		one: function(type, id, success, failure) {
+			var data = O.Storage.get('model:' + type);
+			if (typeof data[id] !== 'undefined') success(data[id]);
+			else failure();
+		},
+		
+		// ambiguous, keys must be synched
+		create: function(type, object, id, success, failure) {
+			try {
+				if (id === null) id = this.nextKey();
+				var data = O.Storage.get('model:' + type);
+				if (data == undefined) data = {};
+				data[id] = object;
+				O.Storage.set('model:' + type, data);
+				success(object);
+			} catch(e) {
+				failure();
+			}
+		},
+		
+		update: function(type, object, id, success, failure) {
+			try {
+				var data = O.Storage.get('model:' + type);
+				data[id] = object;
+				O.Storage.set('model:' + type, data);
+				success(object);
+			} catch(e) {
+				failure();
+			}
+		},
+		
+		delete: function(type, id, success, failure) {
+			try {
+				var data = O.Storage.get('model:' + type);
+				delete data[id];
+				O.Storage.set('model:' + type, data);
+				success();
+			} catch(e) {
+				failure();
+			}
+		},
+		
+		nextKey: function(type) {
+			var size = 0, key;
+			for (key in obj) {
+				if (obj.hasOwnProperty(key)) size++;
+			} return size + 1;
+		}
+	
+	});
+	
+	O.SessionDataSource = O.DB.extend(O.DataSource, {
+	
+		getType: function() {
+			return 'session';
+		},
+		
+		isPersistent: function() {
+			return true;
+		},
+		
+		supportsModels: function() {
+			return true;
+		}
+	
+	});
+	
+	O.ModelDefinition = O.define({
+		
+		initialize: function(config) {
+		
+			this.id = config.id;
+			this.name = config.name;
+			this.fields = config.fields;
+			this.source = O.DB.load(config.source);
+			this.local = O.DB.load('local');
+			this.eventTarget = new O.EventTarget(null, this);
+			
+			for(var field in this.fields) {
+				if (this.fields[field].name == this.id) this.key = field;
+			}
+			
+			if (this.key === null) throw "Missing id field in model '" + this.name + "'";
+			
+			console.log(this.local);
+
+		},
+		
+		destroy: function() {
+			this.eventTarget.destroy();
+		},
+		
+		get: function() {
+		
+		},
+
+		save: function(object, success, failure) {
+				
+		},
+		
+		delete: function(object, success, failure) {
+		
+		},
+		
+		validate: function(data) {
+		
+		},
+		
+		_processData: function(data, save) {
+		
+		},
+		
+		_prepareData: function(object, action) {
+		
+		},
+		
+		on: function() {
+			return this.eventTarget.on.apply(this.eventTarget, arguments);
+		},
+		
+		detach: function() {
+			return this.eventTarget.detach.apply(this.eventTarget, arguments);
+		},
+		
+		fire: function() {
+			return this.eventTarget.fire.apply(this.eventTarget, arguments);
+		}
+		
+	});
+	
+	O.Collection = O.define({
+	
+		initialize: function(model, data) {
+		
+		},
+		
+		toArray: function() {
+		
+		}
+	
+	});
+	
+	O.Item = O.define({
+	
+		initialize: function(model, data) {
+		
+		},
+		
+		toObject: function() {
+		
+		}
+	
+	});
+	
+	O.Binding = (function() {
+		
+		return {
+		
+			bindData: function(node, item) {
+			
+				// check for the data format
+				if (item instanceof O.Item) {
+					var id = item.id(), data = item.toObject();
+				} else if (typeof item === 'object') {
+					var id = null, data = item;
+				}
+				else throw 'Invalid data item';
+				
+				if (id !== null) node.attr('itemid', id);
+				
+				// parse all the data fields
+				for (var field in data) {
+					var el = node.find('[itemprop="' + field + '"]');
+					var childList = [];
+					node.find('[itemprop="' + field + '"]').each(function() {
+						var include = false, parent = $(this).parent();
+						while (parent.length !== 0 && !include) {
+							if ($(parent).not(node).length === 0) {
+								include = true; break;
+							} else if ($(parent).not('[itemscope]').length === 0) {
+								include = false; break;
+							} parent = $(parent).parent();
+						}
+						if (include) childList.push($(this));
+					});
+																							
+					if (childList.length > 0) {
+						for(var i = 0, len = childList.length; i < len; i++) {
+							if (data[field] instanceof Array || data[field] instanceof O.Collection) {
+								O.Binding.bindList(childList[i], data[field]);
+							} else if (typeof data[field] === 'object' || data[field] instanceof O.Item) {
+								O.Binding.bindData(childList[i], data[field]);
+							} else childList[i].text(data[field]);
+						}
+					}
+				}
+			},
+			
+			bindList: function(node, list) {
+						
+				// check for the data format
+				if (list instanceof O.Collection) {
+					var data = list.toArray();
+				} else if (list instanceof Array) {
+					var data = list;
+				}
+				else throw 'Invalid data collection';
+			
+				var template = node.find('[itemscope]');
+				var itemscope = $(template).attr('itemscope');
+				
+				// validate attribute exists
+				if (typeof itemscope !== 'undefined' && itemscope !== false) {
+					node.html('');
+					for(var i=0, len = data.length; i < len; i++) {
+						var instance = template.clone();
+						O.Binding.bindData(instance, data[i]);
+						node.append(instance);
+					}
+				}
+			}
+		}
+	
+	})();
+	
 });
 
 window.onload = function() {
@@ -366,10 +891,82 @@ window.onload = function() {
 	
 		var rootNode = document.getElementById("root");
 		var root = new O.UIView(undefined, rootNode);
+		O.Storage.init();
+		var data = {
+			restaurant: {
+				name: 'food store',
+				address: '123 apple street',
+				locations: [
+					{ name: 'location one' },
+					{ name: 'location two' },
+					{ name: 'location three' }
+				]
+			},
+			rank: 'number one'
+		}
 		
-		console.log(root);
+		root.bindData(data);
+		
+		O.DB.register('test', {
+			type: 'local',
+			path: '/contacts'
+		});
+		
+		var ds = O.DB.load('test');
+		
+		var success = function(data) {
+			console.log(data);
+		}
+		var error = function(data) {
+			console.log("error");
+		}
+		
+		var mod = new O.ModelDefinition({
+			name: 'Contact', 
+			id: 'id',
+			path: '/contacts', 
+			
+			fields: {
+				contactId: { type: 'int', name: 'id', nullable: false },
+				firstName: { type: 'string', name: 'first_name', nullable: false  },
+				lastName: { type: 'string', name: 'last_name', nullable: false  },
+				email: { type: 'email', name: 'email', nullable: true  },
+				phone: { type: 'tel', name: 'phone', nullable: true  },
+				birthday: { type: 'date', name: 'birthday', nullable: true  },
+				website: { type: 'url', name: 'website', nullable: true }
+			}, 
 	
-		root.getForm('one').getField('food').val('Kevin');
+			// map source into the form of a single json object
+			mapItem: function(data) {
+				return data['Contact'];
+			},
+			
+			// map source into the form of an array of source objects
+			mapItems: function(data) {
+				return data['contacts'];
+			}
+		});
+		
+		
+		//ds.update('/contacts', { first_name: 'rachel', last_name: 'samaniego', email: 'kevin@kevin.com' }, 26, success, error);
+		//ds.create('contacts', { name: 'kevin' }, 1, success, error);
+		//ds.one('contacts', 1, success, error);
+//		var ds = new O.DataSource('/orangeui/new/');
+//		
+//		var success = function(data) {
+//			console.log(data);
+//		}
+//		var error = function() {
+//			console.log("error");
+//		}
+//		
+//		ds.request({
+//			url: 'test.json',
+//			type: 'GET',
+//			success: success,
+//			error: error
+//		});
+	
 	
 	});
 
@@ -395,16 +992,43 @@ html, body {
 
 	<form name="one">
 				<input type="text" name="food" />
+				<input type="text" name="drink" />
+				<input type="text" name="coffee" />
+				<input type="submit" name="submit" value="submit" />
 	</form>
 
 	<div data-name="three">
 	
 		<p data-name="btn">Hello</p>
 		
+		<div itemprop="restaurant" itemscope>
+		
+			<div itemprop="name"></div>
+			<div itemprop="address"></div>
+		
+		</div>
+		
+		<div itemprop="name"></div>
+		
+		<div itemprop="rank"></div>
+		
+		<div itemprop="restaurant" itemscope>
+		
+			<ul itemprop="locations">
+			
+				<li itemscope>
+					<span itemprop="name"></span>
+				</li>
+			
+			</ul>
+		
+		</div>
+		
 		<div data-control="ui-view" data-name="view-two">
 	
 			<form name="two">
 				<input type="text" name="food" />
+
 			</form>
 	
 			<p data-name="one">Hi</p>

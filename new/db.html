@@ -1,15 +1,6 @@
-<!DOCTYPE HTML>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>View</title>
-
-<script type="text/javascript" src="lib/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="../src/scripts/oop.js"></script>
-<script type="text/javascript" src="../src/scripts/commons.js"></script>
 <script type="text/javascript">
 
-Orange.use(function(O) {
+O.use('mvc', function(O) {
 
 	O.View = (function() {
 	
@@ -273,11 +264,9 @@ Orange.use(function(O) {
 		bindData: function(item, live) {
 			O.Binding.bindData(this.target, item);
 			if (live && item instanceof O.Item) {
-				var id = item.id(),  model = item.getModel();
+				var id = item.getId(),  model = item.getModel();
 				model.on('datachange', function(d) {
-					if ($.inArray(id, d.data.ids)) {
-						this.bindData(model.get(id), false);
-					}
+					item.mergeChanges(d);
 				}, this);
 			}
 		},
@@ -387,6 +376,9 @@ Orange.use(function(O) {
 				_active = {},
 				_registered = {
 					'cache': { type: 'local', path: '' },
+					'create': { type: 'local', path: '' },
+					'update': { type: 'local', path: '' },
+					'delete': { type: 'local', path: '' },
 					'pending': { type: 'local', path: '' }
 				};
 		
@@ -410,12 +402,12 @@ Orange.use(function(O) {
 			
 			load: function(name) {
 				var source;
-				if (typeof _registered[name] !== 'undefined') {
+				if (_registered.hasOwnProperty(name)) {
 					var reg = _registered[name];
-					if (typeof _active[name] === 'undefined') {
+					if (!_active.hasOwnProperty(name)) {
 						if (typeof _sources[reg.type] !== 'undefined') _active[name] = new _sources[reg.type](name, reg.path);
 					}
-					if (typeof _active[name] !== 'undefined') {
+					if (_active.hasOwnProperty(name)) {
 						return _active[name];
 					} else throw "Error: Data source '" + name + "' could not be loaded";
 				}
@@ -425,8 +417,8 @@ Orange.use(function(O) {
 		};
 	
 	})();
-	
-	
+		
+		
 	O.Model = (function() {
 	
 		var _models = {};
@@ -458,8 +450,7 @@ Orange.use(function(O) {
 		};
 	
 	})();
-	
-	
+
 	O.DataSource = O.DB.define({
 	
 		getType: function() {
@@ -533,7 +524,7 @@ Orange.use(function(O) {
 			this._super(config);
 		},
 				
-		get: function(type, success, failure) {
+		getAll: function(type, success, failure) {
 			
 			var successFunc = function(data) {
 				data = this.processItems(type, data);
@@ -550,7 +541,7 @@ Orange.use(function(O) {
 		
 		},
 		
-		one: function(type, id, success, failure) {
+		get: function(type, id, success, failure) {
 					
 			var successFunc = function(data) {
 				data = this.processItem(type, data);
@@ -569,38 +560,19 @@ Orange.use(function(O) {
 		
 		},
 		
-		create: function(type, object, success, failure) {
-		
-			var successFunc = function(data) {
-				data = this.processItem(type, data);
-				success.call(this, data);
-			}
-									
-			this.request({
-				url: this.path + type,
-				data: object,
-				type: 'POST',
-				dataType: 'text/json',
-				success: $.proxy(successFunc, this),
-				error: failure
-			});
-		
-		},
-		
-		update: function(type, object, id, success, failure) {
+		set: function(type, object, id, success, failure) {
 		
 			var successFunc = function(data) {
 				data = this.processItem(type, data);
 				success.call(this, data);
 			}
 			
-			path = this.path + type;
-						
+			var path = (!id) ? this.path + type : (path.charAt(path.length-1) == '/') ? path + id : path + '/' + id;
+									
 			this.request({
-				url: (path.charAt(path.length-1) == '/') ? path + id : path + '/' + id,
+				url: path,
 				data: object,
-				type: 'PUT',
-				contentType: 'text/json',
+				type: (!id) ? 'POST' : 'PUT',
 				dataType: 'text/json',
 				success: $.proxy(successFunc, this),
 				error: failure
@@ -608,7 +580,7 @@ Orange.use(function(O) {
 		
 		},
 		
-		delete: function(type, id, success, failure) {
+		remove: function(type, id, success, failure) {
 			
 			path = this.path + type;
 			
@@ -630,7 +602,7 @@ Orange.use(function(O) {
 		}
 	
 	});
-	
+
 	O.LocalDataSource = O.DB.extend(O.DataSource, {
 	
 		initialize: function(name, config) {
@@ -651,20 +623,9 @@ Orange.use(function(O) {
 		
 		request: function() {},
 		
-		set: function(type, data, success, failure) {
+		getAll: function(type, success, failure) {
 			try {
-				var data = O.Storage.set('model:' + type, data);
-				success();
-				return true;
-			} catch(e) {
-				failure();
-				return false;
-			}		
-		},
-		
-		get: function(type, success, failure) {
-			try {
-				var data = O.Storage.get('model:' + type);
+				var data = O.Storage.get(this.name + ':' + 'model:' + type);
 				if (data == undefined) return {};
 				success(data);
 				return data;
@@ -674,11 +635,11 @@ Orange.use(function(O) {
 			}
 		},
 		
-		one: function(type, id, success, failure) {
+		get: function(type, id, success, failure) {
 			var data = O.Storage.get(this.name + ':' + 'model:' + type);
-			if (data.hasOwnProperty(this.key)) { //FIX THIS
+			if (typeof data[id] !== 'undefined') {
 				success(data[id]);
-				return data;
+				return data[id];
 			}
 			else {
 				failure();
@@ -686,7 +647,7 @@ Orange.use(function(O) {
 			}
 		},
 		
-		create: function(type, object, id, success, failure) {
+		set: function(type, object, id, success, failure) {
 			try {
 				if (id === null) id = this.nextKey(type);
 				var data = O.Storage.get(this.name + ':' + 'model:' + type);
@@ -694,33 +655,31 @@ Orange.use(function(O) {
 				data[id] = object;
 				O.Storage.set(this.name + ':' + 'model:' + type, data);
 				success(object);
-				return id;
+				return object;
 			} catch(e) {
 				failure();
 				return false;
 			}
 		},
 		
-		update: function(type, object, id, success, failure) {
+		setAll: function(type, data, success, failure) {
 			try {
-				var data = O.Storage.get(this.name + ':' + 'model:' + type);
-				data[id] = object;
 				O.Storage.set(this.name + ':' + 'model:' + type, data);
-				success(object);
-				return data;
+				success();
+				return true;
 			} catch(e) {
 				failure();
 				return false;
-			}
+			}		
 		},
 		
-		delete: function(type, id, success, failure) {
+		remove: function(type, id, success, failure) {
 			try {
 				var data = O.Storage.get(this.name + ':' + 'model:' + type);
 				delete data[id];
 				O.Storage.set(this.name + ':' + 'model:' + type, data);
-				success();
-				return true;
+				success(id);
+				return id;
 			} catch(e) {
 				failure();
 				return false;
@@ -737,34 +696,28 @@ Orange.use(function(O) {
 		}
 	
 	});
-	
-	O.SessionDataSource = O.DB.extend(O.DataSource, {
-	
-		getType: function() {
-			return 'session';
-		},
-		
-		isPersistent: function() {
-			return true;
-		},
-		
-		supportsModels: function() {
-			return true;
-		}
-	
-	});
-	
+
 	O.ModelDefinition = O.define({
-		
+	
 		initialize: function(config) {
 		
 			this.id = config.id;
 			this.name = config.name;
 			this.fields = config.fields;
-			this.source = O.DB.load(config.source);
-			this.cache = O.DB.load('cache');
-			this.pending = O.DB.load('pending');
+			
+			this.liveDS = O.DB.load(config.source);
+			this.cacheDS = O.DB.load('cache');
+			
+			this.createDS = O.DB.load('create');
+			this.updateDS = O.DB.load('update');
+			this.deleteDS = O.DB.load('delete');
+			this.pendingDS = O.DB.load('pending');
+			
+			this.isSyncing = false;
+			
 			this.eventTarget = new O.EventTarget(null, this);
+			this.proxy = $.proxy(this.onStatusChange, this);
+			this.isLive = !(O.Cache.isActive() && !O.Cache.isOnline());
 			
 			for(var field in this.fields) {
 				if (this.fields[field].name == this.id) this.key = field;
@@ -772,225 +725,278 @@ Orange.use(function(O) {
 			
 			if (this.key === null) throw "Missing id field in model '" + this.name + "'";
 			
-			O.Cache.on('statusChange', $.proxy(this.onStatusChange, this));
+			O.Cache.on('statusChange', this.proxy);
 			
 		},
 		
 		destroy: function() {
+			O.Cache.detach('statusChange', this.proxy);
 			this.eventTarget.destroy();
 		},
 		
-		get: function(success, failure, includeUnsaved) {
+		getAll: function(success, error) {
 		
-			var successOfflineFunc = function(data) {
-				data = this.processItems(data);				
-				success.call(this, new O.Collection(this, data));
-			};
+			var offlineFunc = function(data) {
 			
-			var successOnlineFunc = function(data) {
-							
-				// process return data
-				data = this.processItems(data);
-				
-				// get prior data
-				var prev = new O.Collection(this, this.cache.get(this.name));
-				var current = new O.Collection(this, data);
-				
-				// compare differences
-				var delta = prev.getChanges(current); // returns list of objects changed
-				
-				// store updated data
-				this.cache.save(this.name, data);
-				
-				// call success function
-				success.call(this, current);
-
-				// return changed data
-				if (delta.count() > 0) {
-					this.fire('datachange', {
-						data: delta
-					});
+				// get pending data
+				var creates = this.createDS.getAll(),
+						updates = this.updatesDS.getAll(),
+						deletes = this.deletesDS.getAll(),
+						pending = this.pendingDS.getAll();
+			
+				// merge creates
+				for (var key in creates) {
+					data[key] = creates[key];
 				}
+				
+				// merge updates
+				for (var key in updates) {
+					data[key] = updates[key];
+				}
+				
+				// merge deletes
+				for (var key in deletes) {
+					delete data[key];
+				}
+				
+				// merge pending
+				if (this.isSyncing) {
+					for (var key in pending) {
+						data[pending[this.id]] = pending[key];
+					}
+				}
+				
+				// process data set
+				var mappedData = this.mapItems(data);
+				
+				// call success
+				success.call(this, new O.Collection(this, mappedData));
+			
+			},
+			
+			onlineFunc = function(data) {
+			
+				// call offline func
+				offlineFunc.call(this, data);
+			
+				// store back to local storage
+				this.cacheDS.setAll(this.name, data);
 			
 			};
 		
-			if (O.Cache.isActive() && !O.Cache.isOnline()) {
-				var data = this.cache.get(this.name);
-				if (includeUnsaved) {
-					var pending = this.pending.get(this.name);
-					if(pending) {
-						for(var item in pending) {
-							data[item] = pending[item];
-							data[item]._unsaved = true;
+			// get all data
+			if (!this.isLive) {
+				this.cacheDS.getAll(this.name, $.proxy(offlineFunc, this), error);
+			} else {
+				this.liveDS.getAll(this.name, $.proxy(onlineFunc, this), error);
+			}
+		
+		},
+		
+		get: function(id, success, error) {
+		
+			var offlineFunc = function(data) {
+				
+				// process data set
+				var mappedData = this.mapItem(data);
+				
+				// call success
+				success.call(this, new O.Item(this, mappedData));
+			
+			},
+			
+			onlineFunc = function(data) {
+			
+				// call offline func
+				offlineFunc.call(this, data);
+			
+				// store back to local storage
+				this.cacheDS.set(this.name, id, data);
+			
+			};
+		
+			// get item
+			if (!this.isLive) {
+				
+				var data = null;
+				
+				// get pending data
+				var creates = this.createDS.getAll(),
+						updates = this.updatesDS.getAll(),
+						deletes = this.deletesDS.getAll(),
+						pending = this.pendingDS.getAll();
+			
+				// merge pending
+				if (this.isSyncing) {
+					for (var i in pending) {
+						if (typeof pending[i][this.id] !== 'undefined' && pending[i][this.id] == id) {
+							data = pending[i];
 						}
 					}
 				}
-				successOfflineFunc.call(this, data);
-								
+			
+				// merge changes
+				if (typeof creates[id] !== 'undefined') {
+					data = creates[id];
+				} else if (typeof updates[id] !== 'undefined' && data == null) {
+					data = updates[id];
+				} else if (typeof deletes[id] !== 'undefined') {
+					throw "Cannot fetch deleted item";
+				}
+
+				// fetch data if not pending
+				if (!data) this.cacheDS.get(this.name, id, $.proxy(offlineFunc, this), error);
+				
+				// otherwise use pending data
+				offlineFunc.call(this, data);
+				
 			} else {
-				this.source.get(this.name, $.proxy(successOnlineFunc, this), failure);
+				this.liveDS.get(this.name, id, $.proxy(onlineFunc, this), error);
 			}
 		
 		},
 		
-		one: function(id, success, failure, includeUnsaved) {
+		set: function(object, success, error) {
 		
-			var successOfflineFunc = function(data) {
-				data = this.processItem(data);				
-				success.call(this, new O.Item(this, data));
-			};
+			var id = object.hasOwnProperty(this.key) ? object[this.key] : null,
+					mappedObject = this.unmapItem(object);
+		
+			var offlineFunc = function(data, unsaved) {
+				
+				// process data set
+				var mappedData = this.mapItem(data);
+				
+				// call success
+				var item = new O.Item(this, mappedData);
+				if (unsaved) item.markUnsaved();
+				
+				// call success
+				success.call(this, item);
+				
+				// fire changed event
+				this.fire('datachange', { 
+					type: 'set':
+					delta: item
+				});
 			
-			var successOnlineFunc = function(data) {
-							
-				// process return data
-				data = this.processItem(data);
-				
-				// get current
-				var current = new O.Item(this, data);
-				
-				// get prior data
-				if (var prev = this.cache.one(this.name, id)) {
-					if (prev.didChange(current)) {
-						this.fire('datachange', {
-							data: current
-						});
-					}
-				}
-
-				// store updated data
-				this.cache.save(this.name, data);
-				
-				// call success function
-				success.call(this, current);
-
+			},
+			
+			onlineFunc = function(data) {
+			
+				// call offline func
+				offlineFunc.call(this, data);
+			
+				// store back to local storage
+				this.cacheDS.set(this.name, data[this.key], data);
+			
 			};
 		
-			if (O.Cache.isActive() && !O.Cache.isOnline()) {
-				var data = this.cache.one(this.name, id);
-				var pending = this.pending.one(this.name, id);
-				if(pending) {
-					data = pending;
-					data._unsaved = true;
-				}
-				successOfflineFunc.call(this, data);
-			} else {
-				this.source.one(this.name, id, $.proxy(successOnlineFunc, this), failure);
-			}
-		
-		},
-
-		save: function(object, success, failure) {
+			// set item
+			if (!this.isLive) {
 				
-			var id = object.hasOwnProperty(this.key) ? object[this.key] : null;
-			object = this.prepareItem(object);
-			
-			var successOfflineFunc = function(data) {
-				data = this.processItem(data);				
-				success.call(this, new O.Item(this, data));
-			};
-			
-			var successOnlineFunc = function(data) {
-							
-				// process return data
-				data = this.processItem(data);
-				
-				// get current
-				var current = new O.Item(this, data);
-				
-				// get prior data
-				if (var prev = this.cache.one(this.name, id)) {
-					if (prev.didChange(current)) {
-						this.fire('datachange', {
-							data: current
-						});
-					}
-				}
-
-				// store updated data
-				this.cache.save(this.name, data);
-				
-				// call success function
-				success.call(this, current);
-
-			};
-			
-			if (O.Cache.isActive() && !O.Cache.isOnline()) {
+				var func = function(data) {
+					offlineFunc.call(this, data, true);
+				};
 				
 				if (!id) {
-					var key = this.pending.create(this.name, object, null, $.proxy(successOfflineFunc, this), failure);
-					O.Log.warn('Unsaved object. Will save when server reconnects.');
-				}
-				else {
-					var one = this.pending.get(this.name, id);
-					if (one) {
-						this.pending.update(this.name, id, $.proxy(successOfflineFunc, this), failure);
+				
+					// store to pending creates
+					this.createDS.set(this.name, mappedObject, null, func, error);
+				
+				} else if (this.isSyncing) {
+				
+					// get deletes
+					var deletes = this.deletesDS.getAll();
+				
+					if (typeof deletes[id] !== 'undefined') {
+						throw 'Cannot update already removed item';
 					} else {
-						this.pending.create(this.name, id, $.proxy(successOfflineFunc, this), failure);
-					}
-					O.Log.warn('Unsaved changes. Will save when server reconnects.');
+						this.pendingDS.set(this.name, mappedObject, null, func, error); // set unkeyed object
+					} 
+								
+				} else {
+				
+					var data = null;
+						
+					// get pending data
+					var creates = this.createDS.getAll(),
+							deletes = this.deletesDS.getAll();
+				
+					// merge changes
+					if (typeof creates[id] !== 'undefined') {
+						this.createDS.set(this.name, mappedObject, id, func, error);
+					} else if (typeof deletes[id] !== 'undefined') {
+						throw 'Cannot update already removed item';
+					} else {
+						this.updateDS.set(this.name, mappedObject, id, func, error);
+					} 
+					
 				}
 				
-				successOfflineFunc.call(this, data);
-				
 			} else {
-				if (!id) this.source.create(this.name, success, failure);
-				else this.source.update(this.name, object, id, success, failure);
+				this.liveDS.set(this.name, mappedObject, (!id ? null : id), $.proxy(onlineFunc, this), error);						
 			}
+		
+		},
+		
+		remove: function(key, success, error) {
+		
+			var id = (key !== 'object' && object.hasOwnProperty(this.key)) ? object[this.key] : key;
+		
+			var offlineFunc = function(data) {
+			
+				// call success function	
+				success.call(this, true);			
+			
+				// fire changed event
+				this.fire('datachange', { 
+					type: 'remove':
+					delta: id
+				});
+			
+			},
+			
+			onlineFunc = function(data) {
+			
+				// call offline func
+				offlineFunc.call(this, data);
+			
+				// store back to local storage
+				this.cacheDS.remove(this.name, id);
+			
+			};
+		
+			if (!this.isLive) {
 				
-		},
-		
-		delete: function(object, success, failure) {
-		
-			var id = object.hasOwnProperty(this.key) ? object[this.key] : object); // handle erroneous input?
-			if (!id) throw 'Cannot delete object, no id found';
+				var creates = this.createDS.getAll(),
+						updates = this.updatesDS.getAll(),
+						deletes = this.deletesDS.getAll();
 			
-			if (O.Cache.isActive() && !O.Cache.isOnline()) {				
-				this.local.delete(this.name, id, success, failure);
-				O.Log.warn('Unsaved changes. Will save when server reconnects.');
-			} else {
-				this.source.delete(this.name, id, success, failure);
-			}
-		
-		},
-		
-		validate: function(data) {
-		
-			// compare data to our model
-			for(var field in this.fields) {
-			
-				if (this.fields[field].name == this.key) continue;
-							
-				// get source field name
-				var nullable = (typeof this.fields[field].nullable !== undefined) ? this.fields[field].nullable : true;
-				var isNull = (typeof data[field] === 'undefined' || data[field] === '');
-						
-				// continue if field is not defined
-				if (isNull && !nullable) return false;
-			}
-			
-			return true;
-		
-		},
-		
-		processItems: function(data) {
-
-			// setup output
-			var models = [];
-						
-			// map individual items			
-			for (var i = 0, len = data.length; i < len; i++) {
-				var model = this.processItem(data[i]);
-				if (typeof model === 'object') {
-					models.push(model);
+				// merge changes
+				if (typeof creates[id] !== 'undefined') {
+					this.createDS.remove(this.name, id);
+				} else if (typeof updates[id] !== 'undefined') {
+					this.updateDS.remove(this.name, id);
 				}
+				
+				if (typeof deletes[id] !== 'undefined') {
+					throw 'Cannot delete already removed item';
+				} else {
+					this.deleteDS.set(this.name, {}, id);
+				}
+				
+				offlineFunc.call(this, true);
+				
+			} else {
+			
+				// update live source
+				this.liveDS.remove(this.name, id, $.proxy(onlineFunc, this), error);
+			
 			}
-		
-			// return models
-			return models;
 		
 		},
 		
-		processItem: function(data) {
+		mapItem: function(data) {
 		
 			// create output object
 			var model = {};
@@ -1017,20 +1023,31 @@ Orange.use(function(O) {
 		
 		},
 		
-		onStatusChange: function(e) {
-			if(e.data == 1) {
-				// push all pending data to server
-				OrangeUI.Log.info("Unsaved data pushed to server.");
-			} 
+		mapItems: function(data) {
+		
+			// setup output
+			var models = [];
+						
+			// map individual items			
+			for (var i = 0, len = data.length; i < len; i++) {
+				var model = this.mapItem(data[i]);
+				if (typeof model === 'object') {
+					models.push(model);
+				}
+			}
+		
+			// return models
+			return models;
+		
 		},
 		
-		prepareItem: function(object) {
+		unmapItem: function(data) {
 		
 			// create output object
 			var data = {};
 												
 			// map to our model
-			for(var field in this.fields) {
+			for (var field in this.fields) {
 			
 				// skip id if null
 				if (this.key == field && !object.hasOwnProperty(this.key)) {
@@ -1056,6 +1073,170 @@ Orange.use(function(O) {
 		
 		},
 		
+		onStatusChange: function(e) {
+	
+			if (e.data == 1 && !this.isSyncing) {				
+				this.onSync();				
+			} else {
+				if (this.isSyncing) {
+					this.onSyncFailure.call(this);
+				} else {
+					this.isLive = !(O.Cache.isActive() && !O.Cache.isOnline());
+				}
+			}
+		
+		},
+		
+		onSync: function() {
+		
+			var deltas = [];
+			
+			this.isSyncing = true;
+		
+			var createSuccessFunc = function(data, id) {
+						
+				// process data set
+				var mappedData = this.mapItem(data);
+				
+				// create item
+				var item = new O.Item(this, mappedData);
+				
+				// remove from pending
+				this.createDS.remove(this.name, id);
+				
+				// store back to local storage
+				this.cacheDS.set(this.name, data, item.getId());
+				
+				// set sync delta
+				deltas.push({ type: 'sync', data: item, originalId: id, newId: item.getId() });
+				
+				// check status
+				this.syncCount--;
+				this.checkSyncStatus();
+			
+			};
+			
+			var updateSuccessFunc = function(data) {
+			
+				// process data set
+				var mappedData = this.mapItem(data);
+				
+				// create item
+				var item = new O.Item(this, mappedData);
+				
+				// remove from pending
+				this.updateDS.remove(this.name, item.getId());
+				
+				// store back to local storage
+				this.cacheDS.set(this.name, data, item.getId());
+				
+				// set sync delta
+				setDeltas.push({ type: 'set', data: item });
+				
+				// check status
+				this.syncCount--;
+				this.checkSyncStatus();
+			
+			};
+			
+			var deleteSuccessFunc = function(id) {
+				
+				// remove from pending
+				this.deleteDS.remove(this.name, id);
+				
+				// store back to local storage
+				this.cacheDS.remove(this.name, id);
+				
+				// set sync delta
+				setDeltas.push({ type: 'remove', id: id });
+				
+				// check status
+				this.syncCount--;
+				this.checkSyncStatus();
+			
+			};
+		
+			var creates = this.createDS.getAll(),
+					updates = this.updatesDS.getAll(),
+					deletes = this.deletesDS.getAll();
+		
+			this.syncCount = creates.length + updates.length + deletes.length;
+				
+			for (var id in creates) {
+				this.liveDS.set(this.name, creates[id], null, $.proxy(function(data) {				
+					var key = id;
+					createSuccessFunc.call(this, data, key);				
+				}, this), this.onSyncFailure);			
+			}
+			
+			for (var id in updates) {
+				this.liveDS.set(this.name, updates[id], null, $.proxy(function(data) {				
+					var key = id;
+					updateSuccessFunc.call(this, data, key);				
+				}, this), this.onSyncFailure);		
+			}
+			
+			for (var id in deletes) {
+				this.liveDS.remove(this.name, id, null, $.proxy(function(data) {				
+					var key = id;
+					deleteSuccessFunc.call(this, key);				
+				}, this), this.onSyncFailure);	
+			}			
+		
+		},
+		
+		onSyncSuccess: function(e) {
+		
+			this.isSyncing = false;
+			this.isLive = !(O.Cache.isActive() && !O.Cache.isOnline());
+		
+			// push all pending data to server
+			OrangeUI.Log.info("Unsaved data pushed to server.");
+		
+		},
+		
+		onSyncFailure: function(e) {
+		
+			// push all pending data to server
+			OrangeUI.Log.info("Could not push data to server. Retry?");
+					
+		},
+		
+		checkSyncStatus: function(e) {
+		
+			// if all items are synced
+			if (this.syncCount == 0) {
+				
+				// get pending entries
+				var pending = this.pendingDS.getAll();
+				
+				// if there are pending items
+				if (pending.length > 0) {
+				
+					// push pending to the cache
+					for(var i in pending) {
+						
+						if (pending.hasOwnProperty(this.id)) var id = pending[this.id];
+						else throw "Pending item missing id";
+						
+						// push pending to update queue
+						this.updateDS.set(this.name, pending, id);
+						
+						// remove from pending queue
+						this.pendingDS.remove(this.name, id);
+					}
+					
+					// resync changes
+					this.onSync();
+					
+				} else {
+					this.onSyncSuccess.call(this);
+				}
+				
+			}
+		
+		},
+		
 		on: function() {
 			return this.eventTarget.on.apply(this.eventTarget, arguments);
 		},
@@ -1067,12 +1248,41 @@ Orange.use(function(O) {
 		fire: function() {
 			return this.eventTarget.fire.apply(this.eventTarget, arguments);
 		}
-		
+	
 	});
+	
 	
 	O.Collection = O.define({
 	
 		initialize: function(model, data) {
+		
+			// set values
+			this.model = model;
+			this.data = data; // list keyed by id
+		
+		},
+		
+		destroy: function() {
+		
+		},
+		
+		getIds: function() {
+		
+		},
+		
+		getModel: function() {
+		
+		},
+		
+		count: function() {
+		
+		},
+		
+		mergeChanges: function() {
+		
+		},
+		
+		toObject: function() {
 		
 		},
 		
@@ -1086,6 +1296,30 @@ Orange.use(function(O) {
 	
 		initialize: function(model, data) {
 		
+			// set values
+			this.model = model;
+			this.data = data;
+		
+		},
+		
+		destroy: function() {
+		
+		},
+		
+		getId: function() {
+		
+		},
+		
+		getModel: function() {
+		
+		},
+		
+		mergeChanges: function() {
+		
+		},
+		
+		isUnsaved: function() {
+		
 		},
 		
 		toObject: function() {
@@ -1093,230 +1327,7 @@ Orange.use(function(O) {
 		}
 	
 	});
-	
-	O.Binding = (function() {
-		
-		return {
-		
-			bindData: function(node, item) {
-			
-				// check for the data format
-				if (item instanceof O.Item) {
-					var id = item.id(), data = item.toObject();
-				} else if (typeof item === 'object') {
-					var id = null, data = item;
-				}
-				else throw 'Invalid data item';
-				
-				if (id !== null) node.attr('itemid', id);
-				
-				// parse all the data fields
-				for (var field in data) {
-					var el = node.find('[itemprop="' + field + '"]');
-					var childList = [];
-					node.find('[itemprop="' + field + '"]').each(function() {
-						var include = false, parent = $(this).parent();
-						while (parent.length !== 0 && !include) {
-							if ($(parent).not(node).length === 0) {
-								include = true; break;
-							} else if ($(parent).not('[itemscope]').length === 0) {
-								include = false; break;
-							} parent = $(parent).parent();
-						}
-						if (include) childList.push($(this));
-					});
-																							
-					if (childList.length > 0) {
-						for(var i = 0, len = childList.length; i < len; i++) {
-							if (data[field] instanceof Array || data[field] instanceof O.Collection) {
-								O.Binding.bindList(childList[i], data[field]);
-							} else if (typeof data[field] === 'object' || data[field] instanceof O.Item) {
-								O.Binding.bindData(childList[i], data[field]);
-							} else childList[i].text(data[field]);
-						}
-					}
-				}
-			},
-			
-			bindList: function(node, list) {
-						
-				// check for the data format
-				if (list instanceof O.Collection) {
-					var data = list.toArray();
-				} else if (list instanceof Array) {
-					var data = list;
-				}
-				else throw 'Invalid data collection';
-			
-				var template = node.find('[itemscope]');
-				var itemscope = $(template).attr('itemscope');
-				
-				// validate attribute exists
-				if (typeof itemscope !== 'undefined' && itemscope !== false) {
-					node.html('');
-					for(var i=0, len = data.length; i < len; i++) {
-						var instance = template.clone();
-						O.Binding.bindData(instance, data[i]);
-						node.append(instance);
-					}
-				}
-			}
-		}
-	
-	})();
-	
+
 });
 
-window.onload = function() {
-
-	Orange.use(function(O) {
-	
-		var rootNode = document.getElementById("root");
-		var root = new O.UIView(undefined, rootNode);
-		O.Storage.init();
-		var data = {
-			restaurant: {
-				name: 'food store',
-				address: '123 apple street',
-				locations: [
-					{ name: 'location one' },
-					{ name: 'location two' },
-					{ name: 'location three' }
-				]
-			},
-			rank: 'number one'
-		}
-		
-		root.bindData(data);
-		
-		O.DB.register('test', {
-			type: 'local',
-			path: '/contacts'
-		});
-		
-		var ds = O.DB.load('test');
-		
-		var success = function(data) {
-			console.log('success');
-			console.log(data);
-		}
-		var error = function(data) {
-			console.log("error");
-		}
-		
-		
-		//ds.update('/contacts', { first_name: 'rachel', last_name: 'samaniego', email: 'kevin@kevin.com' }, 26, success, error);
-		ds.create('contacts', { name: 'kevin' }, null, success, error);
-		//ds.delete('contacts', 3, success, error);
-		//ds.one('contacts', 1, success, error);
-//		var ds = new O.DataSource('/orangeui/new/');
-//		
-//		var success = function(data) {
-//			console.log(data);
-//		}
-//		var error = function() {
-//			console.log("error");
-//		}
-//		
-//		ds.request({
-//			url: 'test.json',
-//			type: 'GET',
-//			success: success,
-//			error: error
-//		});
-	
-	
-	});
-
-};
-
 </script>
-
-<style type="text/css">
-
-html, body {
-	font: normal 16px "Helvetica Neue", Helvetica, Arial, sans-serif;
-	margin: 0;
-	padding: 0;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div id="root" data-control="ui-view" data-name="view-one" data-root="true">
-
-	<form name="one">
-				<input type="text" name="food" />
-				<input type="text" name="drink" />
-				<input type="text" name="coffee" />
-				<input type="submit" name="submit" value="submit" />
-	</form>
-
-	<div data-name="three">
-	
-		<p data-name="btn">Hello</p>
-		
-		<div itemprop="restaurant" itemscope>
-		
-			<div itemprop="name"></div>
-			<div itemprop="address"></div>
-		
-		</div>
-		
-		<div itemprop="name"></div>
-		
-		<div itemprop="rank"></div>
-		
-		<div itemprop="restaurant" itemscope>
-		
-			<ul itemprop="locations">
-			
-				<li itemscope>
-					<span itemprop="name"></span>
-				</li>
-			
-			</ul>
-		
-		</div>
-		
-		<div data-control="ui-view" data-name="view-two">
-	
-			<form name="two">
-				<input type="text" name="food" />
-
-			</form>
-	
-			<p data-name="one">Hi</p>
-			
-			<div data-control="ui-view" data-name="view-three"></div>
-		
-		</div>
-		
-			<form name="five"></form>
-		
-		<div>
-			
-			<form name="three"></form>
-		
-			<div data-control="ui-view" data-name="view-four">
-			
-				<div data-name="two"></div>
-			
-				<div data-control="ui-view" data-name="view-five"></div>
-			
-				<form name="four"></form>
-			
-			</div>
-		
-		</div>
-	
-	</div>
-
-</div>
-
-</body>
-
-</html>

@@ -1,5 +1,5 @@
 /**
- * commons.js | OrangeUI Commons 0.1
+ * commons.js | OrangeUI Commons 0.2
  * @date 12.21.2011
  * @author Kevin Kinnebrew
  * @dependencies none
@@ -10,7 +10,7 @@
 
 	/* Variable Definitions */
 
-	var version = '0.1',
+	var version = '0.2',
 	
 	OrangeUI = {},
 	
@@ -328,53 +328,6 @@
 		if(OrangeUI[name] == undefined) {
 			OrangeUI[name] = {};
 		}
-	
-	};
-	
-	OrangeUI.app = function(name, config) {
-		var name = name.replace(keyFilterRegex);
-		OrangeUI._apps[name] = config;
-		OrangeUI.Log.info('Added application ' + name);
-	};
-	
-	OrangeUI.init = function(name) {
-	
-		var config = {}, name = name.replace(keyFilterRegex, '');
-	
-		if(OrangeUI._apps[name] != null) {
-			config = OrangeUI._apps[name];
-		}
-		
-		// load module
-		for(var i = 0, len = config.required.length; i < len; i++) {
-			OrangeUI.Loader.loadModule(config.required[i]);
-		}
-	
-		// bind event listeners
-		OrangeUI.Cache.on('statusChange', function(e) {
-			if(e.data == 1) {
-				OrangeUI.Location.goOnline();
-				OrangeUI.Storage.goOnline();
-				if(config.location) OrangeUI.Location.getLocation(function() {});
-				OrangeUI.Log.info("Application went online");
-			} else {
-				OrangeUI.Log.info("Application went offline");
-				OrangeUI.Location.goOffline();
-				OrangeUI.Storage.goOffline();
-			}
-		});
-		
-		// start modules
-		OrangeUI.Cache.init(config.poll);
-		OrangeUI.Storage.init();
-				
-		// call root function
-		var root = $('[data-root="true"]'),
-		type = root.attr('data-control');
-		root.removeAttr('data-root');
-		var c = OrangeUI.View.load(type);
-		var controller = new c(null, root);
-		controller.onLoad();
 	
 	};
 	
@@ -822,7 +775,6 @@
 		};
 	
 	})();	
-	
 	
 	window.Orange = OrangeUI;	
 

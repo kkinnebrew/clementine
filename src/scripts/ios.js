@@ -1,5 +1,5 @@
 /**
- * ios.js | OrangeUI iOS Module 0.1
+ * ios.js | OrangeUI iOS Module 0.2
  * @date 12.21.2011
  * @author Kevin Kinnebrew
  * @dependencies commons, ui, db, jquery-1.7.2
@@ -725,4 +725,4 @@ Orange.add('ios', function(O) {
 	});
 
 	
-}, ['mvc', 'db'], '0.1');
+}, ['mvc', 'db'], '0.2');

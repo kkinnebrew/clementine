@@ -8,7 +8,7 @@
 
 Orange.add('mvc', function(O) {
 	
-	O.Application = (function() {
+	O.App = (function() {
 	
 		var _apps = {},
 				_active = null,

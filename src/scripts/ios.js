@@ -94,6 +94,8 @@ Orange.add('ios', function(O) {
 			// clear attributes
 			this.target.removeAttr('data-default');
 			
+			this.popping = false;
+			
 		},
 		
 		popView: function() {
@@ -117,7 +119,7 @@ Orange.add('ios', function(O) {
 				this.leftBtn.appendTo(this.navBar);
 				setTimeout($.proxy(function() {
 					this.leftBtn.fadeIn(duration+100);
-				}, this), duration);
+				}, this), duration-100);
 			}
 			
 			if (rightViewBtn.length != 0) {
@@ -125,7 +127,7 @@ Orange.add('ios', function(O) {
 				this.rightBtn.appendTo(this.navBar);
 				setTimeout($.proxy(function() {
 					this.rightBtn.fadeIn(duration+100);
-				}, this), duration);
+				}, this), duration-100);
 			}
 			
 			if (leftViewBtn.length == 0 && rightViewBtn.length == 0 && navBar.length == 0) {
@@ -234,6 +236,9 @@ Orange.add('ios', function(O) {
 		
 		popToRootView: function() {
 		
+			if (this.popping) return;
+			this.popping = true;
+				
 			var duration = 300;
 			
 			// clear view stack
@@ -258,7 +263,7 @@ Orange.add('ios', function(O) {
 				this.leftBtn.appendTo(this.navBar);
 				setTimeout($.proxy(function() {
 					this.leftBtn.fadeIn(duration);
-				}, this), duration);
+				}, this), duration-100);
 			}
 			
 			if (rightViewBtn.length != 0) {
@@ -266,7 +271,7 @@ Orange.add('ios', function(O) {
 				this.rightBtn.appendTo(this.navBar);
 				setTimeout($.proxy(function() {
 					this.rightBtn.fadeIn(duration);
-				}, this), duration);
+				}, this), duration-100);
 			}
 			
 			var activeView = this.activeView;
@@ -289,6 +294,7 @@ Orange.add('ios', function(O) {
 			setTimeout($.proxy(function() {
 				view.target.addClass('active').removeClass('loading').removeClass('inactive');
 				this.viewStack = [this.viewStack[0]];
+				this.popping = false;
 			}, this), duration);
 		
 		},
@@ -408,55 +414,34 @@ Orange.add('ios', function(O) {
 			
 			// get table cell template
 			var tableCell = this.target.attr('data-cell-element');
-			if (typeof tableCell === 'undefined') throw "UITableView '" + this.name + "' missing 'data-cell-element' attribute";
-			this.tableCell = O.TemplateManager.load('app/elements/' + tableCell);
+			if (typeof tableCell !== 'undefined') {	
+				//throw "UITableView '" + this.name + "' missing 'data-cell-element' attribute";
+				this.tableCell = O.TemplateManager.load('app/elements/' + tableCell);
+				this.target.wrapInner('<div class="scroll-view"><ul></ul></div>');
+			} else {
+				this.target.wrapInner('<div class="scroll-view"></div>');
+			}
 			
-			// wrap the view
-			this.target.wrapInner('<div class="scroll-view"><ul></ul></div>');
-
 			// setup iscroll
 			this.myScroll = new iScroll(this.target.get(0));
 			this._super();
 			
-			// bind select event
-			this.target.on('click', $.proxy(this.onSelect, this));
 			this.target.removeAttr('data-cell-element');
 			
-			this.target.on('touchstart', $.proxy(function(e) {
-			
-				this.timeout = setTimeout($.proxy(function() {
-				
-					var target = $(e.target);
-				
-					// check if target is a table cell
-					if (target.hasClass('ios-ui-table-cell')) {
-						cell = target;
-					} else if (target.parent().hasClass('ios-ui-table-cell')) {	
-						cell = target.parent();
-					}
-					
-					if(cell != null) {
-						cell.addClass('touched');
-					}
-				
-				}, this), 50);
-				
-			}, this));
+			// bind select event
+			if (typeof tableCell !== 'undefined') {	
+				this.target.on('click', $.proxy(this.onSelect, this));
+			}
 			
 			this.target.on('touchmove', $.proxy(function(e) {
-				clearTimeout(this.timeout);
-				this.target.find('.ios-ui-table-cell').removeClass('touched');
-			}, this));
-			
-			this.target.on('touchend', $.proxy(function(e) {
-				clearTimeout(this.timeout);
-				this.target.find('.ios-ui-table-cell').removeClass('touched');
+				e.stopPropagation();
+				e.preventDefault();				
 			}, this));
 						
 		},
 		
 		setupTable: function() {
-		
+					
 			// build temporary container
 			var target = this.target.find('ul');
 			var container = target.clone();
@@ -464,14 +449,12 @@ Orange.add('ios', function(O) {
 		
 			var data = (this.collection instanceof O.Collection) ? this.collection.data : this.collection;
 		
-			// iterate over collection
-			for(var i=0, len = data.length; i < len; i++) {
-
-				// add templates to the container
+			// iterate over collection			
+			for(var key in data) {
 				template = new jsontemplate.Template(source);
 				var output = '';
 				try {
-					output = template.expand(data[i]);
+					output = template.expand(data[key]);
 				} catch(e) {
 					output = source.replace(/{[^)]*}/, '[undefined]');
 				}
@@ -492,14 +475,13 @@ Orange.add('ios', function(O) {
 		
 		bindData: function(data) {
 				
-				
 			if (data instanceof O.Collection) {
-				
+								
 				// store reference to collection
 				this.collection = data;
 							
 				// bind event on model
-				this.collection.model.on('datachange', $.proxy(this.onDataChange, this));
+				//this.collection.model.on('datachange', $.proxy(this.onDataChange, this));
 				
 				// setup table
 				this.setupTable();
@@ -553,10 +535,11 @@ Orange.add('ios', function(O) {
 				var id = $(cell).attr('itemid');
 				
 				// get entry
-				var data = this.collection[id];
+				if (typeof this.collection.get === 'function') var data = this.collection.get(id);
+				else if (typeof this.collection === 'object') var data = this.collection[id];
 				
 				// fire event
-				this.fire('select', data);
+				this.fire('select', (typeof data !== 'undefined') ? data : null);
 			
 			}
 		
@@ -583,7 +566,7 @@ Orange.add('ios', function(O) {
 			
 			setTimeout($.proxy(function() {
 				this.target.addClass('visible');
-			}, this), 0);
+			}, this), 50);
 					
 		},
 		
@@ -603,94 +586,143 @@ Orange.add('ios', function(O) {
 			
 	});
 	
-	O.iOS.UIFlipView = O.View.define({
+	O.UIMultiView = O.View.extend(O.UIView, {
+	
+		type: 'ui-multi-view',
 		
-		type: 'ios-ui-flip-view',
-				
+		initialize: function(parent, target) {
+			this._super(parent, target);
+			this.defaultView = this.target.attr('data-default');
+			this.target.removeAttr('data-default');
+		},
+		
 		onLoad: function() {
+			for (var i in this._views) {
+				if (this._views[i].name !== this.defaultView) {
+					this._views[i].target.hide();
+				} else {
+					this.activeView = this._views[i];
+				}
+			}
 			this._super();
 		},
 		
-		flipView: function() {
+		activateView: function(name) {
+			var view = this.getView(name);
+			if (view instanceof O.ViewController) {
+				this.activeView.target.hide();
+				this.activeView = view;
+				this.activeView.target.show();
+			}
+		},
 		
+		getActiveView: function() {
+			return this.activeView.name;
+		}
+		
+	});
+	
+	O.UIFlipView = O.View.extend(O.UIView, {
+	
+		type: 'ui-flip-view',
+		
+		onLoad: function() {
+			this._super();
+			for(var view in this._views) {
+				this._views[view].target.addClass('animated');
+			}
+			this.find('.back').css('opacity', 0).hide();
+		},
+		
+		flipView: function(name) {
+			if (this.target.hasClass('flipped')) {
+				this.target.removeClass('flipped');
+				setTimeout($.proxy(function() {
+					this.find('.back').css('opacity', 0);
+				}, this), 300);
+				setTimeout($.proxy(function() {
+					this.find('.back').hide();
+				}, this), 350);
+			} else {
+				this.find('.back').show();
+				setTimeout($.proxy(function() {
+					this.find('.back').css('opacity', 1);
+				}, this), 350);
+				setTimeout($.proxy(function() {
+					this.target.addClass('flipped');
+				}, this), 50);
+			}
+		}
+		
+	});
+	
+	O.iOS.UISegmentedControl = O.View.extend(O.UIView, {
+	
+		type: 'ios-ui-segmented-control',
+		
+		onLoad: function() {
+		
+			this._super();
+						
+			this.onResize();
+			
+			this.target.find(".ios-ui-segment").on(O.Browser.isMobile ? 'touchend' : 'click', $.proxy(this.onClick, this));
+			$(window).on('resize', $.proxy(this.onResize, this));
+		},
+		
+		onClick: function(e) {
+			var segments = this.target.find(".ios-ui-segment");
+			segments.removeClass('selected');
+			var target = $(e.currentTarget);
+			target.addClass('selected');
+			var index = segments.index(target);
+			this.fire('selected', index);
+		},
+		
+		onResize: function(e) {
+		
+			var width = this.target.width();
+			var elements = this.target.find(".ios-ui-segment").size();
+			var padding = parseInt(this.target.find(".ios-ui-segment:first").css('padding-left').replace("px", "")); 
+			padding += parseInt(this.target.find(".ios-ui-segment:first").css('padding-right'));
+			
+			var equalWidths = 0;
+			
+			if(elements > 1) {
+				equalWidths = Math.round(width/elements);
+			}
+			else if(elements = 1) equalWidths = width;
+			else return;
+			
+			var adj = 0;
+			
+			if((equalWidths*elements) != width) {
+				adj = (equalWidths*elements) - width;
+			}
+					
+			this.target.find(".ios-ui-segment").width(equalWidths-padding);
+			this.target.find(".ios-ui-segment:last").width(equalWidths - padding - adj);
+			
+		},
+		
+		index: function() {
+			var segments = this.target.find(".ios-ui-segment");
+			var target = this.target.find(".ios-ui-segment.selected");
+			var index = segments.index(target);
+			return index;
 		},
 		
 		onUnload: function() {
-			this._super();
-		}
-			
-	});
-	
-	
-	/* module management */
-	
-	O.iOS.ModuleManager = O.define({
-	
-		initialize: function() {
-		
-			// handle bar button events
-			
-			// handle segmented controls
-			
-			// handle form input defaults
-		
-		},
-		
-		destroy: function() {
-		
+			$(window).off('resize', $.proxy(this.onResize, this));
 		}
 	
 	});
 	
+	O.iOS.UIToolbar = O.View.extend(O.UIView, {
 	
-	/* element controls */
+		type: 'ios-ui-toolbar'
 	
-//	O.iOS.UISegmentedControl = O.Element.define({
-//	
-//		type: 'ios-ui-segmented-control',
-//	
-//		onLoad: function() {
-//			this._super();
-//		},
-//		
-//		onUnload: function() {
-//			this._super();
-//		}
-//	
-//	});
-//	
-//	O.iOS.UINavigationBar = O.Element.define({
-//		
-//		type: 'ios-ui-navigation-bar',
-//	
-//		onLoad: function() {
-//			this._super();
-//		},
-//		
-//		onUnload: function() {
-//			this._super();
-//		}
-//	
-//	});
-//	
-//	O.iOS.UIBarButtonItem = O.Element.define({
-//		
-//		type: 'ios-ui-bar-button-item',
-//	
-//		onLoad: function() {
-//			this._super();
-//		},
-//		
-//		onUnload: function() {
-//			this._super();
-//		}
-//	
-//	});
-//	
-//	O.iOS.UITabBar = O.Element.define({
-//		
-//		type: 'ios-ui-tab-bar'
-//	
-//	});
+	});
+
 	
 }, ['mvc', 'db'], '0.1');

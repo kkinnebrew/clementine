@@ -1000,6 +1000,7 @@ Orange.add('ui', function(O) {
 			}
 						
 			this.target.addClass(this.typeList);
+//			this.target.addClass(this.name);
 						
 			console.log("[INFO] View '" + this.name + "' of type '" + this.type + "' initialized");
 		
@@ -1263,6 +1264,8 @@ Orange.add('ui', function(O) {
 				    this.isMobile = true; // ipod
 				else if( useragent.search("android") > 0)
 				    this.isMobile = true; // android
+				else if( useragent.search("ipad") > 0)
+				    this.isMobile = true; // ipad
 				else this.isMobile = false;
 				
 			},
@@ -1412,7 +1415,8 @@ Orange.add('db', function(O) {
 			this.id = config.id;
 			this.name = config.name;
 			this.fields = config.fields;
-			this.path = config.path;
+			this.path = (typeof config.path !== undefined) ? config.path : null;
+			this.local = this.path === null;
 			this.mapItem = config.mapItem;
 			this.mapItems = config.mapItems;
 			
@@ -1465,13 +1469,30 @@ Orange.add('db', function(O) {
 			};
 						
 			// fetch data
-			$.ajax({
-			  url: (!id) ? this.path : this.path + id,
-			  contentType: 'text/json',
-			  type: 'GET',
-			  success: (!id) ? $.proxy(successItemsFunc, this) : $.proxy(successItemFunc, this),
-			  error: failure
-			});
+			if (!this.local) {
+				$.ajax({
+				  url: (!id) ? this.path : this.path + id,
+				  contentType: 'text/json',
+				  type: 'GET',
+				  success: (!id) ? $.proxy(successItemsFunc, this) : $.proxy(successItemFunc, this),
+				  error: failure
+				});
+			} else {
+				
+				var data = O.Storage.get(this.name + '[' + id + ']');
+				if (typeof data !== 'undefined') {
+					
+					if (!id) {
+						successItemsFunc.call(this, data);
+					} else {
+						successItemFunc.call(this, data);
+					}
+
+				} else {
+					failure.call(this);
+				}
+				
+			}
 		
 		},
 		
@@ -1502,7 +1523,7 @@ Orange.add('db', function(O) {
 			};
 			
 			// check if object has been saved
-			if (action === 'update') {
+			if (action === 'update' && !this.local) {
 			
 				$.ajax({
 				  url: (!id) ? this.path : this.path + id,
@@ -1513,7 +1534,7 @@ Orange.add('db', function(O) {
 				  error: failure
 				});
 			
-			} else {
+			} else if (!this.local) {
 			
 				$.ajax({
 				  url: this.path,
@@ -1524,6 +1545,8 @@ Orange.add('db', function(O) {
 				  error: failure
 				});
 
+			} else {
+				successFunc.call(this);
 			}
 		
 		},
@@ -1554,14 +1577,20 @@ Orange.add('db', function(O) {
 				
 			};
 			
-			$.ajax({
-			  url: (!id) ? this.path : this.path + id,
-			  contentType: 'text/json',
-			  type: 'DELETE',
-			  data: object,
-				success: $.proxy(successFunc, this),
-			  error: failure
-			});
+			if (!this.local) {
+			
+				$.ajax({
+				  url: (!id) ? this.path : this.path + id,
+				  contentType: 'text/json',
+				  type: 'DELETE',
+				  data: object,
+					success: $.proxy(successFunc, this),
+				  error: failure
+				});
+			
+			} else {
+				successFunc.call(this);
+			}
 		
 		},
 		
@@ -1758,5 +1787,6 @@ Orange.add('db', function(O) {
 		}
 	
 	});
+
 	
 }, [], '0.1');

@@ -94,6 +94,8 @@ Orange.add('ios', function(O) {
 			// clear attributes
 			this.target.removeAttr('data-default');
 			
+			this.popping = false;
+			
 		},
 		
 		popView: function() {
@@ -117,7 +119,7 @@ Orange.add('ios', function(O) {
 				this.leftBtn.appendTo(this.navBar);
 				setTimeout($.proxy(function() {
 					this.leftBtn.fadeIn(duration+100);
-				}, this), duration);
+				}, this), duration-100);
 			}
 			
 			if (rightViewBtn.length != 0) {
@@ -125,7 +127,7 @@ Orange.add('ios', function(O) {
 				this.rightBtn.appendTo(this.navBar);
 				setTimeout($.proxy(function() {
 					this.rightBtn.fadeIn(duration+100);
-				}, this), duration);
+				}, this), duration-100);
 			}
 			
 			if (leftViewBtn.length == 0 && rightViewBtn.length == 0 && navBar.length == 0) {
@@ -234,6 +236,9 @@ Orange.add('ios', function(O) {
 		
 		popToRootView: function() {
 		
+			if (this.popping) return;
+			this.popping = true;
+				
 			var duration = 300;
 			
 			// clear view stack
@@ -258,7 +263,7 @@ Orange.add('ios', function(O) {
 				this.leftBtn.appendTo(this.navBar);
 				setTimeout($.proxy(function() {
 					this.leftBtn.fadeIn(duration);
-				}, this), duration);
+				}, this), duration-100);
 			}
 			
 			if (rightViewBtn.length != 0) {
@@ -266,7 +271,7 @@ Orange.add('ios', function(O) {
 				this.rightBtn.appendTo(this.navBar);
 				setTimeout($.proxy(function() {
 					this.rightBtn.fadeIn(duration);
-				}, this), duration);
+				}, this), duration-100);
 			}
 			
 			var activeView = this.activeView;
@@ -289,6 +294,7 @@ Orange.add('ios', function(O) {
 			setTimeout($.proxy(function() {
 				view.target.addClass('active').removeClass('loading').removeClass('inactive');
 				this.viewStack = [this.viewStack[0]];
+				this.popping = false;
 			}, this), duration);
 		
 		},
@@ -329,58 +335,47 @@ Orange.add('ios', function(O) {
 			
 			// get table cell template
 			var tableCell = this.target.attr('data-cell-element');
-			if (typeof tableCell === 'undefined') throw "UITableView '" + this.name + "' missing 'data-cell-element' attribute";
-			this.tableCell = O.TemplateManager.load('app/elements/' + tableCell);
+			if (typeof tableCell !== 'undefined') {	
+				//throw "UITableView '" + this.name + "' missing 'data-cell-element' attribute";
+				this.tableCell = O.TemplateManager.load('app/elements/' + tableCell);
+				this.target.wrapInner('<div class="scroll-view"><ul></ul></div>');
+			} else {
+				this.target.wrapInner('<div class="scroll-view"></div>');
+			}
 			
-			// wrap the view
-			this.target.wrapInner('<div class="scroll-view"><ul></ul></div>');
-
 			// setup iscroll
 			this.myScroll = new iScroll(this.target.get(0));
 			this._super();
 			
-			// bind select event
-			this.target.on('click', $.proxy(this.onSelect, this));
 			this.target.removeAttr('data-cell-element');
 			
-			this.target.on('touchstart', $.proxy(function(e) {
+			// bind select event
+			if (typeof tableCell !== 'undefined') {	
+				this.target.on('click', $.proxy(this.onSelect, this));
+			}
 			
-				var target = $(e.target);
-			
-				// check if target is a table cell
-				if (target.hasClass('ios-ui-table-cell')) {
-					cell = target;
-				} else if (target.parent().hasClass('ios-ui-table-cell')) {	
-					cell = target.parent();
-				}
-				
-				if(cell != null) {
-					cell.addClass('touched');
-				}
-				
-			}, this));
-			
-			this.target.on('touchend', $.proxy(function(e) {
-				this.target.find('.ios-ui-table-cell').removeClass('touched');
+			this.target.on('touchmove', $.proxy(function(e) {
+				e.stopPropagation();
+				e.preventDefault();				
 			}, this));
 						
 		},
 		
 		setupTable: function() {
-		
+					
 			// build temporary container
 			var target = this.target.find('ul');
 			var container = target.clone();
 			var source = this.tableCell;
 		
-			// iterate over collection
-			for(var i=0, len = this.collection.data.length; i < len; i++) {
-
-				// add templates to the container
+			var data = (this.collection instanceof O.Collection) ? this.collection.data : this.collection;
+		
+			// iterate over collection			
+			for(var key in data) {
 				template = new jsontemplate.Template(source);
 				var output = '';
 				try {
-					output = template.expand(this.collection.data[i]);
+					output = template.expand(data[key]);
 				} catch(e) {
 					output = source.replace(/{[^)]*}/, '[undefined]');
 				}
@@ -401,14 +396,26 @@ Orange.add('ios', function(O) {
 		
 		bindData: function(data) {
 				
-			// store reference to collection
-			this.collection = data;
-						
-			// bind event on model
-			this.collection.model.on('datachange', $.proxy(this.onDataChange, this));
+			if (data instanceof O.Collection) {
+								
+				// store reference to collection
+				this.collection = data;
+							
+				// bind event on model
+				//this.collection.model.on('datachange', $.proxy(this.onDataChange, this));
+				
+				// setup table
+				this.setupTable();
 			
-			// setup table
-			this.setupTable();
+			} else {
+			
+				// store reference to collection
+				this.collection = data;
+			
+				// setup table
+				this.setupTable();
+			
+			}
 		
 		},
 		
@@ -449,10 +456,11 @@ Orange.add('ios', function(O) {
 				var id = $(cell).attr('itemid');
 				
 				// get entry
-				var data = this.collection.get(id);
+				if (typeof this.collection.get === 'function') var data = this.collection.get(id);
+				else if (typeof this.collection === 'object') var data = this.collection[id];
 				
 				// fire event
-				this.fire('select', data);
+				this.fire('select', (typeof data !== 'undefined') ? data : null);
 			
 			}
 		
@@ -474,16 +482,22 @@ Orange.add('ios', function(O) {
 		},
 		
 		presentModalView: function() {
-		
+			this.onLoad();
 			$('body').append(this.target);
-			console.log("presenting");
-		
+			
+			setTimeout($.proxy(function() {
+				this.target.addClass('visible');
+			}, this), 50);
+					
 		},
 		
 		dismissModalView: function() {
-		
-			console.log("dismissing");
-			this.target.remove();
+					
+			this.target.removeClass('visible');
+			setTimeout($.proxy(function() {
+				this.target.remove();
+				this.onUnload();
+			}, this), 300);
 		
 		},
 		

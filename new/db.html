@@ -1,7 +1,89 @@
+<script type="text/javascript" src="lib/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="../src/scripts/oop.js"></script>
+<script type="text/javascript" src="../src/scripts/commons.js"></script>
+
 <script type="text/javascript">
 
-O.use('mvc', function(O) {
-
+Orange.use('mvc', function(O) {
+	
+	O.Application = (function() {
+	
+		var _apps = {},
+				_active = null,
+				keyFilterRegex = /[^A-Za-z0-9_\[\]]/g;
+				
+		
+		return {
+		
+			register: function(name, config) {
+				
+				// store app config in dictionary
+				_apps[name.replace(keyFilterRegex)] = config;
+				
+			},
+			
+			init: function(name) {
+			
+				var config = {}, 
+						name = name.replace(keyFilterRegex);
+			
+				// look up configuration
+				if(typeof _apps[name] !== 'undefined') {
+					config = _apps[name];
+				} else throw 'Invalid application configuration';
+				
+				// load required modules
+				for(var i = 0, len = config.required.length; i < len; i++) {
+					O.Loader.loadModule(config.required[i]);
+				}
+			
+				// bind event listeners
+				O.Cache.on('statusChange', function(e) {
+					if(e.data == 1) {
+						O.Location.goOnline();
+						O.Storage.goOnline();
+						if(config.location) O.Location.getLocation(function() {});
+						O.Log.info("Application went online");
+					} else {
+						O.Log.info("Application went offline");
+						O.Location.goOffline();
+						O.Storage.goOffline();
+					}
+				});
+				
+				// start modules
+				O.Cache.init(config.poll);
+				O.Storage.init();
+				
+				// set active application
+				_active = name;
+				
+				// fetch root view
+				var root = $('[data-root="true"]'),
+				type = root.attr('data-control');
+				
+				// remove root attribute
+				root.removeAttr('data-root');
+				
+				// load view
+				var c = O.View.load(type);
+				var controller = new c(null, root);
+				controller.onLoad();
+									
+			},
+			
+			config: function() {
+			
+				if (_active != null) {
+					return _apps[_active];
+				} else throw 'Invalid application configuration';
+			
+			}
+		
+		};
+	
+	})();
+	
 	O.View = (function() {
 	
 		var _views = {};
@@ -267,6 +349,7 @@ O.use('mvc', function(O) {
 				var id = item.getId(),  model = item.getModel();
 				model.on('datachange', function(d) {
 					item.mergeChanges(d);
+					if (item.isChanged) O.Binding.bindData(this.target, item);
 				}, this);
 			}
 		},
@@ -291,6 +374,77 @@ O.use('mvc', function(O) {
 		}
 	
 	});
+	
+	O.Binding = (function() {
+		
+		return {
+		
+			bindData: function(node, item) {
+			
+				// check for the data format
+				if (item instanceof O.Item) {
+					var id = item.id(), data = item.toObject();
+				} else if (typeof item === 'object') {
+					var id = null, data = item;
+				}
+				else throw 'Invalid data item';
+				
+				if (id !== null) node.attr('itemid', id);
+				
+				// parse all the data fields
+				for (var field in data) {
+					var el = node.find('[itemprop="' + field + '"]');
+					var childList = [];
+					node.find('[itemprop="' + field + '"]').each(function() {
+						var include = false, parent = $(this).parent();
+						while (parent.length !== 0 && !include) {
+							if ($(parent).not(node).length === 0) {
+								include = true; break;
+							} else if ($(parent).not('[itemscope]').length === 0) {
+								include = false; break;
+							} parent = $(parent).parent();
+						}
+						if (include) childList.push($(this));
+					});
+																							
+					if (childList.length > 0) {
+						for(var i = 0, len = childList.length; i < len; i++) {
+							if (data[field] instanceof Array || data[field] instanceof O.Collection) {
+								O.Binding.bindList(childList[i], data[field]);
+							} else if (typeof data[field] === 'object' || data[field] instanceof O.Item) {
+								O.Binding.bindData(childList[i], data[field]);
+							} else childList[i].text(data[field]);
+						}
+					}
+				}
+			},
+			
+			bindList: function(node, list) {
+						
+				// check for the data format
+				if (list instanceof O.Collection) {
+					var data = list.toArray();
+				} else if (list instanceof Array) {
+					var data = list;
+				}
+				else throw 'Invalid data collection';
+			
+				var template = node.find('[itemscope]');
+				var itemscope = $(template).attr('itemscope');
+				
+				// validate attribute exists
+				if (typeof itemscope !== 'undefined' && itemscope !== false) {
+					node.html('');
+					for(var i=0, len = data.length; i < len; i++) {
+						var instance = template.clone();
+						O.Binding.bindData(instance, data[i]);
+						node.append(instance);
+					}
+				}
+			}
+		}
+	
+	})();
 	
 	O.UIView = O.View.define(O.ViewController, {
 		
@@ -869,15 +1023,15 @@ O.use('mvc', function(O) {
 				// call success
 				var item = new O.Item(this, mappedData);
 				if (unsaved) item.markUnsaved();
+				else item.markSaved();
 				
 				// call success
 				success.call(this, item);
 				
 				// fire changed event
-				this.fire('datachange', { 
-					type: 'set':
-					delta: item
-				});
+				this.fire('datachange', [
+					{ type: 'set', data: item }
+				]);
 			
 			},
 			
@@ -949,10 +1103,9 @@ O.use('mvc', function(O) {
 				success.call(this, true);			
 			
 				// fire changed event
-				this.fire('datachange', { 
-					type: 'remove':
-					delta: id
-				});
+				this.fire('datachange', [
+					{ type: 'remove', data: id }
+				]);
 			
 			},
 			
@@ -1259,35 +1412,67 @@ O.use('mvc', function(O) {
 			// set values
 			this.model = model;
 			this.data = data; // list keyed by id
+			this.isChanged = false;
 		
 		},
 		
 		destroy: function() {
-		
-		},
-		
-		getIds: function() {
-		
+			this.data = {};
+			delete this.model;
+			delete this.data;
 		},
 		
 		getModel: function() {
-		
+			return this.model;
 		},
 		
 		count: function() {
-		
+			return this.data.length;
 		},
 		
-		mergeChanges: function() {
+		mergeChanges: function(deltas) {
+		
+			this.isChanged = false;
+			
+			// merge deltas
+			for(var i = 0, len = deltas.length; i < len; i++) {
+				
+				// for syncs
+				if (deltas[i].type == 'sync') {
+					if (typeof this.data[deltas[i].originalId] === 'undefined') continue;
+					delete this.data[deltas[i].originalId];
+					this.data[deltas[i].newId] = deltas[i].item;
+				} else if (deltas[i].type == 'set') {
+					if (typeof this.data[deltas[i].item.getId()] === 'undefined') continue;
+					this.data[deltas[i].item.getId()] = deltas[i].item;
+				} else if (deltas[i].type == 'remove') {
+					if (typeof this.data[deltas[i].id] === 'undefined') continue;
+					delete this.data[deltas[i].id];
+				}
+				
+				this.isChanged = true;
+			}
 		
 		},
 		
 		toObject: function() {
-		
+			return this.data;
 		},
 		
 		toArray: function() {
+			var items = [];
+			for (var key in this.data) {
+				items.push(this.data[key]);
+			}
+			return items;
+		},
 		
+		get: function(id) {
+			return (this.data.hasOwnProperty(id)) ? this.data[id] : false; 
+		},
+		
+		markUpdated: function() {
+			this.isChanged = false;
 		}
 	
 	});
@@ -1299,31 +1484,64 @@ O.use('mvc', function(O) {
 			// set values
 			this.model = model;
 			this.data = data;
+			this.isUnsaved = false;
+			this.isChanged = false;
 		
 		},
 		
 		destroy: function() {
-		
+			delete this.model;
+			this.data = {};
+			delete this.data;
 		},
 		
 		getId: function() {
-		
+			return this.data[this.model.key];
 		},
 		
-		getModel: function() {
-		
+		getModel: function(da) {
+			return this.model;
 		},
 		
-		mergeChanges: function() {
-		
+		mergeChanges: function(item) {
+			for(var field in this.model.fields) {
+				if (item.get(field) != this.data[field]) {
+					this.isChanged = true;
+					break;
+				}
+			}
 		},
 		
 		isUnsaved: function() {
+			return this.isUnsaved;
+		},
 		
+		markUnsaved: function() {
+			this.isUnsaved = true;
+		},
+		
+		markSaved: function() {
+			this.isUnsaved = false;
 		},
 		
 		toObject: function() {
+			return this.data;
+		},
 		
+		get: function(field) {
+			return this.data[field];
+		},
+		
+		set: function(field, value) {
+			this.data[field] = value;
+		},
+		
+		clear: function(field) {
+			delete this.data[field];
+		},
+		
+		markUpdated: function() {
+			this.isChanged = false;
 		}
 	
 	});

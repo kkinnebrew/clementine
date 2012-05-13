@@ -17,6 +17,13 @@ Orange.add('ios', function(O) {
 		getType: function() { return 'ios-ui-view' },
 
 		onLoad: function() {
+			
+			document.body.addEventListener('touchstart', function(e){ 
+				if($(e.target).get(0).tagName.toLowerCase() !== 'input') {
+					e.preventDefault();
+				}
+			});
+		
 			this._super();
 		},
 		
@@ -52,7 +59,7 @@ Orange.add('ios', function(O) {
 					this.activeView = this._views[i];
 				}
 			}
-											
+														
 		},
 		
 		onLoad: function() {
@@ -585,7 +592,7 @@ Orange.add('ios', function(O) {
 		}
 			
 	});
-	
+		
 	O.UIMultiView = O.View.extend(O.UIView, {
 	
 		getType: function() { return 'ui-multi-view' },

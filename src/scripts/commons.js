@@ -609,13 +609,13 @@
 				
 				try {
 					_localStorage.setItem(key, JSON.stringify(obj)); // store object
-					OrangeUI.Log.info("Set: Inserted object with key '" + key.toString() + "' into local storage");
+					//OrangeUI.Log.info("Set: Inserted object with key '" + key.toString() + "' into local storage");
 					return true;
 				} catch (e) {
 					if (e == QUOTA_EXCEEDED_ERR) {
 						OrangeUI.Log.error("Storage quota has been exceeded", e);
 					} else {
-						OrangeUI.Log.error("Could not insert item with key '" + key.toString() + "' into local storage");
+						//OrangeUI.Log.error("Could not insert item with key '" + key.toString() + "' into local storage");
 					}
 				}
 				return false;
@@ -632,18 +632,18 @@
 							_localStorage.removeItem(key); // remove from local storage
 							throw EXPIRE_OBJ_ERR;
 						}
-						OrangeUI.Log.info("Get: Retrieved object for key '" + key.toString() + "' from local storage");
+						//OrangeUI.Log.info("Get: Retrieved object for key '" + key.toString() + "' from local storage");
 						return item.data; // otherwise return data
 					} else {
 						throw UNPACK_OBJ_ERR;
 					}
 				} catch (e) {
 					if (e === UNPACK_OBJ_ERR) {
-						OrangeUI.Log.error("Unpack Error: Could not read local storage object", e);
+						//OrangeUI.Log.error("Unpack Error: Could not read local storage object", e);
 					} else if (e === EXPIRE_OBJ_ERR) {
-						OrangeUI.Log.debug("Removed expired object from local storage", e);
+						//OrangeUI.Log.debug("Removed expired object from local storage", e);
 					} else {
-						OrangeUI.Log.error("Could not load local storage object");
+						//OrangeUI.Log.error("Could not load local storage object");
 					}
 				}
 				
@@ -656,10 +656,10 @@
 				
 				try {
 					_localStorage.removeItem(key); // remove item from local storage array
-					OrangeUI.Log.info("Remove: Object '" + key + "' removed from local storage");
+					//OrangeUI.Log.info("Remove: Object '" + key + "' removed from local storage");
 					
 				} catch(e) {
-					OrangeUI.Log.error("Could not remove local storage object", e);
+					//OrangeUI.Log.error("Could not remove local storage object", e);
 				}
 			},
 			

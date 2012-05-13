@@ -1,0 +1,62 @@
+<!-- index.html -->
+<div data-control="wm-social-app" data-root="true">
+
+	<div data-control="wm-auth" data-name="login" data-default="login">
+	
+		<div data-control="wm-login" data-name="login">
+		
+			<input type="button" data-name="login-btn" value="Login" />
+		
+		</div>
+		
+		<div data-control="wm-setup" data-name="setup">
+		
+			<input type="button" data-name="setup-btn" value="Setup" />
+		
+		</div>
+	
+	</div>
+
+	<div data-control="wm-feed" data-name="feed" data-params="1" data-default="feed">
+	
+		<div data-control="ios-ui-table-view" data-name="feed">
+		
+		</div>
+		
+		<div data-control="wm-event" data-name="event" data-params="1" data-default="event">
+		
+			<div data-control="wm-event-info" data-name="event">
+			
+				<input type="button" data-name="attend-btn" value="Attend" />
+			
+			</div>
+			
+			<div data-control="ios-ui-map-view" data-name="map">
+			
+			</div>
+		
+		</div>
+	
+	</div>
+
+</div>
+
+
+<!-- create.html -->
+<div data-control="ios-ui-modal-view" data-name="modal">
+
+	<div data-control="wm-create" data-name="create" data-default="search">
+	
+		<div data-control="ios-ui-search-view" data-name="search">
+		
+		</div>
+		
+		<div data-control="wm-create-info" data-name="info">
+		
+			<input type="button" data-name="create-btn" value="Create" />
+		
+		</div>
+	
+	</div>
+
+</div>

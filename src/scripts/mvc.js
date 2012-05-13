@@ -21,10 +21,16 @@ Orange.add('mvc', function(O) {
 				// store app config in dictionary
 				_apps[name.replace(keyFilterRegex)] = config;
 				
+				window.onload = function() {
+					
+					O.App.init(name); // initialize app
+				
+				}
+				
 			},
 			
 			init: function(name) {
-			
+								
 				var config = {}, 
 						name = name.replace(keyFilterRegex);
 			
@@ -92,14 +98,14 @@ Orange.add('mvc', function(O) {
 		return {
 		
 			define: function(def) {
-				var c = O.extend(O.ViewController, def), type = def.prototype.getType();
+				var c = O.extend(O.ViewController, def), type = def.getType();
 				c.prototype.typeList = type;
 				if(typeof type === 'undefined') throw "Error: View not named";
 				return _views[type] = c;
 			},
 			
 			extend: function(base, def) {
-				var c = O.extend(base, def), type = def.prototype.getType();
+				var c = O.extend(base, def), type = def.getType();
 				c.prototype.typeList += ' ' + type;
 				if(typeof type === 'undefined') throw "Error: View not named";
 				return _views[type] = c;
@@ -242,6 +248,12 @@ Orange.add('mvc', function(O) {
 		
 		onLoad: function() {
 			
+			this.onWillLoad();
+			
+			for (var name in this.views) {
+				this.views[name].onLoad();
+			}
+			
 			// get events
 			var views = this.getBindings();
 			
@@ -256,12 +268,6 @@ Orange.add('mvc', function(O) {
 					}
 					if (func !== null) this.getView(view).on(event, $.proxy(func,  this));
 				}
-			}
-			
-			this.onWillLoad();
-			
-			for (var name in this.views) {
-				this.views[name].onLoad();
 			}
 			
 			this.onDidLoad();
@@ -447,7 +453,7 @@ Orange.add('mvc', function(O) {
 	
 	})();
 	
-	O.UIView = O.View.define(O.ViewController, {
+	O.UIView = O.View.define({
 		
 		getType: function() {
 			return 'ui-view';
@@ -560,7 +566,7 @@ Orange.add('mvc', function(O) {
 				if (_registered.hasOwnProperty(name)) {
 					var reg = _registered[name];
 					if (!_active.hasOwnProperty(name)) {
-						if (typeof _sources[reg.type] !== 'undefined') _active[name] = new _sources[reg.type](name, reg.path);
+						if (typeof _sources[reg.type] !== 'undefined') _active[name] = new _sources[reg.type](name, reg);
 					}
 					if (_active.hasOwnProperty(name)) {
 						return _active[name];
@@ -586,13 +592,13 @@ Orange.add('mvc', function(O) {
 				return _views[type] = c;
 			},
 		
-			register: function(config) {
+			register: function(name, config) {
 				if (undefined == config || config.hasOwnProperty('type')) throw "Error: Model definition invalid";
 				if (typeof (model = _models[config.type]) !== 'undefined') {
 					var c = new model(config);
 				}
-				else var c = new O.ModelDefinition(config);
-				return _models[config.name] = c;
+				else var c = new O.ModelDefinition(name, config);
+				return _models[name] = c;
 			},
 			
 			get: function(name) {
@@ -682,7 +688,7 @@ Orange.add('mvc', function(O) {
 		getAll: function(type, success, failure) {
 			
 			var successFunc = function(data) {
-				data = this.processItems(type, data);
+				data = this._processItems(type, data);
 				success.call(this, data);
 			}
 						
@@ -754,6 +760,15 @@ Orange.add('mvc', function(O) {
 		
 		processItems: function(path, data) {
 			return $.parseJSON(data);
+		},
+		
+		_processItems: function(path, data) {
+			data = this.processItems(path, data);
+			var output = [];
+			for(var i = 0, len = data.length; i < len; i++) {
+				output.push(this.processItem(path, data[i]));
+			}
+			return output;
 		}
 	
 	});
@@ -854,10 +869,10 @@ Orange.add('mvc', function(O) {
 
 	O.ModelDefinition = O.define({
 	
-		initialize: function(config) {
+		initialize: function(name, config) {
 		
 			this.id = config.id;
-			this.name = config.name;
+			this.name = name;
 			this.fields = config.fields;
 			
 			this.liveDS = O.DB.load(config.source);
@@ -890,14 +905,15 @@ Orange.add('mvc', function(O) {
 		},
 		
 		getAll: function(success, error) {
-		
+					
 			var offlineFunc = function(data) {
-			
+						
 				// get pending data
 				var creates = this.createDS.getAll(),
-						updates = this.updatesDS.getAll(),
-						deletes = this.deletesDS.getAll(),
+						updates = this.updateDS.getAll(),
+						deletes = this.deleteDS.getAll(),
 						pending = this.pendingDS.getAll();
+						
 			
 				// merge creates
 				for (var key in creates) {
@@ -913,27 +929,27 @@ Orange.add('mvc', function(O) {
 				for (var key in deletes) {
 					delete data[key];
 				}
-				
+								
 				// merge pending
 				if (this.isSyncing) {
 					for (var key in pending) {
 						data[pending[this.id]] = pending[key];
 					}
 				}
-				
+								
 				// process data set
 				var mappedData = this.mapItems(data);
-				
+								
 				// call success
 				success.call(this, new O.Collection(this, mappedData));
 			
 			},
 			
 			onlineFunc = function(data) {
-			
+								
 				// call offline func
 				offlineFunc.call(this, data);
-			
+							
 				// store back to local storage
 				this.cacheDS.setAll(this.name, data);
 			
@@ -977,8 +993,8 @@ Orange.add('mvc', function(O) {
 				
 				// get pending data
 				var creates = this.createDS.getAll(),
-						updates = this.updatesDS.getAll(),
-						deletes = this.deletesDS.getAll(),
+						updates = this.updateDS.getAll(),
+						deletes = this.deleteDS.getAll(),
 						pending = this.pendingDS.getAll();
 			
 				// merge pending
@@ -1061,7 +1077,7 @@ Orange.add('mvc', function(O) {
 				} else if (this.isSyncing) {
 				
 					// get deletes
-					var deletes = this.deletesDS.getAll();
+					var deletes = this.deleteDS.getAll();
 				
 					if (typeof deletes[id] !== 'undefined') {
 						throw 'Cannot update already removed item';
@@ -1075,7 +1091,7 @@ Orange.add('mvc', function(O) {
 						
 					// get pending data
 					var creates = this.createDS.getAll(),
-							deletes = this.deletesDS.getAll();
+							deletes = this.deleteDS.getAll();
 				
 					// merge changes
 					if (typeof creates[id] !== 'undefined') {
@@ -1123,8 +1139,8 @@ Orange.add('mvc', function(O) {
 			if (!this.isLive) {
 				
 				var creates = this.createDS.getAll(),
-						updates = this.updatesDS.getAll(),
-						deletes = this.deletesDS.getAll();
+						updates = this.updateDS.getAll(),
+						deletes = this.deleteDS.getAll();
 			
 				// merge changes
 				if (typeof creates[id] !== 'undefined') {
@@ -1311,8 +1327,8 @@ Orange.add('mvc', function(O) {
 			};
 		
 			var creates = this.createDS.getAll(),
-					updates = this.updatesDS.getAll(),
-					deletes = this.deletesDS.getAll();
+					updates = this.updateDS.getAll(),
+					deletes = this.deleteDS.getAll();
 		
 			this.syncCount = creates.length + updates.length + deletes.length;
 				

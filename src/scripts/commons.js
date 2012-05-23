@@ -512,7 +512,7 @@
 				
 			},
 			
-			updateNetworkStatus: function() {
+			updateStatus: function() {
 				_statusCallback();
 			},
 			

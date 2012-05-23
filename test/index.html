@@ -1,421 +1,95 @@
-<script src="http://code.jquery.com/jquery-1.7.2.min.js" type="text/javascript"></script>
+<script src="src/orangeui-1.0.2.js" type="text/javascript"></script>
+<script src="modules/rest.js" type="text/javascript"></script>
+<script src="modules/cakephp.js" type="text/javascript"></script>
 <script src="inflection.js" type="text/javascript"></script>
-<!--<script src="oop.js" type="text/javascript"></script>-->
 <script type="text/javascript">
 
-var Source, LocalStorageSource, AjaxSource, Cache, Log, Ajax, Storage, Class, CakeSource, EventTarget;
-
-Class = (function() {
+Orange.use(function(O) {
+		
+	var Test = new O.Application('test', {
+		required: ['rest', 'cakephp'],
+		location: true,
+		poll: true
+	});
 	
- 	var initializing = false, fnTest = /xyz/.test(function() {xyz;}) ? /\b_super\b/ : /.*/;
+	Log.on('info', function(e) {
+		console.log('[INFO] ' + e.data);
+	});
 	
-	Class.extend = function(def) {
-	
-		var _super = this.prototype;
-    initializing = true;
-    var prototype = new this();
-    initializing = false;
-    
-    for (var name in def) {
-      prototype[name] = typeof def[name] == "function" && typeof _super[name] == "function" && fnTest.test(def[name]) ? (function(name, fn) {
-        return function() {
-          var tmp = this._super;
-          this._super = _super[name];
-          var ret = fn.apply(this, arguments);        
-          this._super = tmp;
-          return ret;
-        };
-      })(name, def[name]) : def[name];
-    }
-    
-    function Class() {
-			if (!initializing && this.initialize) {
-				this.initialize.apply(this, arguments);
-			}
-    }
-    
-    Class.prototype = prototype;
-    Class.prototype.constructor = Class;
-    Class.extend = arguments.callee;
-    
-    return Class;
-	
-	};
-	
-	Class.include = function(base, def) {
-		var prototype = new base();
-		for (var name in def) {
-			base[name] = def[name];
-		}
-		Class.prototype = prototype;
-	};
-	
-	Class.proxy = function(func, context) {
-		var _this = context;
-		return function() {
-			return func.apply(_this, arguments);
-		}
-	};
-	
-	function Class() {}
-	
-	return Class;
-	
-})();
-
-EventTarget = {
-	
-	bind: function() {
-		console.log("123")
-	}
-	
-};
-
-Storage = (function() {
-
-	var _localStorage = window.localStorage;
-
-	Storage.get = function(key, alt) {
-		return JSON.parse(_localStorage.getItem(key));
-	};
-	
-	Storage.set = function(key, value, ttl) {
-		return _localStorage.setItem(key, JSON.stringify(value));
-	};
-	
-	Storage.remove = function(key) {
-		return _localStorage.removeItem(key);
-	};
-	
-	Storage.flushExpired = function() {
-		_localStorage.clear();
-	};
-	
-	Storage.flush = function() {
-		_localStorage.clear();
-	};
-
-	function Storage() {}
-
-	return Storage;
-
-})();
-
-Ajax = (function() {
-
-	Ajax.load = function(request) {
-		return $.ajax(request).responseText;
-	};
-	
-	Ajax.get = function(request) {
-		request.type = 'GET';
-		return Ajax.load(request);
-	};
-	
-	Ajax.post = function(request) {
-		request.type = 'POST';
-		return Ajax.load(request);
-	};
-	
-	Ajax.put = function(request) {
-		request.type = 'PUT';
-		return Ajax.load(request);
-	};
-	
-	Ajax.delete = function(request) {
-		request.type = 'DELETE';
-		return Ajax.load(request);
-	};
-	
-	function Ajax() {}
-	
-	return Ajax;
-
-})();
-
-Cache = (function() {
-	
-	Class.include(Cache, EventTarget);
-	
-	Cache.checkNetworkStatus = function(callback) {
-		callback.call(this, true);
-	};
-
-	Cache.isActive = function() {
-		return true;
-	};
-	
-	Cache.isOnline = function() {
-		return true;
-	};
-	
-	function Cache() {}
-	
-	return Cache;
-
-})();
-
-Log = (function() {
-	
-	Class.include(Log, EventTarget);
-	
-	if (typeof(console) == "undefined") {
-	  console = { log: function() { }, dir: function() { } };
-	}
-
-	Log.info = function(message, ex) {
-		console.info(message);
-	};
-	
-	Log.debug = function(message, ex) {
-		console.debug(message);
-	};
-	
-	Log.error = function(message, ex) {
-		console.error(message);
-	};
-	
-	function Log() {}
-	
-	return Log;
-
-})();
-
-Source = Class.extend({
-
-	initialize: function(config) {
-		this.config = config;
-	},
-	
-	getName: function() {
-		return this.config.name;
-	},
-	
-	isPersistent: function() {
-		return false;
-	}
+	Test.launch();
 
 });
 
-LocalStorageSource = Source.extend({
-
-	isPersistent: function() {
-		return true;
-	},
-	
-	getPath: function(type) {
-		return this.getName() + ':' + 'model:' + type;
-	},
-	
-	getAll: function(type) {
-		return Storage.get(this.getPath(type)) || undefined;
-//		if (typeof query === 'function' && data !== undefined) {
-//			for(var id in data) {
-//				if (!query.call(this, data[id] || {})) delete data[id];
-//			}
-//		}
-	},
-	
-	get: function(type, id) {
-		var data = Storage.get(this.getPath(type)) || {};
-		return data.hasOwnProperty(id) ? data[id] : undefined;
-	},
-	
-	set: function(type, id, object) {
-		if (id === null) id = this.nextKey(type);
-		var data = Storage.get(this.getPath(type));
-		data = data || {};
-		data[id] = object;
-		Storage.set(this.getPath(type), data);
-		return id;
-	},
-	
-	remove: function(type, id) {
-		var data = Storage.get(this.getPath(type));
-		delete data[id];
-		Storage.set(this.getPath(type), data);
-		return true;
-	},
-	
-	flush: function(type) {
-		 Storage.remove(this.getPath(type));
-	},
-	
-	nextKey: function(type) {
-		var size = 0, key, keys = [];
-		var obj = Storage.get(this.getPath(type));
-		for (key in obj) {
-			if (obj.hasOwnProperty(key) && !isNaN(key)) keys.push(parseInt(key, 10));
-		} 
-		return (keys.length > 0) ? Math.max.apply(Math, keys) + 1 : 1;
-	}
-	
-});
-
-AjaxSource = Source.extend({
-
-	initialize: function(config) {
-		this.config = config;
-	},
-	
-	request: function(config) {
-	
-		if (Cache.isActive() && !Cache.isOnline()) {
-			Log.warn('Could not connect to server');
-			return;
-		}
-	
-		var success = (typeof config.success === 'function') ? config.success : null;
-		var error = (typeof config.error === 'function') ? config.error : null;
-	
-		if (typeof config.context !== 'undefined') {
-			if (success) success = function() { success.apply(context, arguments); };
-			if (error) error = function() { error.apply(context, arguments); }
-		}
-		
-		var req = { url: config.url, type: config.type };
-		
-		if (config.hasOwnProperty('async')) req.async = config.async;
-		if (config.hasOwnProperty('data')) req.data = config.data;
-		if (config.hasOwnProperty('dataType')) req.dataType = config.dataType;
-		if (config.hasOwnProperty('contentType')) req.contentType = config.contentType;
-		if (success) req.success = success;
-		if (error) req.error = error;
-		
-		req.complete = function(t) {
-			Log.info('HTTP ' + t.status);
-		};
-		
-		return Ajax.load(req);
-	}
-
-});
-
-RestSource = AjaxSource.extend({
-
-	initialize: function(config) {
-		this.config = config;
-		this.config.path = (config.path.charAt(config.path.length-1) == '/') ? config.path : config.path + '/';
-	},
-	
-	getPath: function() {
-		return this.config.path;
-	},
-	
-	getDataType: function() {
-		return this.config.hasOwnProperty('dataType') ? this.config.dataType : 'text/json';
-	},
-
-	getAll: function(type, success, error) {		
-				
-		var successFunc = function(data) {
-			data = this.processItems(type, data);
-			success.call(this, data);
-		}
-		
-		this.request({
-			url: this.getPath() + type,
-			contentType: this.getDataType(),
-			type: 'GET',
-			success: Class.proxy(successFunc, this),
-			error: error
-		});
-		
-	},
-	
-	get: function(type, id, success, error) {
-
-		var successFunc = function(data) {
-			data = this.processItem(type, data);
-			success.call(this, data);
-		}
-		
-		var path = this.getPath() + type;
-		
-		this.request({
-			url: (path.charAt(path.length-1) == '/') ? path + id : path + '/' + id,
-			contentType: this.getDataType(),
-			type: 'GET',
-			success: Class.proxy(successFunc, this),
-			error: error
-		});
-		
-	},
-	
-	set: function(type, id, object, success, error) {
-
-		var successFunc = function(data) {
-			data = this.processItem(type, data);
-			success.call(this, data);
-		}, path = this.getPath();
-		
-		path = (!id) ? path + type : (path.charAt(path.length-1) == '/') ? path + type + '/' + id : path + '/' + type + '/' + id;
-
-		this.request({
-			url: path,
-			data: object,
-			type: 'POST',
-			dataType: 'text/json',
-			success: Class.proxy(successFunc, this),
-			error: error
-		});
-
-	},
-	
-	remove: function(type, id, success, error) {
-
-		var path = this.getPath() + type;
-		
-		this.request({
-			url: (path.charAt(path.length-1) == '/') ? path + id : path + '/' + id,
-			type: 'DELETE',
-			success: success,
-			error: error
-		});
-		
-	},
-	
-	processItem: function(type, data) {
-		return this.filterItem(type, data);
-	},
-	
-	processItems: function(type, data) {
-		var items = this.filterItems(type, data);
-		var output = [];
-		for(var i = 0, len = items.length; i < len; i++) {
-			output.push(this.processItem(type, items[i]));
-		}
-		return output;
-	},
-	
-	filterItem: function(type, data) {
-		return JSON.parse(data);
-	},
-	
-	filterItems: function(type, data) {
-		return JSON.parse(data);
-	}
-
-});
-
-CakeSource = RestSource.extend({
-	
-	filterItem: function(type, data) {
-		data = (typeof data == 'string') ? JSON.parse(data) : data;
-		var name = (type.substr(0, 1).toUpperCase() + type.substr(1)).singularize();
-		return data[name];
-	},
-	
-	filterItems: function(type, data) {
-		var data = JSON.parse(data);
-		return data[type];
-	}
-	
-});
-
-
-window.onload = function() {
-
-};
+//Orange.use('rest', 'cakephp', function(O) {
+//	
+//	var CakeSource 	= __import('CakeSource'),
+//			Model 			= __import('Model')
+//			Cache				= __import('Cache'),
+//			Storage			= __import('Storage'),
+//			Location		= __import('Location'),
+//			Application	= __import('Application');
+//	
+//	window.onload = function() {
+//	
+//		Cache.on('statusChange', function(e) {
+//			if (e.data == 1) console.log('Application online');
+//			else console.log('Application offline');
+//		});
+//		
+//		Cache.init(false);
+//		Storage.init();
+//		Location.fetch();
+//		
+//		Cache.updateNetworkStatus();
+//		
+//		var contactsSource = new CakeSource({
+//			name: 'contacts-api',
+//			path: '/contacts'
+//		});
+//		
+//		var Contacts = new Model({
+//			name: 'contacts',
+//			id: 'id',
+//			fields: {
+//				contactId: { name: 'id', type: 'text', nullable: false },
+//				firstName: { name: 'first_name', type: 'text', nullable: false },
+//				lastName: { name: 'last_name', type: 'text', nullable: false },
+//				phone: { name: 'phone', type: 'text', nullable: true },
+//				birthday: { name: 'birthday', type: 'date', nullable: true },
+//				website: { name: 'website', type: 'url', nullable: true }
+//			},
+//			source: contactsSource
+//		});
+//		
+//		var success = function(data) {
+//			console.log(data.toArray());
+//			data.filter(function(data) {
+//				return data.firstName == 'Kevin';
+//			});
+//			console.log(data.toArray());
+//		};
+//		
+//		var successItem = function(data) {
+//			console.log(data.toObject());
+//		};
+//		
+//		var error = function(e) {
+//			console.error(e);
+//		};
+//		
+//		Contacts.getAll({}, success, error);
+		//Contacts.get(1, successItem, error);
+		//Contacts.set({ firstName: '123', lastName: '456' }, successItem, error);
+		//Contacts.remove(16, successItem, error);
+//	
+//		var test = new Application('test', {
+//			required: ['rest', 'cakephp']
+//		});
+//		
+//		test.launch();
+//	
+//	};
+//
+//});
 
 </script>

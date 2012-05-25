@@ -13,7 +13,9 @@
 		
 		Class.extend = function(def) {
 		
-			var _super = this.prototype;
+			var _super = this.prototype;		
+			var _static = this;
+			
 	    initializing = true;
 	    var prototype = new this();
 	    initializing = false;
@@ -38,7 +40,10 @@
 	    
 	    Class.prototype = prototype;
 	    Class.prototype.constructor = Class;
-	    Class.extend = arguments.callee;
+	    
+	    for (var name in _static) {
+	    	Class[name] = _static[name];
+	    }
 	    
 	    return Class;
 		
@@ -51,7 +56,7 @@
 			}
 		};
 		
-		function Class() {}
+		function Class() g{}
 		
 		return Class;
 		

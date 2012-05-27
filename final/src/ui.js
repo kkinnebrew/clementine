@@ -8,18 +8,19 @@
 
 Orange.add('ui', function(O) {
 
-	var Binding, Control, Form, GridViewController, LightboxViewController, ListViewController, MapViewController, MultiViewController, 
+	var Binding, Form, Input, GridViewController, LightboxViewController, ListViewController, MapViewController, MultiViewController, 
 			ProgressViewController, TableViewController, TabViewController, TooltipViewController, ViewController;
 
-	var Application = __import('Application');
+	var Application = __import('Application'), Model = __import('Model');
 	
 	Application.prototype.onLaunch = function(online) {
 	
 		window.onload = function() {
 	
 			var root = $('[data-root="true"]'),
-			type = root.attr('data-control');
-			if (typeof type === 'undefined') throw 'Root view not found';
+			type = root.attr('data-control'),
+			name = root.attr('data-name');
+			if (typeof type === 'undefined' || typeof name === 'undefined') throw 'Root view not found';
 			
 			// remove root attribute
 			root.removeAttr('data-root');
@@ -105,16 +106,82 @@ Orange.add('ui', function(O) {
 	})();
 	
 	
-	Control = Class.extend({
+	Input = Class.extend({
 	
 	});
 	
-	Control.extend = function(def) {
+	Input.extend = function(def) {
 	
 	};
 	
 	
 	Form = Class.extend({
+	
+		initialize: function(target) {
+			
+			// set vars
+			var that = this, name = $(target).attr('name');
+			
+			// set instance vars
+			this.fields = {};
+			this.target = target;
+
+			// find all form fields
+			$(target).find('input, select, textarea, button .ui-input').each(function() {
+				var fieldName = $(this).attr('name');
+				that.fields[fieldName] = $(this);
+			});
+			
+		},
+		
+		getField: function(name) {
+			if (typeof this.fields[name] !== 'undefined') {
+				return this.fields[name];
+			} else {
+				throw "Error: Form field '" + name + "' not found";
+			}
+		},
+		
+		setField: function(name, value) {
+			try {
+				this.getField(name).val(value);
+			} catch(e) {
+				console.log('[WARN] Field "' + name +'" could not be fetched');
+			}
+		},
+		
+		getData: function() {
+			var data = {};
+			for (var field in this.fields) {
+				var val = this.fields[field].val(), type = this.fields[field].attr('type');
+				if (typeof val !== undefined && val !== null && type !== 'submit' && type !== 'button') {
+					data[field] = val;
+				}
+			}
+			return data;
+		},
+		
+		setData: function(item) {
+			var data = item;
+			if (item instanceof O.Item) data = item.toObject();
+			for (var field in this.fields) {
+				if (typeof data[field] !== undefined && data[field] !== null) {
+					this.fields[field].val(data[field]);
+				}
+			}
+		},
+		
+		detach: function() {
+			for (var name in this.fields) {
+				this.fields[name].detach();
+			}
+		},
+		
+		destroy: function() {
+			for (var name in this.fields) {
+				delete this.fields[name];
+			}
+		}
 	
 	});
 	
@@ -212,7 +279,7 @@ Orange.add('ui', function(O) {
 		},
 		
 		getType: function() {
-			return 'ui-view';
+			return 'view';
 		},
 		
 		getClasses: function() {
@@ -241,10 +308,8 @@ Orange.add('ui', function(O) {
 				this.views[name].onLoad();
 			}
 			
-			// get events
 			var views = this.getBindings();
 			
-			// bind events
 			for (var view in views) {
 				var events = views[view];
 				for (var event in events) {
@@ -254,7 +319,8 @@ Orange.add('ui', function(O) {
 						var name = event.charAt(0).toUpperCase() + event.slice(1);
 						func = (events[event] === true && typeof this['on' + name] === 'function') ? this['on' + name] : null;
 					}
-					if (func !== null) this.getView(view).on(event, $.proxy(func,  this));
+					if (func !== null && this.views.hasOwnProperty(view)) this.getView(view).on(event, $.proxy(func,  this));
+					else if (func !== null && this.elements.hasOwnProperty(view)) this.getElement(view).on(event, $.proxy(func,  this));
 				}
 			}
 			
@@ -270,38 +336,23 @@ Orange.add('ui', function(O) {
 		
 			this.onWillUnload();
 
-			// unbind view events
-			for (var view in this.views) {
-				this.getView(view).detach();
-			}
-			
-			// unbind form events
-			for (var form in this.forms) {
-				this.getForm(form).detach();
-			}
-			
-			// unbind element events
-			for (var el in this.elements) {
-				this.getElement(el).unbind(); // jQuery dependency
-			}
-			
-			// unload children
-			for (var name in this.views) {
-				this.views[name].onUnload();
-			}
+			for (var view in this.views) { this.getView(view).detach(); }
+			for (var form in this.forms) { this.getForm(form).detach(); }
+			for (var el in this.elements) { this.getElement(el).unbind(); }
+			for (var name in this.views) { this.views[name].onUnload(); }
 			
 			this.onDidUnload();
 		
 		},
 		
 		getView: function(name) {
-			if (name instanceof O.UIView) return name;
+			if (name instanceof ViewController) return name;
 			else if (typeof this.views[name] !== 'undefined') return this.views[name];
 			throw 'Error: View "' + name + '" not found';
 		},
 		
 		getForm: function(name) {
-			if (this.forms[name] instanceof O.Form) return this.forms[name];
+			if (this.forms[name] instanceof Form) return this.forms[name];
 			throw 'Error: Form "' + name + '" not found';
 		},
 
@@ -339,16 +390,16 @@ Orange.add('ui', function(O) {
 		
 		
 		bindData: function(item, live) {
-			O.Binding.bindData(this.target, item);
-			if (live && item instanceof O.Item) {
-				var id = item.getId(),  model = item.getModel();
+			Binding.bindData(this.target, item);
+			if (live && item instanceof Model) {
+				var id = item.getId(), model = item.getModel();
 				model.on('datachange', function(d) {
 					item.mergeChanges(d);
-					if (item.isChanged) O.Binding.bindData(this.target, item);
+					if (item.isChanged) Binding.bindData(this.target, item); // TO DO: this will leak
 				}, this);
 			}
 		},
-		
+				
 		toString: function() {
 			return '[' + this.getType() + ' ' + this.data.name + ']';
 		},
@@ -371,20 +422,22 @@ Orange.add('ui', function(O) {
 	});
 	
 	ViewController.views = { 'view': ViewController };
+	ViewController.prototype.typeList = '';
 	
 	ViewController.extend = function(def) {
 	
 		var m = Class.extend.call(this, def),
 				type = def.getType();
-				
-		var required = ['getType', 'getBindings'];
+
+		var required = ['getType'];
 		for (var i = 0, len = required.length; i < len; i++) {
 			if (!def.hasOwnProperty(required[i])) throw "Class missing '" + required[i] + "()' implementation";
 			m[required[i]] = def[required[i]];
 		}
-		m.prototype.typeList += ' ' + type;
+		m.prototype.typeList += ((m.prototype.typeList == '') ? '' : ' ') + type;
+		m.extend = arguments.callee;
 		
-		return this.views[name] = m;
+		return ViewController.views[type] = m;
 	
 	};
 	
@@ -394,9 +447,45 @@ Orange.add('ui', function(O) {
 	};
 	
 	
+	MultiViewController = ViewController.extend({
+	
+		getType: function() { return 'multi-view' },
+		
+		initialize: function(parent, target) {
+			this._super(parent, target);
+			this.defaultView = this.target.attr('data-default');
+			this.target.removeAttr('data-default');
+		},
+		
+		onLoad: function() {
+			for (var i in this._views) {
+				if (this._views[i].name !== this.defaultView) {
+					this._views[i].target.hide();
+				} else {
+					this.activeView = this._views[i];
+				}
+			}
+			this._super();
+		},
+		
+		activateView: function(name) {
+			var view = this.getView(name);
+			if (view instanceof O.ViewController) {
+				this.activeView.target.hide();
+				this.activeView = view;
+				this.activeView.target.show();
+			}
+		},
+		
+		getActiveView: function() {
+			return this.activeView.name;
+		}
+	
+	});
+	
 	O.Binding = Binding;
-	O.Control	= Control;
 	O.Form		= Form;
+	O.Input	= Input;
 	
 	O.GridViewController			= GridViewController;
 	O.LightboxViewController	= LightboxViewController;

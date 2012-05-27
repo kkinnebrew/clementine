@@ -13,12 +13,10 @@
 
 <script type="text/javascript">
 
-Orange.use('mvc', 'db', 'cakephp', function(O) {
+Orange.use('mvc', 'db', 'cakephp', 'ui', function(O) {
 
-	var Ajax = __import('Ajax');
-	
-	var Model = __import('Model');
-	
+	var Ajax = __import('Ajax'), Model = __import('Model'), ViewController = __import('ViewController');
+		
 	var source = new O.CakePHP.CakeSource({
 		name: 'contacts',
 		path: '/contacts/'
@@ -49,6 +47,36 @@ Orange.use('mvc', 'db', 'cakephp', function(O) {
 	
 	});
 	
+	var MyView = ViewController.extend({
+	
+		getType: function() {
+			return 'my-view'
+		},
+		
+		getBindings: function() {
+			return {
+				'test': { 'click': true }
+			}
+		},
+		
+		onWillLoad: function() {
+
+		},
+		
+		onClick: function(e) {
+			alert("!@3");
+		}
+	
+	});
+	
+	var AnotherView = MyView.extend({
+	
+		getType: function() {
+			return 'another-view'
+		}
+	
+	});
+	
 	var test = new O.Application('test', {
 		location: true,
 		logging: 'INFO',
@@ -65,9 +93,19 @@ Orange.use('mvc', 'db', 'cakephp', function(O) {
 
 <body>
 
-<div data-control="view" data-root="true">
+<div data-control="view" data-name="test-view" data-root="true">
 
 	<p>Hello</p>
+	
+	<div data-control="my-view" data-name="arg">
+	
+		<p data-name="test">Test</p>
+	
+	</div>
+	
+	<div data-control="another-view" data-name="blurg">
+	
+	</div>
 
 </div>
 

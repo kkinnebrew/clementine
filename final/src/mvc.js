@@ -131,6 +131,12 @@ Orange.add('mvc', function(O) {
 			this.destroy();
 		},
 		
+		mergeChanges: function(deltas) {
+			
+			// merge values
+			
+		},
+		
 		isSaved: function() {
 			return this.isSaved;
 		},
@@ -141,6 +147,10 @@ Orange.add('mvc', function(O) {
 		
 		getId: function() {
 			return this.id;
+		},
+		
+		getModel: function() {
+			return this.constructor;
 		},
 		
 		toObject: function() {

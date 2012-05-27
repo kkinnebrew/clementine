@@ -151,7 +151,7 @@
 	
 	Log = (function() {
 		
-		var events = new Events(null, Log);
+		var Log = {}, events = new Events(null, Log);
 		
 		if (typeof(console) == "undefined") {
 		  console = { log: function() {}, dir: function() {} };
@@ -161,7 +161,7 @@
 			if (ex) console.log(type, msg, ex);
 			else console.log(type, msg);
 		};
-					
+		
 		Log.on = function(ev, call, context) {
 			var context = context, proxy = function(e) {
 				var message = e.data.message, ex = e.data.data;
@@ -187,9 +187,7 @@
 		Log.on('debug', function(msg, ex) { printLog('[DEBUG]', msg, ex); });
 		Log.on('warn', function(msg, ex) { printLog('[WARN]', msg, ex); });
 		Log.on('error', function(msg, ex) { printLog('[ERROR]', msg, ex); });
-		
-		function Log() {}
-		
+				
 		return Log;
 		
 	})();
@@ -374,25 +372,494 @@
 	
 	Cache = (function() {
 	
+		var activeProcess = null, poll = false,
+				isOnline = false, isLoaded = false, isInit = false;
+				
+		var stop = function() {
+			if(activeProcess != null) {
+				clearTimeout(activeProcess);
+				activeProcess = null;
+			}
+		};
+		
+		var events = new Events(null, Cache)
+		
+		var statusCallback = function() {
+
+			if(navigator.onLine && !isLoaded) {
+				isOnline = true;
+				isLoaded = true;
+				Cache.fire("statusChange", 1);
+				return;
+			}
+			
+			stop();
+												
+			activeProcess = setTimeout(function() {
+
+				if (navigator.onLine && !isLoaded) {
+					isOnline = true;
+					isLoaded = true;
+					Cache.fire("statusChange", 1);					
+				} else if (navigator.onLine) {
+				  
+				  Ajax.load({
+				  	url: 'ping.js', 
+				  	type: "GET",
+				  	success: function(req) {
+					  	if (isOnline === false) Cache.fire("statusChange", 1);
+					  	isOnline = true;
+					  },
+					  error: function(req) {
+					  	if (isOnline === true) Cache.fire("statusChange", 0);
+					  	isOnline = false;
+					  }
+				  });
+				  		  				  
+				} else {
+					
+					setTimeout(function() {
+						if (isOnline === true) Cache.fire("statusChange", 0);
+						isOnline = false;
+					}, 100);
+				
+				}
+				
+				activeProcess = null;
+				if (poll) setTimeout(statusCallback, 10 * 1000);			
+				
+			}, (isLoaded ? 100 : 0));
+			
+		};
+		
+		var onCached = function(e) {
+			Log.debug("Cache: All resources for this app downloaded. You can run this application while not connected to the internet");
+		};
+		
+		var onChecking = function() {
+			Log.debug("Cache: Checking for cache manifest");
+		};
+
+		var onDownloading = function() {
+			Log.debug("Cache: Starting download of cached files");
+		};
+		
+		var onError = function() {
+			Log.debug("Cache: There was an error in the manifest, downloading cached files or you're offline");
+		};
+		
+		var onNoUpdate = function() {
+			Log.debug("Cache: There was no update needed");
+		};
+		
+		var onProgress = function() {
+			Log.debug("Cache: Downloading cached files");
+		};
+		
+		var onUpdateReady = function() {
+			window.applicationCache.swapCache();
+			Log.debug("Cache: Updated cache has been loaded and is ready");
+			window.location.reload(true);
+		};
+		
+		return {
+				
+			on: function(ev, call, context) {
+				var proxy = (typeof context !== 'undefined') ? function() { call.apply(context, arguments); } : call;
+				return events.on.call(events, ev, proxy);
+			},
+			
+			fire: function() {
+				return events.fire.apply(events, arguments);
+			},
+			
+			detach: function() {
+				return events.detach.apply(events, arguments);
+			},
+				
+			
+			init: function(polling) {
+			
+				if (isInit) return;		
+				poll = polling;
+				isInit = true;
+	
+				Element.bind(window, "offline", statusCallback);
+				Element.bind(window, "online", statusCallback);
+				Element.bind(window, "cached", onCached);
+				Element.bind(window, "checking", onChecking);
+				Element.bind(window, "downloading", onDownloading);
+				Element.bind(window, "error", onError);
+				Element.bind(window, "noupdate", onNoUpdate);
+				Element.bind(window, "progress", onProgress);
+				Element.bind(window, "updateready", onUpdateReady);
+								
+				statusCallback();
+					
+			},
+			
+			updateNetworkStatus: function(callback) {
+				statusCallback();
+			},
+		
+			isActive: function() {
+				return isInit;
+			},
+			
+			isOnline: function() {
+				return isOnline;
+			}
+		
+		}
+	
 	})();
 	
 	
 	Storage = (function() {
+	
+		var _localStorage = window.localStorage,
+				_isSupported = false, _isOnline = false;
+				
+		if ("localStorage" in window) {
+			try {
+				window.localStorage.setItem('_test', 1);
+				_isSupported = true;
+				window.localStorage.removeItem('_test');
+			} catch (e) {} // iOS5 Private Browsing mode throws QUOTA_EXCEEDED_ERROR DOM Exception 22 via JStorage
+		}
+		
+		if (_isSupported) {
+			try {
+				if (window.localStorage) {
+					_localStorage = window.localStorage;
+				}
+			} catch (e) {} // Firefox local storage bug when cookies are disabled via JStorage
+		}
+		else if ("globalStorage" in window) {
+			try {
+				if (window.globalStorage) {
+			    _localStorage = window.globalStorage[window.location.hostname];
+			    _isSupported = true;
+				}
+			} catch(e) {}
+		} else {} // TODO: add support for IE 6/7 userData
+		
+		if ((typeof JSON === "undefined" || JSON.stringify == undefined) && typeof $ === 'undefined') {
+			_isSupported = false;
+		}
+
+		if (_isSupported) Log.debug("localStorage loaded");
+		else Log.debug("localStorage not supported");	
+				
+	
+		Storage.get = function(key, alt) {
+			
+			if (!_isSupported) return;
+			try {
+				var item = JSON.parse(_localStorage.getItem(key));
+				if (item != undefined && item.data != undefined) {
+					if (_isOnline && item.ttl !== -1 && ((new Date()).getTime() - item.timestamp) > item.ttl) {
+						_localStorage.removeItem(key);
+					}
+					return item.data; 
+				}
+			} catch(e) {
+				Log.error("Error saving object to localStorage");
+			}
+			return alt;
+			
+		};
+		
+		Storage.set = function(key, value, ttl) {
+					
+			if (!_isSupported) return false;
+			key = key.replace(__keyFilterRegex, '');
+			if (typeof value === 'undefined') return false;
+			
+			var obj = {
+				data: value,
+				timestamp: (new Date()).getTime(),
+				ttl: ttl ? ttl : (24 * 60 * 60 * 1000) // 24 hours
+			};
+			
+			try {
+				_localStorage.setItem(key, JSON.stringify(obj)); // store object
+				return true;
+			} catch (e) {
+				if (e == QUOTA_EXCEEDED_ERR) {
+					Log.error("Storage quota has been exceeded", e);
+				}
+			}
+			return false;
+		}
+		
+		Storage.remove = function(key) {
+			if (!_isSupported) return false;
+			_localStorage.removeItem(key);
+		};
+		
+		Storage.flushExpired = function(force) {
+			if (!_isSupported) return;			
+			if (_isOnline === false && force !== true) return;
+			for (var key in _localStorage) {
+				Storage.get(key);
+			}
+		};
+		
+		Storage.flush = function(force) {
+			if (!_isSupported) return;
+			if (_isOnline === false && force !== true) return;
+			_localStorage.clear();
+			Log.info("Clear: Local storage cleared");
+		};
+		
+		Storage.isSupported = function() {
+			return _isSupported;
+		};
+	
+		Storage.goOnline = function() {
+			_isOnline = true;
+		};
+		
+		Storage.goOffline = function() {
+			_isOnline = false;
+		};
+	
+		function Storage() {}
+	
+		return Storage;
 	
 	})();
 	
 	
 	Socket = (function() {
 	
+		function Socket(path) {
+			if (typeof io !== 'undefined') {
+				this.connection = io.connect(path);
+			} else throw 'Socket.io required';
+		}
+		
+		Socket.prototype.on = function() {
+			this.connection.on.apply(this.connection, arguments);
+		};
+		
+		Socket.prototype.send = function() {
+			this.connection.send.apply(this.connection, arguments);
+		};
+		
+		Socket.prototype.emit = function() {
+			this.connection.emit.apply(this.connection, arguments);
+		};
+		
+		return Socket;
+	
 	})();
 	
 	
 	Location = (function() {
 	
+		var location = null, timestamp = null,
+				expire = 60 * 60 * 1000;
+	
+		return {
+		
+			fetch: function(success, error) {
+			
+				if (!Location.isExpired()) {
+					if (typeof success !== 'undefined') success(location);
+				} 
+				else {
+					
+					if (navigator.geolocation) {
+						navigator.geolocation.getCurrentPosition(function(position) {
+							timestamp = (new Date().getTime());
+							location = position.coords;
+							Log.debug('Location retrieved');
+							if (typeof success == 'function') success(position.coords);
+						},
+						function(error) {
+							switch (error.code) 
+							{
+								case error.TIMEOUT:
+									Log.error('Location services timeout');
+									break;
+								case error.POSITION_UNAVAILABLE:
+									Log.error('Position unavailable');
+									break;
+								case error.PERMISSION_DENIED:
+									Log.error('Please Enable Location Services');
+									break;
+								default:
+									Log.error('Unknown location services error');
+									break;
+							}
+							if (typeof error === 'function') error();
+						});
+					}
+				}
+			
+			},
+			
+			isExpired: function() {
+				return ((new Date()).getTime() - timestamp) > expire;
+			}
+		
+		}
+	
 	})();
 	
 	
 	Browser = (function() {
+	
+		var BrowserDetect = {
+		
+			init: function () {
+				this.browser = this.searchString(this.dataBrowser) || "An unknown browser";
+				this.version = this.searchVersion(navigator.userAgent)
+					|| this.searchVersion(navigator.appVersion)
+					|| "an unknown version";
+				this.OS = this.searchString(this.dataOS) || "an unknown OS";
+				
+				// check if mobile
+				var useragent = navigator.userAgent.toLowerCase();
+				if (useragent.search("iphone") > 0)
+				    this.isMobile = true; // iphone
+				else if (useragent.search("ipod") > 0)
+				    this.isMobile = true; // ipod
+				else if (useragent.search("android") > 0)
+				    this.isMobile = true; // android
+				else this.isMobile = false;
+				
+				// check if tablet
+				if (useragent.search("ipad") > 0)
+				    this.isTablet = true; // ipad
+				else this.isTablet = false;
+				
+			},
+			
+			searchString: function (data) {
+				for (var i=0;i<data.length;i++)	{
+					var dataString = data[i].string;
+					var dataProp = data[i].prop;
+					this.versionSearchString = data[i].versionSearch || data[i].identity;
+					if (dataString) {
+						if (dataString.indexOf(data[i].subString) != -1)
+							return data[i].identity;
+					}
+					else if (dataProp)
+						return data[i].identity;
+				}
+			},
+			
+			searchVersion: function (dataString) {
+				var index = dataString.indexOf(this.versionSearchString);
+				if (index == -1) return;
+				return parseFloat(dataString.substring(index+this.versionSearchString.length+1));
+			},
+			
+			dataBrowser: [
+				{
+					string: navigator.userAgent,
+					subString: "Chrome",
+					identity: "Chrome"
+				},
+				{ 
+					string: navigator.userAgent,
+					subString: "OmniWeb",
+					versionSearch: "OmniWeb/",
+					identity: "OmniWeb"
+				},
+				{
+					string: navigator.vendor,
+					subString: "Apple",
+					identity: "Safari",
+					versionSearch: "Version"
+				},
+				{
+					prop: window.opera,
+					identity: "Opera",
+					versionSearch: "Version"
+				},
+				{
+					string: navigator.vendor,
+					subString: "iCab",
+					identity: "iCab"
+				},
+				{
+					string: navigator.vendor,
+					subString: "KDE",
+					identity: "Konqueror"
+				},
+				{
+					string: navigator.userAgent,
+					subString: "Firefox",
+					identity: "Firefox"
+				},
+				{
+					string: navigator.vendor,
+					subString: "Camino",
+					identity: "Camino"
+				},
+				{		// for newer Netscapes (6+)
+					string: navigator.userAgent,
+					subString: "Netscape",
+					identity: "Netscape"
+				},
+				{
+					string: navigator.userAgent,
+					subString: "MSIE",
+					identity: "Explorer",
+					versionSearch: "MSIE"
+				},
+				{
+					string: navigator.userAgent,
+					subString: "Gecko",
+					identity: "Mozilla",
+					versionSearch: "rv"
+				},
+				{ 		// for older Netscapes (4-)
+					string: navigator.userAgent,
+					subString: "Mozilla",
+					identity: "Netscape",
+					versionSearch: "Mozilla"
+				}
+			],
+			dataOS : [
+				{
+					string: navigator.platform,
+					subString: "Win",
+					identity: "Windows"
+				},
+				{
+					string: navigator.platform,
+					subString: "Mac",
+					identity: "Mac"
+				},
+				{
+					string: navigator.userAgent,
+					subString: "iPhone",
+					identity: "iPhone/iPod"
+		    },
+				{
+					string: navigator.platform,
+					subString: "Linux",
+					identity: "Linux"
+				}
+			]
+		
+		};
+		
+		BrowserDetect.init();
+		
+		return {
+			browser: BrowserDetect.browser,
+			version: BrowserDetect.version,
+			os: BrowserDetect.OS,
+			isMobile: BrowserDetect.isMobile,
+			isTablet: BrowserDetect.isTablet,
+			isDesktop: !(BrowserDetect.isMobile || BrowserDetect.isTablet)
+		}
 	
 	})();
 	

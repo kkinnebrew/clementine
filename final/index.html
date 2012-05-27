@@ -1,5 +1,7 @@
-<!--<script type="text/javascript" src="../lib/jquery-1.7.2.min.js"></script>-->
+<!--<script type="text/javascript" src="lib/jquery-1.7.2.min.js"></script>-->
 <script src="src/commons.js" type="text/javascript"></script>
+<script src="lib/socket.io.js" type="text/javascript"></script>
+
 <!--<script src="modules/rest.js" type="text/javascript"></script>
 <script src="modules/cakephp.js" type="text/javascript"></script>
 <script src="inflection.js" type="text/javascript"></script>-->
@@ -9,16 +11,39 @@
 window.onload = function() {
 
 	Orange.use(function(O) {
-	
-		var Ajax = __import('Ajax');
 			
-		var test = new O.Element('#hello');
-		test.on('click', function(e) {
-			console.log(e);
-		});
+//		O.Cache.on('statusChange', function(e) {
+//			if (e.data == 1) {
+//				console.log("online");
+//			} else {
+//				console.log("offline");
+//			}
+//		});		
+//		
+//		O.Cache.init(true);
+//		O.Storage.remove('hello');
+//		O.Location.fetch(function(e) {
+//			console.log(e);
+//		});
+
+//		var sock = new O.Socket('http://orangelit.com:8091');
+//				
+//		sock.on('this', function(data) {
+//			var el = document.getElementById('messages');
+//			var li = document.createElement('li');
+//			li.innerText = data.message;
+//			el.appendChild(li);
+//		});
 		
-		console.log(test);
+		//sock.connection.emit('private message', 'hello', 'goodbye');
 	
+
+//		var socket = io.connect('http://www.orangelit.com:8091');
+//		
+//		socket.on('this', function(data) {
+//			console.log(data);
+//		});
+		
 	});
 
 }
@@ -27,6 +52,8 @@ window.onload = function() {
 
 <body>
 
-<div id="hello">123</div>
+<ul id="messages">
+
+</ul>
 
 </body>

@@ -151,7 +151,7 @@
 	
 	Log = (function() {
 		
-		var Log = {}, events = new Events(null, Log);
+		var Log = {}, events = new Events(null, Log), level = 0;
 		
 		if (typeof(console) == "undefined") {
 		  console = { log: function() {}, dir: function() {} };
@@ -178,10 +178,25 @@
 			return events.detach.apply(events, arguments);
 		};
 		
-		Log.info = function(msg, ex) { Log.fire('info', { message: msg, data: ex }); };
-		Log.debug = function(msg, ex) { Log.fire('debug', { message: msg, data: ex }); };
-		Log.warn = function(msg, ex) { Log.fire('warn', { message: msg, data: ex }); };
-		Log.error = function(msg, ex) { Log.fire('error', { message: msg, data: ex }); };
+		Log.setLevel = function(logLevel) {
+			switch (logLevel.toLowerCase()) {
+				case 'info':
+					level = 4; break;
+				case 'debug':
+					level = 3; break;
+				case 'warn':
+					level = 2; break;
+				case 'error':
+					level = 1; break;
+				default:
+					level = 0;
+			}
+		};
+		
+		Log.info = function(msg, ex) { if (level > 3) Log.fire('info', { message: msg, data: ex }); };
+		Log.debug = function(msg, ex) { if (level > 2) Log.fire('debug', { message: msg, data: ex }); };
+		Log.warn = function(msg, ex) { if (level > 1) Log.fire('warn', { message: msg, data: ex }); };
+		Log.error = function(msg, ex) { if (level > 0) Log.fire('error', { message: msg, data: ex }); };
 		
 		Log.on('info', function(msg, ex) { printLog('[INFO]', msg, ex); });
 		Log.on('debug', function(msg, ex) { printLog('[DEBUG]', msg, ex); });
@@ -261,18 +276,21 @@
 									
 					var success, error, data, done = false;
 					
+					console.log(request.data);
+					
 					if (typeof request.success === 'function') success = request.success;
 					if (typeof request.error === 'function') error = request.error;
-					if (request.hasOwnProperty('data')) data = request.data;
+					if (request.hasOwnProperty('data')) data = encodeURIComponent(request.data);
 					var method = request.hasOwnProperty('type') ? request.type : 'GET';
 					var url = request.hasOwnProperty('type') ? request.url : null;
-										
+
 					req.open(method, url, true);
 					req.setRequestHeader('Cache-Control', 'no-cache');
 					req.timeout = 3000;
 					req.ontimeout = function () { error(req); }
 					
 					req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+					if (data) req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
 					req.onreadystatechange = function () {
 						if (req.readyState != 4) return;
 						if (req.status != 200 && req.status != 304) {
@@ -548,8 +566,7 @@
 			_isSupported = false;
 		}
 
-		if (_isSupported) Log.debug("localStorage loaded");
-		else Log.debug("localStorage not supported");	
+		if (!_isSupported) Log.debug("localStorage not supported");	
 				
 	
 		Storage.get = function(key, alt) {
@@ -912,7 +929,7 @@
 	  }
 	}
 	
-	
+		
 	Orange 					= this.Orange = {};
   Orange.version 	= '1.0.2';
 	Orange.__import = this.__import = __import;
@@ -928,7 +945,8 @@
 	Orange.Class 				= this.Class = Class;
 	Orange.Element 			= Element;
 	Orange.Events 			= Events;
-  Orange.EventTarget 	= EventTarget;	
+  Orange.EventTarget 	= EventTarget;
+  Orange.Loader				= Loader;
 	Orange.Location 		= Location;
   Orange.Log 					= this.Log = Log;  
   Orange.Socket 			= Socket;

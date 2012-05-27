@@ -17,6 +17,8 @@ Orange.add('ui', function(O) {
 	
 		window.onload = function() {
 	
+			$('body').css('display', 'none');
+	
 			var root = $('[data-root="true"]'),
 			type = root.attr('data-control'),
 			name = root.attr('data-name');
@@ -29,6 +31,8 @@ Orange.add('ui', function(O) {
 			var c = ViewController.load(type);
 			var controller = new c(null, root);
 			controller.onLoad();
+			
+			$('body').css('display', 'block');
 		
 		}
 		

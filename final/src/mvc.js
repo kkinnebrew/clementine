@@ -292,10 +292,32 @@ Orange.add('mvc', function(O) {
 	
 		var views = {};
 	
+		var fetch = function(path) {
+			return $.ajax({
+				async: false,
+		    contentType: "text/html; charset=utf-8",
+		    dataType: "text",
+		    timeout: 10000,
+		    url: path,
+		    success: function() {},
+		    error: function() {
+					throw "Error: template not found";
+		    }
+			}).responseText;
+		};
+	
 		return {
+		
 			load: function(path) {
-				return views[path];
+				if (typeof views[path] !== 'undefined') {
+					return views[path];
+				} else if (typeof path !== 'undefined' && path !== '') {
+					return fetch(path);
+				}	else {
+					throw 'Invalid template path';
+				}
 			}
+			
 		}
 	
 	})();

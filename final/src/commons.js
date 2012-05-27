@@ -875,7 +875,8 @@
 			os: BrowserDetect.OS,
 			isMobile: BrowserDetect.isMobile,
 			isTablet: BrowserDetect.isTablet,
-			isDesktop: !(BrowserDetect.isMobile || BrowserDetect.isTablet)
+			isDesktop: !(BrowserDetect.isMobile || BrowserDetect.isTablet),
+			isTouch: (BrowserDetect.isMobile || BrowserDetect.isTablet)
 		}
 	
 	})();

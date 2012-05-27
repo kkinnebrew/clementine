@@ -222,7 +222,7 @@ Orange.add('db', function(O) {
 		},
 		
 		filterType: function(type) {
-		
+			return type;
 		}
 	
 	});

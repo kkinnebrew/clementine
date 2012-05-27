@@ -40,10 +40,7 @@
 	    
 	    Class.prototype = prototype;
 	    Class.prototype.constructor = Class;
-	    
-	    for (var name in _static) {
-	    	Class[name] = _static[name];
-	    }
+	    Class.extend = arguments.callee;
 	    
 	    return Class;
 		
@@ -56,7 +53,7 @@
 			}
 		};
 		
-		function Class() g{}
+		function Class() {}
 		
 		return Class;
 		

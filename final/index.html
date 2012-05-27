@@ -1,3 +1,4 @@
+<!--<script type="text/javascript" src="../lib/jquery-1.7.2.min.js"></script>-->
 <script src="src/commons.js" type="text/javascript"></script>
 <!--<script src="modules/rest.js" type="text/javascript"></script>
 <script src="modules/cakephp.js" type="text/javascript"></script>
@@ -5,6 +6,27 @@
 
 <script type="text/javascript">
 
+window.onload = function() {
 
+	Orange.use(function(O) {
+	
+		var Ajax = __import('Ajax');
+			
+		var test = new O.Element('#hello');
+		test.on('click', function(e) {
+			console.log(e);
+		});
+		
+		console.log(test);
+	
+	});
+
+}
 
 </script>
+
+<body>
+
+<div id="hello">123</div>
+
+</body>

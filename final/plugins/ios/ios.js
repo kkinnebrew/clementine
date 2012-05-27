@@ -2,7 +2,7 @@
  * ios.js | Orange iOS Module 1.0.2
  * @date 7.21.2011
  * @author Kevin Kinnebrew
- * @dependencies commons, mvc, ui, jquery-1.7.2
+ * @dependencies commons, mvc, ui, jquery-1.7.2, iscroll
  * @description adds ios specific controllers
  */
 

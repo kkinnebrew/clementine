@@ -9,7 +9,38 @@
 Orange.add('mvc', function(O) {
 
 	var Application, Collection, Controller, Model, Source, View;
-		
+	
+	
+	Application = Class.extend({
+	
+	});
+	
+	
+	Controller = Class.extend({
+	
+	});
+	
+	
+	Model = Class.extend({
+	
+	});
+	
+	
+	View = Class.extend({
+	
+	});
+	
+	
+	Source = Class.extend({
+	
+	});
+	
+	
+	Collection = Class.extend({
+	
+	});
+	
+	
 	O.Application = Application;
 	O.Collection	= Collection;
 	O.Controller	= Controller;

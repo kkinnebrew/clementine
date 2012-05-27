@@ -9,7 +9,28 @@
 Orange.add('db', function(O) {
 
 	var AjaxSource, LocalStorageSource, RestSource, SessionStorageSource;
-		
+	
+	
+	AjaxSource = Source.extend({
+	
+	});
+	
+	
+	LocalStorageSource = Source.extend({
+	
+	});
+	
+	
+	RestSource = Source.extend({
+	
+	});
+	
+	
+	SessionStorageSource = Source.extend({
+	
+	});
+	
+	
 	O.AjaxSource 						= AjaxSource;
 	O.LocalStorageSource 		= LocalStorageSource;
 	O.RestSource 						= RestSource;

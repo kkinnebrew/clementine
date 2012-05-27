@@ -10,7 +10,28 @@ Orange.add('ui', function(O) {
 
 	var Binding, Control, Form, GridViewController, LightboxViewController, ListViewController, MapViewController, MultiViewController, 
 			ProgressViewController, TableViewController, TabViewController, TooltipViewController, ViewController;
-		
+	
+	
+	Binding = Class.extend({
+	
+	});
+	
+	
+	Control = Class.extend({
+	
+	});
+	
+	
+	Form = Class.extend({
+	
+	});
+	
+	
+	ViewController = Class.extend({
+	
+	});
+	
+	
 	O.Binding = Binding;
 	O.Control	= Control;
 	O.Form		= Form;

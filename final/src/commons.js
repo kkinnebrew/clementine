@@ -436,27 +436,34 @@
 				if (navigator.onLine && !isLoaded) {
 					isOnline = true;
 					isLoaded = true;
-					Cache.fire("statusChange", 1);					
+					Cache.fire("statusChange", 1);
 				} else if (navigator.onLine) {
 				  
 				  Ajax.load({
 				  	url: 'ping.js', 
 				  	type: "GET",
 				  	success: function(req) {
-					  	if (isOnline === false) Cache.fire("statusChange", 1);
-					  	isOnline = true;
+					  	if (isOnline === false) {
+					  		isOnline = true;
+					  		Cache.fire("statusChange", 1);
+					  	}
+					  	
 					  },
 					  error: function(req) {
-					  	if (isOnline === true) Cache.fire("statusChange", 0);
-					  	isOnline = false;
+					  	if (isOnline === true) {
+					  		isOnline = false;
+					  		Cache.fire("statusChange", 0);
+					  	}	
 					  }
 				  });
 				  		  				  
 				} else {
 					
 					setTimeout(function() {
-						if (isOnline === true) Cache.fire("statusChange", 0);
-						isOnline = false;
+						if (isOnline === true) {
+							isOnline = false;
+							Cache.fire("statusChange", 0);
+						}
 					}, 100);
 				
 				}

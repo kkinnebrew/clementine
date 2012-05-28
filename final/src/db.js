@@ -12,6 +12,8 @@ Orange.add('db', function(O) {
 	
 	var Cache = __import('Cache'), Storage = __import('Storage'), Ajax = __import('Ajax'), Source = __import('Source');
 	
+	console.log(O);
+	
 	AjaxSource = Source.extend({
 	
 		request: function(config) {

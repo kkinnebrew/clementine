@@ -32,6 +32,7 @@ Orange.add('mvc', function(O) {
 			if (this.config.hasOwnProperty('logging')) Log.setLevel(this.config.logging);
 		
 			Cache.on('statusChange', Class.proxy(function(e) {
+				
 				if (e.data == 1) {
 					Storage.goOnline();
 					if (this.config.location) Location.fetch();
@@ -40,7 +41,11 @@ Orange.add('mvc', function(O) {
 					Log.debug('Application "' + this.name + '" online');
 					Storage.goOffline();
 				}
-				this.onLaunch(e.data);
+				
+				window.onload = Class.proxy(function() {
+					this.onLaunch(e.data);
+				}, this);	
+				
 			}, this));
 			
 			Cache.init(this.config.poll);
@@ -398,6 +403,10 @@ Orange.add('mvc', function(O) {
 		
 		toObject: function() {
 			return this.active;
+		},
+		
+		getModel: function() {
+			return this.model;
 		}
 		
 	});

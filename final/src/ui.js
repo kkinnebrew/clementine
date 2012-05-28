@@ -14,24 +14,20 @@ Orange.add('ui', function(O) {
 	var Application = __import('Application'), Model = __import('Model');
 	
 	Application.prototype.onLaunch = function(online) {
-	
-		window.onload = function() {
-	
-			var root = $('[data-root="true"]'),
-			type = root.attr('data-control'),
-			name = root.attr('data-name');
-			if (typeof type === 'undefined' || typeof name === 'undefined') throw 'Root view not found';
-			
-			// remove root attribute
-			root.removeAttr('data-root');
-			
-			// load view
-			var c = ViewController.load(type);
-			var controller = new c(null, root);
-			controller.onLoad();
-					
-		}
 		
+		var root = $('[data-root="true"]'),
+		type = root.attr('data-control'),
+		name = root.attr('data-name');
+		if (typeof type === 'undefined' || typeof name === 'undefined') throw 'Root view not found';
+		
+		// remove root attribute
+		root.removeAttr('data-root');
+		
+		// load view
+		var c = ViewController.load(type);
+		var controller = new c(null, root);
+		controller.onLoad();
+							
 	};
 	
 	Binding = (function() {
@@ -393,7 +389,7 @@ Orange.add('ui', function(O) {
 		bindData: function(item, live) {
 			Binding.bindData(this.target, item);
 			if (live && item instanceof Model) {
-				if (this.liveEvt) this.liveEvent.detach();
+				if (this.liveEvt) this.liveEvt.detach();
 				var id = item.getId(), model = item.getModel();
 				this.liveEvt = model.on('datachange', function(d) {
 					if (item.mergeChanges(d)) Binding.bindData(this.target, item);

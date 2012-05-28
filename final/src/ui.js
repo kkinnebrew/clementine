@@ -2,7 +2,7 @@
  * ui.js | Orange UI Module 1.0.2
  * @date 7.21.2011
  * @author Kevin Kinnebrew
- * @dependencies commons, jquery-1.7.2
+ * @dependencies commons, jquery-1.7.2, history.js
  * @description commonly used view controllers
  */
 
@@ -22,6 +22,12 @@ Orange.add('ui', function(O) {
 		
 		// remove root attribute
 		root.removeAttr('data-root');
+				
+		// setup history
+		History.Adapter.bind(window, 'statechange', function() {
+			var State = History.getState();
+			Log.info(State.data);
+		});
 		
 		// load view
 		var c = ViewController.load(type);
@@ -292,6 +298,18 @@ Orange.add('ui', function(O) {
 			return {};
 		},
 		
+		getStates: function() {
+			return {}
+		},
+		
+		
+		setState: function(name) {
+			var states = this.getStates();
+			if (states.hasOwnProperty(name) || typeof states[name] === 'function') {
+				states.name.call(this);
+			}
+			History.pushState({}, name, name); // TO DO: Fix this
+		},
 		
 		onWillLoad: function() {},
 		

@@ -285,6 +285,81 @@ Orange.add('mvc', function(O) {
 	});
 	
 	
+	PersistentStorageSource = Source.extend({
+	
+		isPersistent: function() {
+			return true;
+		},
+		
+		supportsModels: function() {
+			return true;
+		},
+		
+		getPath: function() {
+			return this.getName() + ':' + 'model';
+		},
+		
+		getAllActions: function() {
+			var models = Storage.get(this.getPath()) || {}, output = {};
+			for (var model in models) {
+				var m = Models._models[model],
+						actions = models[model];
+				for (var id in actions) {
+					output[id] = { model: m, item: actions[id] };
+				}
+			}
+		},
+		
+		getAll: function(type) {
+			var models = Storage.get(this.getPath());
+			return (typeof models !== 'undefined' && models.hasOwnProperty(type)) ? models[type] : {}; 
+		},
+		
+		get: function(type, id) {
+			var models = Storage.get(this.getPath());
+			return (typeof models !== 'undefined' && models.hasOwnProperty(type)) ? (models[type].hasOwnProperty(id) ? models[type][id] : {}) : {}; 
+		},
+		
+		setAll: function(type, data) {
+			if (data instanceof Array) throw 'Invalid input, expecting object';
+			var models = Storage.get(this.getPath());
+			models[type] = data;
+			return Storage.set(this.getPath(), models);
+		},
+		
+		set: function(type, id, object) {
+			if (id === null) id = this.nextKey(type);
+			var data = Storage.get(this.getPath()) || {};
+			data[type][id] = object;
+			Storage.set(this.getPath(), data);
+			return id;
+		},
+		
+		remove: function(type, id) {
+			var data = Storage.get(this.getPath());
+			delete data[type][id];
+			Storage.set(this.getPath(), data);
+			return true;
+		},
+		
+		flush: function(type) {
+			 Storage.remove(this.getPath());
+		},
+		
+		nextKey: function(type) {
+			var size = 0, key, keys = [];
+			var obj = Storage.get(this.getPath());
+			if (obj.hasOwnProperty(type)) obj = obj[type];
+			else obj[type] = {};
+			for (key in obj) {
+				if (obj.hasOwnProperty(key) && !isNaN(key)) keys.push(parseInt(key, 10));
+			} 
+			return (keys.length > 0) ? Math.max.apply(Math, keys) + 1 : 1;
+		}
+	
+	});
+	
+	
 	RestSource = AjaxSource.extend({
 	
 		initialize: function(config) {
@@ -617,6 +692,8 @@ Orange.add('mvc', function(O) {
 		return data;
 	}
 	
+	Model._models = {};
+	
 	Model.extend = function(def) {
 		
 		var m = Class.extend.call(this, def);
@@ -642,6 +719,8 @@ Orange.add('mvc', function(O) {
 		m.fire = function() { return Model.fire.apply(m, arguments); };
 		m.detach = function() { return Model.detach.apply(m, arguments); };
 		
+		Model._models[m.getName()] = m;
+		
 		return m;
 			
 	};
@@ -650,17 +729,17 @@ Orange.add('mvc', function(O) {
 	
 	PersistenceManager = (function() {
 	
-		var isSyncing = false, isLive = false, models = {};
+		var isSyncing = false, isLive = false;
 		
 		PersistenceManager.init = function() {
 						
 			isLive = !(Cache.isActive() && !Cache.isOnline());
 			
 			this.cacheDS = new LocalStorageSource({ name: 'cache' });
-			this.createDS = new LocalStorageSource({ name: 'create' });
-			this.updateDS = new LocalStorageSource({ name: 'update' });
-			this.deleteDS = new LocalStorageSource({ name: 'delete' });
-			this.pendingDS = new LocalStorageSource({ name: 'pending' });
+			this.createDS = new PersistentStorageSource({ name: 'create' });
+			this.updateDS = new PersistentStorageSource({ name: 'update' });
+			this.deleteDS = new PersistentStorageSource({ name: 'delete' });
+			this.pendingDS = new PersistentStorageSource({ name: 'pending' });
 			
 			Cache.on('statusChange', Class.proxy(this.onStatusChange, this));
 			
@@ -755,19 +834,14 @@ Orange.add('mvc', function(O) {
 			};
 						
 			if (!isLive) {
-				
-				models[model.getName()] = model;
-				
+								
 				if (!id) {
-				
 					var id = 'c' + this.createDS.set(model.getName(), null, item);
-
 					if (!id) error();
 					else {
 						item[model.getId()] = id;
 						offlineFunc(item);
 					}
-				
 				} else if (isSyncing) {
 						
 					var deletes = this.deleteDS.getAll(model.getName());
@@ -802,9 +876,7 @@ Orange.add('mvc', function(O) {
 			};
 		
 			if (!isLive) {
-			
-				models[model.getName()] = model;
-			
+						
 				var creates = this.createDS.getAll(model.getName()),
 						updates = this.updateDS.getAll(model.getName()),
 						deletes = this.deleteDS.getAll(model.getName());
@@ -878,42 +950,37 @@ Orange.add('mvc', function(O) {
 				this.checkSyncStatus();
 			
 			};
-			
-			console.log(models);
-			
-			for (var name in models) {
 				
-				var model = models[name];
-				
-				var creates = this.createDS.getAll(model.getName()),
-						updates = this.updateDS.getAll(model.getName()),
-						deletes = this.deleteDS.getAll(model.getName());
-						
-				this.syncCount += creates.length + updates.length + deletes.length;
-			
-				for (var id in creates) {
-					model.getSource().set(model.getName(), null, creates[id], Class.proxy(function(data) {				
-						var key = id;
-						createSuccessFunc.call(this, data, key, model.getName(), data[model.getId()]);				
-					}, this), this.onSyncFailure);			
-				}
-				
-				for (var id in updates) {
-					model.getSource().set(model.getName(), id, updates[id], Class.proxy(function(data) {				
-						var key = id;
-						updateSuccessFunc.call(this, data, key, model.getName());				
-					}, this), this.onSyncFailure);		
-				}
-				
-				for (var id in deletes) {
-					model.getSource().remove(model.getName(), id, null, Class.proxy(function(data) {				
-						var key = id;
-						deleteSuccessFunc.call(this, key, model.getName());				
-					}, this), this.onSyncFailure);	
-				}
-			
+			var creates = this.createDS.getAllActions(),
+					updates = this.updateDS.getAllActions(),
+					deletes = this.deleteDS.getAllActions();
+					
+			this.syncCount += creates.length + updates.length + deletes.length;
+		
+			for (var id in creates) {
+				var model = creates[id].model;
+				model.getSource().set(model.getName(), null, creates[id].item, Class.proxy(function(data) {				
+					var key = id;
+					createSuccessFunc.call(this, data, key, model.getName(), data[model.getId()]);				
+				}, this), this.onSyncFailure);			
 			}
 			
+			for (var id in updates) {
+				var model = creates[id].model;
+				model.getSource().set(model.getName(), id, updates[id].item, Class.proxy(function(data) {				
+					var key = id;
+					updateSuccessFunc.call(this, data, key, model.getName());				
+				}, this), this.onSyncFailure);		
+			}
+			
+			for (var id in deletes) {
+				var model = creates[id].model;
+				model.getSource().remove(model.getName(), id, null, Class.proxy(function(data) {				
+					var key = id;
+					deleteSuccessFunc.call(this, key, model.getName());				
+				}, this), this.onSyncFailure);	
+			}
+					
 		};
 		
 		PersistenceManager.onSyncSuccess = function() {
@@ -930,25 +997,19 @@ Orange.add('mvc', function(O) {
 		};
 		
 		PersistenceManager.checkSyncStatus = function() {
-			
-			var count = 0;
-			
+					
 			if (this.syncCount == 0) {
-				for (var name in models) {
-					var model = models[name];
-					var pending = this.pendingDS.getAll(model.getName());
-					if (pending.length > 0) {
-						for (var i in pending) {
-							if (pending.hasOwnProperty(model.getId())) var id = pending[model.getId()];
-							else throw "Pending item missing id";
-							this.updateDS.set(model.getName(), pending[i], id);
-							this.pendingDS.remove(model.getName(), id);
-						}
-						count += pending.length;
-					}
-				}
-				if (count > 0) this.onSync(true);
-				else this.onSyncSuccess.call(this);
+				var pending = this.pendingDS.getAllActions();			
+				if (pending.length > 0) {				
+					for (var i in pending) {					
+						var model = pending[i].model, item = pending[i].item;
+						if (item.hasOwnProperty(model.getId())) var id = item[model.getId()];
+						else throw "Pending item missing id";
+						this.updateDS.set(model.getName(), item, id);
+						this.pendingDS.remove(model.getName(), id);						
+					}					
+					this.onSync(true)					
+				} else this.onSyncSuccess.call(this);
 			}
 			
 		};
@@ -962,6 +1023,24 @@ Orange.add('mvc', function(O) {
 		return PersistenceManager;
 	
 	})();
+	
+	
+	Action = Class.extend({
+	
+		initialize: function(model, item) {
+			this.model = model;
+			this.item = item;
+		},
+	
+		getModel: function() {
+			return this.model;
+		},
+		
+		getItem: function() {
+			return this.item;
+		}
+	
+	});
 
 	
 	O.Application = Application;

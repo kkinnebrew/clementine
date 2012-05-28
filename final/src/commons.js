@@ -594,7 +594,7 @@
 		if (!_isSupported) Log.debug("localStorage not supported");	
 				
 	
-		Storage.get = function(key, alt) {
+		Storage.get = function(key) {
 			
 			if (!_isSupported) return;
 			try {
@@ -606,9 +606,8 @@
 					return item.data; 
 				}
 			} catch(e) {
-				Log.error("Error saving object to localStorage");
+				Log.error("Error fetching object from localStorage");
 			}
-			return alt;
 			
 		};
 		

@@ -106,7 +106,7 @@ Orange.add('ios', function(O) {
 		
 			// get name of default view
 			var defaultView = this.target.attr('data-default');
-												
+			
 			// remove views from DOM
 			for (var i in this.views) {
 				if (this.views[i].name !== defaultView) {
@@ -116,13 +116,13 @@ Orange.add('ios', function(O) {
 					this.activeView = this.views[i];
 				}
 			}
-			
+
 			this.target.removeAttr('data-default');
 														
 		},
 		
-		onWillLoad: function() {
-		
+		onDidLoad: function() {
+				
 			// setup navigation bar
 			this.navBar = $('<div class="ios-ui-navigation-bar"></div>');
 			this.target.prepend(this.navBar);
@@ -142,12 +142,9 @@ Orange.add('ios', function(O) {
 				this.rightBtn.appendTo(this.navBar);
 			}
 			
-		
-		},
-		
-		onDidLoad: function() {
 			this.activeView.target.addClass('active');
 			this.popping = false;
+			
 		},
 		
 		
@@ -479,6 +476,8 @@ Orange.add('ios', function(O) {
 				e.stopPropagation();
 				e.preventDefault();				
 			}, this));
+			
+			this.setupTable();
 			
 		},
 		

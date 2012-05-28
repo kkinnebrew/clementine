@@ -4,12 +4,27 @@
 <script src="src/mvc.js" type="text/javascript"></script>
 <!--<script src="src/db.js" type="text/javascript"></script>-->
 <script src="src/ui.js" type="text/javascript"></script>
-<script src="src/ios.js" type="text/javascript"></script>
+<script src="plugins/ios/ios.js" type="text/javascript"></script>
 <script src="plugins/cakephp/cakephp.js" type="text/javascript"></script>
 <script src="lib/socket.io.js" type="text/javascript"></script>
 <script src="lib/inflection.js" type="text/javascript"></script>
+<script src="lib/iscroll.js" type="text/javascript"></script>
 
 <link type="text/css" rel="stylesheet" href="plugins/ios/ios.css" />
+
+<style type="text/css">
+
+html, body {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+}
+
+div[data-root=true] {
+	display: none;
+}
+
+</style>
 
 <script type="text/javascript">
 
@@ -46,52 +61,64 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 		}
 	
 	});
-	
-	var MyView = ViewController.extend({
+		
+	var MainView = O.iOS.UINavigationViewController.extend({
 	
 		getType: function() {
-			return 'my-view'
+			return 'main-view';
 		},
 		
 		getBindings: function() {
 			return {
-				'test': { 'click': true },
-				'goonline': { 'click': this.onOnline }
+				'first': { 'next': true },
+				'second': { 'back': true }
 			}
 		},
 		
-		onWillLoad: function() {
-
-			
+		onNext: function(e) {
+			this.pushView(this.getView('second'));
 		},
 		
-		onClick: function(e) {
-			//History.pushState({}, 'This is another page', 'two');
-			
-			var success = function(data) {
-				console.log(data.toObject());
-			};
-			
-			var error = function(e) {
-				console.log("error");
-			}
-			
-			Contact.set({ firstName: '123', lastName: '24543' }, success, error);
-				O.PersistenceManager.onSync();		
-		},
-		
-		onOnline: function() {
-			O.PersistenceManager.onStatusChange({ data: 1});
+		onBack: function(e) {
+			this.popToRootView();
 		}
 	
 	});
 	
-	var AnotherView = MyView.extend({
-	
+	var FirstView = O.iOS.UIViewController.extend({
+		
 		getType: function() {
-			return 'another-view'
+			return 'first-view';
+		},
+		
+		getBindings: function() {
+			return {
+				'next-btn': { 'touchclick': this.onNext }
+			}
+		},
+		
+		onNext: function() {
+			this.fire('next');
 		}
+		
+	});
 	
+	var SecondView = O.iOS.UIViewController.extend({
+		
+		getType: function() {
+			return 'second-view';
+		},
+		
+		getBindings: function() {
+			return {
+				'back-btn': { 'touchclick': this.onBack }
+			}
+		},
+		
+		onBack: function() {
+			this.fire('back');
+		}		
+		
 	});
 	
 	var test = new O.Application('test', {
@@ -104,18 +131,6 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 	
 	test.launch();
 	
-	
-	//var s = new O.PersistentStorageSource({ name: 'test' });
-	
-	//console.log(s.getAllActions());
-	//console.log(s.getAll('contact'));
-	//console.log(s.get('contact', 1));
-	//console.log(s.set('contact', 3, { name: 'asdsad' }));
-	//console.log(s.remove('contact', 1));
-	//s.flush();
-	
-	
-	
 });
 
 
@@ -123,18 +138,63 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 
 <body>
 
-<div data-control="view" data-name="test-view" data-root="true">
+<div data-control="main-view" data-name="test-main" data-default="first" data-root="true">
 
-	<p>Hello</p>
+	<div data-control="first-view" data-name="first">
 	
-	<div data-control="my-view" data-name="arg">
-	
-		<p data-name="test">Test</p>
-		<p data-name="goonline">Go</p>
+		<div class="ios-ui-navigation-bar">
+			
+			<div class="title">Page One</div>
+			
+			<div class="ios-ui-bar-button-item right" data-name="next-btn">Next</div>
+			
+		</div>
+		
+		<div data-control="ios-ui-table-view" data-name="table-view">
+			
+			<ul>
+				
+				<li>Hello</li>
+				
+				<li>Hello</li>
+				
+				<li>Hello</li>
+				
+				<li>Hello</li>
+				
+				<li>Hello</li>
+				
+				<li>Hello</li>
+				
+				<li>Hello</li>
+				
+				<li>Hello</li>
+				
+				<li>Hello</li>
+				
+				<li>Hello</li>
+				
+				<li>Hello</li>
+				
+				<li>Hello</li>
+				
+			</ul>
+		
+		</div>
 	
 	</div>
 	
-	<div data-control="another-view" data-name="blurg">
+	<div data-control="second-view" data-name="second">
+		
+		<div class="ios-ui-navigation-bar">
+			
+			<div class="title">Page Two</div>
+			
+			<div class="ios-ui-bar-button-item left" data-name="back-btn">Back</div>
+			
+		</div>
+	
+		<p>Arg</p>
 	
 	</div>
 

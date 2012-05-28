@@ -126,7 +126,7 @@
 /* UINavigationBar Styles */
 
 .ios-ui-navigation-bar {
-	background: url(../img/ios-ui-navigation-bar-bg.png) repeat-x;
+	background: url(img/ios-ui-navigation-bar-bg.png) repeat-x;
 	height: 44px;
 	position: relative;
 	width: 100%;
@@ -150,7 +150,7 @@
 @media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
 
 	.ios-ui-navigation-bar {
-		background-image: url(../img/ios-ui-navigation-bar-bg@2x.png);
+		background-image: url(img/ios-ui-navigation-bar-bg@2x.png);
 		background-size: 5px 44px;
 		-moz-background-size: 5px 44px;
 		-o-background-size: 5px 44px;
@@ -163,7 +163,7 @@
 /* UIToolbar Styles */
 
 .ios-ui-toolbar {
-	background: url(../img/ios-ui-navigation-bar-bg.png) repeat-x;
+	background: url(img/ios-ui-navigation-bar-bg.png) repeat-x;
 	height: 44px !important;
 	position: relative;
 	width: 100%;
@@ -172,7 +172,7 @@
 @media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
 
 	.ios-ui-toolbar {
-		background-image: url(../img/ios-ui-toolbar-bg@2x.png);
+		background-image: url(img/ios-ui-toolbar-bg@2x.png);
 		background-size: 5px 44px;
 		-moz-background-size: 5px 44px;
 		-o-background-size: 5px 44px;
@@ -185,7 +185,7 @@
 /* UIBarButtonItem Styles */
 
 .ios-ui-bar-button-item {
-	background: url(../img/ios-ui-bar-button-item-bg.png) repeat-x;
+	background: url(img/ios-ui-bar-button-item-bg.png) repeat-x;
 	color: #FFF;
 	cursor: pointer;
 	font-size: 12px;
@@ -244,7 +244,7 @@
 }
 
 .ios-ui-bar-button-item.touched {
-	background: url(../img/ios-ui-bar-button-item-bg-selected.png) repeat-x;
+	background: url(img/ios-ui-bar-button-item-bg-selected.png) repeat-x;
 /*	background: #93a1b8; /* Old browsers *!/
 	background: -moz-linear-gradient(top,  #93a1b8 0%, #7a8799 1%, #516075 100%); /* FF3.6+ *!/
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#93a1b8), color-stop(1%,#7a8799), color-stop(100%,#516075)); /* Chrome,Safari4+ *!/
@@ -256,7 +256,7 @@
 }
 
 .ios-ui-bar-button-item:hover {
-	background: url(../img/ios-ui-bar-button-item-bg-selected.png) repeat-x;
+	background: url(img/ios-ui-bar-button-item-bg-selected.png) repeat-x;
 /*	background: #93a1b8; /* Old browsers *!/
 	background: -moz-linear-gradient(top,  #93a1b8 0%, #7a8799 1%, #516075 100%); /* FF3.6+ *!/
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#93a1b8), color-stop(1%,#7a8799), color-stop(100%,#516075)); /* Chrome,Safari4+ *!/
@@ -312,7 +312,7 @@
 }
 
 .ios-ui-table-view ul > li {
-	background: rgba(0, 0, 0, 0) url(../img/ios-ui-table-view-arrow.png) no-repeat right center;
+	background: rgba(0, 0, 0, 0) url(img/ios-ui-table-view-arrow.png) no-repeat right center;
 	cursor: pointer;
 	font-size: 14px;
 	margin: 0;
@@ -348,8 +348,8 @@
 	line-height: 44px;
 	padding: 0px 16px;
 	color: #FFF;
-	background-image: url(../img/ios-ui-table-view-arrow-selected.png), -moz-linear-gradient(top,  #058cf5 0%, #015de6 100%); /* FF3.6+ */
-	background-image: url(../img/ios-ui-table-view-arrow-selected.png), -webkit-linear-gradient(top,  #058cf5 0%,#015de6 100%); /* Chrome10+,Safari5.1+ */
+	background-image: url(img/ios-ui-table-view-arrow-selected.png), -moz-linear-gradient(top,  #058cf5 0%, #015de6 100%); /* FF3.6+ */
+	background-image: url(img/ios-ui-table-view-arrow-selected.png), -webkit-linear-gradient(top,  #058cf5 0%,#015de6 100%); /* Chrome10+,Safari5.1+ */
 }
 
 .ios-ui-table-view ul > li:first-child {
@@ -363,7 +363,7 @@
 }
 
 .ios-ui-table-view .section {
-	background: url(../img/ios-ui-table-section-bg.png);
+	background: url(img/ios-ui-table-section-bg.png);
 	color: #FFF;
 	font-size: 13px;
 	font-weight: 600;
@@ -388,7 +388,7 @@
 }
 
 .ios-ui-table-view.grouped {
-	background: #FFF url(../img/ios-ui-table-view-bg.png) repeat;
+	background: #FFF url(img/ios-ui-table-view-bg.png) repeat;
 }
 
 .ios-ui-table-view.grouped ul {
@@ -448,7 +448,7 @@
 @media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
 
 	.ios-ui-table-view ul > li {
-		background: url(../img/ios-ui-table-view-arrow@2x.png) no-repeat right center;
+		background: url(img/ios-ui-table-view-arrow@2x.png) no-repeat right center;
 		background-size: 22px 19px, 100%;
 		-webkit-background-size: 22px 19px, 100%;
 		-moz-background-size: 22px 19px, 100%;
@@ -457,8 +457,8 @@
 	}
 	
 	.ios-ui-table-view ul > li:active {
-		background-image: url(../img/ios-ui-table-view-arrow-selected@2x.png), -moz-linear-gradient(top,  #058cf5 0%, #015de6 100%);
-		background-image: url(../img/ios-ui-table-view-arrow-selected@2x.png), -webkit-linear-gradient(top,  #058cf5 0%,#015de6 100%);
+		background-image: url(img/ios-ui-table-view-arrow-selected@2x.png), -moz-linear-gradient(top,  #058cf5 0%, #015de6 100%);
+		background-image: url(img/ios-ui-table-view-arrow-selected@2x.png), -webkit-linear-gradient(top,  #058cf5 0%,#015de6 100%);
 		background-size: 22px 19px, 100%;
 		-webkit-background-size: 22px 19px, 100%;
 		-moz-background-size: 22px 19px, 100%;
@@ -695,7 +695,7 @@ form > input:focus {
 }
 
 .ios-ui-tab-bar {
-	background: url(../img/ios-ui-tab-bar-bg.png) repeat-x;
+	background: url(img/ios-ui-tab-bar-bg.png) repeat-x;
 	display: table;
 	bottom: 0px;
 	position: absolute;
@@ -707,7 +707,7 @@ form > input:focus {
 @media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
 
 	.ios-ui-tab-bar {
-		background-image: url(../img/ios-ui-tab-bar-bg@2x.png);
+		background-image: url(img/ios-ui-tab-bar-bg@2x.png);
 		background-size: 49px 15px;
 		-webkit-background-size: 49px 15px;
 		-moz-background-size: 49px 15px;

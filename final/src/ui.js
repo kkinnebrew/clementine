@@ -328,14 +328,14 @@ Orange.add('ui', function(O) {
 			for (var view in views) {
 				var events = views[view];
 				for (var event in events) {
-					if (event == 'touchclick') event = Browser.isTouch ? 'touchend' : 'click';
 					var func = (typeof events[event] === 'function') ? events[event] : null;
+					if (event == 'touchclick') event = O.Browser.isTouch ? 'touchend' : 'click';
 					if (func === null) {
 						var name = event.charAt(0).toUpperCase() + event.slice(1);
 						func = (events[event] === true && typeof this['on' + name] === 'function') ? this['on' + name] : null;
 					}
 					if (func !== null && this.views.hasOwnProperty(view)) this.getView(view).on(event, $.proxy(func,  this));
-					else if (func !== null && this.elements.hasOwnProperty(view)) this.getElement(view).on(event, $.proxy(func,  this));
+					else if (func !== null && this.elements.hasOwnProperty(view)) this.getElement(view).on(event, $.proxy(func, this));
 				}
 			}
 			
@@ -417,6 +417,10 @@ Orange.add('ui', function(O) {
 				
 		toString: function() {
 			return '[' + this.getType() + ' ' + this.data.name + ']';
+		},
+		
+		find: function(selector) {
+			return $(this.target).find(selector);
 		},
 				
 		destroy: function() {

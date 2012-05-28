@@ -8,7 +8,7 @@
 
 (function() {
 
-	var Orange, Ajax, Browser, Cache, Class, Element, Events, EventTarget, Loader, Location, Log, Socket, Storage,
+	var Orange, Ajax, Browser, Cache, Class, Element, Events, EventHandle, EventTarget, Loader, Location, Log, Socket, Storage,
 
 			__import = function(name) { return Orange[name] },
 			__export = function(name, object) { return Orange[name] = object },
@@ -86,6 +86,24 @@
 	})();
 	
 	
+	EventHandle = (function() {
+	
+		function EventHandle(target, ev, call) {
+			this.target = target;
+			this.ev = ev;
+			this.call = call;
+		}
+		
+		EventHandle.prototype.detach = function() {
+			this.target.detach(this.ev, this.call);
+			delete this.target;
+			delete this.ev;
+			delete this.call;
+		}
+	
+	});
+	
+	
 	Events = (function() {
 	
 		function Events(parent, self) {
@@ -99,7 +117,7 @@
 				this._listeners[ev] = [];
 			}
 			this._listeners[ev].push(call);	
-			
+			return new EventHandle(this, ev, call);
 		};
 		
 		Events.prototype.fire = function(ev, data) {

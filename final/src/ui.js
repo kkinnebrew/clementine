@@ -17,8 +17,6 @@ Orange.add('ui', function(O) {
 	
 		window.onload = function() {
 	
-			$('body').css('display', 'none');
-	
 			var root = $('[data-root="true"]'),
 			type = root.attr('data-control'),
 			name = root.attr('data-name');
@@ -31,9 +29,7 @@ Orange.add('ui', function(O) {
 			var c = ViewController.load(type);
 			var controller = new c(null, root);
 			controller.onLoad();
-			
-			$('body').css('display', 'block');
-		
+					
 		}
 		
 	};
@@ -201,6 +197,7 @@ Orange.add('ui', function(O) {
 			this.views = {};
 			this.forms = {};
 			this.elements = {};
+			this.events = [];
 			this.data = {};
 			this.eventTarget = new O.Events(parent, this);
 			
@@ -396,10 +393,10 @@ Orange.add('ui', function(O) {
 		bindData: function(item, live) {
 			Binding.bindData(this.target, item);
 			if (live && item instanceof Model) {
+				if (this.liveEvt) this.liveEvent.detach();
 				var id = item.getId(), model = item.getModel();
-				model.on('datachange', function(d) {
-					item.mergeChanges(d);
-					if (item.isChanged) Binding.bindData(this.target, item); // TO DO: this will leak
+				this.liveEvt = model.on('datachange', function(d) {
+					if (item.mergeChanges(d)) Binding.bindData(this.target, item);
 				}, this);
 			}
 		},
@@ -418,6 +415,7 @@ Orange.add('ui', function(O) {
 			for (var name in this._elements) {
 				delete this.elements[name];
 			}
+			if (this.liveEvt) this.liveEvt.detach();
 			delete this.target;
 			delete this.parent;
 			delete this.eventTarget;

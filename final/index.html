@@ -73,14 +73,11 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 			};
 			
 			var error = function(e) {
-				console.log(e);
+				console.log("error");
 			}
 			
-			Contact.set({
-				firstName: '123',
-				lastName: '12313123123'
-			}, success, error);
-						
+			Contact.set({ firstName: '123', lastName: '24543' }, success, error);
+				O.PersistenceManager.onSync();		
 		},
 		
 		onOnline: function() {
@@ -108,9 +105,17 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 	test.launch();
 	
 	
-
-
-
+	//var s = new O.PersistentStorageSource({ name: 'test' });
+	
+	//console.log(s.getAllActions());
+	//console.log(s.getAll('contact'));
+	//console.log(s.get('contact', 1));
+	//console.log(s.set('contact', 3, { name: 'asdsad' }));
+	//console.log(s.remove('contact', 1));
+	//s.flush();
+	
+	
+	
 });
 
 

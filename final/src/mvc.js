@@ -45,6 +45,7 @@ Orange.add('mvc', function(O) {
 				
 				if (Storage.get('appversion') !== this.config.version) {
 					PersistenceManager.flush();
+					Storage.set('appversion', this.config.version)
 				}
 				
 				window.onload = Class.proxy(function() {
@@ -302,22 +303,23 @@ Orange.add('mvc', function(O) {
 		getAllActions: function() {
 			var models = Storage.get(this.getPath()) || {}, output = {};
 			for (var model in models) {
-				var m = Models._models[model],
+				var m = Model._models[model],
 						actions = models[model];
 				for (var id in actions) {
 					output[id] = { model: m, item: actions[id] };
 				}
 			}
+			return (output) ? output : null;
 		},
 		
 		getAll: function(type) {
 			var models = Storage.get(this.getPath());
-			return (typeof models !== 'undefined' && models.hasOwnProperty(type)) ? models[type] : {}; 
+			return (typeof models !== 'undefined' && models.hasOwnProperty(type)) ? models[type] : null; 
 		},
 		
 		get: function(type, id) {
 			var models = Storage.get(this.getPath());
-			return (typeof models !== 'undefined' && models.hasOwnProperty(type)) ? (models[type].hasOwnProperty(id) ? models[type][id] : {}) : {}; 
+			return (typeof models !== 'undefined' && models.hasOwnProperty(type)) ? (models[type].hasOwnProperty(id) ? models[type][id] : null) : null; 
 		},
 		
 		setAll: function(type, data) {
@@ -330,6 +332,7 @@ Orange.add('mvc', function(O) {
 		set: function(type, id, object) {
 			if (id === null) id = this.nextKey(type);
 			var data = Storage.get(this.getPath()) || {};
+			if (!data.hasOwnProperty(type)) data[type] = {};
 			data[type][id] = object;
 			Storage.set(this.getPath(), data);
 			return id;
@@ -337,7 +340,8 @@ Orange.add('mvc', function(O) {
 		
 		remove: function(type, id) {
 			var data = Storage.get(this.getPath());
-			delete data[type][id];
+			if (data && data.hasOwnProperty(type) && data[type].hasOwnProperty(id)) delete data[type][id];
+			else return null;
 			Storage.set(this.getPath(), data);
 			return true;
 		},
@@ -348,7 +352,7 @@ Orange.add('mvc', function(O) {
 		
 		nextKey: function(type) {
 			var size = 0, key, keys = [];
-			var obj = Storage.get(this.getPath());
+			var obj = Storage.get(this.getPath()) || {};
 			if (obj.hasOwnProperty(type)) obj = obj[type];
 			else obj[type] = {};
 			for (key in obj) {
@@ -656,7 +660,7 @@ Orange.add('mvc', function(O) {
 		var model = {}, fields = this.getFields();											
 		for (var field in fields) {
 			var source = fields[field].name, 
-					value = (data.hasOwnProperty(source)) ? data[source] : undefined;		
+					value = (data.hasOwnProperty(source)) && data[source] != null ? data[source] : undefined;		
 			if (value === undefined && !fields[field].nullable) {
 				Log.warn("Could not parse JSON field '" + field + "' for " + this.getName());
 				continue;
@@ -746,18 +750,22 @@ Orange.add('mvc', function(O) {
 		};
 		
 		PersistenceManager.getAll = function(model, success, error) {
-		
+				
 			var offlineFunc = function(data) {
 			
 				var creates = this.createDS.getAll(model.getName()),
 						updates = this.updateDS.getAll(model.getName()),
 						deletes = this.deleteDS.getAll(model.getName()),
 						pending = this.pendingDS.getAll(model.getName());
-				
-				for (var key in creates) data[key] = creates[key];
+								
+				for (var key in creates) {
+					var c = creates[key];
+					c[model.getId()] = 'c' + key;
+					data['c' + key] = c;
+				}
 				for (var key in updates) data[key] = updates[key];
 				for (var key in deletes) delete data[key];
-				
+								
 				if (isSyncing) for (var key in pending) data[pending[model.getId()]] = pending[key];
 				
 				success(data);
@@ -770,7 +778,7 @@ Orange.add('mvc', function(O) {
 					output[data[i][model.getId()]] = data[i];
 				}
 				this.cacheDS.setAll(model.getName(), output); // TO DO: check if this is array or list
-				success(output);
+				success.call(this, output);
 			};
 				
 			if (!isLive) {
@@ -783,13 +791,13 @@ Orange.add('mvc', function(O) {
 		};
 
 		PersistenceManager.get = function(model, id, success, error) {
-		
+				
 			var offlineFunc = function(response) {
 				
-				var creates = this.createDS.getAll(model.getName()) || {},
-						updates = this.updateDS.getAll(model.getName()) || {},
-						deletes = this.deleteDS.getAll(model.getName()) || {},
-						pending = this.pendingDS.getAll(model.getName()) || {},
+				var creates = this.createDS.getAll(model.getName()),
+						updates = this.updateDS.getAll(model.getName()),
+						deletes = this.deleteDS.getAll(model.getName()),
+						pending = this.pendingDS.getAll(model.getName()),
 						data = null;
 				
 				if (isSyncing) {
@@ -798,9 +806,9 @@ Orange.add('mvc', function(O) {
 					}
 				}
 				
-				if (creates.hasOwnProperty(id)) data = creates[id];
-				if (updates.hasOwnProperty(id) && data == null) data = updates[id];
-				if (deletes.hasOwnProperty(id)) throw "Cannot fetch deleted item";
+				if (creates && creates.hasOwnProperty(id)) data = creates[id];
+				if (updates && updates.hasOwnProperty(id) && data == null) data = updates[id];
+				if (deletes && deletes.hasOwnProperty(id)) throw "Cannot fetch deleted item";
 								
 				success((!data) ? response : data);
 				
@@ -811,19 +819,24 @@ Orange.add('mvc', function(O) {
 				success(data);
 			};
 			
+			var onlineFuncError = function(e) {
+				if (e.status == '404') {
+					this.cacheDS.remove(model.getName(), id);
+				} error(e);
+			};
 			
 			if (!isLive) {
 				var item = this.cacheDS.get(model.getName(), id);
 				if (item != undefined) offlineFunc.call(this, item)
 				else error.call(this);
 			}
-			else model.getSource().get(model.getName(), id, Class.proxy(onlineFunc, this), error);
+			else model.getSource().get(model.getName(), id, Class.proxy(onlineFunc, this), Class.proxy(onlineFuncError, this));
 		
 		};
 		
 		
 		PersistenceManager.set = function(model, id, item, success, error) {
-		
+									
 			var offlineFunc = function(data) {
 				data['_unsaved'] = true;
 				success(data);
@@ -831,6 +844,7 @@ Orange.add('mvc', function(O) {
 			
 			var onlineFunc = function(data) {
 				this.cacheDS.set(model.getName(), data[model.getId()], data);
+				success(data);
 			};
 						
 			if (!isLive) {
@@ -846,10 +860,11 @@ Orange.add('mvc', function(O) {
 						
 					var deletes = this.deleteDS.getAll(model.getName());
 				
-					if (deletes.hasOwnProperty(id)) {
+					if (deletes && deletes.hasOwnProperty(id)) {
 						throw 'Cannot update already removed item';
 					} else {
-						this.pendingDS.set(model.getName(), null, item, offlineFunc, error);
+						this.pendingDS.set(model.getName(), null, item);
+						offlineFunc.call(this, item);
 					}
 						
 				} else {
@@ -857,9 +872,11 @@ Orange.add('mvc', function(O) {
 					var creates = this.createDS.getAll(),
 							deletes = this.deleteDS.getAll();
 				
-					if (creates.hasOwnProperty(id)) this.createDS.set(model.getName(), id, item, offlineFunc, error);
-					else if (deletes.hasOwnProperty(id)) throw 'Cannot update already removed item';
-					else this.updateDS.set(model.getName(), id, item, func, error);
+					if (creates && creates.hasOwnProperty(id)) this.createDS.set(model.getName(), id, item);
+					else if (deletes && deletes.hasOwnProperty(id)) throw 'Cannot update already removed item';
+					else this.updateDS.set(model.getName(), id, item);
+					
+					offlineFunc.call(this, item);
 						
 				}
 								
@@ -869,7 +886,7 @@ Orange.add('mvc', function(O) {
 		};
 		
 		PersistenceManager.remove = function(model, id, success, error) {
-			
+						
 			var onlineFunc = function(data) {
 				this.cacheDS.remove(model.getName(), id);
 				success(data);
@@ -881,9 +898,9 @@ Orange.add('mvc', function(O) {
 						updates = this.updateDS.getAll(model.getName()),
 						deletes = this.deleteDS.getAll(model.getName());
 			
-				if (creates.hasOwnProperty(id)) this.createDS.remove(model.getName(), id);
-				if (updates.hasOwnProperty(id)) this.updateDS.remove(model.getName(), id);
-				if (deletes.hasOwnProperty(id)) throw 'Cannot delete already removed item';
+				if (creates && creates.hasOwnProperty(id)) this.createDS.remove(model.getName(), id);
+				if (updates && updates.hasOwnProperty(id)) this.updateDS.remove(model.getName(), id);
+				if (deletes && deletes.hasOwnProperty(id)) throw 'Cannot delete already removed item';
 				else this.deleteDS.set(model.getName(), id, {});
 				
 				success(id);
@@ -955,28 +972,31 @@ Orange.add('mvc', function(O) {
 					updates = this.updateDS.getAllActions(),
 					deletes = this.deleteDS.getAllActions();
 					
-			this.syncCount += creates.length + updates.length + deletes.length;
+			this.syncCount = creates.length + updates.length + deletes.length;
 		
 			for (var id in creates) {
 				var model = creates[id].model;
 				model.getSource().set(model.getName(), null, creates[id].item, Class.proxy(function(data) {				
 					var key = id;
+					console.log("create");
 					createSuccessFunc.call(this, data, key, model.getName(), data[model.getId()]);				
 				}, this), this.onSyncFailure);			
 			}
 			
 			for (var id in updates) {
-				var model = creates[id].model;
+				var model = updates[id].model;
 				model.getSource().set(model.getName(), id, updates[id].item, Class.proxy(function(data) {				
 					var key = id;
+					console.log("update");
 					updateSuccessFunc.call(this, data, key, model.getName());				
 				}, this), this.onSyncFailure);		
 			}
 			
 			for (var id in deletes) {
-				var model = creates[id].model;
+				var model = deletes[id].model;
 				model.getSource().remove(model.getName(), id, null, Class.proxy(function(data) {				
 					var key = id;
+					console.log("delete");
 					deleteSuccessFunc.call(this, key, model.getName());				
 				}, this), this.onSyncFailure);	
 			}
@@ -984,7 +1004,7 @@ Orange.add('mvc', function(O) {
 		};
 		
 		PersistenceManager.onSyncSuccess = function() {
-			
+
 			isSyncing = false;
 			isLive = !(Cache.isActive() && !Cache.isOnline());
 		
@@ -997,7 +1017,9 @@ Orange.add('mvc', function(O) {
 		};
 		
 		PersistenceManager.checkSyncStatus = function() {
-					
+			
+			console.log("checking");
+			
 			if (this.syncCount == 0) {
 				var pending = this.pendingDS.getAllActions();			
 				if (pending.length > 0) {				
@@ -1009,7 +1031,7 @@ Orange.add('mvc', function(O) {
 						this.pendingDS.remove(model.getName(), id);						
 					}					
 					this.onSync(true)					
-				} else this.onSyncSuccess.call(this);
+				} else PersistenceManager.onSyncSuccess.call(this);
 			}
 			
 		};
@@ -1024,23 +1046,6 @@ Orange.add('mvc', function(O) {
 	
 	})();
 	
-	
-	Action = Class.extend({
-	
-		initialize: function(model, item) {
-			this.model = model;
-			this.item = item;
-		},
-	
-		getModel: function() {
-			return this.model;
-		},
-		
-		getItem: function() {
-			return this.item;
-		}
-	
-	});
 
 	
 	O.Application = Application;
@@ -1050,9 +1055,10 @@ Orange.add('mvc', function(O) {
 	O.Source			= Source;
 	O.View				= View;
 	
-	O.AjaxSource 						= AjaxSource;
-	O.LocalStorageSource 		= LocalStorageSource;
-	O.RestSource 						= RestSource;
-	O.PersistenceManager		= PersistenceManager;
+	O.AjaxSource 								= AjaxSource;
+	O.LocalStorageSource 				= LocalStorageSource;
+	O.RestSource 								= RestSource;
+	O.PersistenceManager				= PersistenceManager;
+	O.PersistentStorageSource		= PersistentStorageSource;
 	
 }, [], '1.0.2');

@@ -5,6 +5,14 @@
  * @description styles for ios elements
  */
 
+#ios-preload {
+	background-image: url(img/ios-ui-bar-button-back-selected-left.png), url(img/ios-ui-bar-button-back-selected-right.png), url(img/ios-ui-bar-button-back-selected-center.png), url(img/ios-ui-bar-button-item-bg-selected.png), url(img/ios-ui-bar-button-back-selected-left@2x.png), url(img/ios-ui-bar-button-back-selected-right@2x.png), url(img/ios-ui-bar-button-back-selected-center@2x.png);
+	height: 10px;
+	width: 10px;
+	top: -10px;
+	position: absolute;
+}
+
 /* UINavigationView Styles */
 
 .ios-ui-navigation-view {
@@ -89,6 +97,33 @@
 	-ms-transform: translate(-100%);
 }
 
+.ios-ui-navigation-view > .ios-ui-bar-button-item.back {
+	-webkit-transform: translate(0%);
+	-moz-transform: translate(0%);
+	-o-transform: translate(0%);
+	-ms-transform: translate(0%);
+}
+
+.ios-ui-navigation-view .ios-ui-bar-button-item.back.slideOut {
+	-webkit-transform: translate(-100px);
+	-moz-transform: translate(-100px);
+	-o-transform: translate(-100px);
+	-ms-transform: translate(-100px);
+	-webkit-transition: -webkit-transform 180ms ease-in;
+	-moz-transition: -moz-transform 180ms ease-in;
+	-o-transition: -o-transform 180ms ease-in;
+}
+
+.ios-ui-navigation-view .ios-ui-bar-button-item.back.slideIn {
+	-webkit-transform: translate(100px);
+	-moz-transform: translate(100px);
+	-o-transform: translate(100px);
+	-ms-transform: translate(100px);
+	-webkit-transition: -webkit-transform 300ms ease-in;
+	-moz-transition: -moz-transform 300ms ease-in-out;
+	-o-transition: -o-transform 300ms ease-in-out;
+}
+
 .ios-ui-navigation-view > .ios-ui-view.inactivating .title {
 	opacity: 0;
 }
@@ -132,6 +167,11 @@
 	width: 100%;
 }
 
+/*.landscape .ios-ui-navigation-bar {
+	background: url(img/ios-ui-navigation-bar-bg-landscape.png) repeat-x;
+	height: 32px;
+}*/
+
 .ios-ui-navigation-bar > .title {
 	color: #FFF;
 	font-size: 20px;
@@ -147,6 +187,12 @@
 	z-index: 1;
 }
 
+/*.landscape .ios-ui-navigation-bar > .title {
+	font-size: 16px;
+	height: 32px;
+	line-height: 30px;
+}*/
+
 @media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
 
 	.ios-ui-navigation-bar {
@@ -156,6 +202,14 @@
 		-o-background-size: 5px 44px;
 		-webkit-background-size: 5px 44px;
 	}
+	
+/*	.landscape .ios-ui-navigation-bar {
+		background-image: url(img/ios-ui-navigation-bar-bg-landscape@2x.png);
+		background-size: 5px 32px;
+		-moz-background-size: 5px 32px;
+		-o-background-size: 5px 32px;
+		-webkit-background-size: 5px 32px;
+	}*/
 
 }
 
@@ -243,6 +297,45 @@
 	right: 7px;
 }
 
+.ios-ui-bar-button-item.blue {
+	background: url(img/ios-ui-bar-button-item-blue-bg.png) repeat-x;
+}
+
+.ios-ui-bar-button-item.back {
+	background-image: url(img/ios-ui-bar-button-back-left.png), url(img/ios-ui-bar-button-back-right.png), url(img/ios-ui-bar-button-back-center.png);
+	background-position: left top, right top, left top;
+	background-repeat: no-repeat, no-repeat, repeat-x;
+	border-left: 15px solid transparent;
+	border-right: 7px solid transparent;
+	background-origin: border-box, border-box, padding-box;
+	background-clip: border-box, border-box, padding-box;
+	height: 31px;
+	padding: 0 3px 0 0;
+	-webkit-box-shadow: none;
+}
+
+.ios-ui-bar-button-item.back:hover {
+	background-image: url(img/ios-ui-bar-button-back-selected-left.png), url(img/ios-ui-bar-button-back-selected-right.png), url(img/ios-ui-bar-button-back-selected-center.png);
+	background-position: left top, right top, left top;
+	background-repeat: no-repeat, no-repeat, repeat-x;
+	background-origin: border-box, border-box, padding-box;
+	background-clip: border-box, border-box, padding-box;
+	height: 31px;
+	padding: 0 3px 0 0;
+	-webkit-box-shadow: none;
+}
+
+/*.ios-ui-bar-button-item.back.touched {
+	background-image: url(img/ios-ui-bar-button-back-selected-left.png), url(img/ios-ui-bar-button-back-selected-right.png), url(img/ios-ui-bar-button-back-selected-center.png);
+	background-position: left top, right top, left top;
+	background-repeat: no-repeat, no-repeat, repeat-x;
+	background-origin: border-box, border-box, padding-box;
+	background-clip: border-box, border-box, padding-box;
+	height: 31px;
+	padding: 0 3px 0 0;
+	-webkit-box-shadow: none;
+}*/
+
 .ios-ui-bar-button-item.touched {
 	background: url(img/ios-ui-bar-button-item-bg-selected.png) repeat-x;
 /*	background: #93a1b8; /* Old browsers *!/
@@ -282,6 +375,39 @@
 							inset 0px 0px 2px rgba(0, 0, 0, 0.4),
 							inset 0px 1px 0px rgba(0, 0, 0, 0.2),
 							0px 1px 0px rgba(255, 255, 255, .2);
+	}
+	
+	.ios-ui-bar-button-item.back {
+		background-image: url(img/ios-ui-bar-button-back-left@2x.png), url(img/ios-ui-bar-button-back-right@2x.png), url(img/ios-ui-bar-button-back-center@2x.png);
+		background-size: 15px 31px, 10px 31px, 10px 31px;
+		background-position: left top, right top, left top;
+		background-repeat: no-repeat, no-repeat, repeat-x;
+		border-left: 15px solid transparent;
+		border-right: 10px solid transparent;
+		background-origin: border-box, border-box, padding-box;
+		background-clip: border-box, border-box, padding-box;
+		height: 31px !important;
+		padding: 0;
+		-webkit-box-shadow:none !important;
+		-moz-box-shadow: none;
+		-o-box-shadow: none;
+	}
+	
+	.ios-ui-bar-button-item.back:hover {
+		background-image: url(img/ios-ui-bar-button-back-selected-left@2x.png), url(img/ios-ui-bar-button-back-selected-right@2x.png), url(img/ios-ui-bar-button-back-selected-center@2x.png);
+		background-size: 15px 31px, 10px 31px, 10px 31px;
+		background-position: left top, right top, left top;
+		background-repeat: no-repeat, no-repeat, repeat-x;
+		border-left: 15px solid transparent;
+		border-right: 10px solid transparent;
+		background-origin: border-box, border-box, padding-box;
+		background-clip: border-box, border-box, padding-box;
+		height: 31px !important;
+		padding: 0;
+		-webkit-box-shadow:none;
+		-moz-box-shadow: none;
+		-o-box-shadow: none;
+		
 	}
 	
 }

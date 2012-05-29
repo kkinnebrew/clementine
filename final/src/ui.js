@@ -11,7 +11,7 @@ Orange.add('ui', function(O) {
 	var Binding, Form, Input, GridViewController, LightboxViewController, ListViewController, MapViewController, MultiViewController, 
 			ProgressViewController, TableViewController, TabViewController, TooltipViewController, ViewController;
 
-	var Application = __import('Application'), Model = __import('Model');
+	var Application = __import('Application'), Model = __import('Model'), Collection = __import('Collection');
 	
 	Application.prototype.onLaunch = function(online) {
 		
@@ -40,17 +40,17 @@ Orange.add('ui', function(O) {
 	
 		return {
 		
-			bindData: function(node, item) {
-			
+			bindData: function(node, item, id) {
+						
 				// check for the data format
-				if (item instanceof O.Item) {
+				if (item instanceof Model) {
 					var id = item.id(), data = item.toObject();
 				} else if (typeof item === 'object') {
-					var id = null, data = item;
+					var id = id, data = item;
 				}
 				else throw 'Invalid data item';
 				
-				if (id !== null) node.attr('itemid', id);
+				if (id) node.attr('itemid', id);
 				
 				// parse all the data fields
 				for (var field in data) {
@@ -67,41 +67,54 @@ Orange.add('ui', function(O) {
 						}
 						if (include) childList.push($(this));
 					});
-																							
+																									
 					if (childList.length > 0) {
 						for(var i = 0, len = childList.length; i < len; i++) {
-							if (data[field] instanceof Array || data[field] instanceof O.Collection) {
-								O.Binding.bindList(childList[i], data[field]);
-							} else if (typeof data[field] === 'object' || data[field] instanceof O.Item) {
-								O.Binding.bindData(childList[i], data[field]);
+							if (data[field] instanceof Array || data[field] instanceof Collection) {
+								Binding.bindList(childList[i], data[field]);
+							} else if (typeof data[field] === 'object' || data[field] instanceof Model) {
+								Binding.bindData(childList[i], data[field]);
 							} else childList[i].text(data[field]);
 						}
 					}
+							
 				}
 			},
 			
 			bindList: function(node, list) {
-						
-				// check for the data format
-				if (list instanceof O.Collection) {
-					var data = list.toArray();
-				} else if (list instanceof Array) {
-					var data = list;
-				}
-				else throw 'Invalid data collection';
-			
+				
 				var template = node.find('[itemscope]');
 				var itemscope = $(template).attr('itemscope');
+				var output = node.clone(true);
+				var instance = template.clone().addClass('template').css('display', 'none');
+				output.empty();
+				output.append(instance);
 				
-				// validate attribute exists
-				if (typeof itemscope !== 'undefined' && itemscope !== false) {
-					node.html('');
+				//if (typeof itemscope !== 'undefined' && itemscope !== false) return;
+												
+				// check for the data format
+				if (list instanceof O.Collection) {
+					var data = list.toObject();
+					for(var i in data) {
+						var instance = template.clone();
+						Binding.bindData(instance, data[i], i);
+						output.append(instance);
+					}
+					
+				} else if (list instanceof Array) {
+					
+					var data = list;
 					for(var i=0, len = data.length; i < len; i++) {
 						var instance = template.clone();
-						O.Binding.bindData(instance, data[i]);
-						node.append(instance);
+						Binding.bindData(instance, data[i]);
+						output.append(instance);
 					}
+					
 				}
+				else throw 'Invalid data collection';
+				
+				node.replaceWith(output);
+			
 			}
 		}
 		

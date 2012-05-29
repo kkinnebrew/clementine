@@ -11,7 +11,7 @@ Orange.add('ios', function(O) {
 	var Application, UIFlipViewController, UIModalViewController, UINavigationViewController, UIScrollViewController, 
 			UISearchViewController, UISplitViewController, UITabBarController, UITableViewController, UIViewController;
 	
-	var ViewController = __import('ViewController'), Collection = __import('Collection');
+	var ViewController = __import('ViewController'), Collection = __import('Collection'), Binding = __import('Binding');
 	
 	Application = O.Application.extend({
 	
@@ -19,7 +19,41 @@ Orange.add('ios', function(O) {
 			document.body.addEventListener('touchmove', function(e){ 
 				e.preventDefault();
 			});
+			document.body.addEventListener('touchend', function(e){ 
+				$(".ios-ui-bar-button-item").removeClass('touched')
+			});
+			
+			var that = this;
+			
+		  window.onorientationchange = function()
+		  {
+		  	var orientation;
+		    switch(window.orientation) 
+		    {  
+		      case -90:
+		      case 90:
+		        orientation = 'landscape';
+		        break; 
+		      default:
+		        orientation = 'portrait';
+		        break; 
+		    }
+		    (function() {
+		    	that.onOrientationChange.call(that, orientation);
+		    })();
+		  };
+			
+			window.onorientationchange.call(this);
+			
 			this._super();
+		},
+		
+		onOrientationChange: function(orientation) {
+			if (orientation == 'landscape') {
+				$('body').removeClass('portrait').addClass('landscape');
+			} else {
+				$('body').removeClass('landscape').addClass('portrait');
+			}
 		}
 	
 	});
@@ -158,15 +192,22 @@ Orange.add('ios', function(O) {
 			var rightViewBtn = view.find('.ios-ui-bar-button-item.right');
 			
 			// hide existing buttons
-			if (this.leftBtn != null) this.leftBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
+			if (this.leftBtn != null) {
+				if (this.leftBtn.hasClass('back')) {
+					this.leftBtn.addClass('slideIn');
+					this.leftBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
+				}
+				else this.leftBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
+			}
 			if (this.rightBtn != null) this.rightBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
 		
 			// add new buttons
 			if (leftViewBtn.length != 0) {
-				this.leftBtn = leftViewBtn.clone(true).hide();
-				this.leftBtn.appendTo(this.navBar);
+				var newleftBtn = leftViewBtn.clone(true).hide();
+				newleftBtn.appendTo(this.navBar);
 				setTimeout(Class.proxy(function() {
-					this.leftBtn.fadeIn(duration-100);
+					newleftBtn.fadeIn(duration-100);
+					this.leftBtn = newleftBtn;
 				}, this), 100);
 			}
 			
@@ -233,16 +274,27 @@ Orange.add('ios', function(O) {
 			var navBar = view.find('ios-ui-navigation-bar');
 	
 			// hide existing buttons
-			if(this.leftBtn != null) this.leftBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
+			if (this.leftBtn != null) {
+				if (this.leftBtn.hasClass('back')) {
+					this.leftBtn.addClass('slideOut');
+					setTimeout(Class.proxy(function() { 
+						this.leftBtn.unbind().remove();
+					}, this), 200);
+				}
+				else this.leftBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
+			}
 			if(this.rightBtn != null) this.rightBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
 		
 			// add new buttons
 			if (leftViewBtn.length != 0) {
-				this.leftBtn = leftViewBtn.clone(true).hide();
-				this.leftBtn.appendTo(this.navBar);
+				var newleftBtn = leftViewBtn.clone(true).hide();
+				newleftBtn.appendTo(this.navBar);
 				setTimeout(Class.proxy(function() {
-					this.leftBtn.fadeIn(duration-100);
-				}, this), 100);
+					newleftBtn.fadeIn(duration-100);
+				}, this), 150);
+				setTimeout(Class.proxy(function() {
+					this.leftBtn = newleftBtn;
+				}, this), 300);
 			}
 			
 			if (rightViewBtn.length != 0) {
@@ -302,15 +354,22 @@ Orange.add('ios', function(O) {
 			var rightViewBtn = view.find('.ios-ui-bar-button-item.right');
 			
 			// hide existing buttons
-			if(this.leftBtn != null) this.leftBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
-			if(this.rightBtn != null) this.rightBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
-		
+			if (this.leftBtn != null) {
+				if (this.leftBtn.hasClass('back')) {
+					this.leftBtn.addClass('slideIn');
+					this.leftBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
+				}
+				else this.leftBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
+			}
+			if (this.rightBtn != null) this.rightBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
+			
 			// add new buttons
 			if (leftViewBtn.length != 0) {
-				this.leftBtn = leftViewBtn.clone(true).hide();
-				this.leftBtn.appendTo(this.navBar);
+				var newleftBtn = leftViewBtn.clone(true).hide();
+				newleftBtn.appendTo(this.navBar);
 				setTimeout(Class.proxy(function() {
-					this.leftBtn.fadeIn(duration-100);
+					newleftBtn.fadeIn(duration-100);
+					this.leftBtn = newleftBtn;
 				}, this), 100);
 			}
 			
@@ -416,8 +475,8 @@ Orange.add('ios', function(O) {
 			this.tabBar.delegate('.ios-ui-tab-bar-item', O.Browser.isTouch ? 'touchend' : 'click', Class.proxy(this.onClick, this));
 
 			// load view
-			for (var i in this._views) {
-				this._views[i].onLoad();
+			for (var i in this.views) {
+				this.views[i].onLoad();
 			}
 							
 		},
@@ -482,9 +541,9 @@ Orange.add('ios', function(O) {
 		setupTable: function() {
 					
 			var target = this.target.find('ul');
-			
+						
 			if (this.collection instanceof Collection) {
-				Binding.bindList(this.target, this.collection.toObject());
+				Binding.bindList(this.find('ul'), this.collection);
 			}
 			
 			this.myScroll.refresh();
@@ -503,7 +562,7 @@ Orange.add('ios', function(O) {
 					if (this.liveEvt) this.liveEvt.detach();
 					var model = data.getModel();
 					this.liveEvt = model.on('datachange', function(d) {
-						if (list.mergeChanges(d)) Binding.bindList(this.target, list);
+						if (list.mergeChanges(d)) Binding.bindList(this.find('ul'), list);
 					}, this);
 				}
 			}

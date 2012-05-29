@@ -22,6 +22,12 @@
 
 <style type="text/css">
 
+
+
+</style>
+
+<style type="text/css">
+
 html, body {
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	margin: 0;
@@ -89,7 +95,7 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 		},
 		
 		onBack: function(e) {
-			this.popView();
+			this.popToRootView();
 		}
 	
 	});
@@ -104,6 +110,15 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 			return {
 				'next-btn': { 'touchclick': this.onNext }
 			}
+		},
+		
+		onDidLoad: function() {
+			
+			Contact.getAll({}, Class.proxy(function(data) {
+				console.log(data);
+				this.getView('contacts-table').bindData(data);
+			}, this), function() {})
+		
 		},
 		
 		onNext: function() {
@@ -191,73 +206,28 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 
 <body>
 
+<div id="ios-preload"></div>
+
 <div data-control="main-view" data-name="test-main" data-default="first" data-root="true">
 
 	<div data-control="first-view" data-name="first">
 	
 		<div class="ios-ui-navigation-bar">
+						
+			<div class="title">Inbox</div>
 			
-			<div class="ios-ui-bar-button-item left">Food</div>
-			
-			<div class="title">Page One</div>
-			
-			<div class="ios-ui-bar-button-item right" data-name="next-btn">Next</div>
+			<div class="ios-ui-bar-button-item right" data-name="next-btn">Detail</div>
 			
 		</div>
 		
-		<div id="wrapper" data-control="ios-ui-scroll-view" data-name="table-view">
+		<div data-control="ios-ui-table-view" data-name="contacts-table">
 			
 			<ul>
 				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<input type="text" />
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
-				
-				<li>Hello</li>
+				<li itemscope>
+					<span itemprop="firstName"></span>
+					<span itemprop="lastName"></span>
+				</li>
 				
 			</ul>
 		
@@ -269,9 +239,12 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 		
 		<div class="ios-ui-navigation-bar">
 			
-			<div class="title">Page Two</div>
+			<div class="ios-ui-bar-button-item left back" data-name="back-btn">Back</div>
 			
-			<div class="ios-ui-bar-button-item left" data-name="back-btn">Back</div>
+			<div class="title">Page Two</div>
+						
+			<div class="ios-ui-bar-button-item right blue">Save</div>
+			
 			
 		</div>
 	

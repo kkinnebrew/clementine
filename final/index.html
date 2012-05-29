@@ -89,7 +89,7 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 		},
 		
 		onBack: function(e) {
-			this.popToRootView();
+			this.popView();
 		}
 	
 	});
@@ -196,6 +196,8 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 	<div data-control="first-view" data-name="first">
 	
 		<div class="ios-ui-navigation-bar">
+			
+			<div class="ios-ui-bar-button-item left">Food</div>
 			
 			<div class="title">Page One</div>
 			

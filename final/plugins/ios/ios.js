@@ -158,24 +158,24 @@ Orange.add('ios', function(O) {
 			var rightViewBtn = view.find('.ios-ui-bar-button-item.right');
 			
 			// hide existing buttons
-			if (this.leftBtn != null) this.leftBtn.fadeOut(duration+100, function() { $(this).unbind().remove(); });
-			if (this.rightBtn != null) this.rightBtn.fadeOut(duration+100, function() { $(this).unbind().remove(); });
+			if (this.leftBtn != null) this.leftBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
+			if (this.rightBtn != null) this.rightBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
 		
 			// add new buttons
 			if (leftViewBtn.length != 0) {
 				this.leftBtn = leftViewBtn.clone(true).hide();
 				this.leftBtn.appendTo(this.navBar);
 				setTimeout(Class.proxy(function() {
-					this.leftBtn.fadeIn(duration+100);
-				}, this), duration-100);
+					this.leftBtn.fadeIn(duration-100);
+				}, this), 100);
 			}
 			
 			if (rightViewBtn.length != 0) {
 				this.rightBtn = rightViewBtn.clone(true).hide();
 				this.rightBtn.appendTo(this.navBar);
 				setTimeout(Class.proxy(function() {
-					this.rightBtn.fadeIn(duration+100);
-				}, this), duration-100);
+					this.rightBtn.fadeIn(duration-100);
+				}, this), 100);
 			}
 			
 			if (leftViewBtn.length == 0 && rightViewBtn.length == 0 && navBar.length == 0) {
@@ -233,24 +233,24 @@ Orange.add('ios', function(O) {
 			var navBar = view.find('ios-ui-navigation-bar');
 	
 			// hide existing buttons
-			if(this.leftBtn != null) this.leftBtn.fadeOut(duration+100, function() { $(this).unbind().remove(); });
-			if(this.rightBtn != null) this.rightBtn.fadeOut(duration+100, function() { $(this).unbind().remove(); });
+			if(this.leftBtn != null) this.leftBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
+			if(this.rightBtn != null) this.rightBtn.fadeOut(duration, function() { $(this).unbind().remove(); });
 		
 			// add new buttons
 			if (leftViewBtn.length != 0) {
 				this.leftBtn = leftViewBtn.clone(true).hide();
 				this.leftBtn.appendTo(this.navBar);
 				setTimeout(Class.proxy(function() {
-					this.leftBtn.fadeIn(duration);
-				}, this), duration-100);
+					this.leftBtn.fadeIn(duration-100);
+				}, this), 100);
 			}
 			
 			if (rightViewBtn.length != 0) {
 				this.rightBtn = rightViewBtn.clone(true).hide();
 				this.rightBtn.appendTo(this.navBar);
 				setTimeout(Class.proxy(function() {
-					this.rightBtn.fadeIn(duration);
-				}, this), duration-100);
+					this.rightBtn.fadeIn(duration-100);
+				}, this), 100);
 			}
 			
 			if (leftViewBtn.length == 0 && rightViewBtn.length == 0 && navBar.length == 0) {
@@ -310,16 +310,16 @@ Orange.add('ios', function(O) {
 				this.leftBtn = leftViewBtn.clone(true).hide();
 				this.leftBtn.appendTo(this.navBar);
 				setTimeout(Class.proxy(function() {
-					this.leftBtn.fadeIn(duration);
-				}, this), duration-100);
+					this.leftBtn.fadeIn(duration-100);
+				}, this), 100);
 			}
 			
 			if (rightViewBtn.length != 0) {
 				this.rightBtn = rightViewBtn.clone(true).hide();
 				this.rightBtn.appendTo(this.navBar);
 				setTimeout(Class.proxy(function() {
-					this.rightBtn.fadeIn(duration);
-				}, this), duration-100);
+					this.rightBtn.fadeIn(duration-100);
+				}, this), 100);
 			}
 			
 			var activeView = this.activeView;

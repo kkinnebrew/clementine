@@ -20,17 +20,17 @@
 	top: 44px;
 	width: 100%;
 	-webkit-backface-visibility: hidden;
-	-webkit-transition: -webkit-transform 200ms ease-in-out;
+	-webkit-transition: -webkit-transform 300ms ease-in-out;
 	-moz-backface-visibility: hidden;
-	-moz-transition: -webkit-transform 200ms ease-in-out;
+	-moz-transition: -webkit-transform 300ms ease-in-out;
 	-o-background-size-backface-visibility: hidden;
-	-o-transition: -webkit-transform 200ms ease-in-out;
+	-o-transition: -webkit-transform 300ms ease-in-out;
 }
 
 .ios-ui-navigation-view > .ios-ui-view .title {
-	-webkit-transition: opacity 100ms ease-in-out;
-	-moz-transition: opacity 100ms ease-in-out;
-	-o-transition: opacity 100ms ease-in-out;
+	-webkit-transition: opacity 200ms ease-in-out;
+	-moz-transition: opacity 200ms ease-in-out;
+	-o-transition: opacity 200ms ease-in-out;
 }
 
 .ios-ui-navigation-view > .ios-ui-view.inactive {

@@ -143,8 +143,12 @@ var m = Math,
 		if (that.options.useTransition) that.options.fixedScrollbar = true;
 
 		that.refresh();
-
-		that._bind(RESIZE_EV, window);
+				
+		//that._bind(RESIZE_EV, window);
+		window.addEventListener(RESIZE_EV, function() {
+			that._resize.apply(that, arguments);
+		}, false);
+				
 		that._bind(START_EV);
 		if (!hasTouch) {
 			that._bind('mouseout', that.wrapper);
@@ -171,7 +175,7 @@ iScroll.prototype = {
 	
 	handleEvent: function (e) {
 		var that = this;
-		if (e.target.tagName.toLowerCase() == 'input') {
+		if (e.target.tagName.toLowerCase() == 'input' || e.target.tagName.toLowerCase() == 'select') {
 			return;
 		}
 		switch(e.type) {
@@ -889,7 +893,7 @@ iScroll.prototype = {
 			els,
 			pos = 0,
 			page = 0;
-
+				
 		if (that.scale < that.options.zoomMin) that.scale = that.options.zoomMin;
 		that.wrapperW = that.wrapper.clientWidth || 1;
 		that.wrapperH = that.wrapper.clientHeight || 1;

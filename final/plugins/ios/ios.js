@@ -16,10 +16,8 @@ Orange.add('ios', function(O) {
 	Application = O.Application.extend({
 	
 		onLaunch: function(online) {
-			document.body.addEventListener('touchstart', function(e){ 
-				if($(e.target).get(0).tagName.toLowerCase() !== 'input') {
-					e.preventDefault();
-				}
+			document.body.addEventListener('touchmove', function(e){ 
+				e.preventDefault();
 			});
 			this._super();
 		}

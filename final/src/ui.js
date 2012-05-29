@@ -335,7 +335,9 @@ Orange.add('ui', function(O) {
 						func = (events[event] === true && typeof this['on' + name] === 'function') ? this['on' + name] : null;
 					}
 					if (func !== null && this.views.hasOwnProperty(view)) this.getView(view).on(event, $.proxy(func,  this));
-					else if (func !== null && this.elements.hasOwnProperty(view)) this.getElement(view).on(event, $.proxy(func, this));
+					else if (func !== null && this.elements.hasOwnProperty(view)) {
+						this.getElement(view).on(event, $.proxy(func, this));
+					}
 				}
 			}
 			

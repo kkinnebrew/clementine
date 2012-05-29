@@ -171,6 +171,9 @@ iScroll.prototype = {
 	
 	handleEvent: function (e) {
 		var that = this;
+		if (e.target.tagName.toLowerCase() == 'input') {
+			return;
+		}
 		switch(e.type) {
 			case START_EV:
 				if (!hasTouch && e.button !== 0) return;

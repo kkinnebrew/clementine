@@ -13,6 +13,10 @@
 	position: absolute;
 }
 
+* {
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
 /* UINavigationView Styles */
 
 .ios-ui-navigation-view {
@@ -104,7 +108,7 @@
 	-ms-transform: translate(0%);
 }
 
-.ios-ui-navigation-view .ios-ui-bar-button-item.back.slideOut {
+/*.ios-ui-navigation-view .ios-ui-bar-button-item.back.slideOut {
 	-webkit-transform: translate(-100px);
 	-moz-transform: translate(-100px);
 	-o-transform: translate(-100px);
@@ -122,7 +126,7 @@
 	-webkit-transition: -webkit-transform 300ms ease-in;
 	-moz-transition: -moz-transform 300ms ease-in-out;
 	-o-transition: -o-transform 300ms ease-in-out;
-}
+}*/
 
 .ios-ui-navigation-view > .ios-ui-view.inactivating .title {
 	opacity: 0;
@@ -465,11 +469,25 @@
 	margin-right: 15px;
 }
 
-.ios-ui-table-view ul > li:active .subtitle {
+.ios-ui-table-view ul > li.active .subtitle {
 	color: #FFF;
 }
 
-.ios-ui-table-view ul > li:active {
+.nontouch .ios-ui-table-view ul > li:active .subtitle {
+	color: #FFF;
+}
+
+.ios-ui-table-view ul > li.active {
+	border: none;
+	height: 44px;
+	line-height: 44px;
+	padding: 0px 16px;
+	color: #FFF;
+	background-image: url(img/ios-ui-table-view-arrow-selected.png), -moz-linear-gradient(top,  #058cf5 0%, #015de6 100%); /* FF3.6+ */
+	background-image: url(img/ios-ui-table-view-arrow-selected.png), -webkit-linear-gradient(top,  #058cf5 0%,#015de6 100%); /* Chrome10+,Safari5.1+ */
+}
+
+.nontouch .ios-ui-table-view ul > li:active {
 	border: none;
 	height: 44px;
 	line-height: 44px;
@@ -485,7 +503,11 @@
 	line-height: 44px;
 }
 
-.ios-ui-table-view ul > li:first-child:active {
+.ios-ui-table-view ul > li:first-child.active {
+	height: 44px;
+}
+
+.nontouch .ios-ui-table-view ul > li:first-child:active {
 	height: 44px;
 }
 
@@ -543,7 +565,11 @@
 	border-bottom: 1px solid #CACACA;
 }
 
-.ios-ui-table-view ul > li:last-child:active {
+.ios-ui-table-view ul > li:last-child.active {
+	height: 44px;
+}
+
+.nontouch .ios-ui-table-view ul > li:last-child:active {
 	height: 44px;
 }
 
@@ -583,7 +609,17 @@
 		-ms-background-size: 22px 19px, 100%;
 	}
 	
-	.ios-ui-table-view ul > li:active {
+	.ios-ui-table-view ul > li.active {
+		background-image: url(img/ios-ui-table-view-arrow-selected@2x.png), -moz-linear-gradient(top,  #058cf5 0%, #015de6 100%);
+		background-image: url(img/ios-ui-table-view-arrow-selected@2x.png), -webkit-linear-gradient(top,  #058cf5 0%,#015de6 100%);
+		background-size: 22px 19px, 100%;
+		-webkit-background-size: 22px 19px, 100%;
+		-moz-background-size: 22px 19px, 100%;
+		-o-background-size: 22px 19px, 100%;
+		-ms-background-size: 22px 19px, 100%;
+	}
+	
+	.nontouch .ios-ui-table-view ul > li:active {
 		background-image: url(img/ios-ui-table-view-arrow-selected@2x.png), -moz-linear-gradient(top,  #058cf5 0%, #015de6 100%);
 		background-image: url(img/ios-ui-table-view-arrow-selected@2x.png), -webkit-linear-gradient(top,  #058cf5 0%,#015de6 100%);
 		background-size: 22px 19px, 100%;
@@ -1109,4 +1145,187 @@ form > input:focus {
 						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
 						inset 0px -1px 0px rgba(0, 0, 0, .2);
 	
+}
+
+/* UITableForm */
+
+.ios-ui-table-form {
+	background: #E2E7ED;
+	height: 100%;
+	position: absolute;
+	width: 100%;
+}
+
+.ios-ui-table-form ul {
+	background: #F7F7F7;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+}
+
+.ios-ui-table-form > .scroll-view {
+	position: absolute;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+}
+
+.ios-ui-table-form ul > li {
+	background: rgba(0, 0, 0, 0) no-repeat right center;
+	cursor: pointer;
+	font-size: 14px;
+	margin: 0;
+	height: 42px;
+	padding: 0px 16px;
+	line-height: 42px;
+	border-top: 1px solid #FFF;
+	border-bottom: 1px solid #CACACA;
+}
+
+.ios-ui-table-form ul > li:first-child {
+	border-top: none;
+	height: 43px;
+	line-height: 44px;
+}
+
+.ios-ui-table-form .section {
+	background: url(../img/ios-ui-table-section-bg.png);
+	color: #FFF;
+	font-size: 13px;
+	font-weight: 600;
+	height: 23px;
+	line-height: 23px;
+	padding-left: 10px;
+	text-shadow: 0px 1px #64696E;
+}
+
+.ios-ui-table-form.grouped .section {
+	background: none;
+	color: #4C566C;
+	font-size: 16px;
+	font-weight: 600;
+	height: 23px;
+	padding: 5px 0px 5px 20px;
+	text-shadow: 0px 1px #FFF;
+}
+
+.ios-ui-table-form.grouped .section:first-child {
+	padding-top: 15px;
+}
+
+.ios-ui-table-form.grouped {
+	background: #FFF url(img/ios-ui-table-view-bg.png) repeat;
+}
+
+.ios-ui-table-form.grouped ul {
+	border: 1px solid #A1A7AC;
+	margin: 10px;
+	border-radius: 10px;
+	box-shadow: 0px 1px 0px #F4F4F4;
+	-webkit-box-shadow: 0px 1px 0px #F4F4F4;
+	-moz-box-shadow: 0px 1px 0px #F4F4F4;
+	-o-box-shadow: 0px 1px 0px #F4F4F4;
+	-ms-box-shadow: 0px 1px 0px #F4F4F4;
+}
+
+.ios-ui-table-form.grouped ul > li:last-child {
+	border-bottom: none;
+	height: 43px;
+}
+
+.ios-ui-table-form.sectioned ul > li:last-child {
+	border-bottom: none;
+	height: 43px;
+}
+
+.ios-ui-table-form.sectioned ul:last-child {
+	border-bottom: 1px solid #CACACA;
+}
+
+.ios-ui-table-form form {
+	margin: 0px;
+}
+
+.ios-ui-table-form input {
+	border: none;
+	float: right;
+	font-size: 14px;
+	padding: 0;
+	margin: 0;
+	background: none;
+	height: 43px;
+	outline: none;
+	text-align: right;
+	text-overflow: ellipsis;
+	width: 60%;
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.ios-ui-table-form textarea {
+	border: none;
+	font-size: 14px;
+	padding: 5px 0px;
+	margin: 0 auto;
+	background: none;
+	height: 43px;
+	outline: none;
+	margin-top: 5px;
+	text-align: left;
+	text-overflow: ellipsis;
+	width: 100%;
+	max-width: 100%;
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.ios-ui-table-form ul > li .title {
+	float: left;
+	height: 100%;
+	line-height: 42px;
+}
+
+.ios-ui-table-form ul > li .subtitle {
+	color: #2470D8;
+	float: right;
+	font-size: 12px;
+	height: 100%;
+	line-height: 42px;
+	margin-right: 5px;
+}
+
+.ios-ui-table-form label {
+	color: #666;
+	font-size: 12px;
+}
+
+.ios-ui-table-form ul > li:first-child input {
+	padding-top: 1px;
+}
+
+.ios-ui-table-form input:focus {
+	float: right;
+	outline: none;
+}
+
+.ios-ui-table-form .ios-ui-button {
+	background-color: #F7F7F7;
+	background-image: none;
+	border: 1px solid #A1A7AC;
+	border-radius: 10px;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	-o-border-radius: 10px;
+	-ms-border-radius: 10px;
+	box-shadow: 0px 1px 0px #F4F4F4;
+	padding-left: 0;
+	padding-right: 0;
+	overflow: hidden;
+	text-align: center;
+	line-height: 18px;
+	width: 100%;
+}
+
+.ios-ui-table-form .ios-ui-button:active {
+	background-color: #DDD;
+	background-image: none;
 }

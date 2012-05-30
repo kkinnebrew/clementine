@@ -24,10 +24,10 @@ Orange.add('ui', function(O) {
 		root.removeAttr('data-root');
 				
 		// setup history
-		History.Adapter.bind(window, 'statechange', function() {
-			var State = History.getState();
-			Log.info(State.data);
-		});
+//		History.Adapter.bind(window, 'statechange', function() {
+//			var State = History.getState();
+//			Log.info(State.data);
+//		});
 		
 		// load view
 		var c = ViewController.load(type);
@@ -41,10 +41,10 @@ Orange.add('ui', function(O) {
 		return {
 		
 			bindData: function(node, item, id) {
-						
+
 				// check for the data format
 				if (item instanceof Model) {
-					var id = item.id(), data = item.toObject();
+					var id = item.getId(), data = item.toObject();
 				} else if (typeof item === 'object') {
 					var id = id, data = item;
 				}
@@ -161,7 +161,7 @@ Orange.add('ui', function(O) {
 			try {
 				this.getField(name).val(value);
 			} catch(e) {
-				console.log('[WARN] Field "' + name +'" could not be fetched');
+				Log.warn('[WARN] Field "' + name +'" could not be fetched');
 			}
 		},
 		

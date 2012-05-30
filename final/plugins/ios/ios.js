@@ -25,6 +25,12 @@ Orange.add('ios', function(O) {
 			
 			var that = this;
 			
+			if (O.Browser.isTouch) {
+				$('body').addClass('touch');
+			} else {
+				$('body').addClass('nontouch');
+			}
+			
 		  window.onorientationchange = function()
 		  {
 		  	var orientation;
@@ -175,12 +181,15 @@ Orange.add('ios', function(O) {
 			}
 			
 			this.activeView.target.addClass('active');
-			this.popping = false;
+			this.animating = false;
 			
 		},
 		
 		
 		popView: function() {
+			
+			if (this.animating) return;
+			this.animating = true;
 			
 			var duration = 300;
 			
@@ -247,12 +256,16 @@ Orange.add('ios', function(O) {
 			
 			setTimeout(Class.proxy(function() {
 				view.target.addClass('active').removeClass('loading');
+				this.animating = false;
 			}, this), duration);
 					
 		},
 		
 		pushView: function(view) {
-				
+			
+			if (this.animating) return;
+			this.animating = true;
+			
 			var duration = 300;
 									
 			// fetch view, exception handled in getView()
@@ -330,14 +343,15 @@ Orange.add('ios', function(O) {
 			
 			setTimeout(Class.proxy(function() {
 				view.target.addClass('active').removeClass('loading');
+				this.animating = false;
 			}, this), duration);
 				
 		},
 		
 		popToRootView: function() {
 		
-			if (this.popping) return;
-			this.popping = true;
+			if (this.animating) return;
+			this.animating = true;
 				
 			var duration = 300;
 			
@@ -392,6 +406,7 @@ Orange.add('ios', function(O) {
 			setTimeout(Class.proxy(function() {
 				activeView.target.addClass('preloaded').removeClass('unloading').removeClass('active');
 				activeView.target.remove();
+				activeView.onUnload();
 			}, this), duration);
 			
 			// append new view
@@ -401,7 +416,7 @@ Orange.add('ios', function(O) {
 			setTimeout(Class.proxy(function() {
 				view.target.addClass('active').removeClass('loading').removeClass('inactive');
 				this.viewStack = [this.viewStack[0]];
-				this.popping = false;
+				this.animating = false;
 			}, this), duration);
 		
 		}
@@ -510,32 +525,17 @@ Orange.add('ios', function(O) {
 		
 		onWillLoad: function() {
 			
-			var tableCell = this.target.attr('data-cell-element');
-			if (typeof tableCell !== 'undefined') {	
-				this.tableCell = O.TemplateManager.load('app/elements/' + tableCell);
-				this.target.wrapInner('<div class="scroll-view"><ul></ul></div>');
-			} else {
-				this.target.wrapInner('<div class="scroll-view"></div>');
-			}
-			
+			this.target.wrapInner('<div class="scroll-view"></div>');			
 			this.myScroll = new iScroll(this.target.get(0));
-			this.target.removeAttr('data-cell-element');
 		
 		},
 		
 		onDidLoad: function() {
 			
-			if (typeof tableCell !== 'undefined') {	
-				this.target.on('click', Class.proxy(this.onSelect, this));
-			}
-			
-			this.target.on('touchmove', Class.proxy(function(e) {
-				e.stopPropagation();
-				e.preventDefault();				
-			}, this));
+			if (!O.Browser.isTouch) this.target.on('click', 'li', Class.proxy(this.onSelect, this));
 			
 			this.setupTable();
-			
+
 		},
 		
 		setupTable: function() {
@@ -545,6 +545,32 @@ Orange.add('ios', function(O) {
 			if (this.collection instanceof Collection) {
 				Binding.bindList(this.find('ul'), this.collection);
 			}
+			
+			var evt = null;
+			
+			$(target).on('touchstart', 'li', function(e) {
+				clearTimeout(evt);
+				evt = setTimeout(function() {
+					$(e.currentTarget).addClass('active');
+				}, 10);
+			});
+			
+			$(target).on('touchmove', Class.proxy(function(e) {
+				clearTimeout(evt); evt = null;
+				$(this.target).find('li').removeClass('active');
+			}, this));
+			
+			$(target).on('touchend', Class.proxy(function(e) {
+				clearTimeout(evt); 
+				if (evt) this.onSelect.call(this, e);
+				evt = null;
+				$(this.target).find('li').removeClass('active');
+			}, this));
+			
+			$(target).on('touchcancel', Class.proxy(function(e) {
+				clearTimeout(evt); evt = null;
+				$(this.target).find('li').removeClass('active');
+			}, this));
 			
 			this.myScroll.refresh();
 		
@@ -572,38 +598,21 @@ Orange.add('ios', function(O) {
 		},
 		
 		onSelect: function(e) {
-				
-			// get target
-			var target = $(e.target);
-			var cell = null;
-			
-			// stop propagation
+						
 			e.stopPropagation();
-			
-			// check if target is a table cell
-			if (target.hasClass('ios-ui-table-cell')) {
-				cell = target;
-			} else if (target.parent().hasClass('ios-ui-table-cell')) {	
-				cell = target.parent();
-			}
-			
-			if(cell != null) {
 
-				// get data id
-				var id = $(cell).attr('itemid');
-				
-				// get entry
-				if (this.collection instanceof Collection) var data = this.collection.get(id);
-				
-				// fire event
-				this.fire('select', (typeof data !== 'undefined') ? data : null);
-			
+			var target = $(e.target);
+			var cell = null, id = null, model;
+						
+			if ((id = $(target).attr('itemid')) && this.collection instanceof Collection) {
+				if ((model = this.collection.get(id)) instanceof O.Model) this.fire('select', model);
 			}
 		
 		},
 		
 		onWillUnload: function() {
 			this._super();
+			this.target.find('ul').off();
 			this.myScroll.destroy();
 		}
 			

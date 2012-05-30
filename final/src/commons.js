@@ -138,7 +138,7 @@
 			
 		};
 		
-		Event.prototype.detach = function(ev, call) {
+		Events.prototype.detach = function(ev, call) {
 		
 			if (this._listeners[ev] instanceof Array) {
 				var listeners = this._listeners[ev];

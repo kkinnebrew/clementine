@@ -9,7 +9,7 @@
 Orange.add('ios', function(O) {
 
 	var Application, UIFlipViewController, UIModalViewController, UINavigationViewController, UIScrollViewController, 
-			UISearchViewController, UISplitViewController, UITabBarController, UITableViewController, UIViewController;
+			UISearchViewController, UISearchBarController, UISplitViewController, UITabBarController, UITableViewController, UIViewController;
 	
 	var ViewController = __import('ViewController'), Collection = __import('Collection'), Binding = __import('Binding');
 	
@@ -262,7 +262,7 @@ Orange.add('ios', function(O) {
 		},
 		
 		pushView: function(view) {
-			
+						
 			if (this.animating) return;
 			this.animating = true;
 			
@@ -272,7 +272,8 @@ Orange.add('ios', function(O) {
 			view = this.getView(view);
 			for(var i in this.viewStack) {
 				if(this.viewStack[i].target[0] == view.target[0]) {
-					throw "Can't repush view controller";
+					Log.warn("Can't repush view controller");
+					return;
 				}
 			}
 			
@@ -431,15 +432,15 @@ Orange.add('ios', function(O) {
 		initialize: function(parent, target) {
 			this._super(parent, target);
 			this.target.wrapInner('<div class="scroll-view"></div>');
-			this.myScroll = new iScroll(this.target.get(0));
 		},
 		
 		onDidLoad: function() {
-			this.myScroll.refresh();
+			this.myScroll = new iScroll(this.target.get(0));
 		},
 		
 		onWillUnload: function() {
 			this.myScroll.destroy();
+			delete this.myScroll;
 		}
 			
 	});
@@ -532,42 +533,43 @@ Orange.add('ios', function(O) {
 		
 		onDidLoad: function() {
 			
-			if (!O.Browser.isTouch) this.target.on('click', 'li', Class.proxy(this.onSelect, this));
+			this.target.on('click', 'li', Class.proxy(this.onSelect, this));
 			
-			this.setupTable();
-
+			setTimeout(Class.proxy(function() {
+				this.setupTable();
+			}, this), 200);
 		},
 		
 		setupTable: function() {
 					
-			var target = this.target.find('ul');
+			this.list = this.target.find('ul');
 						
 			if (this.collection instanceof Collection) {
-				Binding.bindList(this.find('ul'), this.collection);
+				Binding.bindList(this.list, this.collection);
 			}
 			
 			var evt = null;
 			
-			$(target).on('touchstart', 'li', function(e) {
+			$(this.list).on('touchstart', 'li', function(e) {
 				clearTimeout(evt);
 				evt = setTimeout(function() {
 					$(e.currentTarget).addClass('active');
 				}, 10);
 			});
 			
-			$(target).on('touchmove', Class.proxy(function(e) {
+			$(this.list).on('touchmove', Class.proxy(function(e) {
 				clearTimeout(evt); evt = null;
 				$(this.target).find('li').removeClass('active');
 			}, this));
 			
-			$(target).on('touchend', Class.proxy(function(e) {
+			$(this.list).on('touchend', Class.proxy(function(e) {
 				clearTimeout(evt); 
 				if (evt) this.onSelect.call(this, e);
 				evt = null;
 				$(this.target).find('li').removeClass('active');
 			}, this));
 			
-			$(target).on('touchcancel', Class.proxy(function(e) {
+			$(this.list).on('touchcancel', Class.proxy(function(e) {
 				clearTimeout(evt); evt = null;
 				$(this.target).find('li').removeClass('active');
 			}, this));
@@ -612,12 +614,109 @@ Orange.add('ios', function(O) {
 		
 		onWillUnload: function() {
 			this._super();
-			this.target.find('ul').off();
+			this.list.off();
 			this.myScroll.destroy();
 		}
 			
 	});
 	
+	
+	UISearchBarController = ViewController.extend({
+	
+		getType: function() {
+			return 'ios-ui-search-bar';
+		},
+	
+		onWillLoad: function() {
+			
+			var isMSIE = /*@cc_on!@*/0, isFF = /Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent);
+			
+			if (isFF) this.find("input[type=text]").wrap('<div class="ios-ff-ui-search-bar-wrapper" />');
+			if (isMSIE) this.find("input[type=text]").wrap('<div class="ios-ff-ui-search-bar-wrapper" />');
+		
+		},
+		
+		onDidLoad: function() {
+		
+			this.find("input[type=text]").on('keypress', this.onKeyPress);
+			this.find("input[type=text]").on('focus', this.onFocus);
+			this.find("input[type=text]").on('blur', this.onBlur);
+			this.find(".ios-ui-search-button").on('click', this.onClick);
+		
+		},
+		
+		onKeyPress: function(e) {
+			var code = (e.keyCode ? e.keyCode : e.which);
+      if (code == 13) { //Enter keycode
+        if (!e) var e = window.event;
+
+        e.cancelBubble = true;
+        e.returnValue = false;
+
+        if (e.stopPropagation) {
+            e.stopPropagation();
+            e.preventDefault();
+        }
+        
+        $(this).blur();
+      }
+		},
+		
+		onFocus: function(e) {
+			
+			var bar = $(this).parent();
+			var input = $(this);
+			var ff = false;
+			
+			if(bar.hasClass("ios-ff-ui-search-bar-wrapper")) {
+				input = bar;
+				ff = true;
+				bar = bar.parent();
+			}
+	
+			bar.find('.ios-ui-search-button').css('display', 'block');
+					
+			input.stop().animate({
+			  right: (ff ? '117px' : '80px')
+			}, (ff ? 0 : 200)).parent().stop().find('.ios-ui-search-button').animate({
+			  right: '7px'
+			}, (ff ? 0 : 200));
+			
+		},
+		
+		onBlur: function(e) {
+		
+			var bar = $(this).parent();
+			var input = $(this);
+			var ff = false;
+			
+			if(bar.hasClass("ios-ff-ui-search-bar-wrapper")) {
+				input = bar;
+				ff = true;
+				bar = bar.parent();
+			}
+			
+			input.stop().animate({
+			  right: (ff ? '44px' : '7px')
+			}, (ff ? 0 : 200)).parent().stop().find('.ios-ui-search-button').animate({
+			  right: '-64px'
+			}, (ff ? 0 : 200), function() {
+				bar.find('.ios-ui-search-button').css('display', 'none');
+			});
+		
+		},
+		
+		onClick: function(e) {
+			$(this).parent().find("input[type=text]").blur();
+		},
+		
+		onWillUnload: function() {
+			this.find("input[type=text]").off();
+			this.find(".ios-ui-search-button").off();
+		}
+	
+	});
+		
 	
 	UIViewController = ViewController.extend({
 			
@@ -635,6 +734,7 @@ Orange.add('ios', function(O) {
 	O.iOS.UINavigationViewController 	= UINavigationViewController;
 	O.iOS.UIScrollViewController 			= UIScrollViewController;
 	O.iOS.UISearchViewController 			= UISearchViewController;
+	O.iOS.UISearchBarController 			= UISearchBarController;
 	O.iOS.UISplitViewController 			= UISplitViewController;
 	O.iOS.UITabBarController					= UITabBarController;
 	O.iOS.UITableViewController 			= UITableViewController;

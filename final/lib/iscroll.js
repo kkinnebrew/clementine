@@ -884,6 +884,7 @@ iScroll.prototype = {
 		if (that.options.checkDOMChanges) clearInterval(that.checkDOMTime);
 		
 		if (that.options.onDestroy) that.options.onDestroy.call(that);
+		
 	},
 
 	refresh: function () {

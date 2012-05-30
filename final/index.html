@@ -202,6 +202,7 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 //
   // Initial execution
 //  doOnOrientationChange();
+
 });
 
 
@@ -219,6 +220,11 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 						
 			<div class="title">My Contacts</div>
 						
+		</div>
+		
+		<div data-control="ios-ui-search-bar" data-name="search">
+			<input type="text" name="search" autocomplete="false" spellcheck="false" placeholder="Search" />
+			<div class="ios-ui-search-button">Cancel</div>
 		</div>
 		
 		<div data-control="ios-ui-table-view" data-name="contacts-table">

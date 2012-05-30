@@ -426,6 +426,10 @@
 	width: 100%;
 }
 
+.nontouch .ios-ui-table-view {
+	overflow: auto;
+}
+
 .ios-ui-table-view ul {
 	background: #F7F7F7;
 	list-style: none;
@@ -639,6 +643,10 @@
 	top: 0px;
 	bottom: 0px;
 	width: 100%;
+	overflow: auto;
+}
+
+.nontouch .ios-ui-scroll-view {
 	overflow: auto;
 }
 
@@ -1328,4 +1336,193 @@ form > input:focus {
 .ios-ui-table-form .ios-ui-button:active {
 	background-color: #DDD;
 	background-image: none;
+}
+
+/* UISearchBar */
+
+.ios-ui-search-bar {
+	
+	background: #e1e7eb; /* Old browsers */
+	background: -moz-linear-gradient(top,  #e1e7eb 0%, #e1e7eb 1%, #bac4cb 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e1e7eb), color-stop(1%,#e1e7eb), color-stop(100%,#bac4cb)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #e1e7eb 0%,#e1e7eb 1%,#bac4cb 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #e1e7eb 0%,#e1e7eb 1%,#bac4cb 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #e1e7eb 0%,#e1e7eb 1%,#bac4cb 100%); /* IE10+ */
+	background: linear-gradient(top,  #e1e7eb 0%,#e1e7eb 1%,#bac4cb 100%); /* W3C */
+	filter: ~"progid:DXImageTransform.Microsoft.gradient( startColorstr='#e1e7eb', endColorstr='#bac4cb',GradientType=0 )"; /* IE6-9 */
+	
+	border-bottom: 1px solid #8D9CA8;
+	height: 30px;
+	overflow: hidden;
+	padding: 6px 0px 7px 0px;
+	width: 100%;
+
+}
+
+.ios-ui-search-bar input[type=text] {
+	
+	background: #FFF url(img/ios-ui-search-bar-icon.png) no-repeat left;
+	border: 1px solid #9AA9B3;
+	font-size: 14px;
+	left: 7px;
+	outline: none;
+	overflow: hidden;
+	padding: 5px 5px 5px 30px;
+	position: absolute;
+	right: 7px;
+			
+	
+	border-radius: 15px;
+	-moz-border-radius: 15px;
+	-webkit-border-radius: 15px;
+	-o-border-radius: 15px;
+	
+	-webkit-box-shadow: inset 0 2px 3px rgba(0, 0, 0, .4);
+		
+	-webkit-tap-highlight-color: rgba(0,0,0,0); 
+	
+}
+
+.ios-ui-search-bar input[type=text]:focus {
+	/* correct webkit outline bug */
+	outline-color: rgba(255,255,255,0);
+	outline-offset: 10px;
+}
+
+.ios-ui-search-bar .ios-ui-search-button {
+	
+	background: #96a0ba; /* Old browsers */
+	background: -moz-linear-gradient(top,  #96a0ba 0%, #647792 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#96a0ba), color-stop(100%,#647792)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #96a0ba 0%,#647792 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #96a0ba 0%,#647792 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #96a0ba 0%,#647792 100%); /* IE10+ */
+	background: linear-gradient(top,  #96a0ba 0%,#647792 100%); /* W3C */
+	filter: ~"progid:DXImageTransform.Microsoft.gradient( startColorstr='#96a0ba', endColorstr='#647792',GradientType=0 )"; /* IE6-9 */
+		
+	color: #FFF;
+	cursor: pointer;
+	display: none;
+	font-weight: bold;
+	font-size: 12px;
+	line-height: 30px;
+	padding: 0px 10px;
+	position: absolute;
+	height: 30px;
+	margin-top: 1px;
+	overflow: hidden;
+	right: -64px;
+	text-align: center;
+	text-shadow: 0px -1px 0 rgba(0, 0, 0, .4);
+	width: 60px;
+	
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-o-border-radius: 5px;
+	
+	background-clip: padding-box;
+	-webkit-background-clip: padding-box;
+	
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-o-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	
+	user-select: none;
+	-webkit-user-select: none;
+	
+	-webkit-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset -1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset 0px 1px 1px rgba(0, 0, 0, .6),
+						inset 0px -1px 1px rgba(0, 0, 0, .2),
+						0px 1px 0px rgba(255, 255, 255, .3);
+	-moz-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset -1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset 0px 1px 1px rgba(0, 0, 0, .6),
+						inset 0px -1px 1px rgba(0, 0, 0, .2),
+						0px 1px 0px rgba(255, 255, 255, .3);
+				
+	-webkit-tap-highlight-color: rgba(0,0,0,0); 
+
+}
+
+.ios-ui-search-bar .ios-ui-search-button.touched {
+	background: #93a1b8; /* Old browsers */
+	background: -moz-linear-gradient(top,  #93a1b8 0%, #7a8799 1%, #516075 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#93a1b8), color-stop(1%,#7a8799), color-stop(100%,#516075)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #93a1b8 0%,#7a8799 1%,#516075 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #93a1b8 0%,#7a8799 1%,#516075 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #93a1b8 0%,#7a8799 1%,#516075 100%); /* IE10+ */
+	background: linear-gradient(top,  #93a1b8 0%,#7a8799 1%,#516075 100%); /* W3C */
+	filter: ~"progid:DXImageTransform.Microsoft.gradient( startColorstr='#93a1b8', endColorstr='#516075',GradientType=0 )"; /* IE6-9 */;
+}
+
+::-webkit-input-placeholder {  -webkit-appearance: none; -moz-appearance: none; }
+
+::-webkit-search-cancel-button { -webkit-appearance: none; -moz-appearance: none; }
+
+@media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
+
+	.ios-ui-search-bar {
+		
+		background-image: url(img/ios-ui-search-bar-bg@2x.png);
+		border: none;
+		height: 31px;
+		
+		background-size: 5px 44px;
+		-webkit-background-size: 5px 44px;
+		-moz-background-size: 5px 44px;
+		
+	}
+	
+	.ios-ui-search-bar input[type=text] {
+		
+		background-image:url(img/ios-ui-search-bar-icon@2x.png);
+		
+		background-size: 25px 21px;
+		-webkit-background-size: 25px 21px;
+		-moz-background-size: 25px 21px;
+		
+	}
+	
+	.ios-ui-search-bar .ios-ui-search-button {
+		
+		border:none;
+		line-height: 30px;
+						
+		background-size: 15px 32px;
+		-webkit-background-size: 15px 32px;
+		-moz-background-size: 15px 32px;
+	
+	}
+
+}
+
+@-moz-document url-prefix() {
+
+	/* Element: UISearchBar */
+	
+	.ios-ui-search-bar input[type=text]  {
+		/* correct firebox padding bug */
+		padding: 6px 5px 4px 30px;
+		left: 0px;
+		width: 100%;
+		position: relative;
+	}
+	
+	.ios-ui-search-bar .ios-ui-search-button  {
+		/* correct firebox padding bug */
+		line-height: 30px;
+	}
+	
+	.ios-ff-ui-search-bar-wrapper {
+		height: 30px;
+		left: 7px;
+		right: 44px;
+		position: absolute;
+		
+	}
+
 }

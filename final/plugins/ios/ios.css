@@ -318,7 +318,7 @@
 	-webkit-box-shadow: none;
 }
 
-.ios-ui-bar-button-item.back:hover {
+.ios-ui-bar-button-item.back:active {
 	background-image: url(img/ios-ui-bar-button-back-selected-left.png), url(img/ios-ui-bar-button-back-selected-right.png), url(img/ios-ui-bar-button-back-selected-center.png);
 	background-position: left top, right top, left top;
 	background-repeat: no-repeat, no-repeat, repeat-x;
@@ -352,7 +352,7 @@
 	filter: ~"progid:DXImageTransform.Microsoft.gradient( startColorstr='#93a1b8', endColorstr='#516075',GradientType=0 )"; /* IE6-9 *!/*/
 }
 
-.ios-ui-bar-button-item:hover {
+.ios-ui-bar-button-item:active {
 	background: url(img/ios-ui-bar-button-item-bg-selected.png) repeat-x;
 /*	background: #93a1b8; /* Old browsers *!/
 	background: -moz-linear-gradient(top,  #93a1b8 0%, #7a8799 1%, #516075 100%); /* FF3.6+ *!/
@@ -397,7 +397,7 @@
 		-o-box-shadow: none;
 	}
 	
-	.ios-ui-bar-button-item.back:hover {
+	.ios-ui-bar-button-item.back:active {
 		background-image: url(img/ios-ui-bar-button-back-selected-left@2x.png), url(img/ios-ui-bar-button-back-selected-right@2x.png), url(img/ios-ui-bar-button-back-selected-center@2x.png);
 		background-size: 15px 31px, 10px 31px, 10px 31px;
 		background-position: left top, right top, left top;

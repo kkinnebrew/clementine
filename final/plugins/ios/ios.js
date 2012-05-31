@@ -663,7 +663,7 @@ Orange.add('ios', function(O) {
 		},
 		
 		onFocus: function(e) {
-			
+						
 			var bar = $(this).parent();
 			var input = $(this);
 			var ff = false;

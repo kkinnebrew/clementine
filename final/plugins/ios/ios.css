@@ -1448,7 +1448,7 @@ form > input:focus {
 
 }
 
-.ios-ui-search-bar .ios-ui-search-button.touched {
+.ios-ui-search-bar .ios-ui-search-button:active {
 	background: #93a1b8; /* Old browsers */
 	background: -moz-linear-gradient(top,  #93a1b8 0%, #7a8799 1%, #516075 100%); /* FF3.6+ */
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#93a1b8), color-stop(1%,#7a8799), color-stop(100%,#516075)); /* Chrome,Safari4+ */

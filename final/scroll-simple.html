@@ -1,0 +1,179 @@
+<!-- iOS meta rules -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+<!-- viewport rules -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+
+
+<head>
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+
+<style type="text/css">
+
+body {
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+}
+
+.scrollable {
+	overflow: scroll;
+	-webkit-overflow-scrolling: touch;
+	-webkit-backface-visibility: hidden;
+}
+
+.test-container {
+	position: absolute;
+	top: 44px;
+	bottom: 0px;
+	width: 100%;
+	background-color: #F00;
+}
+
+.test-scroll {
+	height: 200%;
+	width: 100%;
+	background-color: #F0F;
+}
+
+</style>
+
+<script type="text/javascript">
+
+window.onload = function() {
+
+	document.body.addEventListener('touchstart', onTouchStart, false);
+	
+	var startY, dy, el, sc;
+	
+	function onTouchStart(e) {
+
+		el = e.target;
+		
+		while (el && !(el.className || '').match(/\bscrollable\b/)) {
+		   el = el.parentNode
+		}
+		
+		if (!el) {
+			e.preventDefault();
+		}
+		
+		if (e.touches.length == 1 && el) {
+			startY = e.touches[0].pageY;
+			el.addEventListener('touchmove', onTouchMove, false);
+			el.addEventListener('touchend', onTouchEnd, false);
+						
+			var c = el.childNodes, obj;
+			
+			for (var i = 0, len = c.length; i < len; i++) {
+				obj = c[i];				
+				try {
+			    if (obj instanceof HTMLElement) sc = obj;
+			  }
+			  catch(e){
+			    if ((typeof obj === "object") &&
+			      (obj.nodeType === 1) && (typeof obj.style === "object") &&
+			      (typeof obj.ownerDocument ==="object")) sc = obj;
+			  }
+			}
+		}
+	}
+	
+	function onTouchMove(e) {
+		if (e.touches.length > 1 || !sc) {
+			cancelTouch();
+		} else {
+			dy = e.touches[0].pageY - startY;
+			var offset = el.offsetTop - $(sc).offset().top;
+			if ((offset <=0 && dy > 0) || (offset >= el.offsetHeight && dy < 0)) {
+				e.preventDefault();
+			}
+		}
+	
+	}
+
+	function onTouchEnd(e) {
+		cancelTouch();
+	}
+
+	function cancelTouch() {
+	
+		el.removeEventListener('touchmove', onTouchMove);
+		el.removeEventListener('touchend', onTouchEnd);
+		
+		el = null;
+		sc = null;
+		startY = null;
+		direction = null;
+	
+	}
+	
+}
+
+</script>
+
+</head>
+
+<body>
+
+<div id="test" class="test-container scrollable left">
+
+	<div class="test-scroll scroller">
+	
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+		
+		<div>Hello</div>
+	
+	</div>
+
+</div>
+
+</body>

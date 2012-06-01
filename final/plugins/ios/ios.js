@@ -138,11 +138,11 @@ Orange.add('ios', function(O) {
 		navBar: null,
 		viewStack: [],
 		
-		initialize: function(parent, target) {
-
-			this._super(parent, target);
+		onLoad: function() {
 		
-			// get name of default view
+			// run functions
+			
+			// get default view
 			var defaultView = this.target.attr('data-default');
 			
 			// remove views from DOM
@@ -154,13 +154,23 @@ Orange.add('ios', function(O) {
 					this.activeView = this.views[i];
 				}
 			}
-
+			
+			// load children
+			this.activeView.load();
+			
+			// remove attribute
 			this.target.removeAttr('data-default');
-														
+			
+			// DEBUG
+			console.log(this.data.name + ' ' + "Load");
+		
+			// fire loaded event
+			this.fire('_loaded');
+		
 		},
 		
 		onDidLoad: function() {
-				
+			
 			// setup navigation bar
 			this.navBar = $('<div class="ios-ui-navigation-bar"></div>');
 			this.target.prepend(this.navBar);
@@ -182,6 +192,9 @@ Orange.add('ios', function(O) {
 			
 			this.activeView.target.addClass('active');
 			this.animating = false;
+						
+			// call parent
+			this._super();
 			
 		},
 		
@@ -247,7 +260,7 @@ Orange.add('ios', function(O) {
 			setTimeout(Class.proxy(function() {
 				activeView.target.addClass('preloaded').removeClass('unloading');
 				activeView.target.remove();
-				activeView.onUnload();
+				activeView.unload();
 			}, this), duration);
 			
 			// append new view
@@ -280,7 +293,7 @@ Orange.add('ios', function(O) {
 			// append new view
 			view.target.addClass('preloaded');
 			this.target.append(view.target);
-			view.onLoad();
+			view.load();
 			
 			// get buttons
 			var leftViewBtn = view.find('.ios-ui-bar-button-item.left');
@@ -407,7 +420,7 @@ Orange.add('ios', function(O) {
 			setTimeout(Class.proxy(function() {
 				activeView.target.addClass('preloaded').removeClass('unloading').removeClass('active');
 				activeView.target.remove();
-				activeView.onUnload();
+				activeView.unload();
 			}, this), duration);
 			
 			// append new view
@@ -528,6 +541,8 @@ Orange.add('ios', function(O) {
 			
 			this.target.wrapInner('<div class="scroll-view"></div>');			
 			this.myScroll = new iScroll(this.target.get(0));
+			
+			this._super();
 		
 		},
 		
@@ -535,13 +550,13 @@ Orange.add('ios', function(O) {
 			
 			this.target.on('click', 'li', Class.proxy(this.onSelect, this));
 			
-			setTimeout(Class.proxy(function() {
-				this.setupTable();
-			}, this), 200);
+			this.setupTable();
+			
+			this._super();
 		},
 		
 		setupTable: function() {
-					
+						
 			this.list = this.target.find('ul');
 						
 			if (this.collection instanceof Collection) {
@@ -583,8 +598,9 @@ Orange.add('ios', function(O) {
 		},
 		
 		bindData: function(list, live) {
-				
+			
 			if (list instanceof Collection) {
+
 				this.collection = list;
 				if (live) {
 					if (this.liveEvt) this.liveEvt.detach();

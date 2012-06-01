@@ -147,6 +147,306 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 		}
 		
 	});
+		
+	var testController = O.Controller.extend({
+		
+		initialize: function(parent, target) {
+		
+			// set view statuses
+			this.loading = false;
+			this.unloading = false;
+			this.loaded = false;
+			
+			this.visible = false;
+			this.appearing = false;
+			this.disappearing = false;
+			
+			// create arrays
+			this.loadEvts = [];
+			this.unloadEvts = [];
+			this.showEvts = [];
+			this.hideEvts = [];
+			
+			// setup event target
+			this.eventTarget = new O.Events(parent, target);
+		
+			// run functions
+			console.log("Initialized");
+		
+		},
+		
+		load: function() {
+		
+			// return if already loading
+			if (this.loading || this.loaded) return;
+			
+			// set statuses
+			this.loading = true;
+			
+			// bind event handlers
+			this.loadEvts.push(this.on('_load', this.onLoad, this));
+			this.loadEvts.push(this.on('_loaded', this.onDidLoad, this));
+			
+			// call onWillLoad
+			this.onWillLoad();
+		
+		},
+		
+		onWillLoad: function() {
+			
+			// run functions
+			console.log("Will Load");
+			
+			// fire load event
+			this.fire('_load');
+			
+		},
+		
+		onLoad: function() {
+		
+			// run functions
+			console.log("Load");
+		
+			// fire loaded event
+			this.fire('_loaded');
+		
+		},
+		
+		onDidLoad: function() {
+		
+			// run functions
+			console.log("Did Load");
+		
+			// unbind all event handlers
+			for (var i = 0, len = this.loadEvts.length; i < len; i++) {
+				this.loadEvts[i].detach();
+			}
+			
+			// allow unloading
+			this.loadEvts = [];
+			this.loading = false;
+			this.loaded = true;
+						
+			// fire public load event
+			this.fire('load', {'asd': '123'});
+		
+		},
+		
+		unload: function() {
+		
+			// return if already unloading
+			if (this.unloading || !this.loaded) return;
+			
+			// bind event handlers
+			this.unloadEvts.push(this.on('_unload', this.onUnload, this));
+			this.unloadEvts.push(this.on('_unloaded', this.onDidUnload, this));
+			
+			// set statuses
+			this.unloading = true;
+			
+			// call onWillUnload
+			this.onWillUnload();
+		
+		},
+		
+		onWillUnload: function() {
+			
+			// run functions
+			console.log("Will Unload");
+			
+			// fire unload event
+			this.fire('_unload');
+			
+		},
+		
+		onUnload: function() {
+		
+			// run functions
+			console.log("Unload");
+		
+			// fire unloaded event
+			this.fire('_unloaded');
+		
+		},
+		
+		onDidUnload: function() {
+		
+			// run functions
+			console.log("Did Unload");
+			
+			// unbind all event handlers
+			for (var i = 0, len = this.unloadEvts.length; i < len; i++) {
+				this.unloadEvts[i].detach();
+			}
+			
+			// allow loading
+			this.unloadEvts = [];
+			this.unloading = false;
+			this.loaded = false;
+			
+			// fire public unload event
+			this.fire('unload');
+		
+		},
+		
+		show: function() {
+		
+			// return if already visible or appearing
+			if (this.visible || this.appearing) return;
+			
+			// set statuses
+			this.appearing = true;
+			
+			// bind event handlers
+			this.showEvts.push(this.on('_appear', this.onAppear, this));
+			this.showEvts.push(this.on('_appeared', this.onDidAppear, this));
+			
+			// call onWillAppear
+			this.onWillAppear();
+		
+		},
+		
+		onWillAppear: function() {
+			
+			// run functions
+			console.log("Will Appear");
+			
+			// fire appear event
+			this.fire('_appear');
+			
+		},
+		
+		onAppear: function() {
+		
+			// run functions
+			console.log("Appear");
+		
+			// fire appeared event
+			this.fire('_appeared');
+		
+		},
+		
+		onDidAppear: function() {
+		
+			// run functions
+			console.log("Did Appear");
+		
+			// unbind all event handlers
+			for (var i = 0, len = this.showEvts.length; i < len; i++) {
+				this.showEvts[i].detach();
+			}
+			
+			// allow hiding
+			this.showEvts = [];
+			this.appearing = false;
+			this.visible = true;
+			
+			// fire public appear event
+			this.fire('appear');
+		
+		},
+			
+		hide: function() {
+
+			// return if already hidden or hiding
+			if (!this.visible || this.disappearing) return;
+			console.log("hide");
+			// set statuses
+			this.disappearing = true;
+			
+			// bind event handlers
+			this.hideEvts.push(this.on('_disappear', this.onDisappear, this));
+			this.hideEvts.push(this.on('_disappeared', this.onDidDisappear, this));
+			
+			// call onWillDisappear
+			this.onWillDisappear();
+		
+		},
+		
+		onWillDisappear: function() {
+			
+			// run functions
+			console.log("Will Disappear");
+			
+			// fire disappear event
+			this.fire('_disappear');
+			
+		},
+		
+		onDisappear: function() {
+		
+			// run functions
+			console.log("Disappear");
+		
+			// fire disappeared event
+			this.fire('_disappeared');
+		
+		},
+		
+		onDidDisappear: function() {
+		
+			// run functions
+			console.log("Did Disappear");
+		
+			// unbind all event handlers
+			for (var i = 0, len = this.hideEvts.length; i < len; i++) {
+				this.hideEvts[i].detach();
+			}
+			
+			// allow showing
+			this.hideEvts = [];
+			this.disappearing = false;
+			this.visible = false;
+			
+			// fire public disappear event
+			this.fire('disappear');
+		
+		},
+		
+		on: function(event, callback, context) {
+			var proxy = (typeof context !== 'undefined') ? function() { callback.apply(context, arguments); } : callback;
+			return this.eventTarget.on.call(this.eventTarget, event, proxy);
+		},
+		
+		detach: function(event, callback) {
+			return this.eventTarget.detach.apply(this.eventTarget, arguments);
+		},
+		
+		fire: function(event, data) {
+			return this.eventTarget.fire.apply(this.eventTarget, arguments);
+		}
+	
+	});
+	
+	var t = new testController();
+	
+	t.on('load', function(e) {
+		t.show();
+	});
+	
+	t.on('appear', function(e) {
+		t.hide();
+	});
+	
+	t.on('disappear', function(e) {
+		t.unload();
+	});
+	
+	t.on('unload', function(e) {
+		console.log(t);
+	});
+	
+	
+	
+	t.load();
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	var test = new O.iOS.Application('test', {
 		location: true,
@@ -156,7 +456,7 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 		version: '1.2.3'
 	});
 	
-	test.launch();
+	//test.launch();
 	
 
 	

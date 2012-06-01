@@ -84,10 +84,6 @@ Orange.add('ui', function(O) {
 		
 			var template = node.find('[itemscope]');
 			var itemscope = $(template).attr('itemscope');
-			var output = node.clone(true);
-			var instance = template.clone().addClass('template').css('display', 'none');
-			output.empty();
-			output.append(instance);
 			
 			if (typeof itemscope !== 'undefined' && itemscope !== false) return;
 											
@@ -213,6 +209,7 @@ Orange.add('ui', function(O) {
 			this.events = [];
 			this.data = {};
 			this.eventTarget = new O.Events(parent, this);
+			this.source = target.clone();
 			
 			// validate target
 			if (typeof target !== 'undefined') {
@@ -314,13 +311,13 @@ Orange.add('ui', function(O) {
 		},
 		
 		
-		setState: function(name) {
-			var states = this.getStates();
-			if (states.hasOwnProperty(name) || typeof states[name] === 'function') {
-				states.name.call(this);
-			}
-			History.pushState({}, name, name); // TO DO: Fix this
-		},
+//		setState: function(name) {
+//			var states = this.getStates();
+//			if (states.hasOwnProperty(name) || typeof states[name] === 'function') {
+//				states.name.call(this);
+//			}
+//			History.pushState({}, name, name); // TO DO: Fix this
+//		},
 		
 		onWillLoad: function() {},
 		

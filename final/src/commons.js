@@ -99,9 +99,12 @@
 			delete this.target;
 			delete this.ev;
 			delete this.call;
+			delete this;
 		}
+		
+		return EventHandle;
 	
-	});
+	})();
 	
 	
 	Events = (function() {

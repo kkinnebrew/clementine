@@ -661,6 +661,16 @@ Orange.add('ui', function(O) {
 			// return if already unloading
 			if (this.unloading || !this.loaded) return;
 			
+			// hide first if visible
+			if (this.visible && !this.disappearing) {
+				this.vEvt = this.on('disappear', function(e) {
+					this.unload();
+					this.vEvt.detach();
+				}, this);
+				this.hide();
+				return;
+			}
+			
 			// bind event handlers
 			this.unloadEvts.push(this.on('_unload', this.onUnload, this));
 			this.unloadEvts.push(this.on('_unloaded', this.onDidUnload, this));

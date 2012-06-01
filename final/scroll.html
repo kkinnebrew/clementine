@@ -24,6 +24,10 @@ body {
 	-webkit-backface-visibility: hidden;
 }
 
+.scroller {
+	-webkit-backface-visibility: hidden;
+}
+
 .test-container {
 	position: absolute;
 	top: 44px;
@@ -46,11 +50,13 @@ window.onload = function() {
 
 	document.body.addEventListener('touchstart', onTouchStart, false);
 	
-	var startY, dy, el, sc;
+	var startY, dy, el, sc, t;
 	
 	function onTouchStart(e) {
 
 		el = e.target;
+		
+		clearTimeout(t);
 		
 		while (el && !(el.className || '').match(/\bscrollable\b/)) {
 		   el = el.parentNode
@@ -79,10 +85,10 @@ window.onload = function() {
 			  }
 			}
 			
-//			if (sc) {
-//				sc.style['WebkitTransition'] = '-webkit-transform 0ms';
-//				sc.style['WebkitTransform'] = '-webkit-transform 0ms';
-//			}
+			if (sc) {
+				sc.style['WebkitTransition'] = '-webkit-transform 0ms';
+				sc.style['WebkitTransform'] = '-webkit-transform 0ms';
+			}
 			
 		}
 	}
@@ -95,24 +101,26 @@ window.onload = function() {
 			var offset = el.offsetTop - $(sc).offset().top;
 			if ((offset <=0 && dy > 0) || (offset >= el.offsetHeight && dy < 0)) {
 				e.preventDefault();
-//				var val = Math.pow(Math.abs(dy), 0.8);
-//				sc.style['WebkitTransform'] = 'translate3d(0, ' + val * (dy < 0 ? -1 : 1) * 1.5 + 'px, 0)';
+				var val = Math.pow(Math.abs(dy), 0.8);
+				sc.style['WebkitTransform'] = 'translate3d(0, ' + val * (dy < 0 ? -1 : 1) * 1.5 + 'px, 0)';
 			}
 		}
 	
 	}
 
 	function onTouchEnd(e) {
-//		sc.style['WebkitTransition'] = '-webkit-transform 300ms';
-//		sc.style['WebkitTransform'] = 'translate3d(0, 0, 0)';
-//		sc.style['WebkitTransitionTimingFunction'] = 'cubic-bezier(0,0,.1,1)';
+		sc.style['WebkitTransition'] = '-webkit-transform 300ms linear';
+		sc.style['WebkitTransform'] = 'translate3d(0px, 0px, 0px)';
+		sc.style['WebkitTransitionTimingFunction'] = 'cubic-bezier(0,0,.1,1)';
 		
-//		setTimeout(function() {
-//			sc.style.cssText = '';
-//			cancelTouch();	
-//		}, 0);
-
-		cancelTouch();
+		t = setTimeout(function() {
+			var offset = el.offsetTop - $(sc).offset().top;
+			console.log(offset);
+			if (offset >= el.offsetHeight) {
+				sc.style.cssText = '-webkit-transform: translate3d(0px, 0px, 0px);';
+			}
+			cancelTouch();	
+		}, 1000);
 
 	}
 

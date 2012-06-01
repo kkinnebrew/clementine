@@ -22,12 +22,6 @@ Orange.add('ui', function(O) {
 		
 		// remove root attribute
 		root.removeAttr('data-root');
-				
-		// setup history
-//		History.Adapter.bind(window, 'statechange', function() {
-//			var State = History.getState();
-//			Log.info(State.data);
-//		});
 		
 		// load view
 		var c = ViewController.load(type);
@@ -36,90 +30,94 @@ Orange.add('ui', function(O) {
 							
 	};
 	
-	Binding = (function() {
+	Binding = Class.extend({
 	
-		return {
+		initialize: function(node) {
+			
+			this.template = node		
 		
-			bindData: function(node, item, id) {
-
-				// check for the data format
-				if (item instanceof Model) {
-					var id = item.getId(), data = item.toObject();
-				} else if (typeof item === 'object') {
-					var id = id, data = item;
-				}
-				else throw 'Invalid data item';
-				
-				if (id) node.attr('itemid', id);
-				
-				// parse all the data fields
-				for (var field in data) {
-					var el = node.find('[itemprop="' + field + '"]');
-					var childList = [];
-					node.find('[itemprop="' + field + '"]').each(function() {
-						var include = false, parent = $(this).parent();
-						while (parent.length !== 0 && !include) {
-							if ($(parent).not(node).length === 0) {
-								include = true; break;
-							} else if ($(parent).not('[itemscope]').length === 0) {
-								include = false; break;
-							} parent = $(parent).parent();
-						}
-						if (include) childList.push($(this));
-					});
-																									
-					if (childList.length > 0) {
-						for(var i = 0, len = childList.length; i < len; i++) {
-							if (data[field] instanceof Array || data[field] instanceof Collection) {
-								Binding.bindList(childList[i], data[field]);
-							} else if (typeof data[field] === 'object' || data[field] instanceof Model) {
-								Binding.bindData(childList[i], data[field]);
-							} else childList[i].text(data[field]);
-						}
-					}
-							
-				}
-			},
-			
-			bindList: function(node, list) {
-				
-				var template = node.find('[itemscope]');
-				var itemscope = $(template).attr('itemscope');
-				var output = node.clone(true);
-				var instance = template.clone().addClass('template').css('display', 'none');
-				output.empty();
-				output.append(instance);
-				
-				//if (typeof itemscope !== 'undefined' && itemscope !== false) return;
-												
-				// check for the data format
-				if (list instanceof O.Collection) {
-					var data = list.toObject();
-					for(var i in data) {
-						var instance = template.clone();
-						Binding.bindData(instance, data[i], i);
-						output.append(instance);
-					}
-					
-				} else if (list instanceof Array) {
-					
-					var data = list;
-					for(var i=0, len = data.length; i < len; i++) {
-						var instance = template.clone();
-						Binding.bindData(instance, data[i]);
-						output.append(instance);
-					}
-					
-				}
-				else throw 'Invalid data collection';
-				
-				node.replaceWith(output);
-			
+		},
+		
+		bindData: function(item, id) {
+		
+			// check for the data format
+			if (item instanceof Model) {
+				var id = item.getId(), data = item.toObject();
+			} else if (typeof item === 'object') {
+				var id = id, data = item;
 			}
-		}
+			else throw 'Invalid data item';
+			
+			if (id) node.attr('itemid', id);
+			
+			// parse all the data fields
+			for (var field in data) {
+				var el = node.find('[itemprop="' + field + '"]');
+				var childList = [];
+				node.find('[itemprop="' + field + '"]').each(function() {
+					var include = false, parent = $(this).parent();
+					while (parent.length !== 0 && !include) {
+						if ($(parent).not(node).length === 0) {
+							include = true; break;
+						} else if ($(parent).not('[itemscope]').length === 0) {
+							include = false; break;
+						} parent = $(parent).parent();
+					}
+					if (include) childList.push($(this));
+				});
+																								
+				if (childList.length > 0) {
+					for(var i = 0, len = childList.length; i < len; i++) {
+						if (data[field] instanceof Array || data[field] instanceof Collection) {
+							Binding.bindList(childList[i], data[field]);
+						} else if (typeof data[field] === 'object' || data[field] instanceof Model) {
+							Binding.bindData(childList[i], data[field]);
+						} else childList[i].text(data[field]);
+					}
+				}
+						
+			}
 		
-	})();
+		},
+		
+		bindList: function(list) {
+		
+			var template = node.find('[itemscope]');
+			var itemscope = $(template).attr('itemscope');
+			var output = node.clone(true);
+			var instance = template.clone().addClass('template').css('display', 'none');
+			output.empty();
+			output.append(instance);
+			
+			if (typeof itemscope !== 'undefined' && itemscope !== false) return;
+											
+			// check for the data format
+			if (list instanceof O.Collection) {
+				var data = list.toObject();
+				for(var i in data) {
+					var instance = template.clone();
+					Binding.bindData(instance, data[i], i);
+					output.append(instance);
+				}
+				
+			} else if (list instanceof Array) {
+				
+				var data = list;
+				for(var i=0, len = data.length; i < len; i++) {
+					var instance = template.clone();
+					Binding.bindData(instance, data[i]);
+					output.append(instance);
+				}
+				
+			}
+			else throw 'Invalid data collection';
+			
+			node.replaceWith(output);
+			
+		}
 	
+	});
+		
 	
 	Input = Class.extend({
 	

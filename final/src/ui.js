@@ -445,6 +445,12 @@ Orange.add('ui', function(O) {
 
 	var ViewController = O.Controller.extend({
 			
+		/**
+		 * initializes the view controller and all its child 
+		 * view controllers, forms, and elements
+		 * @param {ViewController} parent
+		 * @param {HTMLElement} parent
+		 */
 		initialize: function(parent, target) {
 		
 			// set vars
@@ -459,6 +465,9 @@ Orange.add('ui', function(O) {
 			this.visible = false;
 			this.appearing = false;
 			this.disappearing = false;
+			
+			// setup state statuses
+			this.changing = false;
 			
 			// create arrays
 			this.loadEvts = [];
@@ -549,6 +558,12 @@ Orange.add('ui', function(O) {
 			this.target.addClass(this.getClasses());
 			this.target.removeAttr('data-control').removeAttr('data-name');
 			
+			// bind state change event
+			this.on('change', function(e) {
+				this.state = e.data;
+				this.changing = false;
+			});
+			
 			// store for debugging
 			this.type = this.getType();
 			this.name = this.data.name;
@@ -558,32 +573,100 @@ Orange.add('ui', function(O) {
 		
 		},
 		
-		
+		/**
+		 * the unique type string for the controller. this matches the
+		 * data-control value used in view markup
+		 */
 		getType: function() {
 			return 'ui-view';
 		},
 		
+		/**
+		 * returns the outputted class names for the view. by default
+		 * the getType() of the view controller as well as all its parent
+		 * view controllers, as well as its data-name attribute will be added
+		 */
 		getClasses: function() {
 			var classes = typeof this.typeList !== 'undefined' ? this.typeList : '';
 			return classes + ' ' + this.data.name;
 		},
 	
+		/**
+		 * returns an array of strings of the events this function
+		 * triggers. this is for informational / syntax readability purposes only
+		 */
 		getTriggers: function() {
 			return [];
 		},
 		
+		/**
+		 * returns dynamic bindings of events on child views in the form
+		 * { 'view-name' : { 'event' : 'callback' }
+		 * the callback can be replaced with true to default to looking for a
+		 * method in the format on{Event}. All callbacks are bound in the context
+		 * of the view controller.
+		 */
 		getBindings: function() {
 			return {};
 		},
 		
+		/**
+		 * returns the given route expression for a view controller
+		 * in the form /:param1:param2
+		 */
 		getStates: function() {
-			return {};
+			return '/:id';
 		},
 		
+		/**
+		 * returns list of state routes and their associated callbacks in the form
+		 * { 'route': function(params) {} }
+		 * the parameters of the route will be passed to the callback as a json object
+		 */
+		getStates: function() {
+			return {
+				'/event:id': function(data) {
+				
+					var l = '/event:id/';
+					var s = '/event?id=43/';
+					var routes = [
+						'/',
+						'/feed:id',
+						'/feed:id/event:id'
+					];
+					
+					var urls = [
+						'/',
+						'/feed?id=chicago',
+						'/feed?id=chicago/event?id=43',
+						'/create'
+					];
+					
+					this.getView('person').hide();
+					this.getView('event').setId(data.id);
+					this.getView('event').show();
+					
+				}
+			
+			};
+		},
 		
+		/**
+		 * sets a specific state of a view. views 
+		 * 
+		 */
 		setState: function(name) {
+			
+			// prevent duplicate state changes
+			if (this.changing) return;
+			
+			// set as changing
+			this.changing = true;
+			
+			// get states
 			var s = this.getStates();
 			if (s.hasOwnProperty(name)) s[name].call(this);
+			
 		},
 		
 		

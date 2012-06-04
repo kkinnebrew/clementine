@@ -131,14 +131,14 @@ var ViewController = O.Controller.extend({
 		return {};
 	},
 	
-	getStates: function() {
+	getRoutes: function() {
 		return {};
 	},
 	
 	
-	setState: function(name) {
-		var s = this.getStates();
-		if (s.hasOwnProperty(name)) s[name].call(this);
+	setRoute: function(name) {
+		var r = this.getRoutes();
+		if (r.hasOwnProperty(name)) r[name].call(this);
 	},
 	
 	

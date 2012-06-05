@@ -21,6 +21,12 @@ html {
 	-webkit-text-size-adjust: none;
 }
 
+.scrollable {
+	overflow-y: scroll;
+	-webkit-overflow-scrolling: touch;
+	-webkit-backface-visibility: hidden;
+}
+
 /* UINavigationView Styles */
 
 .ios-ui-navigation-view {

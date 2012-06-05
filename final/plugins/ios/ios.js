@@ -16,9 +16,7 @@ Orange.add('ios', function(O) {
 	Application = O.Application.extend({
 	
 		onLaunch: function(online) {
-			document.body.addEventListener('touchmove', function(e){ 
-				e.preventDefault();
-			});
+
 			document.body.addEventListener('touchend', function(e){ 
 				$(".ios-ui-bar-button-item").removeClass('touched')
 			});
@@ -50,6 +48,8 @@ Orange.add('ios', function(O) {
 		  };
 			
 			window.onorientationchange.call(this);
+						
+			if (O.Browser.isScrollable) this.setupScroll();
 			
 			this._super();
 		},
@@ -60,6 +60,75 @@ Orange.add('ios', function(O) {
 			} else {
 				$('body').removeClass('landscape').addClass('portrait');
 			}
+		},
+		
+		setupScroll: function() {
+		
+			document.body.addEventListener('touchstart', onTouchStart, false);
+						
+			var startY, dy, el, sc;
+			
+			function onTouchStart(e) {
+				el = e.target;
+
+				while (el && !(el.className || '').match(/\bscrollable\b/)) {
+				   el = el.parentNode
+				}
+				
+				if (!el) {
+					e.preventDefault();
+				}
+								
+				if (e.touches.length == 1 && el) {
+					startY = e.touches[0].pageY;
+					el.addEventListener('touchmove', onTouchMove, false);
+					el.addEventListener('touchend', onTouchEnd, false);
+								
+					var c = el.childNodes, obj;
+					
+					for (var i = 0, len = c.length; i < len; i++) {
+						obj = c[i];				
+						try {
+					    if (obj instanceof HTMLElement) sc = obj;
+					  }
+					  catch(e){
+					    if ((typeof obj === "object") &&
+					      (obj.nodeType === 1) && (typeof obj.style === "object") &&
+					      (typeof obj.ownerDocument ==="object")) sc = obj;
+					  }
+					}
+				}
+			}
+			
+			function onTouchMove(e) {
+				if (e.touches.length > 1 || !sc) {
+					cancelTouch();
+				} else {
+					dy = e.touches[0].pageY - startY;
+					var offset = el.offsetTop - $(sc).offset().top;
+					if ((offset <=0 && dy > 0) || (offset >= el.offsetHeight && dy < 0)) {
+						e.preventDefault();
+					}
+				}
+			
+			}
+		
+			function onTouchEnd(e) {
+				cancelTouch();
+			}
+		
+			function cancelTouch() {
+			
+				el.removeEventListener('touchmove', onTouchMove);
+				el.removeEventListener('touchend', onTouchEnd);
+				
+				el = null;
+				sc = null;
+				startY = null;
+				direction = null;
+			
+			}
+		
 		}
 	
 	});
@@ -468,22 +537,22 @@ Orange.add('ios', function(O) {
 		},
 		
 		onWillLoad: function() {
-			this.target.wrapInner('<div class="scroll-view"></div>');
+			if (!O.Browser.isScrollable) this.target.wrapInner('<div class="scroll-view"></div>');
+			else this.target.addClass('scrollable');
 			this._super();
 		},
 		
 		onWillAppear: function() {
-			this.myScroll = new iScroll(this.target.get(0));
+			if (!O.Browser.isScrollable) this.myScroll = new iScroll(this.target.get(0));
 			this._super();
 		},
 		
 		onWillDisappear: function() {
-			this.myScroll.destroy();
+			if (!O.Browser.isScrollable) this.myScroll.destroy();
 			this._super();
 		},
 		
 		onWillUnload: function() {
-			delete this.myScroll;
 			this._super();
 		}
 			
@@ -573,10 +642,11 @@ Orange.add('ios', function(O) {
 		onWillLoad: function() {
 		
 			// wrap list
-			this.target.wrapInner('<div class="scroll-view"></div>');			
+			if (!O.Browser.isScrollable) this.target.wrapInner('<div class="scroll-view"></div>');			
 						
 			// get list
 			this.list = this.target.find('ul');
+			if (O.Browser.isScrollable) this.target.addClass('scrollable')
 			
 			// setup binding
 			this.binding = new Binding(this.list);
@@ -599,7 +669,7 @@ Orange.add('ios', function(O) {
 		onDidAppear: function() {
 			
 			// setup iscroll
-			this.myScroll = new iScroll(this.target.get(0));
+			if (!O.Browser.isScrollable) this.myScroll = new iScroll(this.target.get(0));
 			
 			var evt = null;
 
@@ -636,7 +706,7 @@ Orange.add('ios', function(O) {
 		onWillDisappear: function() {
 		
 			// destroy iscroll
-			this.myScroll.destroy();
+			if (!O.Browser.isScrollable) this.myScroll.destroy();
 			
 			// call parent
 			this._super();
@@ -667,7 +737,7 @@ Orange.add('ios', function(O) {
 				this.binding.bindList(this.collection);
 				
 				// refresh iscroll
-				this.myScroll.refresh();
+				if (!O.Browser.isScrollable) this.myScroll.refresh();
 				
 			}
 			
@@ -801,11 +871,13 @@ Orange.add('ios', function(O) {
 		},
 	
 		onWillLoad: function() {
-			
+						
 			var isMSIE = /*@cc_on!@*/0, isFF = /Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent);
 			
 			if (isFF) this.find("input[type=text]").wrap('<div class="ios-ff-ui-search-bar-wrapper" />');
 			if (isMSIE) this.find("input[type=text]").wrap('<div class="ios-ff-ui-search-bar-wrapper" />');
+		
+			this._super();
 		
 		},
 		
@@ -815,6 +887,8 @@ Orange.add('ios', function(O) {
 			this.find("input[type=text]").on('focus', this.onFocus);
 			this.find("input[type=text]").on('blur', this.onBlur);
 			this.find(".ios-ui-search-button").on('click', this.onClick);
+			
+			this._super();
 		
 		},
 		
@@ -884,8 +958,12 @@ Orange.add('ios', function(O) {
 		},
 		
 		onWillUnload: function() {
+		
 			this.find("input[type=text]").off();
 			this.find(".ios-ui-search-button").off();
+			
+			this._super();
+			
 		}
 	
 	});

@@ -780,6 +780,10 @@
 				    this.isTablet = true; // ipad
 				else this.isTablet = false;
 				
+				if (navigator.userAgent.match(/OS 5(_\d)+ like Mac OS X/i)) {
+					this.isScrollable = true;
+				} else this.isScrollable = false;
+				
 			},
 			
 			searchString: function (data) {
@@ -903,7 +907,8 @@
 			isMobile: BrowserDetect.isMobile,
 			isTablet: BrowserDetect.isTablet,
 			isDesktop: !(BrowserDetect.isMobile || BrowserDetect.isTablet),
-			isTouch: (BrowserDetect.isMobile || BrowserDetect.isTablet)
+			isTouch: (BrowserDetect.isMobile || BrowserDetect.isTablet),
+			isScrollable: true//BrowserDetect.isScrollable || !(BrowserDetect.isMobile || BrowserDetect.isTablet)
 		}
 	
 	})();

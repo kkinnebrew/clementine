@@ -538,7 +538,10 @@ Orange.add('ios', function(O) {
 		
 		onWillLoad: function() {
 			if (!O.Browser.isScrollable) this.target.wrapInner('<div class="scroll-view"></div>');
-			else this.target.addClass('scrollable');
+			else {
+				this.target.wrapInner('<div class="scroller"></div>');
+				this.target.addClass('scrollable');
+			}
 			this._super();
 		},
 		

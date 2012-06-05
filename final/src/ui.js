@@ -11,7 +11,7 @@ Orange.add('ui', function(O) {
 	var Binding, Form, Input, GridViewController, LightboxViewController, ListViewController, MapViewController, MultiViewController, 
 			ProgressViewController, TableViewController, TabViewController, TooltipViewController, ViewController;
 
-	var Application = __import('Application'), Model = __import('Model'), Collection = __import('Collection');
+	var Application = __import('Application'), Events = __import('Events'), Model = __import('Model'), Collection = __import('Collection');
 	
 	Application.prototype.onLaunch = function(online) {
 		
@@ -26,25 +26,53 @@ Orange.add('ui', function(O) {
 		// load view
 		var c = ViewController.get(type);
 		var controller = new c(null, root);
+		
+		controller.on('load', function() {	
+			controller.show();
+		});
+		
 		controller.load();
 							
 	};
 	
-	Binding = {
+	Binding = Class.extend({
+	
+		initialize: function(node) {
+	
+			this.node = node;
+			this.template = node.clone();
+			this.eventTarget = new Events(null, this);
+			this.loaded = false;
 		
-		bindData: function(item, id) {
+		},
 		
-			// check for the data format
-			if (item instanceof Model) {
-				var id = item.getId(), data = item.toObject();
-			} else if (typeof item === 'object') {
-				var id = id, data = item;
-			}
-			else throw 'Invalid data item';
+		bindData: function(model, live) {
+		
+			// check if already loaded
+			if (this.loaded) return;
+		
+			// pass to binding method
+			this._bindData(this.node, model);
 			
+			// set as loaded
+			this.loaded = true;
+		
+		},
+		
+		_bindData: function(node, model, id) {
+		
+			if (model instanceof Model) {
+				var id = model.getId(), data = model.toObject();
+			} else if (typeof model !== 'undefined') {
+				data = model, id = id;
+			} else {
+				Log.error('Invalid model item');
+				return;
+			}
+						
 			if (id) node.attr('itemid', id);
 			
-			// parse all the data fields
+			// parse data fields
 			for (var field in data) {
 				var el = node.find('[itemprop="' + field + '"]');
 				var childList = [];
@@ -59,34 +87,48 @@ Orange.add('ui', function(O) {
 					}
 					if (include) childList.push($(this));
 				});
-																								
+				
 				if (childList.length > 0) {
 					for(var i = 0, len = childList.length; i < len; i++) {
 						if (data[field] instanceof Array || data[field] instanceof Collection) {
-							Binding.bindList(childList[i], data[field]);
+							this._bindList(childList[i], data[field]);
 						} else if (typeof data[field] === 'object' || data[field] instanceof Model) {
-							Binding.bindData(childList[i], data[field]);
+							this._bindData(childList[i], data[field]);
 						} else childList[i].text(data[field]);
 					}
 				}
-						
 			}
 		
 		},
 		
-		bindList: function(node) {
+		bindList: function(list, live) {
 		
-			var template = node.find('[itemscope]');
-			var itemscope = $(template).attr('itemscope');
+			// check if already loaded
+			if (this.loaded) return;
 			
-			if (typeof itemscope !== 'undefined' && itemscope !== false) return;
-											
+			// bind data
+			this._bindList(this.node, list);
+			
+			// set as loaded
+			this.loaded = true;
+				
+			
+		},
+		
+		_bindList: function(node, list) {
+		
+			var itemscope = $(node).find('[itemscope]');
+			if (!itemscope.length) return;
+						
+			// get template
+			var template = itemscope.clone(), output = node.clone().empty();
+		
 			// check for the data format
 			if (list instanceof O.Collection) {
 				var data = list.toObject();
 				for(var i in data) {
 					var instance = template.clone();
-					Binding.bindData(instance, data[i], i);
+					this._bindData(instance, data[i], i);
 					output.append(instance);
 				}
 				
@@ -95,16 +137,25 @@ Orange.add('ui', function(O) {
 				var data = list;
 				for(var i=0, len = data.length; i < len; i++) {
 					var instance = template.clone();
-					Binding.bindData(instance, data[i]);
+					this._bindData(instance, data[i]);
 					output.append(instance);
 				}
 				
 			}
-			else throw 'Invalid data collection';
-						
+			
+			// insert into dom
+			node.replaceWith(output);
+		
+		},
+		
+		clear: function() {
+			
+			this.node.replaceWith(this.template.clone());
+			this.loaded = false;
+		
 		}
 	
-	};
+	});
 		
 	
 	Input = Class.extend({
@@ -186,262 +237,6 @@ Orange.add('ui', function(O) {
 	
 	});
 	
-	
-//	ViewController = Class.extend({
-//	
-//		initialize: function(parent, target) {
-//				
-			// set vars
-//			var that = this, views = [], forms = [], elements = [];
-//			
-			// setup instance vars
-//			this.views = {};
-//			this.forms = {};
-//			this.elements = {};
-//			this.events = [];
-//			this.data = {};
-//			this.eventTarget = new O.Events(parent, this);
-//			this.source = target.clone();
-//			
-			// validate target
-//			if (typeof target !== 'undefined') {
-//				this.target = $(target);
-//				var _target = $(target).get(0);
-//			} else throw 'Invalid target';
-//			
-			// check if parent
-//			this.parent = (typeof parent !== 'undefined') ? parent : null;
-//			if (this.parent === null) this.target.removeAttr('data-root');
-//						
-			// validate arguments
-//			for (var i = 0, len = _target.attributes.length; i < len; i++) {
-//				if (_target.attributes[i].name.match(/data-/)) {
-//					this.data[_target.attributes[i].name.replace(/data-/, '')] = _target.attributes[i].value;
-//				}
-//			}
-//			
-			// finds immediate descendant children
-//			var childFunc = function(selector) {
-//				var childList = [];
-//				this.target.find(selector).each(function() {
-//					var include = false, parent = $(this).parent();
-//					while (parent.length !== 0 && !include) {
-//						if ($(parent).not($(that.target)).length === 0) {
-//							include = true; break;
-//						} else if ($(parent).not('[data-control]').length === 0) {
-//							include = false; break;
-//						} parent = $(parent).parent();
-//					}
-//					if (include) childList.push(this);
-//				});
-//				return childList;
-//			}
-//			
-			// populate child views
-//			views = childFunc.call(this, '[data-control]');
-//			forms = childFunc.call(this, 'form');
-//			elements = childFunc.call(this, '[data-name]:not([data-control])');
-//			
-			// process views
-//			for (var i = 0, len = views.length; i < len; i++) {
-//				var view = $(views[i]), name = view.attr('data-name'),
-//						type = view.attr('data-control'), path = view.attr('data-template'),
-//						isRemote = (typeof path !== 'undefined' && path.length > 0);
-//				
-//				if (isRemote) {
-//					var source = O.View.load(path);
-//					view.html($(source).html());
-//					cloneAttributes(source, view);
-//					view.removeAttr('data-template');
-//				}
-//				
-//				var c = ViewController.get(type);
-//				this.views[name] = new c(this, view);
-//			}
-//			
-			// process forms
-//			for (var i = 0, len = forms.length; i < len; i++) {
-//				var form = $(forms[i]), name = form.attr('name'), child = new O.Form(form);
-//				this.forms[name] = child;
-//			}
-//			
-			// process elements
-//			for (var i = 0, len = elements.length; i < len; i++) {
-//				var el = $(elements[i]), name = el.attr('data-name');
-//				if (typeof name !== 'undefined' && name.length > 0) this.elements[name] = el.removeAttr('data-name');
-//			}
-//			
-			// process types
-//			this.target.addClass(this.getClasses());
-//			this.target.removeAttr('data-control').removeAttr('data-name');
-//			
-			// store for debugging
-//			this.type = this.getType();
-//			this.name = this.data.name;
-//							
-//		},
-//		
-//		getType: function() {
-//			return 'view';
-//		},
-//		
-//		getClasses: function() {
-//			var classes = typeof this.typeList !== 'undefined' ? this.typeList : '';
-//			return classes + ' ' + this.data.name;
-//		},
-//
-//		getTriggers: function() {
-//			return [];
-//		},
-//		
-//		getBindings: function() {
-//			return {};
-//		},
-//		
-//		getStates: function() {
-//			return {}
-//		},
-//		
-//		
-//		setState: function(name) {
-//			var states = this.getStates();
-//			if (states.hasOwnProperty(name) || typeof states[name] === 'function') {
-//				states.name.call(this);
-//			}
-//			History.pushState({}, name, name); // TO DO: Fix this
-//		},
-//		
-//		onWillLoad: function() {},
-//		
-//		onDidLoad: function() {},
-//		
-//		onLoad: function() {
-//			
-//			this.onWillLoad();
-//			
-//			for (var name in this.views) {
-//				this.views[name].onLoad();
-//			}
-//			
-//			var views = this.getBindings();
-//			
-//			for (var view in views) {
-//				var events = views[view];
-//				for (var event in events) {
-//					var func = (typeof events[event] === 'function') ? events[event] : null;
-//					if (event == 'touchclick') event = O.Browser.isTouch ? 'touchend' : 'click';
-//					if (func === null) {
-//						var name = event.charAt(0).toUpperCase() + event.slice(1);
-//						func = (events[event] === true && typeof this['on' + name] === 'function') ? this['on' + name] : null;
-//					}
-//					if (func !== null && this.views.hasOwnProperty(view)) this.getView(view).on(event, $.proxy(func,  this));
-//					else if (func !== null && this.elements.hasOwnProperty(view)) {
-//						this.getElement(view).on(event, $.proxy(func, this));
-//					}
-//				}
-//			}
-//			
-//			this.onDidLoad();
-//		
-//		},
-//		
-//		onWillUnload: function() {},
-//		
-//		onDidUnload: function() {},
-//		
-//		onUnload: function() {
-//		
-//			this.onWillUnload();
-//
-//			for (var view in this.views) { this.getView(view).detach(); }
-//			for (var form in this.forms) { this.getForm(form).detach(); }
-//			for (var el in this.elements) { this.getElement(el).unbind(); }
-//			for (var name in this.views) { this.views[name].onUnload(); }
-//			
-//			this.onDidUnload();
-//		
-//		},
-//		
-//		getView: function(name) {
-//			if (name instanceof ViewController) return name;
-//			else if (typeof this.views[name] !== 'undefined') return this.views[name];
-//			throw 'Error: View "' + name + '" not found';
-//		},
-//		
-//		getForm: function(name) {
-//			if (this.forms[name] instanceof Form) return this.forms[name];
-//			throw 'Error: Form "' + name + '" not found';
-//		},
-//
-//		getElement: function(name) {
-//			if (typeof this.elements[name] !== 'undefined') return this.elements[name];
-//			throw 'Error: Element "' + name + '" not found';
-//		},				
-//		
-//		
-//		hasView: function(name) {
-//			return typeof this._views[name] !== 'undefined';
-//		},
-//		
-//		hasElement: function(name) {
-//			return typeof this._elements[name] !== 'undefined';
-//		},
-//		
-//		hasForm: function(name) {
-//			return typeof this._forms[name] !== 'undefined';
-//		},
-//		
-//
-//		on: function(event, callback, context) {
-//			var proxy = (typeof context !== 'undefined') ? function() { callback.apply(context, arguments); } : callback;
-//			return this.eventTarget.on.call(this.eventTarget, event, proxy);
-//		},
-//		
-//		detach: function(event, callback) {
-//			return this.eventTarget.detach.apply(this.eventTarget, arguments);
-//		},
-//		
-//		fire: function(event, data) {
-//			return this.eventTarget.fire.apply(this.eventTarget, arguments);
-//		},
-//		
-//		
-//		bindData: function(item, live) {
-//			Binding.bindData(this.target, item);
-//			if (live && item instanceof Model) {
-//				if (this.liveEvt) this.liveEvt.detach();
-//				var id = item.getId(), model = item.getModel();
-//				this.liveEvt = model.on('datachange', function(d) {
-//					if (item.mergeChanges(d)) Binding.bindData(this.target, item);
-//				}, this);
-//			}
-//		},
-//				
-//		toString: function() {
-//			return '[' + this.getType() + ' ' + this.data.name + ']';
-//		},
-//		
-//		find: function(selector) {
-//			return $(this.target).find(selector);
-//		},
-//				
-//		destroy: function() {
-//			for (var name in this._views) {
-//				this.views[name].destroy();
-//			}
-//			for (var name in this._forms) {
-//				this.forms[name].destroy();
-//			}
-//			for (var name in this._elements) {
-//				delete this.elements[name];
-//			}
-//			if (this.liveEvt) this.liveEvt.detach();
-//			delete this.target;
-//			delete this.parent;
-//			delete this.eventTarget;
-//		}
-//	
-//	});
 
 	var ViewController = O.Controller.extend({
 			
@@ -525,6 +320,9 @@ Orange.add('ui', function(O) {
 			forms = childFunc.call(this, 'form');
 			elements = childFunc.call(this, '[data-name]:not([data-control])');
 			
+			// DEBUG
+			console.log(this.data.name + ' ' + "Initialized");
+			
 			// process views
 			for (var i = 0, len = views.length; i < len; i++) {
 				var view = $(views[i]), name = view.attr('data-name'),
@@ -558,18 +356,9 @@ Orange.add('ui', function(O) {
 			this.target.addClass(this.getClasses());
 			this.target.removeAttr('data-control').removeAttr('data-name');
 			
-			// bind state change event
-			this.on('change', function(e) {
-				this.state = e.data;
-				this.changing = false;
-			});
-			
 			// store for debugging
 			this.type = this.getType();
 			this.name = this.data.name;
-		
-			// DEBUG
-			console.log(this.data.name + ' ' + "Initialized");
 		
 		},
 		
@@ -608,65 +397,6 @@ Orange.add('ui', function(O) {
 		 */
 		getBindings: function() {
 			return {};
-		},
-		
-		/**
-		 * returns the given route expression for a view controller
-		 * in the form /:param1:param2
-		 */
-		getStates: function() {
-			return '/:id';
-		},
-		
-		/**
-		 * returns list of state routes and their associated callbacks in the form
-		 * { 'route': function(params) {} }
-		 * the parameters of the route will be passed to the callback as a json object
-		 */
-		getStates: function() {
-			return {
-				'/event:id': function(data) {
-				
-					var l = '/event:id/';
-					var s = '/event?id=43/';
-					var routes = [
-						'/',
-						'/feed:id',
-						'/feed:id/event:id'
-					];
-					
-					var urls = [
-						'/',
-						'/feed?id=chicago',
-						'/feed?id=chicago/event?id=43',
-						'/create'
-					];
-					
-					this.getView('person').hide();
-					this.getView('event').setId(data.id);
-					this.getView('event').show();
-					
-				}
-			
-			};
-		},
-		
-		/**
-		 * sets a specific state of a view. views 
-		 * 
-		 */
-		setState: function(name) {
-			
-			// prevent duplicate state changes
-			if (this.changing) return;
-			
-			// set as changing
-			this.changing = true;
-			
-			// get states
-			var s = this.getStates();
-			if (s.hasOwnProperty(name)) s[name].call(this);
-			
 		},
 		
 		
@@ -734,7 +464,7 @@ Orange.add('ui', function(O) {
 			this.loaded = true;
 						
 			// fire public load event
-			this.fire('load', {'asd': '123'});
+			this.fire('load');
 		
 		},
 		
@@ -769,7 +499,7 @@ Orange.add('ui', function(O) {
 		onWillUnload: function() {
 			
 			// run functions
-			console.log("Will Unload");
+			console.log(this.data.name + ' ' + "Will Unload");
 			
 			// ex. clear data
 			
@@ -779,14 +509,14 @@ Orange.add('ui', function(O) {
 		},
 		
 		onUnload: function() {
-		
-			// run functions
-			console.log("Unload");
 			
 			// unload children
 			for (var name in this.views) {
 				this.views[name].unload();
 			}
+		
+			// run functions
+			console.log(this.data.name + ' ' + "Unload");
 		
 			// fire unloaded event
 			this.fire('_unloaded');
@@ -796,7 +526,7 @@ Orange.add('ui', function(O) {
 		onDidUnload: function() {
 		
 			// run functions
-			console.log("Did Unload");
+			console.log(this.data.name + ' ' + "Did Unload");
 						
 			// unbind all event handlers
 			for (var i = 0, len = this.unloadEvts.length; i < len; i++) {
@@ -834,11 +564,11 @@ Orange.add('ui', function(O) {
 		onWillAppear: function() {
 			
 			// run functions
-			console.log("Will Appear");
+			console.log(this.data.name + ' ' + "Will Appear");
 			
 			// bind events
 			var views = this.getBindings();
-			
+												
 			for (var view in views) {
 				var events = views[view];
 				for (var event in events) {
@@ -848,7 +578,9 @@ Orange.add('ui', function(O) {
 						var name = event.charAt(0).toUpperCase() + event.slice(1);
 						func = (events[event] === true && typeof this['on' + name] === 'function') ? this['on' + name] : null;
 					}
-					if (func !== null && this.views.hasOwnProperty(view)) this.getView(view).on(event, $.proxy(func,  this));
+					if (func !== null && this.views.hasOwnProperty(view)) {	
+							this.getView(view).on(event, $.proxy(func,  this));
+					}
 					else if (func !== null && this.elements.hasOwnProperty(view)) {
 						this.getElement(view).on(event, $.proxy(func, this));
 					}
@@ -861,10 +593,15 @@ Orange.add('ui', function(O) {
 		},
 		
 		onAppear: function() {
-		
+				
+			// show children
+			for (var name in this.views) {
+				this.views[name].show();
+			}
+			
 			// run functions
-			console.log("Appear");
-		
+			console.log(this.data.name + ' ' + "Appear");
+			
 			// fire appeared event
 			this.fire('_appeared');
 		
@@ -873,7 +610,7 @@ Orange.add('ui', function(O) {
 		onDidAppear: function() {
 		
 			// run functions
-			console.log("Did Appear");
+			console.log(this.data.name + ' ' + "Did Appear");
 		
 			// unbind all event handlers
 			for (var i = 0, len = this.showEvts.length; i < len; i++) {
@@ -895,7 +632,7 @@ Orange.add('ui', function(O) {
 	
 			// return if already hidden or hiding
 			if (!this.visible || this.disappearing) return;
-			console.log("hide");
+
 			// set statuses
 			this.disappearing = true;
 			
@@ -911,7 +648,7 @@ Orange.add('ui', function(O) {
 		onWillDisappear: function() {
 			
 			// run functions
-			console.log("Will Disappear");
+			console.log(this.data.name + ' ' + "Will Disappear");
 			
 			// unbind events
 			for (var view in this.views) { this.getView(view).detach(); }
@@ -924,9 +661,14 @@ Orange.add('ui', function(O) {
 		},
 		
 		onDisappear: function() {
-		
+				
+			// show children
+			for (var name in this.views) {
+				this.views[name].hide();
+			}
+			
 			// run functions
-			console.log("Disappear");
+			console.log(this.data.name + ' ' + "Disappear");
 		
 			// fire disappeared event
 			this.fire('_disappeared');
@@ -936,7 +678,7 @@ Orange.add('ui', function(O) {
 		onDidDisappear: function() {
 		
 			// run functions
-			console.log("Did Disappear");
+			console.log(this.data.name + ' ' + "Did Disappear");
 		
 			// unbind all event handlers
 			for (var i = 0, len = this.hideEvts.length; i < len; i++) {
@@ -996,7 +738,7 @@ Orange.add('ui', function(O) {
 		fire: function(event, data) {
 			return this.eventTarget.fire.apply(this.eventTarget, arguments);
 		},
-
+		
 		
 		toString: function() {
 			return '[' + this.getType() + ' ' + this.data.name + ']';

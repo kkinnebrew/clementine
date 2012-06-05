@@ -33,6 +33,10 @@ div[data-root=true] {
 	display: none;
 }
 
+.contacts-table {
+	top: 44px;
+}
+
 </style>
 
 <script type="text/javascript">
@@ -113,7 +117,7 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 		onDidLoad: function() {
 						
 			Contact.getAll({}, Class.proxy(function(data) {
-				this.getView('contacts-table').bindData(data);
+				this.getView('contacts-table').setCollection(data);
 			}, this), function() {});
 			
 			this._super();
@@ -139,7 +143,23 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 		},
 		
 		onBack: function() {
+		
+			console.log("!@#");
+		
 			this.fire('back');
+		},
+		
+		bindData: function(data) {
+		
+			// setup binding
+			if (!this.binding) this.binding = new O.Binding(this.target);
+		
+			// clear data prior
+			this.binding.clear();
+		
+			// bind data
+			this.binding.bindData(data);
+		
 		}
 		
 	});

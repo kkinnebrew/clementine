@@ -17,6 +17,10 @@
 	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
+html {
+	-webkit-text-size-adjust: none;
+}
+
 /* UINavigationView Styles */
 
 .ios-ui-navigation-view {
@@ -421,8 +425,9 @@
 
 .ios-ui-table-view {
 	background: #E2E7ED;
-	height: 100%;
+	bottom: 0;
 	position: absolute;
+	top: 0;
 	width: 100%;
 }
 
@@ -1355,6 +1360,7 @@ form > input:focus {
 	height: 30px;
 	overflow: hidden;
 	padding: 6px 0px 7px 0px;
+	position: relative;
 	width: 100%;
 
 }

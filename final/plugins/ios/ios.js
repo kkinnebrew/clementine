@@ -169,6 +169,19 @@ Orange.add('ios', function(O) {
 		
 		},
 		
+		onAppear: function() {
+		
+			// run functions
+			console.log(this.data.name + ' ' + "Appear");
+		
+			// show children
+			if (this.activeView) this.activeView.show();
+		
+			// fire appeared event
+			this.fire('_appeared');
+		
+		},
+		
 		onDidLoad: function() {
 			
 			// setup navigation bar
@@ -290,10 +303,15 @@ Orange.add('ios', function(O) {
 				}
 			}
 			
+			// load view
+			view.load();
+			
 			// append new view
 			view.target.addClass('preloaded');
 			this.target.append(view.target);
-			view.load();
+			
+			// show view
+			view.show();
 			
 			// get buttons
 			var leftViewBtn = view.find('.ios-ui-bar-button-item.left');
@@ -352,6 +370,7 @@ Orange.add('ios', function(O) {
 			}, this), duration);
 			
 			this.activeView = view;
+			activeView.hide();
 			view.target.addClass('loading').removeClass('preloaded');;
 			this.viewStack.push(view);
 			
@@ -414,6 +433,7 @@ Orange.add('ios', function(O) {
 			// unload existing view
 			if (this.activeView.length != 0) {
 				activeView.target.addClass('unloading');
+				activeView.hide();
 				this.viewStack.pop();
 			}
 			
@@ -425,6 +445,7 @@ Orange.add('ios', function(O) {
 			
 			// append new view
 			this.activeView = view;
+			view.show();
 			view.target.addClass('loading');
 			
 			setTimeout(Class.proxy(function() {
@@ -444,16 +465,26 @@ Orange.add('ios', function(O) {
 		
 		initialize: function(parent, target) {
 			this._super(parent, target);
-			this.target.wrapInner('<div class="scroll-view"></div>');
 		},
 		
-		onDidLoad: function() {
+		onWillLoad: function() {
+			this.target.wrapInner('<div class="scroll-view"></div>');
+			this._super();
+		},
+		
+		onWillAppear: function() {
 			this.myScroll = new iScroll(this.target.get(0));
+			this._super();
+		},
+		
+		onWillDisappear: function() {
+			this.myScroll.destroy();
+			this._super();
 		},
 		
 		onWillUnload: function() {
-			this.myScroll.destroy();
 			delete this.myScroll;
+			this._super();
 		}
 			
 	});
@@ -534,107 +565,233 @@ Orange.add('ios', function(O) {
 	
 	
 	UITableViewController = ViewController.extend({
-			
-		getType: function() { return 'ios-ui-table-view' },
+	
+		getType: function() {
+			return 'ios-ui-table-view';
+		},
 		
 		onWillLoad: function() {
-			
-			this.target.wrapInner('<div class="scroll-view"></div>');			
-			this.myScroll = new iScroll(this.target.get(0));
-			
-			this._super();
 		
+			// wrap list
+			this.target.wrapInner('<div class="scroll-view"></div>');			
+						
+			// get list
+			this.list = this.target.find('ul');
+			
+			// setup binding
+			this.binding = new Binding(this.list);
+			
+			// call parent
+			this._super();
+				
 		},
 		
 		onDidLoad: function() {
-			
+		
+			// delegate click event
 			this.target.on('click', 'li', Class.proxy(this.onSelect, this));
 			
-			this.setupTable();
-			
+			// call parent
 			this._super();
+			
 		},
 		
-		setupTable: function() {
-						
-			this.list = this.target.find('ul');
-						
-			if (this.collection instanceof Collection) {
-				Binding.bindList(this.list, this.collection);
-			}
+		onDidAppear: function() {
+			
+			// setup iscroll
+			this.myScroll = new iScroll(this.target.get(0));
 			
 			var evt = null;
-			
-			$(this.list).on('touchstart', 'li', function(e) {
+
+			// setup touch events
+			this.target.on('touchstart', 'li', function(e) {
 				clearTimeout(evt);
 				evt = setTimeout(function() {
 					$(e.currentTarget).addClass('active');
-				}, 10);
+				}, 20);
 			});
 			
-			$(this.list).on('touchmove', Class.proxy(function(e) {
+			this.target.on('touchmove', Class.proxy(function(e) {
 				clearTimeout(evt); evt = null;
 				$(this.target).find('li').removeClass('active');
 			}, this));
 			
-			$(this.list).on('touchend', Class.proxy(function(e) {
+			this.target.on('touchend', Class.proxy(function(e) {
 				clearTimeout(evt); 
 				if (evt) this.onSelect.call(this, e);
 				evt = null;
 				$(this.target).find('li').removeClass('active');
 			}, this));
 			
-			$(this.list).on('touchcancel', Class.proxy(function(e) {
+			this.target.on('touchcancel', Class.proxy(function(e) {
 				clearTimeout(evt); evt = null;
 				$(this.target).find('li').removeClass('active');
 			}, this));
-			
-			this.myScroll.refresh();
+		
+			// call parent
+			this._super();
 		
 		},
 		
-		onRefresh: function() {
-			this.setupTable();
-		},
+		onWillDisappear: function() {
 		
-		bindData: function(list, live) {
+			// destroy iscroll
+			this.myScroll.destroy();
 			
-			if (list instanceof Collection) {
-
-				this.collection = list;
-				if (live) {
-					if (this.liveEvt) this.liveEvt.detach();
-					var model = data.getModel();
-					this.liveEvt = model.on('datachange', function(d) {
-						if (list.mergeChanges(d)) Binding.bindList(this.find('ul'), list);
-					}, this);
-				}
-			}
-			
-			this.setupTable();
-					
-		},
-		
-		onSelect: function(e) {
-						
-			e.stopPropagation();
-
-			var target = $(e.target);
-			var cell = null, id = null, model;
-						
-			if ((id = $(target).attr('itemid')) && this.collection instanceof Collection) {
-				if ((model = this.collection.get(id)) instanceof O.Model) this.fire('select', model);
-			}
+			// call parent
+			this._super();
 		
 		},
 		
 		onWillUnload: function() {
-			this._super();
-			this.list.off();
-			this.myScroll.destroy();
-		}
 			
+			// clear bindings
+			this.binding.clear();
+			
+			// clear touch events
+			this.list.off();
+			
+			// call parent
+			this._super();
+			
+		},
+		
+		setCollection: function(collection) {
+		
+			if (collection instanceof Collection) {
+			
+				// store to view
+				this.collection = collection;
+				
+				// bind collection
+				this.binding.bindList(this.collection);
+				
+				// refresh iscroll
+				this.myScroll.refresh();
+				
+			}
+			
+		},
+		
+		onSelect: function(e) {
+		
+			var target = $(e.target);
+			var cell = null, id = null, model;
+									
+			if ((id = $(target).attr('itemid')) && this.collection instanceof Collection) {
+				if ((model = this.collection.get(id)) instanceof O.Model) {
+					this.fire('select', model);
+				}
+			}
+		
+		}
+	
 	});
+	
+//	UITableViewController = ViewController.extend({
+//			
+//		getType: function() { return 'ios-ui-table-view' },
+//		
+//		onWillLoad: function() {
+//			
+//			this.target.wrapInner('<div class="scroll-view"></div>');			
+//			this.myScroll = new iScroll(this.target.get(0));
+//			
+//			this._super();
+//		
+//		},
+//		
+//		onDidLoad: function() {
+//			
+//			this.target.on('click', 'li', Class.proxy(this.onSelect, this));
+//			
+//			this.setupTable();
+//			
+//			this._super();
+//		},
+//		
+//		setupTable: function() {
+//						
+//			this.list = this.target.find('ul');
+//						
+//			if (this.collection instanceof Collection) {
+//				Binding.bindList(this.list, this.collection);
+//			}
+//			
+//			var evt = null;
+//			
+//			$(this.list).on('touchstart', 'li', function(e) {
+//				clearTimeout(evt);
+//				evt = setTimeout(function() {
+//					$(e.currentTarget).addClass('active');
+//				}, 10);
+//			});
+//			
+//			$(this.list).on('touchmove', Class.proxy(function(e) {
+//				clearTimeout(evt); evt = null;
+//				$(this.target).find('li').removeClass('active');
+//			}, this));
+//			
+//			$(this.list).on('touchend', Class.proxy(function(e) {
+//				clearTimeout(evt); 
+//				if (evt) this.onSelect.call(this, e);
+//				evt = null;
+//				$(this.target).find('li').removeClass('active');
+//			}, this));
+//			
+//			$(this.list).on('touchcancel', Class.proxy(function(e) {
+//				clearTimeout(evt); evt = null;
+//				$(this.target).find('li').removeClass('active');
+//			}, this));
+//			
+//			this.myScroll.refresh();
+//		
+//		},
+//		
+//		onRefresh: function() {
+//			this.setupTable();
+//		},
+//		
+//		bindData: function(list, live) {
+//			
+//			console.log(list);
+//			
+//			if (list instanceof Collection) {
+//
+//				this.collection = list;
+//				if (live) {
+//					if (this.liveEvt) this.liveEvt.detach();
+//					var model = data.getModel();
+//					this.liveEvt = model.on('datachange', function(d) {
+//						if (list.mergeChanges(d)) Binding.bindList(this.find('ul'), list);
+//					}, this);
+//				}
+//			}
+//			
+//			this.setupTable();
+//					
+//		},
+//		
+//		onSelect: function(e) {
+//						
+//			e.stopPropagation();
+//
+//			var target = $(e.target);
+//			var cell = null, id = null, model;
+//						
+//			if ((id = $(target).attr('itemid')) && this.collection instanceof Collection) {
+//				if ((model = this.collection.get(id)) instanceof O.Model) this.fire('select', model);
+//			}
+//		
+//		},
+//		
+//		onWillUnload: function() {
+//			this._super();
+//			this.list.off();
+//			this.myScroll.destroy();
+//		}
+//			
+//	});
 	
 	
 	UISearchBarController = ViewController.extend({

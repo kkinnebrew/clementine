@@ -1,0 +1,1519 @@
+/**
+ * ios.css | Orange Stylesheet 1.0.2
+ * @date 7.21.2011
+ * @author Kevin Kinnebrew
+ * @description styles for ios elements
+ */
+
+#ios-preload {
+	background-image: url(img/ios-ui-bar-button-back-selected-left.png), 
+										url(img/ios-ui-bar-button-back-selected-right.png), 
+										url(img/ios-ui-bar-button-back-selected-center.png), 
+										url(img/ios-ui-bar-button-item-bg-selected.png), 
+										url(img/ios-ui-bar-button-back-selected-left@2x.png), 
+										url(img/ios-ui-bar-button-back-selected-right@2x.png), 
+										url(img/ios-ui-bar-button-back-selected-center@2x.png);
+	height: 10px;
+	width: 10px;
+	top: -10px;
+	position: absolute;
+}
+
+* {
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+html {
+	-webkit-text-size-adjust: none;
+}
+
+.scrollable {
+	overflow-y: scroll;
+	-webkit-overflow-scrolling: touch;
+	-webkit-backface-visibility: hidden;
+}
+
+/* UINavigationView Styles */
+
+.ios-ui-navigation-view {
+	position: relative;
+	height: 100%;
+	overflow: hidden;
+	width: 100%;
+}
+
+.ios-ui-navigation-view > .ios-ui-view {
+	bottom: 0px;
+	position: absolute;
+	top: 44px;
+	width: 100%;
+	-webkit-backface-visibility: hidden;
+	-webkit-transition: -webkit-transform 300ms ease-in-out;
+	-moz-backface-visibility: hidden;
+	-moz-transition: -webkit-transform 300ms ease-in-out;
+	-o-background-size-backface-visibility: hidden;
+	-o-transition: -webkit-transform 300ms ease-in-out;
+}
+
+.ios-ui-navigation-view > .ios-ui-view .title {
+	-webkit-transition: opacity 200ms ease-in-out;
+	-moz-transition: opacity 200ms ease-in-out;
+	-o-transition: opacity 200ms ease-in-out;
+}
+
+.ios-ui-navigation-view > .ios-ui-view.inactive {
+	opacity: 0;
+	-webkit-transform: translate(-100%);
+	-moz-transform: translate(-100%);
+	-o-transform: translate(-100%);
+	-ms-transform: translate(-100%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.active {
+	opacity: 1;
+	-webkit-transform: translate(0%);
+	-moz-transform: translate(0%);
+	-o-transform: translate(0%);
+	-ms-transform: translate(0%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.preloaded {
+	opacity: 1;
+	-webkit-transform: translate(100%);
+	-moz-transform: translate(100%);
+	-o-transform: translate(100%);
+	-ms-transform: translate(100%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.unloading {
+	opacity: 1;
+	-webkit-transform: translate(100%);
+	-moz-transform: translate(100%);
+	-o-transform: translate(100%);
+	-ms-transform: translate(100%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.unloading .title {
+	opacity: 0;
+}
+
+.ios-ui-navigation-view > .ios-ui-view.loading {
+	opacity: 1;
+	-webkit-transform: translate(0%);
+	-moz-transform: translate(0%);
+	-o-transform: translate(0%);
+	-ms-transform: translate(0%);
+}
+
+.ios-ui-navigation-view > .ios-ui-view.loading .title {
+	opacity: 1;
+}
+
+.ios-ui-navigation-view > .ios-ui-view.inactivating {
+	opacity: 1;
+	-webkit-transform: translate(-100%);
+	-moz-transform: translate(-100%);
+	-o-transform: translate(-100%);
+	-ms-transform: translate(-100%);
+}
+
+.ios-ui-navigation-view > .ios-ui-bar-button-item.back {
+	-webkit-transform: translate(0%);
+	-moz-transform: translate(0%);
+	-o-transform: translate(0%);
+	-ms-transform: translate(0%);
+}
+
+/*.ios-ui-navigation-view .ios-ui-bar-button-item.back.slideOut {
+	-webkit-transform: translate(-100px);
+	-moz-transform: translate(-100px);
+	-o-transform: translate(-100px);
+	-ms-transform: translate(-100px);
+	-webkit-transition: -webkit-transform 180ms ease-in;
+	-moz-transition: -moz-transform 180ms ease-in;
+	-o-transition: -o-transform 180ms ease-in;
+}
+
+.ios-ui-navigation-view .ios-ui-bar-button-item.back.slideIn {
+	-webkit-transform: translate(100px);
+	-moz-transform: translate(100px);
+	-o-transform: translate(100px);
+	-ms-transform: translate(100px);
+	-webkit-transition: -webkit-transform 300ms ease-in;
+	-moz-transition: -moz-transform 300ms ease-in-out;
+	-o-transition: -o-transform 300ms ease-in-out;
+}*/
+
+.ios-ui-navigation-view > .ios-ui-view.inactivating .title {
+	opacity: 0;
+}
+
+.ios-ui-navigation-view > .ios-ui-view .ios-ui-navigation-bar {
+	height: 0;
+}
+
+.ios-ui-navigation-view > .ios-ui-view .ios-ui-bar-button-item {
+	display: none;
+}
+
+.ios-ui-navigation-view > .ios-ui-navigation-bar > .ios-ui-bar-button-item {
+	z-index: 21;
+	position: absolute;
+}
+
+.ios-ui-navigation-view > .ios-ui-navigation-bar.hidden {
+	-webkit-transform: translate(-100%);
+	-moz-transform: translate(-100%);
+	-o-transform: translate(-100%);
+	-ms-transform: translate(-100%);
+	-webkit-transition: -webkit-transform 200ms ease-in-out;
+	-moz-transition: -webkit-transform 200ms ease-in-out;
+	-o-transition: -webkit-transform 200ms ease-in-out;
+	-ms-transition: -webkit-transform 200ms ease-in-out;
+}
+
+.ios-ui-navigation-view > .ios-ui-view .title {
+	top: -44px;
+	z-index: 20;
+}
+
+
+/* UINavigationBar Styles */
+
+.ios-ui-navigation-bar {
+	background: url(img/ios-ui-navigation-bar-bg.png) repeat-x;
+	height: 44px;
+	position: relative;
+	width: 100%;
+}
+
+/*.landscape .ios-ui-navigation-bar {
+	background: url(img/ios-ui-navigation-bar-bg-landscape.png) repeat-x;
+	height: 32px;
+}*/
+
+.ios-ui-navigation-bar > .title {
+	color: #FFF;
+	font-size: 20px;
+	font-weight: bold;
+	height: 44px;
+	line-height: 42px;
+	margin: 0px;
+	padding: 0px;
+	position: absolute;
+	text-align: center;
+	text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.35);
+	width: 100%;
+	z-index: 1;
+}
+
+/*.landscape .ios-ui-navigation-bar > .title {
+	font-size: 16px;
+	height: 32px;
+	line-height: 30px;
+}*/
+
+@media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
+
+	.ios-ui-navigation-bar {
+		background-image: url(img/ios-ui-navigation-bar-bg@2x.png);
+		background-size: 5px 44px;
+		-moz-background-size: 5px 44px;
+		-o-background-size: 5px 44px;
+		-webkit-background-size: 5px 44px;
+	}
+	
+/*	.landscape .ios-ui-navigation-bar {
+		background-image: url(img/ios-ui-navigation-bar-bg-landscape@2x.png);
+		background-size: 5px 32px;
+		-moz-background-size: 5px 32px;
+		-o-background-size: 5px 32px;
+		-webkit-background-size: 5px 32px;
+	}*/
+
+}
+
+
+/* UIToolbar Styles */
+
+.ios-ui-toolbar {
+	background: url(img/ios-ui-navigation-bar-bg.png) repeat-x;
+	height: 44px !important;
+	position: relative;
+	width: 100%;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
+
+	.ios-ui-toolbar {
+		background-image: url(img/ios-ui-toolbar-bg@2x.png);
+		background-size: 5px 44px;
+		-moz-background-size: 5px 44px;
+		-o-background-size: 5px 44px;
+		-webkit-background-size: 5px 44px;
+	}
+
+}
+
+
+/* UIBarButtonItem Styles */
+
+.ios-ui-bar-button-item {
+	background: url(img/ios-ui-bar-button-item-bg.png) repeat-x;
+	color: #FFF;
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: bold;
+	height: 30px;
+	line-height: 30px;
+	min-width: 35px;
+	padding: 0px 12px;
+	position: absolute;
+	text-align: center;
+	text-overflow: ellipsis;
+	text-shadow: 0px -1px 1px rgba(0, 0, 0, .5);
+	z-index: 10;
+	
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+	
+	-webkit-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset -1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0px -1px 0px rgba(0, 0, 0, .2),
+						0px 1px 0px rgba(255, 255, 255, .3);
+	-moz-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset -1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0px -1px 0px rgba(0, 0, 0, .2),
+						0px 1px 0px rgba(255, 255, 255, .3);
+	-o-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset -1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0px -1px 0px rgba(0, 0, 0, .2),
+						0px 1px 0px rgba(255, 255, 255, .3);
+	
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-o-border-radius: 5px;
+	
+	user-select: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+}
+
+.ios-ui-bar-button-item.left {
+	top: 7px;
+	left: 7px;
+}
+
+.ios-ui-bar-button-item.right {
+	top: 7px;
+	right: 7px;
+}
+
+.ios-ui-bar-button-item.blue {
+	background: url(img/ios-ui-bar-button-item-blue-bg.png) repeat-x;
+}
+
+.ios-ui-bar-button-item.back {
+	background-image: url(img/ios-ui-bar-button-back-left.png), url(img/ios-ui-bar-button-back-right.png), url(img/ios-ui-bar-button-back-center.png);
+	background-position: left top, right top, left top;
+	background-repeat: no-repeat, no-repeat, repeat-x;
+	border-left: 15px solid transparent;
+	border-right: 7px solid transparent;
+	background-origin: border-box, border-box, padding-box;
+	background-clip: border-box, border-box, padding-box;
+	height: 31px;
+	padding: 0 3px 0 0;
+	-webkit-box-shadow: none;
+}
+
+.ios-ui-bar-button-item.back:active {
+	background-image: url(img/ios-ui-bar-button-back-selected-left.png), url(img/ios-ui-bar-button-back-selected-right.png), url(img/ios-ui-bar-button-back-selected-center.png);
+	background-position: left top, right top, left top;
+	background-repeat: no-repeat, no-repeat, repeat-x;
+	background-origin: border-box, border-box, padding-box;
+	background-clip: border-box, border-box, padding-box;
+	height: 31px;
+	padding: 0 3px 0 0;
+	-webkit-box-shadow: none;
+}
+
+.ios-ui-bar-button-item.touched {
+	background: url(img/ios-ui-bar-button-item-bg-selected.png) repeat-x;
+}
+
+.ios-ui-bar-button-item:active {
+	background: url(img/ios-ui-bar-button-item-bg-selected.png) repeat-x;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
+
+	.ios-ui-bar-button-item {
+		-webkit-box-shadow:	inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+							inset 0px 0px 2px rgba(0, 0, 0, 0.4),
+							inset 0px 1px 0px rgba(0, 0, 0, 0.2),
+							0px 1px 0px rgba(255, 255, 255, .2);
+		-moz-box-shadow:	inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+							inset 0px 0px 2px rgba(0, 0, 0, 0.4),
+							inset 0px 1px 0px rgba(0, 0, 0, 0.2),
+							0px 1px 0px rgba(255, 255, 255, .2);
+		-o-box-shadow:	inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+							inset 0px 0px 2px rgba(0, 0, 0, 0.4),
+							inset 0px 1px 0px rgba(0, 0, 0, 0.2),
+							0px 1px 0px rgba(255, 255, 255, .2);
+	}
+	
+	.ios-ui-bar-button-item.back {
+		background-image: url(img/ios-ui-bar-button-back-left@2x.png), url(img/ios-ui-bar-button-back-right@2x.png), url(img/ios-ui-bar-button-back-center@2x.png);
+		background-size: 15px 31px, 10px 31px, 10px 31px;
+		background-position: left top, right top, left top;
+		background-repeat: no-repeat, no-repeat, repeat-x;
+		border-left: 15px solid transparent;
+		border-right: 10px solid transparent;
+		background-origin: border-box, border-box, padding-box;
+		background-clip: border-box, border-box, padding-box;
+		height: 31px !important;
+		padding: 0;
+		-webkit-box-shadow:none !important;
+		-moz-box-shadow: none;
+		-o-box-shadow: none;
+	}
+	
+	.ios-ui-bar-button-item.back:active {
+		background-image: url(img/ios-ui-bar-button-back-selected-left@2x.png), url(img/ios-ui-bar-button-back-selected-right@2x.png), url(img/ios-ui-bar-button-back-selected-center@2x.png);
+		background-size: 15px 31px, 10px 31px, 10px 31px;
+		background-position: left top, right top, left top;
+		background-repeat: no-repeat, no-repeat, repeat-x;
+		border-left: 15px solid transparent;
+		border-right: 10px solid transparent;
+		background-origin: border-box, border-box, padding-box;
+		background-clip: border-box, border-box, padding-box;
+		height: 31px !important;
+		padding: 0;
+		-webkit-box-shadow:none;
+		-moz-box-shadow: none;
+		-o-box-shadow: none;
+		
+	}
+	
+}
+
+
+/* UITableView Styles */
+
+.ios-ui-table-view {
+	background: #E2E7ED;
+	bottom: 0;
+	position: absolute;
+	top: 0;
+	width: 100%;
+}
+
+.nontouch .ios-ui-table-view {
+	overflow: auto;
+}
+
+.ios-ui-table-view ul {
+	background: #F7F7F7;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+}
+
+.ios-ui-table-view > .scroll-view {
+	position: absolute;
+	z-index: 1;
+	width: 100%;
+	height: auto;
+	min-height: 100%;
+}
+
+.ios-ui-table-view ul > li {
+	background: rgba(0, 0, 0, 0) url(img/ios-ui-table-view-arrow.png) no-repeat right center;
+	cursor: pointer;
+	font-size: 14px;
+	margin: 0;
+	height: 42px;
+	padding: 0px 16px;
+	line-height: 42px;
+	border-top: 1px solid #FFF;
+	border-bottom: 1px solid #CACACA;
+}
+
+.ios-ui-table-view ul > li .title {
+	float: left;
+	height: 100%;
+	line-height: 42px;
+}
+
+.ios-ui-table-view ul > li .subtitle {
+	color: #2470D8;
+	float: right;
+	font-size: 12px;
+	height: 100%;
+	line-height: 42px;
+	margin-right: 15px;
+}
+
+.ios-ui-table-view ul > li.active .subtitle {
+	color: #FFF;
+}
+
+.nontouch .ios-ui-table-view ul > li:active .subtitle {
+	color: #FFF;
+}
+
+.ios-ui-table-view ul > li.active {
+	border: none;
+	height: 44px;
+	line-height: 44px;
+	padding: 0px 16px;
+	color: #FFF;
+	background-image: url(img/ios-ui-table-view-arrow-selected.png), -moz-linear-gradient(top,  #058cf5 0%, #015de6 100%); /* FF3.6+ */
+	background-image: url(img/ios-ui-table-view-arrow-selected.png), -webkit-linear-gradient(top,  #058cf5 0%,#015de6 100%); /* Chrome10+,Safari5.1+ */
+}
+
+.nontouch .ios-ui-table-view ul > li:active {
+	border: none;
+	height: 44px;
+	line-height: 44px;
+	padding: 0px 16px;
+	color: #FFF;
+	background-image: url(img/ios-ui-table-view-arrow-selected.png), -moz-linear-gradient(top,  #058cf5 0%, #015de6 100%); /* FF3.6+ */
+	background-image: url(img/ios-ui-table-view-arrow-selected.png), -webkit-linear-gradient(top,  #058cf5 0%,#015de6 100%); /* Chrome10+,Safari5.1+ */
+}
+
+.ios-ui-table-view ul > li:first-child {
+	border-top: none;
+	height: 43px;
+	line-height: 44px;
+}
+
+.ios-ui-table-view ul > li:first-child.active {
+	height: 44px;
+}
+
+.nontouch .ios-ui-table-view ul > li:first-child:active {
+	height: 44px;
+}
+
+.ios-ui-table-view .section {
+	background: url(img/ios-ui-table-section-bg.png);
+	color: #FFF;
+	font-size: 13px;
+	font-weight: 600;
+	height: 23px;
+	line-height: 23px;
+	padding-left: 10px;
+	text-shadow: 0px 1px 1px #64696E;
+}
+
+.ios-ui-table-view.grouped .section {
+	background: none;
+	color: #4C566C;
+	font-size: 16px;
+	font-weight: 600;
+	height: 23px;
+	padding: 5px 0px 5px 20px;
+	text-shadow: 0px 1px 1px #FFF;
+}
+
+.ios-ui-table-view.grouped .section:first-child {
+	padding-top: 15px;
+}
+
+.ios-ui-table-view.grouped {
+	background: #FFF url(img/ios-ui-table-view-bg.png) repeat;
+}
+
+.ios-ui-table-view.grouped ul {
+	border: 1px solid #A1A7AC;
+	margin: 10px;
+	border-radius: 10px;
+	box-shadow: 0px 1px 0px #F4F4F4;
+	-webkit-box-shadow: 0px 1px 0px #F4F4F4;
+	-moz-box-shadow: 0px 1px 0px #F4F4F4;
+	-o-box-shadow: 0px 1px 0px #F4F4F4;
+	-ms-box-shadow: 0px 1px 0px #F4F4F4;
+}
+
+.ios-ui-table-view.grouped ul > li:last-child {
+	border-bottom: none;
+	height: 43px;
+}
+
+.ios-ui-table-view.sectioned ul > li:last-child {
+	border-bottom: none;
+	height: 43px;
+}
+
+.ios-ui-table-view.sectioned ul:last-child {
+	border-bottom: 1px solid #CACACA;
+}
+
+.ios-ui-table-view ul > li:last-child.active {
+	height: 44px;
+}
+
+.nontouch .ios-ui-table-view ul > li:last-child:active {
+	height: 44px;
+}
+
+.ios-ui-table-view form {
+	margin: 10px 10px 0px 10px;
+}
+
+.ios-ui-table-view .ios-ui-button {
+	background-color: #F7F7F7;
+	background-image: none;
+	border: 1px solid #A1A7AC;
+	border-radius: 10px;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	-o-border-radius: 10px;
+	-ms-border-radius: 10px;
+	box-shadow: 0px 1px 0px #F4F4F4;
+	padding-left: 0;
+	padding-right: 0;
+	overflow: hidden;
+	line-height: 18px;
+}
+
+.ios-ui-table-view .ios-ui-button:active {
+	background-color: #DDD;
+	background-image: none;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
+
+	.ios-ui-table-view ul > li {
+		background: url(img/ios-ui-table-view-arrow@2x.png) no-repeat right center;
+		background-size: 22px 19px, 100%;
+		-webkit-background-size: 22px 19px, 100%;
+		-moz-background-size: 22px 19px, 100%;
+		-o-background-size: 22px 19px, 100%;
+		-ms-background-size: 22px 19px, 100%;
+	}
+	
+	.ios-ui-table-view ul > li.active {
+		background-image: url(img/ios-ui-table-view-arrow-selected@2x.png), -moz-linear-gradient(top,  #058cf5 0%, #015de6 100%);
+		background-image: url(img/ios-ui-table-view-arrow-selected@2x.png), -webkit-linear-gradient(top,  #058cf5 0%,#015de6 100%);
+		background-size: 22px 19px, 100%;
+		-webkit-background-size: 22px 19px, 100%;
+		-moz-background-size: 22px 19px, 100%;
+		-o-background-size: 22px 19px, 100%;
+		-ms-background-size: 22px 19px, 100%;
+	}
+	
+	.nontouch .ios-ui-table-view ul > li:active {
+		background-image: url(img/ios-ui-table-view-arrow-selected@2x.png), -moz-linear-gradient(top,  #058cf5 0%, #015de6 100%);
+		background-image: url(img/ios-ui-table-view-arrow-selected@2x.png), -webkit-linear-gradient(top,  #058cf5 0%,#015de6 100%);
+		background-size: 22px 19px, 100%;
+		-webkit-background-size: 22px 19px, 100%;
+		-moz-background-size: 22px 19px, 100%;
+		-o-background-size: 22px 19px, 100%;
+		-ms-background-size: 22px 19px, 100%;
+	}
+
+}
+
+
+/* UIScrollView Styles */
+
+.ios-ui-scroll-view {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	width: 100%;
+	overflow: auto;
+}
+
+.nontouch .ios-ui-scroll-view {
+	overflow: auto;
+}
+
+.ios-ui-scroll-view > .scroll-view {
+	position: absolute;
+	z-index: 1;
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+	width: 100%;
+	height: auto;
+	min-height: 100%;
+	padding: 0;
+}
+
+/* UIModalView Styles */
+
+.ios-ui-modal-view {
+	background: #FFF;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	width: 100%;
+	z-index: 100;
+	opacity: 1;
+	
+	-webkit-transform: translateY(100%);
+	-moz-transform: translateY(100%);
+	-o-transform: translateY(100%);
+	-ms-transform: translateY(100%);
+	
+	-webkit-transition: -webkit-transform 400ms ease-in-out;
+	-moz-transition: -moz-transform 400ms ease-in-out;
+	-o-transition: -o-transform 400ms ease-in-out;
+	-ms-transition: -ms-transform 400ms ease-in-out;
+}
+
+.ios-ui-modal-view.visible {
+
+	opacity: 1;
+
+	-webkit-transform: translateY(0);
+	-moz-transform: translateY(0);
+	-o-transform: translateY(0);
+	-ms-transform: translateY(0);
+
+	-webkit-transition: -webkit-transform 400ms ease-in-out;
+	-moz-transition: -moz-transform 400ms ease-in-out;
+	-o-transition: -o-transform 400ms ease-in-out;
+	-ms-transition: -ms-transform 400ms ease-in-out;
+	
+}
+
+.ios-ui-modal-view > .ios-ui-view {
+	bottom: 0px;
+	position: absolute;
+	top: 0px;
+	width: 100%;
+	-webkit-backface-visibility: hidden;
+	-moz-backface-visibility: hidden;
+	-o-backface-visibility: hidden;
+	-ms-backface-visibility: hidden;
+}
+
+/* Form Styles */
+
+form {
+	position: relative;
+	margin: 20px 20px 0px 20px;
+}
+
+form > input {
+	background: #FFF;
+	outline: none;
+	border: 1px solid #CCC;
+	height: 44px;
+	font-size: 16px;
+	width: 100%;
+	padding: 10px;
+	margin: 0 auto;
+	left: 0;
+	right: 0;
+	position: relative;
+	margin-top: 0px;
+	margin-bottom: 20px;
+	
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-o-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-o-border-radius: 5px;
+	-ms-border-radius: 5px;
+	
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	-o-appearance: none;
+	-ms-appearance: none;
+	
+	-moz-box-shadow: inset 0 0 5px rbga(0, 0, 0, .3);
+	-o-box-shadow: inset 0 0 5px rbga(0, 0, 0, .3);
+	-ms-box-shadow: inset 0 0 5px rbga(0, 0, 0, .3);
+	-webkit-box-shadow: inset 0 0 5px rbga(0, 0, 0, .3);
+	box-shadow: inner 0 0 5px #888;
+	
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+	z-index: 10000;
+}
+
+form > input:focus {
+	box-shadow: 0 0 2px 2px rgba(149, 161, 255, .2);
+	-webkit-box-shadow: 0 0 2px 2px rgba(149, 161, 255, .2);
+	-moz-box-shadow: 0 0 2px 2px rgba(149, 161, 255, .2);
+	-o-box-shadow: 0 0 2px 2px rgba(149, 161, 255, .2);
+	-ms-box-shadow: 0 0 2px 2px rgba(149, 161, 255, .2);
+}
+
+.ios-ui-button {
+	
+	color: #333;
+	cursor: pointer;
+	font-size: 16px;
+	width: 100%;
+	font-weight: bold;
+	margin-top: 10px;
+	border: 1px solid #CCC;
+	text-align: center;
+	text-shadow: 0px 0px 1px #FFF;
+	padding-top: 12px;
+	padding-bottom: 13px;
+	box-sizing: border-box;
+	
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	-o-border-radius: 5px;
+	-ms-border-radius: 5px;
+	
+	-webkit-tap-highlight-color: rgba(0,0,0,0); 
+	
+	background-image: linear-gradient(bottom, rgb(224,224,224) 0%, rgb(235,235,235) 100%);
+	background-image: -o-linear-gradient(bottom, rgb(224,224,224) 0%, rgb(235,235,235) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(224,224,224) 0%, rgb(235,235,235) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(224,224,224) 0%, rgb(235,235,235) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(224,224,224) 0%, rgb(235,235,235) 100%);
+	
+	background-image: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(0, rgb(224,224,224)),
+		color-stop(1, rgb(235,235,235))
+	);
+
+}
+
+.ios-ui-button.touched {
+	background-image: linear-gradient(bottom, rgb(196,196,196) 0%, rgb(214,214,214) 100%);
+	background-image: -o-linear-gradient(bottom, rgb(196,196,196) 0%, rgb(214,214,214) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(196,196,196) 0%, rgb(214,214,214) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(196,196,196) 0%, rgb(214,214,214) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(196,196,196) 0%, rgb(214,214,214) 100%);
+	
+	background-image: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(0, rgb(196,196,196)),
+		color-stop(1, rgb(214,214,214))
+	);
+}
+
+.ios-ui-button:active {
+	background-image: linear-gradient(bottom, rgb(196,196,196) 0%, rgb(214,214,214) 100%);
+	background-image: -o-linear-gradient(bottom, rgb(196,196,196) 0%, rgb(214,214,214) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(196,196,196) 0%, rgb(214,214,214) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(196,196,196) 0%, rgb(214,214,214) 100%);
+	background-image: -ms-linear-gradient(bottom, rgb(196,196,196) 0%, rgb(214,214,214) 100%);
+	
+	background-image: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(0, rgb(196,196,196)),
+		color-stop(1, rgb(214,214,214))
+	);
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
+
+	.ios-ui-button {
+		border:none;
+    box-shadow: inset 0 0 1px #000,
+                inset 0 1px 0 #FFF,
+                0 1px 1px -1px rgba(0, 0, 0, .5);
+	}
+	
+}
+	
+/* UI Tab Bar Styles */
+
+.ios-ui-tab-view {
+	bottom: 0;
+	display: block;
+	position: absolute;
+	top: 0px;
+	width: 100%;
+}
+
+.ios-ui-tab-view > .ios-ui-view.hidden {
+	bottom: 49px;
+}
+
+.ios-ui-tab-view > .ios-ui-view.hidden {
+	display: none;
+}
+
+.ios-ui-tab-bar {
+	background: url(img/ios-ui-tab-bar-bg.png) repeat-x;
+	display: table;
+	bottom: 0px;
+	position: absolute;
+	height: 45px;
+	padding: 2px;
+	width: 100%;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
+
+	.ios-ui-tab-bar {
+		background-image: url(img/ios-ui-tab-bar-bg@2x.png);
+		background-size: 49px 15px;
+		-webkit-background-size: 49px 15px;
+		-moz-background-size: 49px 15px;
+		-o-background-size: 49px 15px;
+		-ms-background-size: 49px 15px;
+	}
+	
+}
+
+.ios-ui-tab-bar-item {
+	cursor: pointer;
+	display: table-cell;
+	height: 33px;
+	min-width: 80px;
+}
+
+.ios-ui-tab-bar-item.active {
+	background: rgba(255, 255, 255, .1);
+	border-radius: 3px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	-o-border-radius: 3px;
+	-ms-border-radius: 3px;
+}
+
+.ios-ui-tab-bar-item.active:hover {
+	background: rgba(255, 255, 255, .15);
+}
+
+.ios-ui-tab-bar-item > .icon {
+	text-align: center;
+	padding-top: 3px;
+}
+
+.ios-ui-tab-bar-item > .title {
+	color: #FFF;
+	font-size: 10px;
+	text-align: center;
+}
+
+/* UIFlipView */
+
+.ui-flip-view {
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	-webkit-perspective: 1200px;
+	-moz-perspective: 1200px;
+	-o-perspective: 1200px;
+	-ms-perspective: 1200px;
+	overflow: hidden;
+}
+
+.ui-flip-view .ui-view {
+	height: 100%;
+	width: 100%;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+.ui-flip-view .ui-view.animated {
+	-webkit-transition: -webkit-transform 0.6s ease-in-out;
+	-moz-transition: -webkit-transform 0.6s ease-in-out;
+	-o-transition: -webkit-transform 0.6s ease-in-out;
+	-ms-transition: -webkit-transform 0.6s ease-in-out;
+}
+
+.ui-flip-view .ui-view.front {
+	z-index: 900;
+	-webkit-transform: rotateY(0deg);
+	-webkit-transform-style: preserve-3d;
+	-webkit-backface-visibility: hidden;
+	-moz-transform: rotateY(0deg);
+	-moz-transform-style: preserve-3d;
+	-moz-backface-visibility: hidden;
+	-o-transform: rotateY(0deg);
+	-o-transform-style: preserve-3d;
+	-o-backface-visibility: hidden;
+	position: absolute;
+	height: 100%;
+	width: 100%;
+}
+
+.ui-flip-view.flipped .ui-view.front {
+	-webkit-transform: rotateY(180deg);
+	-moz-transform: rotateY(180deg);
+	-o-transform: rotateY(180deg);
+	z-index: 900;
+}
+
+.ui-flip-view .ui-view.back {
+	-webkit-transform: rotateY(-180deg);
+	-webkit-transform-style: preserve-3d;
+	-webkit-backface-visibility: hidden;
+	-moz-transform: rotateY(-180deg);
+	-moz-transform-style: preserve-3d;
+	-moz-backface-visibility: hidden;
+	position: absolute;
+	z-index: 800;
+}
+
+.ui-flip-view.flipped .ui-view.back {
+	-webkit-transform: rotateY(0deg);
+	-moz-transform: rotateY(0deg);
+	-o-transform: rotateY(0deg);
+	z-index: 1000;
+}
+
+/* Element: UISegmentedControl */
+
+.ios-ui-segmented-control {
+	
+	background-color: #354F72;
+	border: none;
+	color: #FFF;
+	font-size: 12px;
+	font-weight: bold;
+	height: 30px !important;
+	line-height: 30px;
+	list-style: none;
+	top: 7px;
+	position: absolute;
+	left: 7px;
+	right: 7px;
+	overflow: hidden;
+	width: auto !important;
+	padding: 0;
+	text-align: center;
+	text-overflow: ellipsis;
+	text-shadow: 0px -1px 1px rgba(0, 0, 0, .5);
+	
+	-webkit-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, .2), 
+				0px 1px 0px rgba(255, 255, 255, .3);
+	-moz-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, .2), 
+				0px 1px 0px rgba(255, 255, 255, .3);
+	
+	border-radius: 7px;
+	-webkit-border-radius: 7px;
+	-moz-border-radius: 7px;
+}
+
+.ios-ui-segmented-control > .ios-ui-segment {
+		
+	background: #ccd2da; /* Old browsers */
+	background: -moz-linear-gradient(top, #ccd2da 0%, #b5c0ce 1%, #889bb3 50%, #7e93af 50%, #7e93af 100%, #6d83a1 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ccd2da), color-stop(1%,#b5c0ce), color-stop(50%,#889bb3), color-stop(50%,#7e93af), color-stop(100%,#7e93af), color-stop(100%,#6d83a1)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, #ccd2da 0%,#b5c0ce 1%,#889bb3 50%,#7e93af 50%,#7e93af 100%,#6d83a1 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #ccd2da 0%,#b5c0ce 1%,#889bb3 50%,#7e93af 50%,#7e93af 100%,#6d83a1 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, #ccd2da 0%,#b5c0ce 1%,#889bb3 50%,#7e93af 50%,#7e93af 100%,#6d83a1 100%); /* IE10+ */
+	background: linear-gradient(top, #ccd2da 0%,#b5c0ce 1%,#889bb3 50%,#7e93af 50%,#7e93af 100%,#6d83a1 100%); /* W3C */
+	filter: ~"progid:DXImageTransform.Microsoft.gradient( startColorstr='#ccd2da', endColorstr='#6d83a1',GradientType=0 );" /* IE6-9 */
+	
+	border: none;
+	cursor: pointer;
+	float: left;
+	height: 30px;
+	margin: 0;
+	min-width: 35px;
+	padding: 0px 12px;
+	
+	-webkit-tap-highlight-color: rgba(0,0,0,0); 
+	
+	user-select: none;
+	-webkit-user-select: none;
+	
+	-webkit-box-shadow:	inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0px -1px 0px rgba(0, 0, 0, .2);
+	-moz-box-shadow:	inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0px -1px 0px rgba(0, 0, 0, .2);
+	
+}	
+
+.ios-ui-segmented-control > .ios-ui-segment.selected {
+		
+	background: #8aa1bf; /* Old browsers */
+	background: -moz-linear-gradient(top,  #8aa1bf 0%, #5877a2 50%, #476999 50%, #4a6c9b 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#8aa1bf), color-stop(50%,#5877a2), color-stop(50%,#476999), color-stop(100%,#4a6c9b)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #8aa1bf 0%,#5877a2 50%,#476999 50%,#4a6c9b 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #8aa1bf 0%,#5877a2 50%,#476999 50%,#4a6c9b 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #8aa1bf 0%,#5877a2 50%,#476999 50%,#4a6c9b 100%); /* IE10+ */
+	background: linear-gradient(top,  #8aa1bf 0%,#5877a2 50%,#476999 50%,#4a6c9b 100%); /* W3C */
+	filter: ~"progid:DXImageTransform.Microsoft.gradient( startColorstr='#8aa1bf', endColorstr='#4a6c9b',GradientType=0 )"; /* IE6-9 */
+	
+	border: none;
+	-webkit-box-shadow: inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+						inset 0px 1px 0px rgba(0, 0, 0, .4),
+						inset 0px -1px 0px rgba(0, 0, 0, .2);
+	-moz-box-shadow: inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+						inset 0px 1px 0px rgba(0, 0, 0, .4),
+						inset 0px -1px 0px rgba(0, 0, 0, .2);
+					
+}
+
+.ios-ui-segmented-control > .ios-ui-segment:first-child {
+	
+	border: none;
+	-webkit-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.3),
+						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0px -1px 0px rgba(0, 0, 0, .2);
+	-moz-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.3),
+						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0px -1px 0px rgba(0, 0, 0, .2);
+	
+	-webkit-border-top-left-radius: 5px;
+	-webkit-border-bottom-left-radius: 5px;
+	-moz-border-radius-topleft: 5px;
+	-moz-border-radius-bottomleft: 5px;
+	border-top-left-radius: 5px;
+	border-bottom-left-radius: 5px;
+	
+}
+
+.ios-ui-segmented-control > .ios-ui-segment.selected:first-child {
+	
+	border: none;
+	-webkit-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.3),
+						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0px -1px 0px rgba(0, 0, 0, .2);
+	-moz-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.3),
+						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset -1px 0px 0px rgba(40, 74, 124, 0.4),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0px -1px 0px rgba(0, 0, 0, .2);
+	
+
+}
+
+.ios-ui-segmented-control > .ios-ui-segment:last-child {
+	
+	border: none;
+	-webkit-box-shadow:	inset -1px 0px 1px rgba(0, 0, 0, 0.3),
+						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0px -1px 0px rgba(0, 0, 0, .2);
+	-moz-box-shadow:	inset -1px 0px 1px rgba(0, 0, 0, 0.3),
+						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0px -1px 0px rgba(0, 0, 0, .2);
+						
+	-webkit-border-top-right-radius: 5px;
+	-webkit-border-bottom-right-radius: 5px;
+	-moz-border-radius-topright: 5px;
+	-moz-border-radius-bottomright: 5px;
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+	
+}
+
+.ios-ui-segmented-control > .ios-ui-segment.selected:last-child {
+	
+	border: none;
+	-webkit-box-shadow:	inset -1px 0px 1px rgba(0, 0, 0, 0.3),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset 0px -1px 0px rgba(0, 0, 0, .2);
+	-moz-box-shadow:	inset -1px 0px 1px rgba(0, 0, 0, 0.3),
+						inset 0px 1px 0px rgba(0, 0, 0, .2),
+						inset 0 2px 1px -1px rgba(0, 0, 0, .3),
+						inset 0px -1px 0px rgba(0, 0, 0, .2);
+	
+}
+
+/* UITableForm */
+
+.ios-ui-table-form {
+	background: #E2E7ED;
+	height: 100%;
+	position: absolute;
+	width: 100%;
+}
+
+.ios-ui-table-form ul {
+	background: #F7F7F7;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+}
+
+.ios-ui-table-form > .scroll-view {
+	position: absolute;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+}
+
+.ios-ui-table-form ul > li {
+	background: rgba(0, 0, 0, 0) no-repeat right center;
+	cursor: pointer;
+	font-size: 14px;
+	margin: 0;
+	height: 42px;
+	padding: 0px 16px;
+	line-height: 42px;
+	border-top: 1px solid #FFF;
+	border-bottom: 1px solid #CACACA;
+}
+
+.ios-ui-table-form ul > li:first-child {
+	border-top: none;
+	height: 43px;
+	line-height: 44px;
+}
+
+.ios-ui-table-form .section {
+	background: url(../img/ios-ui-table-section-bg.png);
+	color: #FFF;
+	font-size: 13px;
+	font-weight: 600;
+	height: 23px;
+	line-height: 23px;
+	padding-left: 10px;
+	text-shadow: 0px 1px 1px #64696E;
+}
+
+.ios-ui-table-form.grouped .section {
+	background: none;
+	color: #4C566C;
+	font-size: 16px;
+	font-weight: 600;
+	height: 23px;
+	padding: 5px 0px 5px 20px;
+	text-shadow: 0px 1px 1px #FFF;
+}
+
+.ios-ui-table-form.grouped .section:first-child {
+	padding-top: 15px;
+}
+
+.ios-ui-table-form.grouped {
+	background: #FFF url(img/ios-ui-table-view-bg.png) repeat;
+}
+
+.ios-ui-table-form.grouped ul {
+	border: 1px solid #A1A7AC;
+	margin: 10px;
+	border-radius: 10px;
+	box-shadow: 0px 1px 0px #F4F4F4;
+	-webkit-box-shadow: 0px 1px 0px #F4F4F4;
+	-moz-box-shadow: 0px 1px 0px #F4F4F4;
+	-o-box-shadow: 0px 1px 0px #F4F4F4;
+	-ms-box-shadow: 0px 1px 0px #F4F4F4;
+}
+
+.ios-ui-table-form.grouped ul > li:last-child {
+	border-bottom: none;
+	height: 43px;
+}
+
+.ios-ui-table-form.sectioned ul > li:last-child {
+	border-bottom: none;
+	height: 43px;
+}
+
+.ios-ui-table-form.sectioned ul:last-child {
+	border-bottom: 1px solid #CACACA;
+}
+
+.ios-ui-table-form form {
+	margin: 0px;
+}
+
+.ios-ui-table-form input {
+	border: none;
+	float: right;
+	font-size: 14px;
+	padding: 0;
+	margin: 0;
+	background: none;
+	height: 43px;
+	outline: none;
+	text-align: right;
+	text-overflow: ellipsis;
+	width: 60%;
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.ios-ui-table-form textarea {
+	border: none;
+	font-size: 14px;
+	padding: 5px 0px;
+	margin: 0 auto;
+	background: none;
+	height: 43px;
+	outline: none;
+	margin-top: 5px;
+	text-align: left;
+	text-overflow: ellipsis;
+	width: 100%;
+	max-width: 100%;
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.ios-ui-table-form ul > li .title {
+	float: left;
+	height: 100%;
+	line-height: 42px;
+}
+
+.ios-ui-table-form ul > li .subtitle {
+	color: #2470D8;
+	float: right;
+	font-size: 12px;
+	height: 100%;
+	line-height: 42px;
+	margin-right: 5px;
+}
+
+.ios-ui-table-form label {
+	color: #666;
+	font-size: 12px;
+}
+
+.ios-ui-table-form ul > li:first-child input {
+	padding-top: 1px;
+}
+
+.ios-ui-table-form input:focus {
+	float: right;
+	outline: none;
+}
+
+.ios-ui-table-form .ios-ui-button {
+	background-color: #F7F7F7;
+	background-image: none;
+	border: 1px solid #A1A7AC;
+	border-radius: 10px;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	-o-border-radius: 10px;
+	-ms-border-radius: 10px;
+	box-shadow: 0px 1px 0px #F4F4F4;
+	padding-left: 0;
+	padding-right: 0;
+	overflow: hidden;
+	text-align: center;
+	line-height: 18px;
+	width: 100%;
+}
+
+.ios-ui-table-form .ios-ui-button:active {
+	background-color: #DDD;
+	background-image: none;
+}
+
+/* UISearchBar */
+
+.ios-ui-search-bar {
+	
+	background: #e1e7eb; /* Old browsers */
+	background: -moz-linear-gradient(top,  #e1e7eb 0%, #e1e7eb 1%, #bac4cb 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e1e7eb), color-stop(1%,#e1e7eb), color-stop(100%,#bac4cb)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #e1e7eb 0%,#e1e7eb 1%,#bac4cb 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #e1e7eb 0%,#e1e7eb 1%,#bac4cb 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #e1e7eb 0%,#e1e7eb 1%,#bac4cb 100%); /* IE10+ */
+	background: linear-gradient(top,  #e1e7eb 0%,#e1e7eb 1%,#bac4cb 100%); /* W3C */
+	filter: ~"progid:DXImageTransform.Microsoft.gradient( startColorstr='#e1e7eb', endColorstr='#bac4cb',GradientType=0 )"; /* IE6-9 */
+	
+	border-bottom: 1px solid #8D9CA8;
+	height: 30px;
+	overflow: hidden;
+	padding: 6px 0px 7px 0px;
+	position: relative;
+	width: 100%;
+
+}
+
+.ios-ui-search-bar input[type=text] {
+	
+	background: #FFF url(img/ios-ui-search-bar-icon.png) no-repeat left;
+	border: 1px solid #9AA9B3;
+	font-size: 14px;
+	left: 7px;
+	outline: none;
+	overflow: hidden;
+	padding: 5px 5px 5px 30px;
+	position: absolute;
+	right: 7px;
+			
+	
+	border-radius: 15px;
+	-moz-border-radius: 15px;
+	-webkit-border-radius: 15px;
+	-o-border-radius: 15px;
+	
+	-webkit-box-shadow: inset 0 2px 3px rgba(0, 0, 0, .4);
+		
+	-webkit-tap-highlight-color: rgba(0,0,0,0); 
+	
+}
+
+.ios-ui-search-bar input[type=text]:focus {
+	/* correct webkit outline bug */
+	outline-color: rgba(255,255,255,0);
+	outline-offset: 10px;
+}
+
+.ios-ui-search-bar .ios-ui-search-button {
+	
+	background: #96a0ba; /* Old browsers */
+	background: -moz-linear-gradient(top,  #96a0ba 0%, #647792 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#96a0ba), color-stop(100%,#647792)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #96a0ba 0%,#647792 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #96a0ba 0%,#647792 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #96a0ba 0%,#647792 100%); /* IE10+ */
+	background: linear-gradient(top,  #96a0ba 0%,#647792 100%); /* W3C */
+	filter: ~"progid:DXImageTransform.Microsoft.gradient( startColorstr='#96a0ba', endColorstr='#647792',GradientType=0 )"; /* IE6-9 */
+		
+	color: #FFF;
+	cursor: pointer;
+	display: none;
+	font-weight: bold;
+	font-size: 12px;
+	line-height: 30px;
+	padding: 0px 10px;
+	position: absolute;
+	height: 30px;
+	margin-top: 1px;
+	overflow: hidden;
+	right: -64px;
+	text-align: center;
+	text-shadow: 0px -1px 1px rgba(0, 0, 0, .4);
+	width: 60px;
+	
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-o-border-radius: 5px;
+	
+	background-clip: padding-box;
+	-webkit-background-clip: padding-box;
+	
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-o-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	
+	user-select: none;
+	-webkit-user-select: none;
+	
+	-webkit-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset -1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset 0px 1px 1px rgba(0, 0, 0, .6),
+						inset 0px -1px 1px rgba(0, 0, 0, .2),
+						0px 1px 0px rgba(255, 255, 255, .3);
+	-moz-box-shadow:	inset 1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset -1px 0px 1px rgba(0, 0, 0, 0.2),
+						inset 0px 1px 1px rgba(0, 0, 0, .6),
+						inset 0px -1px 1px rgba(0, 0, 0, .2),
+						0px 1px 0px rgba(255, 255, 255, .3);
+				
+	-webkit-tap-highlight-color: rgba(0,0,0,0); 
+
+}
+
+.ios-ui-search-bar .ios-ui-search-button:active {
+	background: #93a1b8; /* Old browsers */
+	background: -moz-linear-gradient(top,  #93a1b8 0%, #7a8799 1%, #516075 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#93a1b8), color-stop(1%,#7a8799), color-stop(100%,#516075)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top,  #93a1b8 0%,#7a8799 1%,#516075 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top,  #93a1b8 0%,#7a8799 1%,#516075 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top,  #93a1b8 0%,#7a8799 1%,#516075 100%); /* IE10+ */
+	background: linear-gradient(top,  #93a1b8 0%,#7a8799 1%,#516075 100%); /* W3C */
+	filter: ~"progid:DXImageTransform.Microsoft.gradient( startColorstr='#93a1b8', endColorstr='#516075',GradientType=0 )"; /* IE6-9 */;
+}
+
+::-webkit-input-placeholder {  -webkit-appearance: none; -moz-appearance: none; }
+
+::-webkit-search-cancel-button { -webkit-appearance: none; -moz-appearance: none; }
+
+@media only screen and (-webkit-min-device-pixel-ratio:1.5), only screen and (min-device-pixel-ratio:1.5) {
+
+	.ios-ui-search-bar {
+		
+		background-image: url(img/ios-ui-search-bar-bg@2x.png);
+		border: none;
+		height: 31px;
+		
+		background-size: 5px 44px;
+		-webkit-background-size: 5px 44px;
+		-moz-background-size: 5px 44px;
+		
+	}
+	
+	.ios-ui-search-bar input[type=text] {
+		
+		background-image:url(img/ios-ui-search-bar-icon@2x.png);
+		
+		background-size: 25px 21px;
+		-webkit-background-size: 25px 21px;
+		-moz-background-size: 25px 21px;
+		
+	}
+	
+	.ios-ui-search-bar .ios-ui-search-button {
+		
+		border:none;
+		line-height: 30px;
+						
+		background-size: 15px 32px;
+		-webkit-background-size: 15px 32px;
+		-moz-background-size: 15px 32px;
+	
+	}
+
+}
+
+@-moz-document url-prefix() {
+
+	/* Element: UISearchBar */
+	
+	.ios-ui-search-bar input[type=text]  {
+		/* correct firebox padding bug */
+		padding: 6px 5px 4px 30px;
+		left: 0px;
+		width: 100%;
+		position: relative;
+	}
+	
+	.ios-ui-search-bar .ios-ui-search-button  {
+		/* correct firebox padding bug */
+		line-height: 30px;
+	}
+	
+	.ios-ff-ui-search-bar-wrapper {
+		height: 30px;
+		left: 7px;
+		right: 44px;
+		position: absolute;
+		
+	}
+
+}

@@ -196,7 +196,7 @@ html {
 	padding: 0px;
 	position: absolute;
 	text-align: center;
-	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.35);
+	text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.35);
 	width: 100%;
 	z-index: 1;
 }
@@ -265,7 +265,7 @@ html {
 	position: absolute;
 	text-align: center;
 	text-overflow: ellipsis;
-	text-shadow: 0px -1px 0 rgba(0, 0, 0, .5);
+	text-shadow: 0px -1px 1px rgba(0, 0, 0, .5);
 	z-index: 10;
 	
 	-webkit-tap-highlight-color: rgba(0,0,0,0);
@@ -534,7 +534,7 @@ html {
 	height: 23px;
 	line-height: 23px;
 	padding-left: 10px;
-	text-shadow: 0px 1px #64696E;
+	text-shadow: 0px 1px 1px #64696E;
 }
 
 .ios-ui-table-view.grouped .section {
@@ -544,7 +544,7 @@ html {
 	font-weight: 600;
 	height: 23px;
 	padding: 5px 0px 5px 20px;
-	text-shadow: 0px 1px #FFF;
+	text-shadow: 0px 1px 1px #FFF;
 }
 
 .ios-ui-table-view.grouped .section:first-child {
@@ -1021,7 +1021,7 @@ form > input:focus {
 	padding: 0;
 	text-align: center;
 	text-overflow: ellipsis;
-	text-shadow: 0px -1px 0 rgba(0, 0, 0, .5);
+	text-shadow: 0px -1px 1px rgba(0, 0, 0, .5);
 	
 	-webkit-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, .2), 
 				0px 1px 0px rgba(255, 255, 255, .3);
@@ -1216,7 +1216,7 @@ form > input:focus {
 	height: 23px;
 	line-height: 23px;
 	padding-left: 10px;
-	text-shadow: 0px 1px #64696E;
+	text-shadow: 0px 1px 1px #64696E;
 }
 
 .ios-ui-table-form.grouped .section {
@@ -1226,7 +1226,7 @@ form > input:focus {
 	font-weight: 600;
 	height: 23px;
 	padding: 5px 0px 5px 20px;
-	text-shadow: 0px 1px #FFF;
+	text-shadow: 0px 1px 1px #FFF;
 }
 
 .ios-ui-table-form.grouped .section:first-child {
@@ -1425,7 +1425,7 @@ form > input:focus {
 	overflow: hidden;
 	right: -64px;
 	text-align: center;
-	text-shadow: 0px -1px 0 rgba(0, 0, 0, .4);
+	text-shadow: 0px -1px 1px rgba(0, 0, 0, .4);
 	width: 60px;
 	
 	border-radius: 5px;

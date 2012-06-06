@@ -174,11 +174,12 @@ Orange.add('ios', function(O) {
 		
 		presentModalView: function() {
 			
-			this.onLoad();
+			this.load();
 			
 			$('body').append(this.target);
 			
 			setTimeout(Class.proxy(function() {
+				this.show();
 				this.target.addClass('visible');
 			}, this), 50);
 					
@@ -186,10 +187,12 @@ Orange.add('ios', function(O) {
 		
 		dismissModalView: function() {
 					
+			this.hide();
+					
 			this.target.removeClass('visible');
 			setTimeout(Class.proxy(function() {
 				this.target.remove();
-				this.onUnload();
+				this.unload();
 			}, this), 300);
 		
 		}
@@ -575,20 +578,12 @@ Orange.add('ios', function(O) {
 			this._super(parent, target);
 			
 			// get name of default view
-			var defaultView = this.target.attr('data-default');
-																									
-			// remove views from DOM
-			for (var i in this.views) {
-				if (this.views[i].name !== defaultView) {
-					this.views[i].target.addClass('hidden');
-				} else {
-					this.activeView = this.views[i];
-				}
-			}
+			this.defaultView = this.target.attr('data-default');
 			
 			this.target.removeAttr('data-default');
 			
 		},
+		
 		
 		onWillLoad: function() {
 
@@ -609,8 +604,24 @@ Orange.add('ios', function(O) {
 			// load view
 			for (var i in this.views) {
 				this.views[i].onLoad();
+				this.views[i].target.addClass('hidden');
 			}
 							
+		},
+		
+		onWillAppear: function() {
+		
+			// remove views from DOM
+			for (var i in this.views) {
+				if (this.views[i].name == defaultView) {
+					this.activeView = this.views[i];
+					this.activeView.show();
+					this.activeView.removeClass('hidden');
+				}
+			}
+		
+			this._super();
+		
 		},
 		
 		onClick: function(e) {
@@ -625,8 +636,10 @@ Orange.add('ios', function(O) {
 		activateTab: function(name) {
 		
 			this.activeView.target.addClass('hidden');
+			this.activeView.hide();
 			this.getView(name).target.removeClass('hidden');
 			this.activeView = this.getView(name);
+			this.activeView.show();
 			
 			this.tabBar.find('.ios-ui-tab-bar-item').removeClass('active');
 			this.tabBar.find('.ios-ui-tab-bar-item:[data-tab="' + name + '"]').addClass('active');

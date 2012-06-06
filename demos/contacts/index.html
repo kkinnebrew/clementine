@@ -1,14 +1,12 @@
-<script type="text/javascript" src="lib/jquery-1.7.2.min.js"></script>
-<!--<script type="text/javascript" src="lib/jquery.history.js"></script>-->
-<script src="src/commons.js" type="text/javascript"></script>
-<script src="src/mvc.js" type="text/javascript"></script>
-<!--<script src="src/db.js" type="text/javascript"></script>-->
-<script src="src/ui.js" type="text/javascript"></script>
-<script src="plugins/ios/ios.js" type="text/javascript"></script>
-<script src="plugins/cakephp/cakephp.js" type="text/javascript"></script>
-<script src="lib/socket.io.js" type="text/javascript"></script>
-<script src="lib/inflection.js" type="text/javascript"></script>
-<script src="lib/iscroll.js" type="text/javascript"></script>
+<script type="text/javascript" src="../../lib/jquery-1.7.2.min.js"></script>
+<script src="../../src/commons.js" type="text/javascript"></script>
+<script src="../../src/mvc.js" type="text/javascript"></script>
+<script src="../../src/ui.js" type="text/javascript"></script>
+<script src="../../src/plugins/ios/ios.js" type="text/javascript"></script>
+<script src="../../src/plugins/cakephp/cakephp.js" type="text/javascript"></script>
+<script src="../../lib/socket.io.js" type="text/javascript"></script>
+<script src="../../lib/inflection.js" type="text/javascript"></script>
+<script src="../../lib/iscroll.js" type="text/javascript"></script>
 
 <!-- iOS meta rules -->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,7 +16,7 @@
 <!-- viewport rules -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
 
-<link type="text/css" rel="stylesheet" href="plugins/ios/ios.css" />
+<link type="text/css" rel="stylesheet" href="../../src/plugins/ios/ios.css" />
 
 <style type="text/css">
 
@@ -173,51 +171,6 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 	});
 	
 	test.launch();
-	
-
-	
-//	setTimeout(function() {
-//		
-//		var myScroll;
-//		function loaded() {
-//			console.log("!23");
-//			myScroll = new iScroll('wrapper');
-//		}
-//		
-//		document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
-//		
-//		/* * * * * * * *
-//		 *
-//		 * Use this for high compatibility (iDevice + Android)
-//		 *
-//		 */
-//		loaded();
-//		
-//	
-//	}, 2000);
-//	
-
-//function doOnOrientationChange()
-//  {
-//    switch(window.orientation) 
-//    {  
-//      case -90:
-//      case 90:
-//        alert('landscape');
-//        break; 
-//      default:
-//        alert('portrait');
-//        break; 
-//    }
-//  }
-//
-//  window.onorientationchange = function()
-//  {
-//    doOnOrientationChange();
-//  };
-//
-  // Initial execution
-//  doOnOrientationChange();
 
 });
 

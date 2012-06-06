@@ -99,9 +99,12 @@
 			delete this.target;
 			delete this.ev;
 			delete this.call;
+			delete this;
 		}
+		
+		return EventHandle;
 	
-	});
+	})();
 	
 	
 	Events = (function() {
@@ -138,7 +141,7 @@
 			
 		};
 		
-		Event.prototype.detach = function(ev, call) {
+		Events.prototype.detach = function(ev, call) {
 		
 			if (this._listeners[ev] instanceof Array) {
 				var listeners = this._listeners[ev];
@@ -436,27 +439,34 @@
 				if (navigator.onLine && !isLoaded) {
 					isOnline = true;
 					isLoaded = true;
-					Cache.fire("statusChange", 1);					
+					Cache.fire("statusChange", 1);
 				} else if (navigator.onLine) {
 				  
 				  Ajax.load({
 				  	url: 'ping.js', 
 				  	type: "GET",
 				  	success: function(req) {
-					  	if (isOnline === false) Cache.fire("statusChange", 1);
-					  	isOnline = true;
+					  	if (isOnline === false) {
+					  		isOnline = true;
+					  		Cache.fire("statusChange", 1);
+					  	}
+					  	
 					  },
 					  error: function(req) {
-					  	if (isOnline === true) Cache.fire("statusChange", 0);
-					  	isOnline = false;
+					  	if (isOnline === true) {
+					  		isOnline = false;
+					  		Cache.fire("statusChange", 0);
+					  	}	
 					  }
 				  });
 				  		  				  
 				} else {
 					
 					setTimeout(function() {
-						if (isOnline === true) Cache.fire("statusChange", 0);
-						isOnline = false;
+						if (isOnline === true) {
+							isOnline = false;
+							Cache.fire("statusChange", 0);
+						}
 					}, 100);
 				
 				}
@@ -587,7 +597,7 @@
 		if (!_isSupported) Log.debug("localStorage not supported");	
 				
 	
-		Storage.get = function(key, alt) {
+		Storage.get = function(key) {
 			
 			if (!_isSupported) return;
 			try {
@@ -599,9 +609,8 @@
 					return item.data; 
 				}
 			} catch(e) {
-				Log.error("Error saving object to localStorage");
+				Log.error("Error fetching object from localStorage");
 			}
-			return alt;
 			
 		};
 		
@@ -771,6 +780,10 @@
 				    this.isTablet = true; // ipad
 				else this.isTablet = false;
 				
+				if (navigator.userAgent.match(/OS 5(_\d)+ like Mac OS X/i)) {
+					this.isScrollable = true;
+				} else this.isScrollable = false;
+				
 			},
 			
 			searchString: function (data) {
@@ -894,7 +907,8 @@
 			isMobile: BrowserDetect.isMobile,
 			isTablet: BrowserDetect.isTablet,
 			isDesktop: !(BrowserDetect.isMobile || BrowserDetect.isTablet),
-			isTouch: (BrowserDetect.isMobile || BrowserDetect.isTablet)
+			isTouch: (BrowserDetect.isMobile || BrowserDetect.isTablet),
+			isScrollable: true//BrowserDetect.isScrollable || !(BrowserDetect.isMobile || BrowserDetect.isTablet)
 		}
 	
 	})();
@@ -983,12 +997,12 @@
 
 Orange.add('mvc', function(O) {
 
-	var Application, Collection, Controller, Model, Source, View,
+	var Application, Collection, Controller, Model, Source, View, AjaxSource, PersistenceManager, LocalStorageSource, RestSource, SessionStorageSource,
 			__keyFilterRegex = /[^A-Za-z:0-9_\[\]]/g;
 	
 	var Cache = __import('Cache'), Storage = __import('Storage'), 
 			Loader = __import('Loader'), Location = __import('Location'),
-			Events = __import('Events');
+			Events = __import('Events'), Ajax = __import('Ajax');
 	
 	Application = Class.extend({
 		
@@ -1007,14 +1021,20 @@ Orange.add('mvc', function(O) {
 			if (this.config.hasOwnProperty('logging')) Log.setLevel(this.config.logging);
 		
 			Cache.on('statusChange', Class.proxy(function(e) {
-				
+								
 				if (e.data == 1) {
 					Storage.goOnline();
+					PersistenceManager.init();
 					if (this.config.location) Location.fetch();
 					Log.debug('Application "' + this.name + '" online');
 				} else {
-					Log.debug('Application "' + this.name + '" online');
+					Log.debug('Application "' + this.name + '" offline');
 					Storage.goOffline();
+				}
+				
+				if (Storage.get('appversion') !== this.config.version) {
+					PersistenceManager.flush();
+					Storage.set('appversion', this.config.version)
 				}
 				
 				window.onload = Class.proxy(function() {
@@ -1050,232 +1070,6 @@ Orange.add('mvc', function(O) {
 		destroy: function() {}
 		
 	});
-	
-	
-	Model = Class.extend({
-		
-		initialize: function(data) {
-			this.getName();
-			var field = this.constructor.getKey();
-			this.isSaved = (data || {}).hasOwnProperty(field);
-			this.id = this.isSaved ? data[field] : null;
-			this.data = data || {};
-		},
-		
-		getName: function() {
-			throw 'Cannot instantiate model';
-		},
-		
-		getFields: function() {
-			throw 'Cannot instantiate model';
-		},
-		
-		getSource: function() {
-			throw 'Cannot instantiate model';
-		},
-		
-		get: function(name) {
-			return this.data[name];
-		},
-		
-		set: function(name, value) {
-			this.data[name] = value;
-			this.isSaved = false;
-		},
-		
-		clear: function() {
-			delete this.data[name];
-			this.isSaved = false;
-		},
-		
-		refresh: function() {
-			var item = this.constructor.get(this.getId());
-			this.data = item.toObject();
-			this.isSaved = true;
-			// prevent duplicate refreshes
-		},
-		
-		save: function(success, error, context) {
-			if (this.isSaved) return;
-			var successFunc = function(data) {
-				this.isSaved = true;
-				if (typeof success === 'function') success(data);
-			};
-			this.constructor.set(this.data, Class.proxy(successFunc, this), error, context);
-		},
-		
-		remove: function(success, error, context) {
-			if (this.exists()) {
-				this.constructor.remove(this.id, success, error, context);
-			}
-			this.destroy();
-		},
-		
-		mergeChanges: function(deltas) {
-			
-			// merge values
-			
-		},
-		
-		isSaved: function() {
-			return this.isSaved;
-		},
-		
-		exists: function() {
-			return this.id !== null;
-		},
-		
-		getId: function() {
-			return this.id;
-		},
-		
-		getModel: function() {
-			return this.constructor;
-		},
-		
-		toObject: function() {
-			return this.data;
-		},
-		
-		destroy: function() {
-			this.isSaved = false;
-			this.id = null;
-			this.data = {};
-		}
-		
-	});
-	
-	Model.getKey = function() {
-		var fields = this.getFields();
-		for(var field in fields) {
-			if (fields[field].hasOwnProperty('primaryKey')) return field;
-		}
-	};
-	
-	Model.getId = function() {
-		var fields = this.getFields();
-		for(var field in fields) {
-			if (fields[field].hasOwnProperty('primaryKey')) return fields[field].name;
-		}
-	};
-	
-	Model.getAll = function(query, success, error, context) {
-		var successFunc = function(data) {
-			var mappedData = Model.mapItems.call(this, data);
-			success.call((typeof context === 'function' ? context : this), new Collection(this, mappedData));
-		};
-		this.getSource().getAll(this.getName(), Class.proxy(successFunc, this), error);
-	};
-	
-	Model.get = function(id, success, error, context) {
-		var successFunc = function(data) {
-			var mappedData = Model.mapItem.call(this, data);
-			success.call((typeof context !== 'undefined' ? context : this), new this(mappedData));
-		};
-		this.getSource().get(this.getName(), id, Class.proxy(successFunc, this), error);
-	};
-	
-	Model.set = function(item, success, error, context) {
-		if (item instanceof Model) item = item.toObject();
-		var id = item.hasOwnProperty(this.getKey()) ? item[this.getKey()] : null;
-		var successFunc = function(data) {
-			var mappedData = Model.mapItem.call(this, data);
-			if (typeof success === 'function') success.call((typeof context !== 'undefined' ? context : this), new this(mappedData));
-			this.fire('datachange', [ { action: (id == null ? 'sync' : 'set'), id: mappedData[this.getKey()] } ]);
-		};
-		this.getSource().set(this.getName(), id, Model.unmapItem.call(this, item), Class.proxy(successFunc, this), error);
-	};
-	
-	Model.remove = function(id, success, error) {
-		var deltaId = id;
-		var successFunc = function(data) {
-			if (typeof success === 'function') success.call(this, deltaId);
-			this.fire('datachange', [ { action: 'remove', id: deltaId } ]);
-		};
-		this.getSource().remove(this.getName(), id, Class.proxy(successFunc, this), error);
-	};
-	
-	Model.on = function(ev, call, context) {
-		var proxy = (typeof context !== 'undefined') ? function() { call.apply(context, arguments); } : call;
-		return this.events.on.call(this.events, ev, proxy);
-	},
-	
-	Model.fire = function() {
-		return this.events.fire.apply(this.events, arguments);
-	},
-	
-	Model.detach = function() {
-		return this.events.detach.apply(this.events, arguments);
-	},
-	
-	Model.mapItem = function(data) {
-		var model = {}, fields = this.getFields();											
-		for (var field in fields) {
-			var source = fields[field].name, 
-					value = (data.hasOwnProperty(source)) ? data[source] : undefined;		
-			if (value === undefined) {
-				Log.warn("Could not parse JSON field '" + field + "' for " + this.getName());
-				continue;
-			}
-			model[field] = value;
-		}
-		return model;
-	},
-	
-	Model.mapItems = function(data) {
-		var models = {}, id = this.getKey();
-		for (var i = 0, len = data.length; i < len; i++) {
-			var model = Model.mapItem.call(this, data[i]);
-			if (typeof model === 'object') models[model[id]] = model;
-		}	
-		return models;	
-	},
-	
-	Model.unmapItem = function(object) {	
-		var data = {}, fields = this.getFields();
-		for (var field in fields) {
-			if (this.getKey() == field && !object.hasOwnProperty(this.getKey())) {
-				continue;
-			}
-			var source = fields[field].name,
-					value = (typeof object[field] !== 'undefined') ? object[field] : undefined;
-			if (value === undefined && !fields[field].nullable) {
-				Log.warn("Missing data for field '" + field + "' for " + this.getName());
-				continue;
-			}		
-			data[source] = value;
-		}
-		return data;
-	}
-	
-	Model.extend = function(def) {
-		
-		var m = Class.extend.call(this, def);
-				
-		var required = ['getName', 'getId', 'getFields', 'getSource'];
-		for (var i = 0, len = required.length; i < len; i++) {
-			if (!def.hasOwnProperty(required[i])) throw "Class missing '" + required[i] + "()' implementation";
-			m[required[i]] = def[required[i]];
-		}
-		
-		var source = def.getSource();
-		if (!source.supportsModels()) throw "Source '" + source.getName() + "' does not support models";
-		
-		m.events = new Events(null, this);
-		
-		m.getKey = function() { return Model.getKey.apply(m, arguments); };
-		m.getAll = function() { return Model.getAll.apply(m, arguments); };
-		m.get = function() { return Model.get.apply(m, arguments); };
-		m.set = function() { return Model.set.apply(m, arguments); };
-		m.remove = function() { return Model.remove.apply(m, arguments); };
-		
-		m.on = function() { return Model.on.apply(m, arguments); };
-		m.fire = function() { return Model.fire.apply(m, arguments); };
-		m.detach = function() { return Model.detach.apply(m, arguments); };
-		
-		return m;
-			
-	};
 	
 	
 	View = (function() {
@@ -1386,32 +1180,8 @@ Orange.add('mvc', function(O) {
 		
 	});
 	
-	
-	O.Application = Application;
-	O.Collection	= Collection;
-	O.Controller	= Controller;
-	O.Model				= Model;
-	O.Source			= Source;
-	O.View				= View;
-	
-}, [], '1.0.2');
-
-/**
- * db.js | Orange DB Module 1.0.2
- * @date 7.21.2011
- * @author Kevin Kinnebrew
- * @dependencies commons, mvc
- * @description adds common data source types
- */
-
-Orange.add('db', function(O) {
-
-	var AjaxSource, LocalStorageSource, RestSource, SessionStorageSource;
-	
-	var Cache = __import('Cache'), Storage = __import('Storage'), Ajax = __import('Ajax'), Source = __import('Source');
-	
 	AjaxSource = Source.extend({
-	
+		
 		request: function(config) {
 		
 			if (Cache.isActive() && !Cache.isOnline()) {
@@ -1468,6 +1238,11 @@ Orange.add('db', function(O) {
 			return data.hasOwnProperty(id) ? data[id] : undefined;
 		},
 		
+		setAll: function(type, data) {
+			if (data instanceof Array) throw 'Invalid input, expecting object';
+			return Storage.set(this.getPath(type), data);
+		},
+		
 		set: function(type, id, object) {
 			if (id === null) id = this.nextKey(type);
 			var data = Storage.get(this.getPath(type));
@@ -1491,6 +1266,84 @@ Orange.add('db', function(O) {
 		nextKey: function(type) {
 			var size = 0, key, keys = [];
 			var obj = Storage.get(this.getPath(type));
+			for (key in obj) {
+				if (obj.hasOwnProperty(key) && !isNaN(key)) keys.push(parseInt(key, 10));
+			} 
+			return (keys.length > 0) ? Math.max.apply(Math, keys) + 1 : 1;
+		}
+	
+	});
+	
+	
+	PersistentStorageSource = Source.extend({
+	
+		isPersistent: function() {
+			return true;
+		},
+		
+		supportsModels: function() {
+			return true;
+		},
+		
+		getPath: function() {
+			return this.getName() + ':' + 'model';
+		},
+		
+		getAllActions: function() {
+			var models = Storage.get(this.getPath()) || {}, output = {};
+			for (var model in models) {
+				var m = Model._models[model],
+						actions = models[model];
+				for (var id in actions) {
+					output[id] = { model: m, item: actions[id] };
+				}
+			}
+			return (output) ? output : null;
+		},
+		
+		getAll: function(type) {
+			var models = Storage.get(this.getPath());
+			return (typeof models !== 'undefined' && models.hasOwnProperty(type)) ? models[type] : null; 
+		},
+		
+		get: function(type, id) {
+			var models = Storage.get(this.getPath());
+			return (typeof models !== 'undefined' && models.hasOwnProperty(type)) ? (models[type].hasOwnProperty(id) ? models[type][id] : null) : null; 
+		},
+		
+		setAll: function(type, data) {
+			if (data instanceof Array) throw 'Invalid input, expecting object';
+			var models = Storage.get(this.getPath());
+			models[type] = data;
+			return Storage.set(this.getPath(), models);
+		},
+		
+		set: function(type, id, object) {
+			if (id === null) id = this.nextKey(type);
+			var data = Storage.get(this.getPath()) || {};
+			if (!data.hasOwnProperty(type)) data[type] = {};
+			data[type][id] = object;
+			Storage.set(this.getPath(), data);
+			return id;
+		},
+		
+		remove: function(type, id) {
+			var data = Storage.get(this.getPath());
+			if (data && data.hasOwnProperty(type) && data[type].hasOwnProperty(id)) delete data[type][id];
+			else return null;
+			Storage.set(this.getPath(), data);
+			return true;
+		},
+		
+		flush: function(type) {
+			 Storage.remove(this.getPath());
+		},
+		
+		nextKey: function(type) {
+			var size = 0, key, keys = [];
+			var obj = Storage.get(this.getPath()) || {};
+			if (obj.hasOwnProperty(type)) obj = obj[type];
+			else obj[type] = {};
 			for (key in obj) {
 				if (obj.hasOwnProperty(key) && !isNaN(key)) keys.push(parseInt(key, 10));
 			} 
@@ -1626,21 +1479,584 @@ Orange.add('db', function(O) {
 	});
 	
 	
-	SessionStorageSource = Source.extend({});
+	
+	Model = Class.extend({
+		
+		initialize: function(data) {
+			this.getName();
+			var field = this.constructor.getKey();
+			this.isSaved = (data || {}).hasOwnProperty(field);
+			this.id = this.isSaved ? data[field] : null;
+			this.data = data || {};
+			if (data.hasOwnProperty('_unsaved')) this.isSaved = false;
+		},
+		
+		getName: function() {
+			throw 'Cannot instantiate model';
+		},
+		
+		getFields: function() {
+			throw 'Cannot instantiate model';
+		},
+		
+		getSource: function() {
+			throw 'Cannot instantiate model';
+		},
+		
+		get: function(name) {
+			return this.data[name];
+		},
+		
+		set: function(name, value) {
+			this.data[name] = value;
+			this.isSaved = false;
+		},
+		
+		clear: function() {
+			delete this.data[name];
+			this.isSaved = false;
+		},
+		
+		refresh: function() {
+			var item = this.constructor.get(this.getId());
+			this.data = item.toObject();
+			this.isSaved = true;
+			// prevent duplicate refreshes
+		},
+		
+		save: function(success, error, context) {
+			if (this.isSaved) return;
+			var successFunc = function(data) {
+				this.isSaved = true;
+				if (typeof success === 'function') success(data);
+			};
+			this.constructor.set(this.data, Class.proxy(successFunc, this), error, context);
+		},
+		
+		remove: function(success, error, context) {
+			if (this.exists()) {
+				this.constructor.remove(this.id, success, error, context);
+			}
+			this.destroy();
+		},
+		
+		mergeChanges: function(deltas) {
+			
+			// merge values
+			
+		},
+		
+		isSaved: function() {
+			return this.isSaved;
+		},
+		
+		exists: function() {
+			return this.id !== null;
+		},
+		
+		getId: function() {
+			return this.id;
+		},
+		
+		getModel: function() {
+			return this.constructor;
+		},
+		
+		toObject: function() {
+			return this.data;
+		},
+		
+		destroy: function() {
+			this.isSaved = false;
+			this.id = null;
+			this.data = {};
+		}
+		
+	});
+	
+	Model.getKey = function() {
+		var fields = this.getFields();
+		for(var field in fields) {
+			if (fields[field].hasOwnProperty('primaryKey')) return field;
+		}
+	};
+	
+	Model.getId = function() {
+		var fields = this.getFields();
+		for(var field in fields) {
+			if (fields[field].hasOwnProperty('primaryKey')) return fields[field].name;
+		}
+	};
+	
+	Model.getAll = function(query, success, error, context) {
+		var context = typeof context === 'function' ? context : this;
+		var successFunc = function(data) {
+			var mappedData = Model.mapItems.call(this, data), output = {};
+			if (typeof query === 'function') {
+				for (var i in mappedData) {
+					if (query == null || query.call(this, mappedData[i])) {
+						output[i] = mappedData[i];
+					}
+				} mappedData = output;
+			}
+			success.call(context, new Collection(this, mappedData));
+		};
+		PersistenceManager.getAll(this, Class.proxy(successFunc, this), Class.proxy(error, context));
+	};
+	
+	Model.get = function(id, success, error, context) {
+		var context = typeof context === 'function' ? context : this;
+		var successFunc = function(data) {
+			var mappedData = Model.mapItem.call(this, data);
+			success.call(context, new this(mappedData));
+		};
+		PersistenceManager.get(this, id, Class.proxy(successFunc, this), Class.proxy(error, context));
+	};
+	
+	Model.set = function(item, success, error, context) {
+		if (item instanceof Model) item = item.toObject();
+		var id = item.hasOwnProperty(this.getKey()) ? item[this.getKey()] : null;
+		var context = typeof context === 'function' ? context : this;
+		var successFunc = function(data) {
+			var mappedData = Model.mapItem.call(this, data);
+			success.call(context, new this(mappedData));
+		};
+		PersistenceManager.set(this, id, Model.unmapItem.call(this, item), Class.proxy(successFunc, this), Class.proxy(error, context));
+	};
+	
+	Model.remove = function(id, success, error, context) {
+		var context = typeof context === 'function' ? context : this, deltaId = id;
+		var successFunc = function(data) {
+			success.call(context, deltaId);
+		};
+		PersistenceManager.remove(this, id, Class.proxy(successFunc, this), Class.proxy(error, context));
+	};
+	
+	Model.on = function(ev, call, context) {
+		var proxy = (typeof context !== 'undefined') ? function() { call.apply(context, arguments); } : call;
+		return this.events.on.call(this.events, ev, proxy);
+	},
+	
+	Model.fire = function() {
+		return this.events.fire.apply(this.events, arguments);
+	},
+	
+	Model.detach = function() {
+		return this.events.detach.apply(this.events, arguments);
+	},
+	
+	Model.mapItem = function(data) {
+		var model = {}, fields = this.getFields();											
+		for (var field in fields) {
+			var source = fields[field].name, 
+					value = (data.hasOwnProperty(source)) && data[source] != null ? data[source] : undefined;		
+			if (value === undefined && !fields[field].nullable) {
+				Log.warn("Could not parse JSON field '" + field + "' for " + this.getName());
+				continue;
+			}
+			else if (value !== undefined) model[field] = value;
+		}
+		return model;
+	},
+	
+	Model.mapItems = function(data) {
+		var models = {}, id = this.getKey();
+		for (var i in data) {
+			var model = Model.mapItem.call(this, data[i]);
+			if (typeof model === 'object') models[i] = model;
+		}	
+		return models;	
+	},
+	
+	Model.unmapItem = function(object) {	
+		var data = {}, fields = this.getFields();
+		for (var field in fields) {
+			if (this.getKey() == field && !object.hasOwnProperty(this.getKey())) {
+				continue;
+			}
+			var source = fields[field].name,
+					value = (object.hasOwnProperty(field)) ? object[field] : undefined;
+			if (value === undefined && !fields[field].nullable) {
+				Log.warn("Missing data for field '" + field + "' for " + this.getName());
+				continue;
+			}		
+			else if (value !== undefined) data[source] = value;
+		}
+		return data;
+	}
+	
+	Model._models = {};
+	
+	Model.extend = function(def) {
+		
+		var m = Class.extend.call(this, def);
+				
+		var required = ['getName', 'getId', 'getFields', 'getSource'];
+		for (var i = 0, len = required.length; i < len; i++) {
+			if (!def.hasOwnProperty(required[i])) throw "Class missing '" + required[i] + "()' implementation";
+			m[required[i]] = def[required[i]];
+		}
+		
+		var source = def.getSource();
+		if (!source.supportsModels()) throw "Source '" + source.getName() + "' does not support models";
+		
+		m.events = new Events(null, this);
+		
+		m.getKey = function() { return Model.getKey.apply(m, arguments); };
+		m.getAll = function() { return Model.getAll.apply(m, arguments); };
+		m.get = function() { return Model.get.apply(m, arguments); };
+		m.set = function() { return Model.set.apply(m, arguments); };
+		m.remove = function() { return Model.remove.apply(m, arguments); };
+		
+		m.on = function() { return Model.on.apply(m, arguments); };
+		m.fire = function() { return Model.fire.apply(m, arguments); };
+		m.detach = function() { return Model.detach.apply(m, arguments); };
+		
+		Model._models[m.getName()] = m;
+		
+		return m;
+			
+	};
+		
 	
 	
-	O.AjaxSource 						= AjaxSource;
-	O.LocalStorageSource 		= LocalStorageSource;
-	O.RestSource 						= RestSource;
-	O.SessionStorageSource 	= SessionStorageSource;
+	PersistenceManager = (function() {
 	
-}, ['mvc'], '1.0.2');
+		var isSyncing = false, isLive = false;
+		
+		PersistenceManager.init = function() {
+						
+			isLive = !(Cache.isActive() && !Cache.isOnline());
+			
+			this.cacheDS = new LocalStorageSource({ name: 'cache' });
+			this.createDS = new PersistentStorageSource({ name: 'create' });
+			this.updateDS = new PersistentStorageSource({ name: 'update' });
+			this.deleteDS = new PersistentStorageSource({ name: 'delete' });
+			this.pendingDS = new PersistentStorageSource({ name: 'pending' });
+			
+			Cache.on('statusChange', Class.proxy(this.onStatusChange, this));
+			
+		};
+		
+		PersistenceManager.getAll = function(model, success, error) {
+				
+			var offlineFunc = function(data) {
+			
+				var creates = this.createDS.getAll(model.getName()),
+						updates = this.updateDS.getAll(model.getName()),
+						deletes = this.deleteDS.getAll(model.getName()),
+						pending = this.pendingDS.getAll(model.getName());
+								
+				for (var key in creates) {
+					var c = creates[key];
+					c[model.getId()] = 'c' + key;
+					data['c' + key] = c;
+				}
+				for (var key in updates) data[key] = updates[key];
+				for (var key in deletes) delete data[key];
+								
+				if (isSyncing) for (var key in pending) data[pending[model.getId()]] = pending[key];
+				
+				success(data);
+			
+			};
+			
+			var onlineFunc = function(data) {
+				var output = {};
+				for (var i = 0, len = data.length; i < len; i++) {
+					output[data[i][model.getId()]] = data[i];
+				}
+				this.cacheDS.setAll(model.getName(), output); // TO DO: check if this is array or list
+				success.call(this, output);
+			};
+				
+			if (!isLive) {
+				var items = this.cacheDS.getAll(model.getName());
+				if (items != undefined) offlineFunc.call(this, items)
+				else error.call(this);
+			}
+			else model.getSource().getAll(model.getName(), Class.proxy(onlineFunc, this), error);
+		
+		};
+
+		PersistenceManager.get = function(model, id, success, error) {
+				
+			var offlineFunc = function(response) {
+				
+				var creates = this.createDS.getAll(model.getName()),
+						updates = this.updateDS.getAll(model.getName()),
+						deletes = this.deleteDS.getAll(model.getName()),
+						pending = this.pendingDS.getAll(model.getName()),
+						data = null;
+				
+				if (isSyncing) {
+					for (var i in pending) {
+						if (pending[i].hasOwnProperty(model.getId()) && pending[i][model.getId()] == id) data = pending[i];
+					}
+				}
+				
+				if (creates && creates.hasOwnProperty(id)) data = creates[id];
+				if (updates && updates.hasOwnProperty(id) && data == null) data = updates[id];
+				if (deletes && deletes.hasOwnProperty(id)) throw "Cannot fetch deleted item";
+								
+				success((!data) ? response : data);
+				
+			};
+			
+			var onlineFunc = function(data) {
+				this.cacheDS.set(model.getName(), id, data);
+				success(data);
+			};
+			
+			var onlineFuncError = function(e) {
+				if (e.status == '404') {
+					this.cacheDS.remove(model.getName(), id);
+				} error(e);
+			};
+			
+			if (!isLive) {
+				var item = this.cacheDS.get(model.getName(), id);
+				if (item != undefined) offlineFunc.call(this, item)
+				else error.call(this);
+			}
+			else model.getSource().get(model.getName(), id, Class.proxy(onlineFunc, this), Class.proxy(onlineFuncError, this));
+		
+		};
+		
+		
+		PersistenceManager.set = function(model, id, item, success, error) {
+									
+			var offlineFunc = function(data) {
+				data['_unsaved'] = true;
+				success(data);
+			};
+			
+			var onlineFunc = function(data) {
+				this.cacheDS.set(model.getName(), data[model.getId()], data);
+				success(data);
+			};
+						
+			if (!isLive) {
+								
+				if (!id) {
+					var id = 'c' + this.createDS.set(model.getName(), null, item);
+					if (!id) error();
+					else {
+						item[model.getId()] = id;
+						offlineFunc(item);
+					}
+				} else if (isSyncing) {
+						
+					var deletes = this.deleteDS.getAll(model.getName());
+				
+					if (deletes && deletes.hasOwnProperty(id)) {
+						throw 'Cannot update already removed item';
+					} else {
+						this.pendingDS.set(model.getName(), null, item);
+						offlineFunc.call(this, item);
+					}
+						
+				} else {
+												
+					var creates = this.createDS.getAll(),
+							deletes = this.deleteDS.getAll();
+				
+					if (creates && creates.hasOwnProperty(id)) this.createDS.set(model.getName(), id, item);
+					else if (deletes && deletes.hasOwnProperty(id)) throw 'Cannot update already removed item';
+					else this.updateDS.set(model.getName(), id, item);
+					
+					offlineFunc.call(this, item);
+						
+				}
+								
+			}
+			else model.getSource().set(model.getName(), id, item, Class.proxy(onlineFunc, this), error);
+		
+		};
+		
+		PersistenceManager.remove = function(model, id, success, error) {
+						
+			var onlineFunc = function(data) {
+				this.cacheDS.remove(model.getName(), id);
+				success(data);
+			};
+		
+			if (!isLive) {
+						
+				var creates = this.createDS.getAll(model.getName()),
+						updates = this.updateDS.getAll(model.getName()),
+						deletes = this.deleteDS.getAll(model.getName());
+			
+				if (creates && creates.hasOwnProperty(id)) this.createDS.remove(model.getName(), id);
+				if (updates && updates.hasOwnProperty(id)) this.updateDS.remove(model.getName(), id);
+				if (deletes && deletes.hasOwnProperty(id)) throw 'Cannot delete already removed item';
+				else this.deleteDS.set(model.getName(), id, {});
+				
+				success(id);
+				
+			} else model.getSource().remove(model.getName(), id, Class.proxy(onlineFunc, this), error);
+			
+		};
+		
+		PersistenceManager.flush = function() {
+		
+			this.createDS.flush(true);
+			this.updateDS.flush(true);
+			this.deleteDS.flush(true);
+			this.pendingDS.flush(true);
+			
+		};
+		
+		PersistenceManager.onStatusChange = function(e) {
+						
+			if (e.data == 1 && !isSyncing) {
+				this.onSync();				
+			} else {
+				if (isSyncing) {
+					this.onSyncFailure.call(this);
+				} else {
+					isLive = !(Cache.isActive() && !Cache.isOnline());
+				}
+			}
+			
+		};
+		
+		PersistenceManager.onSync = function(force) {
+						
+			if (isSyncing && !force) return;
+			
+			isSyncing = true;
+			
+			var createSuccessFunc = function(data, id, name, newId) {
+
+				this.createDS.remove(name, id);
+				this.cacheDS.set(name, newId, data);
+				
+				this.syncCount--;
+				this.checkSyncStatus();
+			
+			};
+			
+			var updateSuccessFunc = function(data, id, name) {
+			
+				this.updateDS.remove(name, id);
+				this.cacheDS.set(name, id, data);
+				
+				this.syncCount--;
+				this.checkSyncStatus();
+			
+			};
+			
+			var deleteSuccessFunc = function(id, name) {
+				
+				this.deleteDS.remove(name, id);
+				this.cacheDS.remove(name, id);
+				
+				this.syncCount--;
+				this.checkSyncStatus();
+			
+			};
+				
+			var creates = this.createDS.getAllActions(),
+					updates = this.updateDS.getAllActions(),
+					deletes = this.deleteDS.getAllActions();
+					
+			this.syncCount = creates.length + updates.length + deletes.length;
+		
+			for (var id in creates) {
+				var model = creates[id].model;
+				model.getSource().set(model.getName(), null, creates[id].item, Class.proxy(function(data) {				
+					var key = id;
+					console.log("create");
+					createSuccessFunc.call(this, data, key, model.getName(), data[model.getId()]);				
+				}, this), this.onSyncFailure);			
+			}
+			
+			for (var id in updates) {
+				var model = updates[id].model;
+				model.getSource().set(model.getName(), id, updates[id].item, Class.proxy(function(data) {				
+					var key = id;
+					console.log("update");
+					updateSuccessFunc.call(this, data, key, model.getName());				
+				}, this), this.onSyncFailure);		
+			}
+			
+			for (var id in deletes) {
+				var model = deletes[id].model;
+				model.getSource().remove(model.getName(), id, null, Class.proxy(function(data) {				
+					var key = id;
+					console.log("delete");
+					deleteSuccessFunc.call(this, key, model.getName());				
+				}, this), this.onSyncFailure);	
+			}
+					
+		};
+		
+		PersistenceManager.onSyncSuccess = function() {
+
+			isSyncing = false;
+			isLive = !(Cache.isActive() && !Cache.isOnline());
+		
+			Log.info("Unsaved data pushed to server.");
+			
+		};
+		
+		PersistenceManager.onSyncFailure = function() {
+			Log.info("Could not push unsaved data to server.");
+		};
+		
+		PersistenceManager.checkSyncStatus = function() {
+			
+			console.log("checking");
+			
+			if (this.syncCount == 0) {
+				var pending = this.pendingDS.getAllActions();			
+				if (pending.length > 0) {				
+					for (var i in pending) {					
+						var model = pending[i].model, item = pending[i].item;
+						if (item.hasOwnProperty(model.getId())) var id = item[model.getId()];
+						else throw "Pending item missing id";
+						this.updateDS.set(model.getName(), item, id);
+						this.pendingDS.remove(model.getName(), id);						
+					}					
+					this.onSync(true)					
+				} else PersistenceManager.onSyncSuccess.call(this);
+			}
+			
+		};
+		
+		PersistenceManager.destroy = function() {
+			Cache.detach('statusChange', this.proxy);
+		}
+		
+		function PersistenceManager() {}
+		
+		return PersistenceManager;
+	
+	})();
+	
+
+	
+	O.Application = Application;
+	O.Collection	= Collection;
+	O.Controller	= Controller;
+	O.Model				= Model;
+	O.Source			= Source;
+	O.View				= View;
+	
+	O.AjaxSource 								= AjaxSource;
+	O.LocalStorageSource 				= LocalStorageSource;
+	O.RestSource 								= RestSource;
+	O.PersistenceManager				= PersistenceManager;
+	O.PersistentStorageSource		= PersistentStorageSource;
+	
+}, [], '1.0.2');
 
 /**
  * ui.js | Orange UI Module 1.0.2
  * @date 7.21.2011
  * @author Kevin Kinnebrew
- * @dependencies commons, jquery-1.7.2
+ * @dependencies commons, jquery-1.7.2, history.js
  * @description commonly used view controllers
  */
 
@@ -1649,7 +2065,7 @@ Orange.add('ui', function(O) {
 	var Binding, Form, Input, GridViewController, LightboxViewController, ListViewController, MapViewController, MultiViewController, 
 			ProgressViewController, TableViewController, TabViewController, TooltipViewController, ViewController;
 
-	var Application = __import('Application'), Model = __import('Model');
+	var Application = __import('Application'), Events = __import('Events'), Model = __import('Model'), Collection = __import('Collection');
 	
 	Application.prototype.onLaunch = function(online) {
 		
@@ -1662,92 +2078,138 @@ Orange.add('ui', function(O) {
 		root.removeAttr('data-root');
 		
 		// load view
-		var c = ViewController.load(type);
+		var c = ViewController.get(type);
 		var controller = new c(null, root);
-		controller.onLoad();
+		
+		controller.on('load', function() {	
+			controller.show();
+		});
+		
+		controller.load();
 							
 	};
 	
-	Binding = (function() {
+	Binding = Class.extend({
 	
-		return {
+		initialize: function(node) {
+	
+			this.node = node;
+			this.template = node.clone();
+			this.eventTarget = new Events(null, this);
+			this.loaded = false;
 		
-			bindData: function(node, item) {
+		},
+		
+		bindData: function(model, live) {
+		
+			// check if already loaded
+			if (this.loaded) return;
+		
+			// pass to binding method
+			this._bindData(this.node, model);
 			
-				// check for the data format
-				if (item instanceof O.Item) {
-					var id = item.id(), data = item.toObject();
-				} else if (typeof item === 'object') {
-					var id = null, data = item;
-				}
-				else throw 'Invalid data item';
-				
-				if (id !== null) node.attr('itemid', id);
-				
-				// parse all the data fields
-				for (var field in data) {
-					var el = node.find('[itemprop="' + field + '"]');
-					var childList = [];
-					node.find('[itemprop="' + field + '"]').each(function() {
-						var include = false, parent = $(this).parent();
-						while (parent.length !== 0 && !include) {
-							if ($(parent).not(node).length === 0) {
-								include = true; break;
-							} else if ($(parent).not('[itemscope]').length === 0) {
-								include = false; break;
-							} parent = $(parent).parent();
-						}
-						if (include) childList.push($(this));
-					});
-																							
-					if (childList.length > 0) {
-						for(var i = 0, len = childList.length; i < len; i++) {
-							if (data[field] instanceof Array || data[field] instanceof O.Collection) {
-								O.Binding.bindList(childList[i], data[field]);
-							} else if (typeof data[field] === 'object' || data[field] instanceof O.Item) {
-								O.Binding.bindData(childList[i], data[field]);
-							} else childList[i].text(data[field]);
-						}
-					}
-				}
-			},
-			
-			bindList: function(node, list) {
+			// set as loaded
+			this.loaded = true;
+		
+		},
+		
+		_bindData: function(node, model, id) {
+		
+			if (model instanceof Model) {
+				var id = model.getId(), data = model.toObject();
+			} else if (typeof model !== 'undefined') {
+				data = model, id = id;
+			} else {
+				Log.error('Invalid model item');
+				return;
+			}
 						
-				// check for the data format
-				if (list instanceof O.Collection) {
-					var data = list.toArray();
-				} else if (list instanceof Array) {
-					var data = list;
-				}
-				else throw 'Invalid data collection';
+			if (id) node.attr('itemid', id);
 			
-				var template = node.find('[itemscope]');
-				var itemscope = $(template).attr('itemscope');
+			// parse data fields
+			for (var field in data) {
+				var el = node.find('[itemprop="' + field + '"]');
+				var childList = [];
+				node.find('[itemprop="' + field + '"]').each(function() {
+					var include = false, parent = $(this).parent();
+					while (parent.length !== 0 && !include) {
+						if ($(parent).not(node).length === 0) {
+							include = true; break;
+						} else if ($(parent).not('[itemscope]').length === 0) {
+							include = false; break;
+						} parent = $(parent).parent();
+					}
+					if (include) childList.push($(this));
+				});
 				
-				// validate attribute exists
-				if (typeof itemscope !== 'undefined' && itemscope !== false) {
-					node.html('');
-					for(var i=0, len = data.length; i < len; i++) {
-						var instance = template.clone();
-						O.Binding.bindData(instance, data[i]);
-						node.append(instance);
+				if (childList.length > 0) {
+					for(var i = 0, len = childList.length; i < len; i++) {
+						if (data[field] instanceof Array || data[field] instanceof Collection) {
+							this._bindList(childList[i], data[field]);
+						} else if (typeof data[field] === 'object' || data[field] instanceof Model) {
+							this._bindData(childList[i], data[field]);
+						} else childList[i].text(data[field]);
 					}
 				}
 			}
-		}
 		
-	})();
-	
-	
-	Input = Class.extend({
+		},
+		
+		bindList: function(list, live) {
+		
+			// check if already loaded
+			if (this.loaded) return;
+			
+			// bind data
+			this._bindList(this.node, list);
+			
+			// set as loaded
+			this.loaded = true;
+				
+			
+		},
+		
+		_bindList: function(node, list) {
+		
+			var itemscope = $(node).find('[itemscope]');
+			if (!itemscope.length) return;
+						
+			// get template
+			var template = itemscope.clone(), output = node.clone().empty();
+		
+			// check for the data format
+			if (list instanceof O.Collection) {
+				var data = list.toObject();
+				for(var i in data) {
+					var instance = template.clone();
+					this._bindData(instance, data[i], i);
+					output.append(instance);
+				}
+				
+			} else if (list instanceof Array) {
+				
+				var data = list;
+				for(var i=0, len = data.length; i < len; i++) {
+					var instance = template.clone();
+					this._bindData(instance, data[i]);
+					output.append(instance);
+				}
+				
+			}
+			
+			// insert into dom
+			node.replaceWith(output);
+		
+		},
+		
+		clear: function() {
+			
+			this.node.replaceWith(this.template.clone());
+			this.loaded = false;
+		
+		}
 	
 	});
-	
-	Input.extend = function(def) {
-	
-	};
-	
 	
 	Form = Class.extend({
 	
@@ -1780,7 +2242,7 @@ Orange.add('ui', function(O) {
 			try {
 				this.getField(name).val(value);
 			} catch(e) {
-				console.log('[WARN] Field "' + name +'" could not be fetched');
+				Log.warn('[WARN] Field "' + name +'" could not be fetched');
 			}
 		},
 		
@@ -1819,13 +2281,38 @@ Orange.add('ui', function(O) {
 	
 	});
 	
-	
-	ViewController = Class.extend({
-	
+
+	var ViewController = O.Controller.extend({
+			
+		/**
+		 * initializes the view controller and all its child 
+		 * view controllers, forms, and elements
+		 * @param {ViewController} parent
+		 * @param {HTMLElement} parent
+		 */
 		initialize: function(parent, target) {
-				
+		
 			// set vars
 			var that = this, views = [], forms = [], elements = [];
+		
+			// set load statuses
+			this.loading = false;
+			this.unloading = false;
+			this.loaded = false;
+			
+			// setup display statuses
+			this.visible = false;
+			this.appearing = false;
+			this.disappearing = false;
+			
+			// setup state statuses
+			this.changing = false;
+			
+			// create arrays
+			this.loadEvts = [];
+			this.unloadEvts = [];
+			this.showEvts = [];
+			this.hideEvts = [];
 			
 			// setup instance vars
 			this.views = {};
@@ -1833,6 +2320,9 @@ Orange.add('ui', function(O) {
 			this.elements = {};
 			this.events = [];
 			this.data = {};
+			this.source = target.clone();
+						
+			// setup event target
 			this.eventTarget = new O.Events(parent, this);
 			
 			// validate target
@@ -1844,7 +2334,7 @@ Orange.add('ui', function(O) {
 			// check if parent
 			this.parent = (typeof parent !== 'undefined') ? parent : null;
 			if (this.parent === null) this.target.removeAttr('data-root');
-						
+			
 			// validate arguments
 			for (var i = 0, len = _target.attributes.length; i < len; i++) {
 				if (_target.attributes[i].name.match(/data-/)) {
@@ -1874,6 +2364,9 @@ Orange.add('ui', function(O) {
 			forms = childFunc.call(this, 'form');
 			elements = childFunc.call(this, '[data-name]:not([data-control])');
 			
+			// DEBUG
+			console.log(this.data.name + ' ' + "Initialized");
+			
 			// process views
 			for (var i = 0, len = views.length; i < len; i++) {
 				var view = $(views[i]), name = view.attr('data-name'),
@@ -1887,7 +2380,7 @@ Orange.add('ui', function(O) {
 					view.removeAttr('data-template');
 				}
 				
-				var c = ViewController.load(type);
+				var c = ViewController.get(type);
 				this.views[name] = new c(this, view);
 			}
 			
@@ -1910,75 +2403,342 @@ Orange.add('ui', function(O) {
 			// store for debugging
 			this.type = this.getType();
 			this.name = this.data.name;
-							
+		
 		},
 		
+		/**
+		 * the unique type string for the controller. this matches the
+		 * data-control value used in view markup
+		 */
 		getType: function() {
-			return 'view';
+			return 'ui-view';
 		},
 		
+		/**
+		 * returns the outputted class names for the view. by default
+		 * the getType() of the view controller as well as all its parent
+		 * view controllers, as well as its data-name attribute will be added
+		 */
 		getClasses: function() {
 			var classes = typeof this.typeList !== 'undefined' ? this.typeList : '';
 			return classes + ' ' + this.data.name;
 		},
-
+	
+		/**
+		 * returns an array of strings of the events this function
+		 * triggers. this is for informational / syntax readability purposes only
+		 */
 		getTriggers: function() {
 			return [];
 		},
 		
+		/**
+		 * returns dynamic bindings of events on child views in the form
+		 * { 'view-name' : { 'event' : 'callback' }
+		 * the callback can be replaced with true to default to looking for a
+		 * method in the format on{Event}. All callbacks are bound in the context
+		 * of the view controller.
+		 */
 		getBindings: function() {
 			return {};
 		},
 		
 		
-		onWillLoad: function() {},
+		load: function() {
 		
-		onDidLoad: function() {},
+			// return if already loading
+			if (this.loading || this.loaded) return;
+			
+			// set statuses
+			this.loading = true;
+			
+			// bind event handlers
+			this.loadEvts.push(this.on('_load', this.onLoad, this));
+			this.loadEvts.push(this.on('_loaded', this.onDidLoad, this));
+			
+			// call onWillLoad
+			this.onWillLoad();
+		
+		},
+		
+		onWillLoad: function() {
+			
+			// ex. fetch data
+			
+			// DEBUG
+			console.log(this.data.name + ' ' + "Will Load");
+			
+			// fire load event
+			this.fire('_load');
+			
+		},
 		
 		onLoad: function() {
+		
+			// run functions
 			
-			this.onWillLoad();
-			
+			// load children
 			for (var name in this.views) {
-				this.views[name].onLoad();
+				this.views[name].load();
 			}
 			
-			var views = this.getBindings();
+			// DEBUG
+			console.log(this.data.name + ' ' + "Load");
+		
+			// fire loaded event
+			this.fire('_loaded');
+		
+		},
+		
+		onDidLoad: function() {
+		
+			// run functions
+					
+			// unbind all event handlers
+			for (var i = 0, len = this.loadEvts.length; i < len; i++) {
+				this.loadEvts[i].detach();
+			}
 			
+			// DEBUG
+			console.log(this.data.name + ' ' + "Did Load");
+						
+			// allow unloading
+			this.loadEvts = [];
+			this.loading = false;
+			this.loaded = true;
+						
+			// fire public load event
+			this.fire('load');
+		
+		},
+		
+		
+		unload: function() {
+		
+			// return if already unloading
+			if (this.unloading || !this.loaded) return;
+			
+			// hide first if visible
+			if (this.visible && !this.disappearing) {
+				this.vEvt = this.on('disappear', function(e) {
+					this.unload();
+					this.vEvt.detach();
+				}, this);
+				this.hide();
+				return;
+			}
+			
+			// bind event handlers
+			this.unloadEvts.push(this.on('_unload', this.onUnload, this));
+			this.unloadEvts.push(this.on('_unloaded', this.onDidUnload, this));
+			
+			// set statuses
+			this.unloading = true;
+			
+			// call onWillUnload
+			this.onWillUnload();
+		
+		},
+		
+		onWillUnload: function() {
+			
+			// run functions
+			console.log(this.data.name + ' ' + "Will Unload");
+			
+			// ex. clear data
+			
+			// fire unload event
+			this.fire('_unload');
+			
+		},
+		
+		onUnload: function() {
+			
+			// unload children
+			for (var name in this.views) {
+				this.views[name].unload();
+			}
+		
+			// run functions
+			console.log(this.data.name + ' ' + "Unload");
+		
+			// fire unloaded event
+			this.fire('_unloaded');
+		
+		},
+		
+		onDidUnload: function() {
+		
+			// run functions
+			console.log(this.data.name + ' ' + "Did Unload");
+						
+			// unbind all event handlers
+			for (var i = 0, len = this.unloadEvts.length; i < len; i++) {
+				this.unloadEvts[i].detach();
+			}
+			
+			// allow loading
+			this.unloadEvts = [];
+			this.unloading = false;
+			this.loaded = false;
+			
+			// fire public unload event
+			this.fire('unload');
+		
+		},
+		
+		
+		show: function() {
+		
+			// return if already visible or appearing
+			if (this.visible || this.appearing) return;
+			
+			// set statuses
+			this.appearing = true;
+			
+			// bind event handlers
+			this.showEvts.push(this.on('_appear', this.onAppear, this));
+			this.showEvts.push(this.on('_appeared', this.onDidAppear, this));
+			
+			// call onWillAppear
+			this.onWillAppear();
+		
+		},
+		
+		onWillAppear: function() {
+			
+			// run functions
+			console.log(this.data.name + ' ' + "Will Appear");
+			
+			// bind events
+			var views = this.getBindings();
+												
 			for (var view in views) {
 				var events = views[view];
 				for (var event in events) {
-					if (event == 'touchclick') event = Browser.isTouch ? 'touchend' : 'click';
 					var func = (typeof events[event] === 'function') ? events[event] : null;
+					if (event == 'touchclick') event = O.Browser.isTouch ? 'touchend' : 'click';
 					if (func === null) {
 						var name = event.charAt(0).toUpperCase() + event.slice(1);
 						func = (events[event] === true && typeof this['on' + name] === 'function') ? this['on' + name] : null;
 					}
-					if (func !== null && this.views.hasOwnProperty(view)) this.getView(view).on(event, $.proxy(func,  this));
-					else if (func !== null && this.elements.hasOwnProperty(view)) this.getElement(view).on(event, $.proxy(func,  this));
+					if (func !== null && this.views.hasOwnProperty(view)) {	
+							this.getView(view).on(event, $.proxy(func,  this));
+					}
+					else if (func !== null && this.elements.hasOwnProperty(view)) {
+						this.getElement(view).on(event, $.proxy(func, this));
+					}
 				}
 			}
 			
-			this.onDidLoad();
+			// fire appear event
+			this.fire('_appear');
+			
+		},
+		
+		onAppear: function() {
+				
+			// show children
+			for (var name in this.views) {
+				this.views[name].show();
+			}
+			
+			// run functions
+			console.log(this.data.name + ' ' + "Appear");
+			
+			// fire appeared event
+			this.fire('_appeared');
 		
 		},
 		
-		onWillUnload: function() {},
+		onDidAppear: function() {
 		
-		onDidUnload: function() {},
+			// run functions
+			console.log(this.data.name + ' ' + "Did Appear");
 		
-		onUnload: function() {
+			// unbind all event handlers
+			for (var i = 0, len = this.showEvts.length; i < len; i++) {
+				this.showEvts[i].detach();
+			}
+			
+			// allow hiding
+			this.showEvts = [];
+			this.appearing = false;
+			this.visible = true;
+			
+			// fire public appear event
+			this.fire('appear');
 		
-			this.onWillUnload();
+		},
+		
+			
+		hide: function() {
+	
+			// return if already hidden or hiding
+			if (!this.visible || this.disappearing) return;
 
+			// set statuses
+			this.disappearing = true;
+			
+			// bind event handlers
+			this.hideEvts.push(this.on('_disappear', this.onDisappear, this));
+			this.hideEvts.push(this.on('_disappeared', this.onDidDisappear, this));
+			
+			// call onWillDisappear
+			this.onWillDisappear();
+		
+		},
+		
+		onWillDisappear: function() {
+			
+			// run functions
+			console.log(this.data.name + ' ' + "Will Disappear");
+			
+			// unbind events
 			for (var view in this.views) { this.getView(view).detach(); }
 			for (var form in this.forms) { this.getForm(form).detach(); }
 			for (var el in this.elements) { this.getElement(el).unbind(); }
-			for (var name in this.views) { this.views[name].onUnload(); }
 			
-			this.onDidUnload();
+			// fire disappear event
+			this.fire('_disappear');
+			
+		},
+		
+		onDisappear: function() {
+				
+			// show children
+			for (var name in this.views) {
+				this.views[name].hide();
+			}
+			
+			// run functions
+			console.log(this.data.name + ' ' + "Disappear");
+		
+			// fire disappeared event
+			this.fire('_disappeared');
 		
 		},
+		
+		onDidDisappear: function() {
+		
+			// run functions
+			console.log(this.data.name + ' ' + "Did Disappear");
+		
+			// unbind all event handlers
+			for (var i = 0, len = this.hideEvts.length; i < len; i++) {
+				this.hideEvts[i].detach();
+			}
+			
+			// allow showing
+			this.hideEvts = [];
+			this.disappearing = false;
+			this.visible = false;
+			
+			// fire public disappear event
+			this.fire('disappear');
+		
+		},
+		
 		
 		getView: function(name) {
 			if (name instanceof ViewController) return name;
@@ -1990,7 +2750,7 @@ Orange.add('ui', function(O) {
 			if (this.forms[name] instanceof Form) return this.forms[name];
 			throw 'Error: Form "' + name + '" not found';
 		},
-
+	
 		getElement: function(name) {
 			if (typeof this.elements[name] !== 'undefined') return this.elements[name];
 			throw 'Error: Element "' + name + '" not found';
@@ -1999,17 +2759,17 @@ Orange.add('ui', function(O) {
 		
 		hasView: function(name) {
 			return typeof this._views[name] !== 'undefined';
+		},				
+		
+		hasForm: function(name) {
+			return typeof this._forms[name] !== 'undefined';
 		},
 		
 		hasElement: function(name) {
 			return typeof this._elements[name] !== 'undefined';
 		},
 		
-		hasForm: function(name) {
-			return typeof this._forms[name] !== 'undefined';
-		},
 		
-
 		on: function(event, callback, context) {
 			var proxy = (typeof context !== 'undefined') ? function() { callback.apply(context, arguments); } : callback;
 			return this.eventTarget.on.call(this.eventTarget, event, proxy);
@@ -2024,35 +2784,26 @@ Orange.add('ui', function(O) {
 		},
 		
 		
-		bindData: function(item, live) {
-			Binding.bindData(this.target, item);
-			if (live && item instanceof Model) {
-				if (this.liveEvt) this.liveEvt.detach();
-				var id = item.getId(), model = item.getModel();
-				this.liveEvt = model.on('datachange', function(d) {
-					if (item.mergeChanges(d)) Binding.bindData(this.target, item);
-				}, this);
-			}
-		},
-				
 		toString: function() {
 			return '[' + this.getType() + ' ' + this.data.name + ']';
 		},
+		
+		find: function(selector) {
+			return $(this.target).find(selector);
+		},
 				
 		destroy: function() {
-			for (var name in this._views) {
-				this.views[name].destroy();
-			}
-			for (var name in this._forms) {
-				this.forms[name].destroy();
-			}
-			for (var name in this._elements) {
-				delete this.elements[name];
-			}
-			if (this.liveEvt) this.liveEvt.detach();
+		
+			// destroy views
+			for (var name in this._views) { this.views[name].destroy(); }
+			for (var name in this._forms) { this.forms[name].destroy(); }
+			for (var name in this._elements) { delete this.elements[name]; }
+			
+			// clear references
 			delete this.target;
 			delete this.parent;
 			delete this.eventTarget;
+			
 		}
 	
 	});
@@ -2077,7 +2828,7 @@ Orange.add('ui', function(O) {
 	
 	};
 	
-	ViewController.load = function(name) {
+	ViewController.get = function(name) {
 		if (!this.views.hasOwnProperty(name)) throw "View '" + name + '" not found';
 		return this.views[name];
 	};
@@ -2121,17 +2872,8 @@ Orange.add('ui', function(O) {
 	
 	O.Binding = Binding;
 	O.Form		= Form;
-	O.Input	= Input;
 	
-	O.GridViewController			= GridViewController;
-	O.LightboxViewController	= LightboxViewController;
-	O.ListViewController			= ListViewController;
-	O.MapViewController				= MapViewController;
 	O.MultiViewController			= MultiViewController;
-	O.ProgressViewController	= ProgressViewController;
-	O.TableViewController			= TableViewController;
-	O.TabViewController				= TabViewController;
-	O.TooltipViewController		= TooltipViewController;
 	O.ViewController					= ViewController;
 	
 }, ['mvc'], '1.0.2');

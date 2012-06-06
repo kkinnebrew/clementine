@@ -9,7 +9,7 @@
 Orange.add('ios', function(O) {
 
 	var Application, UIFlipViewController, UIModalViewController, UINavigationViewController, UIScrollViewController, 
-			UISearchViewController, UISearchBarController, UISplitViewController, UITabBarController, UITableViewController, UIViewController;
+			UISearchBarController, UITabBarController, UITableViewController, UIViewController;
 	
 	var ViewController = __import('ViewController'), Collection = __import('Collection'), Binding = __import('Binding');
 	
@@ -563,11 +563,7 @@ Orange.add('ios', function(O) {
 		}
 			
 	});
-	
-	
-	// UISearchViewController
-	// UISplitViewController
-	
+
 	
 	UITabBarController = ViewController.extend({
 			
@@ -773,112 +769,7 @@ Orange.add('ios', function(O) {
 		}
 	
 	});
-	
-//	UITableViewController = ViewController.extend({
-//			
-//		getType: function() { return 'ios-ui-table-view' },
-//		
-//		onWillLoad: function() {
-//			
-//			this.target.wrapInner('<div class="scroll-view"></div>');			
-//			this.myScroll = new iScroll(this.target.get(0));
-//			
-//			this._super();
-//		
-//		},
-//		
-//		onDidLoad: function() {
-//			
-//			this.target.on('click', 'li', Class.proxy(this.onSelect, this));
-//			
-//			this.setupTable();
-//			
-//			this._super();
-//		},
-//		
-//		setupTable: function() {
-//						
-//			this.list = this.target.find('ul');
-//						
-//			if (this.collection instanceof Collection) {
-//				Binding.bindList(this.list, this.collection);
-//			}
-//			
-//			var evt = null;
-//			
-//			$(this.list).on('touchstart', 'li', function(e) {
-//				clearTimeout(evt);
-//				evt = setTimeout(function() {
-//					$(e.currentTarget).addClass('active');
-//				}, 10);
-//			});
-//			
-//			$(this.list).on('touchmove', Class.proxy(function(e) {
-//				clearTimeout(evt); evt = null;
-//				$(this.target).find('li').removeClass('active');
-//			}, this));
-//			
-//			$(this.list).on('touchend', Class.proxy(function(e) {
-//				clearTimeout(evt); 
-//				if (evt) this.onSelect.call(this, e);
-//				evt = null;
-//				$(this.target).find('li').removeClass('active');
-//			}, this));
-//			
-//			$(this.list).on('touchcancel', Class.proxy(function(e) {
-//				clearTimeout(evt); evt = null;
-//				$(this.target).find('li').removeClass('active');
-//			}, this));
-//			
-//			this.myScroll.refresh();
-//		
-//		},
-//		
-//		onRefresh: function() {
-//			this.setupTable();
-//		},
-//		
-//		bindData: function(list, live) {
-//			
-//			console.log(list);
-//			
-//			if (list instanceof Collection) {
-//
-//				this.collection = list;
-//				if (live) {
-//					if (this.liveEvt) this.liveEvt.detach();
-//					var model = data.getModel();
-//					this.liveEvt = model.on('datachange', function(d) {
-//						if (list.mergeChanges(d)) Binding.bindList(this.find('ul'), list);
-//					}, this);
-//				}
-//			}
-//			
-//			this.setupTable();
-//					
-//		},
-//		
-//		onSelect: function(e) {
-//						
-//			e.stopPropagation();
-//
-//			var target = $(e.target);
-//			var cell = null, id = null, model;
-//						
-//			if ((id = $(target).attr('itemid')) && this.collection instanceof Collection) {
-//				if ((model = this.collection.get(id)) instanceof O.Model) this.fire('select', model);
-//			}
-//		
-//		},
-//		
-//		onWillUnload: function() {
-//			this._super();
-//			this.list.off();
-//			this.myScroll.destroy();
-//		}
-//			
-//	});
-	
+
 	
 	UISearchBarController = ViewController.extend({
 	
@@ -1000,9 +891,7 @@ Orange.add('ios', function(O) {
 	O.iOS.UIModalViewController				= UIModalViewController;
 	O.iOS.UINavigationViewController 	= UINavigationViewController;
 	O.iOS.UIScrollViewController 			= UIScrollViewController;
-	O.iOS.UISearchViewController 			= UISearchViewController;
 	O.iOS.UISearchBarController 			= UISearchBarController;
-	O.iOS.UISplitViewController 			= UISplitViewController;
 	O.iOS.UITabBarController					= UITabBarController;
 	O.iOS.UITableViewController 			= UITableViewController;
 	O.iOS.UIViewController 						= UIViewController;

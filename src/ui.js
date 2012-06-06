@@ -156,16 +156,6 @@ Orange.add('ui', function(O) {
 		}
 	
 	});
-		
-	
-	Input = Class.extend({
-	
-	});
-	
-	Input.extend = function(def) {
-	
-	};
-	
 	
 	Form = Class.extend({
 	
@@ -828,17 +818,16 @@ Orange.add('ui', function(O) {
 	
 	O.Binding = Binding;
 	O.Form		= Form;
-	O.Input	= Input;
 	
-	O.GridViewController			= GridViewController;
-	O.LightboxViewController	= LightboxViewController;
-	O.ListViewController			= ListViewController;
-	O.MapViewController				= MapViewController;
+//	O.GridViewController			= GridViewController;
+//	O.LightboxViewController	= LightboxViewController;
+//	O.ListViewController			= ListViewController;
+//	O.MapViewController				= MapViewController;
+//	O.ProgressViewController	= ProgressViewController;
+//	O.TableViewController			= TableViewController;
+//	O.TabViewController				= TabViewController;
+//	O.TooltipViewController		= TooltipViewController;
 	O.MultiViewController			= MultiViewController;
-	O.ProgressViewController	= ProgressViewController;
-	O.TableViewController			= TableViewController;
-	O.TabViewController				= TabViewController;
-	O.TooltipViewController		= TooltipViewController;
 	O.ViewController					= ViewController;
 	
 }, ['mvc'], '1.0.2');

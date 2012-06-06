@@ -1,4 +1,12 @@
-(function(){
+/**
+ * ios.js | OrangeUI 0.1
+ * @date 12.21.2011
+ * @author Kevin Kinnebrew
+ * @dependencies jquery-1.7.2
+ * @description adds ios element controls
+ */
+ 
+ (function(){
   var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
   // The base Class implementation (does nothing)
   this.Class = function(){};

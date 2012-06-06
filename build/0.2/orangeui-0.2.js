@@ -1,5 +1,5 @@
 /**
- * commons.js | Orange Commons 1.0.2
+ * commons.js | Orange Commons 0.2
  * @date 7.21.2011
  * @author Kevin Kinnebrew
  * @dependencies none (socket.io if using websockets)

@@ -108,7 +108,7 @@ Orange.add('mvc', function(O) {
 		var views = {};
 	
 		var fetch = function(path) {
-			
+						
 			// check for cache
 			if (views.hasOwnProperty(path)) return views[path];
 			
@@ -126,7 +126,7 @@ Orange.add('mvc', function(O) {
 			}).responseText;
 			
 			// cache view
-			views[path] = views;
+			views[path] = view;
 			
 			// return
 			return view;
@@ -141,7 +141,7 @@ Orange.add('mvc', function(O) {
 				
 				// fetch path
 				var source = fetch(path), views, view;
-								
+				
 				// get named view
 				if ($(source).length > 1) views = $('<div>' + source + '</div>');
 				else if (typeof type == 'undefined' && typeof name == 'undefined') return $(source);

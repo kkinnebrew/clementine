@@ -14,11 +14,11 @@ Orange.use('mvc', function(O) {
 	
 	$(document).ready(function() {
 	
-		//var html = O.View.load('views/my-view.html', 'ui-view', 'my-other-view');
-		//var html = O.View.load('views/my-one-view.html');
-		var html = O.View.load('views/my-view.html', 'ui-view');
+	  console.log(O.View.load('views/my-view.html', 'ui-view', 'my-other-view'));
+		console.log(O.View.load('views/my-one-view.html'));
+		console.log(O.View.load('views/my-view.html', 'ui-view'));
 		
-		$("body").html(html);
+		//$("body").html(html);
 	
 	});
 

@@ -12,14 +12,20 @@ Orange.use('mvc', function(O) {
 		required: []
 	});
 	
-	$(document).ready(function() {
+	var source = new O.AjaxSource({
+		name: '123'
+	});
 	
-	  console.log(O.View.load('views/my-view.html', 'ui-view', 'my-other-view'));
-		console.log(O.View.load('views/my-one-view.html'));
-		console.log(O.View.load('views/my-view.html', 'ui-view'));
-		
-		//$("body").html(html);
-	
+	source.request({
+		url: '/contacts/contacts/',
+		type: 'GET',
+		contentType: 'text/json',
+		success: function(data) {
+			console.log(data);
+		},
+		error: function() {
+			console.log('error');
+		}
 	});
 
 });

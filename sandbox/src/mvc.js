@@ -100,8 +100,10 @@ Orange.add('mvc', function(O) {
 	});
 	
 	/**
-	 * views are fetched and parsed via
-	 * this view manager
+	 * views can be stored externally and loaded dynamically
+	 * via a given path. when loading different views from the
+	 * same file, a type and or name should be included. for overriding
+	 * default views, only the last view will be used if duplicates exist.
 	 */
 	View = (function() {
 	
@@ -109,10 +111,8 @@ Orange.add('mvc', function(O) {
 	
 		var fetch = function(path) {
 						
-			// check for cache
 			if (views.hasOwnProperty(path)) return views[path];
 			
-			// fetch source file
 			var view = $.ajax({
 				async: false,
 		    contentType: "text/html; charset=utf-8",
@@ -125,10 +125,8 @@ Orange.add('mvc', function(O) {
 		    }
 			}).responseText;
 			
-			// cache view
 			views[path] = view;
 			
-			// return
 			return view;
 			
 		};
@@ -138,22 +136,18 @@ Orange.add('mvc', function(O) {
 			load: function(path, type, name) {
 				
 				if (typeof path === 'undefined' || path == '') return;
-				
-				// fetch path
+
 				var source = fetch(path), views, view;
 				
-				// get named view
 				if ($(source).length > 1) views = $('<div>' + source + '</div>');
 				else if (typeof type == 'undefined' && typeof name == 'undefined') return $(source);
-				
-				// lookup view				
+
 				if (typeof type !== 'undefined' && typeof name !== 'undefined') {
-					view = views.find('[data-control="' + type + '"][data-name="' + name + '"]:first');
+					view = views.find('[data-control="' + type + '"][data-name="' + name + '"]:last');
 				} else if (typeof type !== 'undefined') {
-					view = views.find('[data-control="' + type + '"]:first');
+					view = views.find('[data-control="' + type + '"]:last');
 				} else throw 'View not found';
 								
-				// return
 				if (view.length) return view;
 				else throw 'View not found';
 				
@@ -163,6 +157,69 @@ Orange.add('mvc', function(O) {
 	
 	})();
 
+	/**
+	 * the base source class is overridden to
+	 * provide custom handling of different types of
+	 * data sources. the config.name property is required.
+	 */
+	Source = Class.extend({
+	
+		initialize: function(config) {
+			if (typeof config === 'undefined') return;
+			this.config = config;
+		},
+		
+		getName: function() {
+			return (this.config || {}).hasOwnProperty('name') ? this.config.name : 'source';
+		},
+		
+		supportsModels: function() {
+			return false;
+		},
+		
+		isPersistent: function() {
+			return false;
+		}
+	
+	});
+	
+	/**
+	 * overrides the base data source to allow for data requests
+	 * via ajax
+	 */
+	AjaxSource = Source.extend({
+		
+		request: function(config) {
+		
+			if (Cache.isActive() && !Cache.isOnline()) {
+				Log.warn('Could not connect to server');
+				return;
+			}
+		
+			var success = (typeof config.success === 'function') ? config.success : null;
+			var error = (typeof config.error === 'function') ? config.error : null;
+			var complete = (typeof config.complete === 'function') ? config.complete : null;
+		
+			if (typeof config.context !== 'undefined') {
+				if (success) success = function() { success.apply(context, arguments); };
+				if (error) error = function() { error.apply(context, arguments); }
+				if (complete) complete = function() { complete.apply(context, arguments); }
+			}
+			
+			var req = { url: config.url, type: config.type };
+			
+			if (config.hasOwnProperty('async')) req.async = config.async;
+			if (config.hasOwnProperty('data')) req.data = config.data;
+			if (config.hasOwnProperty('dataType')) req.dataType = config.dataType;
+			if (config.hasOwnProperty('contentType')) req.contentType = config.contentType;
+			if (success) req.success = success;
+			if (error) req.error = error;
+			if (complete) req.complete;
+			
+			return Ajax.load(req);
+		}
+	
+	});
 
 	O.Application = Application;
 //	O.Collection	= Collection;
@@ -171,7 +228,7 @@ Orange.add('mvc', function(O) {
 //	O.Source			= Source;
 	O.View				= View;
 //	
-//	O.AjaxSource 								= AjaxSource;
+	O.AjaxSource 								= AjaxSource;
 //	O.LocalStorageSource 				= LocalStorageSource;
 //	O.RestSource 								= RestSource;
 //	O.PersistenceManager				= PersistenceManager;

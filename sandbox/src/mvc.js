@@ -2,13 +2,13 @@
  * mvc.js | Orange MVC Module 1.0.2
  * @date 7.21.2011
  * @author Kevin Kinnebrew
- * @dependencies commons
+ * @dependencies commons, jquery-1.7.2
  * @description base model-view-controller classes
  */
 
 Orange.add('mvc', function(O) {
 
-	var Application;
+	var Application, Controller, View;
 	
 	// import dependencies
 	var Ajax 			= __import('Ajax'),
@@ -87,14 +87,89 @@ Orange.add('mvc', function(O) {
 		}
 	
 	});
+	
+	/**
+	 * this is the base controller class
+	 * which will be overriden by other controllers
+	 */
+	Controller = Class.extend({
+	
+		initialize: function() {},
+		destroy: function() {}
+	
+	});
+	
+	/**
+	 * views are fetched and parsed via
+	 * this view manager
+	 */
+	View = (function() {
+	
+		var views = {};
+	
+		var fetch = function(path) {
+			
+			// check for cache
+			if (views.hasOwnProperty(path)) return views[path];
+			
+			// fetch source file
+			var view = $.ajax({
+				async: false,
+		    contentType: "text/html; charset=utf-8",
+		    dataType: "text",
+		    timeout: 10000,
+		    url: path,
+		    success: function() {},
+		    error: function() {
+					throw "Error: template not found";
+		    }
+			}).responseText;
+			
+			// cache view
+			views[path] = views;
+			
+			// return
+			return view;
+			
+		};
+	
+		return {
+		
+			load: function(path, type, name) {
+				
+				if (typeof path === 'undefined' || path == '') return;
+				
+				// fetch path
+				var source = fetch(path), views, view;
+								
+				// get named view
+				if ($(source).length > 1) views = $('<div>' + source + '</div>');
+				else if (typeof type == 'undefined' && typeof name == 'undefined') return $(source);
+				
+				// lookup view				
+				if (typeof type !== 'undefined' && typeof name !== 'undefined') {
+					view = views.find('[data-control="' + type + '"][data-name="' + name + '"]:first');
+				} else if (typeof type !== 'undefined') {
+					view = views.find('[data-control="' + type + '"]:first');
+				} else throw 'View not found';
+								
+				// return
+				if (view.length) return view;
+				else throw 'View not found';
+				
+			}
+			
+		}
+	
+	})();
 
 
 	O.Application = Application;
 //	O.Collection	= Collection;
-//	O.Controller	= Controller;
+	O.Controller	= Controller;
 //	O.Model				= Model;
 //	O.Source			= Source;
-//	O.View				= View;
+	O.View				= View;
 //	
 //	O.AjaxSource 								= AjaxSource;
 //	O.LocalStorageSource 				= LocalStorageSource;

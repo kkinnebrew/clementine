@@ -1,3 +1,4 @@
+<script type="text/javascript" src="lib/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="src/commons.js"></script>
 <script type="text/javascript" src="src/mvc.js"></script>
 <script type="text/javascript">
@@ -9,6 +10,16 @@ Orange.use('mvc', function(O) {
 		logging: 'info',
 		location: true,
 		required: []
+	});
+	
+	$(document).ready(function() {
+	
+		//var html = O.View.load('views/my-view.html', 'ui-view', 'my-other-view');
+		//var html = O.View.load('views/my-one-view.html');
+		var html = O.View.load('views/my-view.html', 'ui-view');
+		
+		$("body").html(html);
+	
 	});
 
 });

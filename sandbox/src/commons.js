@@ -799,7 +799,7 @@
 	
 		return {
 		
-			fetch: function(success, error) {
+			get: function(success, error) {
 			
 				if (!Location.isExpired() && typeof success !== 'undefined') return success(location);
 					
@@ -869,9 +869,7 @@
 				else if (navigator.userAgent.match(/ HTC/i) || navigator.userAgent.match(/ Desire_A8181/i)
 				  || navigator.userAgent.match(/ myTouch4G/i) || navigator.userAgent.match(/ ADR6200/i)) {
 				    this.nativeScroll = true;
-				} else {
-					this.nativeScroll = false;
-				}
+				} else this.nativeScroll = false;
 				
 			},
 			

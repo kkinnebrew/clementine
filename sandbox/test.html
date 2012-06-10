@@ -3,7 +3,7 @@
 
 Orange.use(function(O) {
 
-	var Cache = __import('Cache');
+	var Cache = __import('Cache'), Storage = __import('Storage');
 	
 	Cache.on('statusChange', function(e) {
 		if (e.data == 1) {
@@ -14,6 +14,16 @@ Orange.use(function(O) {
 	});
 	
 	Cache.init();
+	
+	//Storage.set('kevin', { name: 'kevin' });
+	
+	//console.log(Storage.get('kevin'));
+	
+	O.Location.get(function(e) {
+		console.log(e);
+	});
+	
+	console.log(Browser);
 
 });
 

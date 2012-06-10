@@ -1,4 +1,5 @@
 <script type="text/javascript" src="lib/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="lib/inflection.js"></script>
 <script type="text/javascript" src="src/commons.js"></script>
 <script type="text/javascript" src="src/mvc.js"></script>
 <script type="text/javascript">
@@ -12,9 +13,20 @@ Orange.use('mvc', function(O) {
 		required: []
 	});
 	
-	var source = new O.LocalStorageSource({
-		name: 'mysource'
+	var source = new O.CakeSource({
+		name: 'mysource',
+		path: '/contacts'
 	});
+	
+	var success = function(data) {
+		console.log(data);
+	}
+	
+	var error = function() {
+		console.log("Error");
+	}
+	
+	source.getAll('contacts', success, error);
 	
 	source.destroy();
 

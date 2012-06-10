@@ -8,7 +8,7 @@
 
 Orange.add('mvc', function(O) {
 
-	var Application, Controller, View;
+	var Application, Controller, View, Source, AjaxSource, LocalStorageSource, RestSource;
 	
 	// import dependencies
 	var Ajax 			= __import('Ajax'),
@@ -227,7 +227,10 @@ Orange.add('mvc', function(O) {
 	
 	});
 	
-	
+	/**
+	 * the local storage source allows the access of model
+	 * data cached to localStorage via the model get/set methods
+	 */
 	LocalStorageSource = Source.extend({
 	
 		isPersistent: function() {
@@ -287,6 +290,137 @@ Orange.add('mvc', function(O) {
 		}
 	
 	});
+	
+	/**
+	 * the rest source provides a standard implementation
+	 * of interaction with a REST webservice for retrieving
+	 * model data
+	 */
+	RestSource = AjaxSource.extend({
+	
+		initialize: function(config) {
+			if (typeof config === 'undefined') return;
+			this.config = config;
+			if (!this.config.hasOwnProperty('path')) throw 'Rest Source missing path';
+			this.config.path = (config.path.charAt(config.path.length-1) == '/') ? config.path : config.path + '/';
+			Log.info('Source "' + this.getName() + '" connected');
+		},
+		
+		getPath: function() {
+			return this.config.path;
+		},
+		
+		getDataType: function() {
+			return this.config.hasOwnProperty('dataType') ? this.config.dataType : 'text/json';
+		},
+	
+		getAll: function(type, success, error) {		
+					
+			var successFunc = function(data) {
+				success.call(this, this.processItems(type, data));
+			}
+									
+			this.request({
+				url: this.getPath() + this.filterType(type),
+				contentType: this.getDataType(),
+				type: 'GET',
+				success: Class.proxy(successFunc, this),
+				error: error
+			});
+			
+		},
+		
+		get: function(type, id, success, error) {
+	
+			var successFunc = function(data) {
+				data = this.processItem(type, data);
+				success.call(this, data);
+			}
+			
+			var path = this.getPath() + this.filterType(type);
+			
+			this.request({
+				url: (path.charAt(path.length-1) == '/') ? path + id : path + '/' + id,
+				contentType: this.getDataType(),
+				type: 'GET',
+				success: Class.proxy(successFunc, this),
+				error: error
+			});
+			
+		},
+		
+		set: function(type, id, object, success, error) {
+
+			var type = this.filterType(type);
+	
+			var successFunc = Class.proxy(function(data) {
+				data = this.processItem(type, data);
+				success.call(this, data);
+			}, this), path = this.getPath(), req;
+			
+			path = (!id) ? path + type : (path.charAt(path.length-1) == '/') ? path + type + '/' + id : path + '/' + type + '/' + id;
+			
+			req = {
+				url: path,
+				success: Class.proxy(successFunc, this),
+				error: error
+			}
+			
+			if (!id) {
+				req['type'] = 'POST',
+				req['data'] = object
+			} else {
+				req['type'] = 'PUT';
+				req['data'] = JSON.stringify(object);
+				req['contentType'] = 'application/json';
+			}
+						
+			this.request(req);
+	
+		},
+		
+		remove: function(type, id, success, error) {
+	
+			var path = this.getPath() + this.filterType(type);
+			
+			this.request({
+				url: (path.charAt(path.length-1) == '/') ? path + id : path + '/' + id,
+				type: 'DELETE',
+				success: function(data) {
+					success.call(this, JSON.parse(data));
+				},
+				error: error
+			});
+			
+		},
+				
+		processItem: function(type, data) {
+			return this.filterItem(type, data);
+		},
+		
+		processItems: function(type, data) {
+			var items = this.filterItems(type, data);
+			var output = [];
+			for(var i = 0, len = items.length; i < len; i++) {
+				output.push(this.processItem(type, items[i]));
+			}
+			return output;
+		},
+		
+		filterItem: function(type, data) {
+			return JSON.parse(data);
+		},
+		
+		filterItems: function(type, data) {
+			return JSON.parse(data);
+		},
+		
+		filterType: function(type) {
+			return type;
+		}
+	
+	});
+	
 
 	O.Application = Application;
 //	O.Collection	= Collection;
@@ -297,7 +431,7 @@ Orange.add('mvc', function(O) {
 //	
 	O.AjaxSource 								= AjaxSource;
 	O.LocalStorageSource 				= LocalStorageSource;
-//	O.RestSource 								= RestSource;
+	O.RestSource 								= RestSource;
 //	O.PersistenceManager				= PersistenceManager;
 //	O.PersistentStorageSource		= PersistentStorageSource;
 	

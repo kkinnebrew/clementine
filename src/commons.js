@@ -5,19 +5,34 @@
  * @dependencies none (socket.io if using websockets)
  * @description base library classes
  */
-
+ 
 (function() {
 
-	var Orange, Ajax, Browser, Cache, Class, Element, Events, EventHandle, EventTarget, Loader, Location, Log, Socket, Storage,
-
-			__import = function(name) { return Orange[name] },
-			__export = function(name, object) { return Orange[name] = object },
-			__keyFilterRegex = /[^A-Za-z:0-9_\[\]]/g,
-			__modFilterRegex = /[^-A-Za-z_]/g;
-
-
+	var Orange, Class, EventTarget, EventHandle, Events, Log, Loader, Ajax, Element, Cache, Storage, Socket, Location,
+	
+		__import = function(name) { return Orange[name] },
+		__export = function(name, object) { return Orange[name] = object },
+		__keyFilterRegex = /[^A-Za-z:0-9_\[\]]/g,
+		__modFilterRegex = /[^-A-Za-z_]/g;
+	
+	function noop() {}
+	
+	function clone(o) {
+		var newObj = (o instanceof Array) ? [] : {};
+		for (i in o) {
+		  if (i == 'clone') continue;
+		  if (o[i] && typeof o[i] == "object") {
+		    newObj[i] = clone(o[i]);
+		  } else newObj[i] = o[i];
+		} return newObj;
+	}
+	
+	/**
+	 * provides basic oop functionality including
+	 * inheritance, and accessing super classes
+	 */
 	Class = (function() {
-
+	
 		var initializing = false, fnTest = /xyz/.test(function() {xyz;}) ? /\b_super\b/ : /.*/;
 		
 		Class.extend = function(def) {
@@ -66,7 +81,10 @@
 
 	})();
 
-	
+	/**
+	 * the returned event object passed to callback
+	 * functions
+	 */	
 	EventTarget = (function() {	
 	
 		function EventTarget(type, currentTarget, target, data) {
@@ -85,7 +103,10 @@
 	
 	})();
 	
-	
+	/**
+	 * the event handle returned on every event binding
+	 * to maintain a reference for unbinding later
+	 */
 	EventHandle = (function() {
 	
 		function EventHandle(target, ev, call) {
@@ -106,7 +127,11 @@
 	
 	})();
 	
-	
+	/**
+	 * the event object to bind, fire, and unbind
+	 * events on. this can be used in your other classes
+	 * to give them even functionality
+	 */
 	Events = (function() {
 	
 		function Events(parent, self) {
@@ -168,8 +193,13 @@
 		return Events;
 	
 	})();
-
 	
+	/**
+	 * adds basic logging functionality on top
+	 * of the console so that the application can
+	 * bind to and listen for log messages.
+	 * the log is exposed as a global variable.
+	 */
 	Log = (function() {
 		
 		var Log = {}, events = new Events(null, Log), level = 0;
@@ -228,7 +258,11 @@
 		
 	})();
 	
-	
+	/**
+	 * the loader is used internally to manage
+	 * all developer created modules outside the scope
+	 * and namespace of the library
+	 */
 	Loader = (function() {
 	
 		var modules = {}, active = {};
@@ -262,7 +296,48 @@
 	
 	})();
 	
+	/**
+	 * publically available loader function
+	 * for adding modules
+	 */
+	var add = function() {
+		var args = arguments,
+			name = args[0],
+			fn = ( typeof args[1] === 'function' ) ? args[1] : null,
+			req = args[2];
+		Loader.addModule(name, fn, req);	
+	};
 	
+	/**
+	 * publically available loader function
+	 * for loading dependant modules
+	 */
+	var use = function() {
+		var args = Array.prototype.slice.call(arguments),
+			fn = args[args.length-1],
+			req = clone(args).splice(0, args.length-1)										
+		if(typeof req[0] != 'function') { 
+			for (var i = 0, len = req.length; i < len; i++) {
+				Loader.loadModule(req[i]);
+			}
+		}
+		fn.call(window, Orange);	
+	};
+	
+	/**
+	 * sets the given namespace inside a module
+	 */
+	var namespace = function(name) {
+		if(Orange[name] == undefined) {
+			Orange[name] = {};
+		}	
+	};
+	
+	/**
+	 * wrapper around ajax calls either using jQuery if
+	 * available for defaulting to a limited functionality
+	 * XMLHttpRequest otherwise.
+	 */	
 	Ajax = (function() {
 	
 		var XMLHttpRequests = [
@@ -296,8 +371,6 @@
 					if (!req) return;
 									
 					var success, error, data, done = false;
-					
-					console.log(request.data);
 					
 					if (typeof request.success === 'function') success = request.success;
 					if (typeof request.error === 'function') error = request.error;
@@ -344,7 +417,7 @@
 				return Ajax.load(request);
 			},
 			
-			delete: function(request) {
+			del: function(request) {
 				request.type = 'DELETE';
 				return Ajax.load(request);
 			}
@@ -353,7 +426,11 @@
 	
 	})();
 	
-	
+	/**
+	 * internal wrapper for DOM element lookups using either jQuery 
+	 * for defaulting to document.getElementById() providing
+	 * event listener bindings
+	 */
 	Element = (function() {
 		
 		Element.bind = function(obj, evt, fn) {		
@@ -408,16 +485,21 @@
 		
 	})();
 	
-	
+	/**
+	 * the cache wraps HTML5's new offline mode
+	 * using the navigator.onLine propery. it falls
+	 * back to polling when offline mode is not supported.
+	 * 
+	 */
 	Cache = (function() {
-	
-		var activeProcess = null, poll = false,
+		
+		var active = null, poll = false,
 				isOnline = false, isLoaded = false, isInit = false;
 				
 		var stop = function() {
-			if(activeProcess != null) {
-				clearTimeout(activeProcess);
-				activeProcess = null;
+			if(active != null) {
+				clearTimeout(active);
+				active = null;
 			}
 		};
 		
@@ -434,14 +516,14 @@
 			
 			stop();
 												
-			activeProcess = setTimeout(function() {
+			active = setTimeout(function() {
 
 				if (navigator.onLine && !isLoaded) {
 					isOnline = true;
 					isLoaded = true;
 					Cache.fire("statusChange", 1);
 				} else if (navigator.onLine) {
-				  
+				  				  
 				  Ajax.load({
 				  	url: 'ping.js', 
 				  	type: "GET",
@@ -471,7 +553,7 @@
 				
 				}
 				
-				activeProcess = null;
+				active = null;
 				if (poll) setTimeout(statusCallback, 10 * 1000);			
 				
 			}, (isLoaded ? 100 : 0));
@@ -479,7 +561,7 @@
 		};
 		
 		var onCached = function(e) {
-			Log.debug("Cache: All resources for this app downloaded. You can run this application while not connected to the internet");
+			Log.debug("Cache: All resources downloaded");
 		};
 		
 		var onChecking = function() {
@@ -487,15 +569,15 @@
 		};
 
 		var onDownloading = function() {
-			Log.debug("Cache: Starting download of cached files");
+			Log.debug("Cache: Starting download of files");
 		};
 		
 		var onError = function() {
-			Log.debug("Cache: There was an error in the manifest, downloading cached files or you're offline");
+			Log.debug("Cache: Error in manifest, downloading cached files or you're offline");
 		};
 		
 		var onNoUpdate = function() {
-			Log.debug("Cache: There was no update needed");
+			Log.debug("Cache: No update needed");
 		};
 		
 		var onProgress = function() {
@@ -504,7 +586,7 @@
 		
 		var onUpdateReady = function() {
 			window.applicationCache.swapCache();
-			Log.debug("Cache: Updated cache has been loaded and is ready");
+			Log.debug("Cache: Updated cache loaded and ready");
 			window.location.reload(true);
 		};
 		
@@ -560,21 +642,24 @@
 	
 	})();
 	
-	
+	/**
+	 * storage wraps HTML5 local storage adding
+	 * expirations and support for older browsers
+	 */
 	Storage = (function() {
 	
 		var _localStorage = window.localStorage,
-				_isSupported = false, _isOnline = false;
+				isSupported = false, isOnline = false;
 				
 		if ("localStorage" in window) {
 			try {
 				window.localStorage.setItem('_test', 1);
-				_isSupported = true;
+				isSupported = true;
 				window.localStorage.removeItem('_test');
 			} catch (e) {} // iOS5 Private Browsing mode throws QUOTA_EXCEEDED_ERROR DOM Exception 22 via JStorage
 		}
 		
-		if (_isSupported) {
+		if (isSupported) {
 			try {
 				if (window.localStorage) {
 					_localStorage = window.localStorage;
@@ -585,25 +670,25 @@
 			try {
 				if (window.globalStorage) {
 			    _localStorage = window.globalStorage[window.location.hostname];
-			    _isSupported = true;
+			    isSupported = true;
 				}
 			} catch(e) {}
 		} else {} // TODO: add support for IE 6/7 userData
 		
 		if ((typeof JSON === "undefined" || JSON.stringify == undefined) && typeof $ === 'undefined') {
-			_isSupported = false;
+			isSupported = false;
 		}
 
-		if (!_isSupported) Log.debug("localStorage not supported");	
+		if (!isSupported) Log.debug("localStorage not supported");	
 				
 	
 		Storage.get = function(key) {
 			
-			if (!_isSupported) return;
+			if (!isSupported) return;
 			try {
 				var item = JSON.parse(_localStorage.getItem(key));
 				if (item != undefined && item.data != undefined) {
-					if (_isOnline && item.ttl !== -1 && ((new Date()).getTime() - item.timestamp) > item.ttl) {
+					if (isOnline && item.ttl !== -1 && ((new Date()).getTime() - item.timestamp) > item.ttl) {
 						_localStorage.removeItem(key);
 					}
 					return item.data; 
@@ -616,7 +701,7 @@
 		
 		Storage.set = function(key, value, ttl) {
 					
-			if (!_isSupported) return false;
+			if (!isSupported) return false;
 			key = key.replace(__keyFilterRegex, '');
 			if (typeof value === 'undefined') return false;
 			
@@ -638,35 +723,35 @@
 		}
 		
 		Storage.remove = function(key) {
-			if (!_isSupported) return false;
+			if (!isSupported) return false;
 			_localStorage.removeItem(key);
 		};
 		
 		Storage.flushExpired = function(force) {
-			if (!_isSupported) return;			
-			if (_isOnline === false && force !== true) return;
+			if (!isSupported) return;			
+			if (isOnline === false && force !== true) return;
 			for (var key in _localStorage) {
 				Storage.get(key);
 			}
 		};
 		
 		Storage.flush = function(force) {
-			if (!_isSupported) return;
-			if (_isOnline === false && force !== true) return;
+			if (!isSupported) return;
+			if (isOnline === false && force !== true) return;
 			_localStorage.clear();
 			Log.info("Clear: Local storage cleared");
 		};
 		
 		Storage.isSupported = function() {
-			return _isSupported;
+			return isSupported;
 		};
 	
 		Storage.goOnline = function() {
-			_isOnline = true;
+			isOnline = true;
 		};
 		
 		Storage.goOffline = function() {
-			_isOnline = false;
+			isOnline = false;
 		};
 	
 		function Storage() {}
@@ -675,7 +760,10 @@
 	
 	})();
 	
-	
+	/**
+	 * basic wrapper for web sockets using
+	 * socket.io for support
+	 */
 	Socket = (function() {
 	
 		function Socket(path) {
@@ -700,7 +788,10 @@
 	
 	})();
 	
-	
+	/**
+	 * adds wrapper for support for HTML5's geolocation
+	 * TODO handle time zone differences
+	 */
 	Location = (function() {
 	
 		var location = null, timestamp = null,
@@ -708,39 +799,34 @@
 	
 		return {
 		
-			fetch: function(success, error) {
+			get: function(success, error) {
 			
-				if (!Location.isExpired()) {
-					if (typeof success !== 'undefined') success(location);
-				} 
-				else {
+				if (!Location.isExpired() && typeof success !== 'undefined') return success(location);
 					
-					if (navigator.geolocation) {
-						navigator.geolocation.getCurrentPosition(function(position) {
-							timestamp = (new Date().getTime());
-							location = position.coords;
-							Log.debug('Location retrieved');
-							if (typeof success == 'function') success(position.coords);
-						},
-						function(error) {
-							switch (error.code) 
-							{
-								case error.TIMEOUT:
-									Log.error('Location services timeout');
-									break;
-								case error.POSITION_UNAVAILABLE:
-									Log.error('Position unavailable');
-									break;
-								case error.PERMISSION_DENIED:
-									Log.error('Please Enable Location Services');
-									break;
-								default:
-									Log.error('Unknown location services error');
-									break;
-							}
-							if (typeof error === 'function') error();
-						});
-					}
+				if (navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(function(position) {
+						timestamp = (new Date().getTime());
+						location = position.coords;
+						Log.debug('Location retrieved');
+						if (typeof success == 'function') success(position.coords);
+					},
+					function(error) {
+						switch (error.code) {
+							case error.TIMEOUT:
+								Log.error('Location services timeout');
+								break;
+							case error.POSITION_UNAVAILABLE:
+								Log.error('Position unavailable');
+								break;
+							case error.PERMISSION_DENIED:
+								Log.error('Please Enable Location Services');
+								break;
+							default:
+								Log.error('Unknown location services error');
+								break;
+						}
+						if (typeof error === 'function') error();
+					});
 				}
 			
 			},
@@ -753,7 +839,10 @@
 	
 	})();
 	
-	
+	/**
+	 * performs user ageent detection to determine the 
+	 * browser, version, os, and device for an application
+	 */
 	Browser = (function() {
 	
 		var BrowserDetect = {
@@ -765,24 +854,22 @@
 					|| "an unknown version";
 				this.OS = this.searchString(this.dataOS) || "an unknown OS";
 				
-				// check if mobile
+				// check device
 				var useragent = navigator.userAgent.toLowerCase();
-				if (useragent.search("iphone") > 0)
-				    this.isMobile = true; // iphone
-				else if (useragent.search("ipod") > 0)
-				    this.isMobile = true; // ipod
-				else if (useragent.search("android") > 0)
-				    this.isMobile = true; // android
-				else this.isMobile = false;
+				if (useragent.search("iphone") > 0 || useragent.search("ipod") > 0) this.device = 'phone';
+				else if (useragent.search("ipad") > 0) this.device = 'tablet';
+				else if (useragent.search("mobile") > 0 && this.OS == 'Android') this.device = 'phone';
+				else if (this.OS == 'Android') this.device = 'tablet';
+				else this.device = 'desktop';
+				if (this.OS == 'Android' && useragent.search("galaxy_tab") > 0) this.device = 'tablet';
 				
-				// check if tablet
-				if (useragent.search("ipad") > 0)
-				    this.isTablet = true; // ipad
-				else this.isTablet = false;
-				
-				if (navigator.userAgent.match(/OS 5(_\d)+ like Mac OS X/i)) {
-					this.isScrollable = true;
-				} else this.isScrollable = false;
+				// check scrolling
+				if (this.device == 'desktop') this.nativeScroll = true;
+				else if (this.OS == 'iOS' && navigator.userAgent.match(/ OS 5_/i)) this.nativeScroll = true;
+				else if (navigator.userAgent.match(/ HTC/i) || navigator.userAgent.match(/ Desire_A8181/i)
+				  || navigator.userAgent.match(/ myTouch4G/i) || navigator.userAgent.match(/ ADR6200/i)) {
+				    this.nativeScroll = true;
+				} else this.nativeScroll = false;
 				
 			},
 			
@@ -803,10 +890,12 @@
 			searchVersion: function (dataString) {
 				var index = dataString.indexOf(this.versionSearchString);
 				if (index == -1) return;
-				return parseFloat(dataString.substring(index+this.versionSearchString.length+1));
+				var str = dataString.substring(index+this.versionSearchString.length+1).split(' ', 1).pop();
+				return str.split('.', 2).join('.').replace(';', '');
 			},
 			
 			dataBrowser: [
+				{ string: navigator.userAgent, subString: "Android", versionSearch: "Android", identity: "Android" },
 				{ string: navigator.userAgent, subString: "Chrome", identity: "Chrome" },
 				{ string: navigator.userAgent, subString: "OmniWeb", versionSearch: "OmniWeb/", identity: "OmniWeb" },
 				{ string: navigator.vendor, subString: "Apple", identity: "Safari", versionSearch: "Version" },
@@ -821,9 +910,11 @@
 				{ string: navigator.userAgent, subString: "≈", identity: "Netscape", versionSearch: "Mozilla" }
 			],
 			dataOS : [
+				{ string: navigator.userAgent, subString: "Android", identity: "Android" },
+				{ string: navigator.userAgent, subString: "iPhone", identity: "iOS" },
+				{ string: navigator.userAgent, subString: "iPad", identity: "iOS" },
 				{ string: navigator.platform, subString: "Win", identity: "Windows" },
 				{ string: navigator.platform, subString: "Mac", identity: "Mac" },
-				{ string: navigator.userAgent, subString: "iPhone", identity: "iPhone/iPod" },
 				{ string: navigator.platform, subString: "Linux", identity: "Linux" }
 			]
 		
@@ -835,67 +926,14 @@
 			browser: BrowserDetect.browser,
 			version: BrowserDetect.version,
 			os: BrowserDetect.OS,
-			isMobile: BrowserDetect.isMobile,
-			isTablet: BrowserDetect.isTablet,
-			isDesktop: !(BrowserDetect.isMobile || BrowserDetect.isTablet),
-			isTouch: (BrowserDetect.isMobile || BrowserDetect.isTablet),
-			isScrollable: true//BrowserDetect.isScrollable || !(BrowserDetect.isMobile || BrowserDetect.isTablet)
+			device: BrowserDetect.device,
+			scroll: BrowserDetect.nativeScroll
 		}
 	
 	})();
 	
-	
-	var add = function() {
-		var args = arguments,
-			name = args[0],
-			fn = ( typeof args[1] === 'function' ) ? args[1] : null,
-			req = args[2];
-		Loader.addModule(name, fn, req);	
-	};
-	
-	var use = function() {
-		var args = Array.prototype.slice.call(arguments),
-			fn = args[args.length-1],
-			req = clone(args).splice(0, args.length-1)										
-		if(typeof req[0] != 'function') { 
-			for (var i = 0, len = req.length; i < len; i++) {
-				Loader.loadModule(req[i]);
-			}
-		}
-		fn.call(window, Orange);	
-	};
-	
-	var namespace = function(name) {
-		if(Orange[name] == undefined) {
-			Orange[name] = {};
-		}	
-	};
-	
-	function noop() {}
-	
-	function clone(o) {
-		var newObj = (o instanceof Array) ? [] : {};
-		for (i in o) {
-		  if (i == 'clone') continue;
-		  if (o[i] && typeof o[i] == "object") {
-		    newObj[i] = clone(o[i]);
-		  } else newObj[i] = o[i];
-		} return newObj;
-	}
-	
-	function cloneAttributes(source, destination) {
-		if (typeof $ !== 'undefined') throw "cloneAttributes() not supported";
-		var destination = $(destination).eq(0);
-	  var source = $(source)[0];
-	  for (i = 0; i < source.attributes.length; i++) {
-	      var a = source.attributes[i];
-	      destination.attr(a.name, a.value);
-	  }
-	}
-	
-		
 	Orange 					= this.Orange = {};
-  Orange.version 	= '1.0.2';
+	Orange.version 	= '0.3';
 	Orange.__import = this.__import = __import;
 	Orange.modules 	= {};
 
@@ -907,13 +945,10 @@
 	Orange.Browser 			= Browser;
 	Orange.Cache 				= Cache;
 	Orange.Class 				= this.Class = Class;
-	Orange.Element 			= Element;
 	Orange.Events 			= Events;
-  Orange.EventTarget 	= EventTarget;
-  Orange.Loader				= Loader;
 	Orange.Location 		= Location;
   Orange.Log 					= this.Log = Log;  
-  Orange.Socket 			= Socket;
-  Orange.Storage 			= Storage;	
+  Orange.Storage 			= Storage;
+	
 
 }).call(this);

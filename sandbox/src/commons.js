@@ -259,8 +259,8 @@
 	})();
 	
 	/**
-	 * the loader is used internally to manage
-	 * all developer created modules outside the scope
+	 * the loader is used to manage all
+	 * developer created modules outside the scope
 	 * and namespace of the library
 	 */
 	Loader = (function() {
@@ -560,30 +560,6 @@
 			
 		};
 		
-		var onCached = function(e) {
-			Log.debug("Cache: All resources downloaded");
-		};
-		
-		var onChecking = function() {
-			Log.debug("Cache: Checking for cache manifest");
-		};
-
-		var onDownloading = function() {
-			Log.debug("Cache: Starting download of files");
-		};
-		
-		var onError = function() {
-			Log.debug("Cache: Error in manifest, downloading cached files or you're offline");
-		};
-		
-		var onNoUpdate = function() {
-			Log.debug("Cache: No update needed");
-		};
-		
-		var onProgress = function() {
-			Log.debug("Cache: Downloading cached files");
-		};
-		
 		var onUpdateReady = function() {
 			window.applicationCache.swapCache();
 			Log.debug("Cache: Updated cache loaded and ready");
@@ -614,12 +590,6 @@
 	
 				Element.bind(window, "offline", statusCallback);
 				Element.bind(window, "online", statusCallback);
-				Element.bind(window, "cached", onCached);
-				Element.bind(window, "checking", onChecking);
-				Element.bind(window, "downloading", onDownloading);
-				Element.bind(window, "error", onError);
-				Element.bind(window, "noupdate", onNoUpdate);
-				Element.bind(window, "progress", onProgress);
 				Element.bind(window, "updateready", onUpdateReady);
 								
 				statusCallback();
@@ -946,6 +916,7 @@
 	Orange.Cache 				= Cache;
 	Orange.Class 				= this.Class = Class;
 	Orange.Events 			= Events;
+	Orange.Loaded				= Loader;
 	Orange.Location 		= Location;
   Orange.Log 					= this.Log = Log;  
   Orange.Storage 			= Storage;

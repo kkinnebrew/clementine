@@ -1,29 +1,15 @@
 <script type="text/javascript" src="src/commons.js"></script>
+<script type="text/javascript" src="src/mvc.js"></script>
 <script type="text/javascript">
 
-Orange.use(function(O) {
+Orange.use('mvc', function(O) {
 
-	var Cache = __import('Cache'), Storage = __import('Storage');
-	
-	Cache.on('statusChange', function(e) {
-		if (e.data == 1) {
-			console.log("online");
-		} else {
-			console.log("offline");
-		}
+	var app = new O.Application('test', {
+		version: '1.0',
+		logging: 'info',
+		location: true,
+		required: []
 	});
-	
-	Cache.init();
-	
-	//Storage.set('kevin', { name: 'kevin' });
-	
-	//console.log(Storage.get('kevin'));
-	
-	O.Location.get(function(e) {
-		console.log(e);
-	});
-	
-	console.log(Browser);
 
 });
 

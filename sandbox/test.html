@@ -1,7 +1,20 @@
 <script type="text/javascript" src="src/commons.js"></script>
 <script type="text/javascript">
 
+Orange.use(function(O) {
+
+	var Cache = __import('Cache');
+	
+	Cache.on('statusChange', function(e) {
+		if (e.data == 1) {
+			console.log("online");
+		} else {
+			console.log("offline");
+		}
+	});
+	
+	Cache.init();
+
+});
 
 </script>
-
-<input type="button" onclick="runTest()" value="Run Test" />

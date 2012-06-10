@@ -157,7 +157,7 @@
 		
 		};
 		
-		Event.prototype.destroy = function() {
+		Events.prototype.destroy = function() {
 			for(var listener in this._listeners) {
 				listener.detach();
 			}

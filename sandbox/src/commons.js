@@ -8,7 +8,12 @@
  
 (function() {
 
-	var Orange, Class, EventTarget, EventHandle, Events, Log, Loader, Ajax, Element, Cache, Storage, Socket, Location;
+	var Orange, Class, EventTarget, EventHandle, Events, Log, Loader, Ajax, Element, Cache, Storage, Socket, Location,
+	
+		__import = function(name) { return Orange[name] },
+		__export = function(name, object) { return Orange[name] = object },
+		__keyFilterRegex = /[^A-Za-z:0-9_\[\]]/g,
+		__modFilterRegex = /[^-A-Za-z_]/g;
 	
 	function noop() {}
 	
@@ -177,7 +182,7 @@
 		
 		};
 		
-		Event.prototype.destroy = function() {
+		Events.prototype.destroy = function() {
 			for(var listener in this._listeners) {
 				listener.detach();
 			}
@@ -332,23 +337,26 @@
 	 * wrapper around ajax calls either using jQuery if
 	 * available for defaulting to a limited functionality
 	 * XMLHttpRequest otherwise.
-	 */
+	 */	
 	Ajax = (function() {
-		
-		var RequestObj = [
+	
+		var XMLHttpRequests = [
 			function() { return new XMLHttpRequest() },
 			function() { return new ActiveXObject('Msxml2.XMLHTTP') },
 			function() { return new ActiveXObject('Msxml3.XMLHTTP') },
 			function() { return new ActiveXObject('Microsoft.XMLHTTP') }
 		];
 		
-		var getRequestObject = function() {
-			var o = false;
-			for (var i = 0, l = RequestObj.length; i < l; i++) {
-				try { o = RequestObj[i]();
-				} catch(e) { continue; }
+		var createXMLHttpObject = function() {
+			var obj = false;
+			for(var i = 0, length = XMLHttpRequests.length; i < length; i++) {
+				try {
+					obj = XMLHttpRequests[i]();
+				} catch(e) {
+					continue;
+				}
 			}
-			return o;
+			return obj;
 		};
 		
 		return {
@@ -359,34 +367,37 @@
 					return $.ajax(request).responseText;
 				} 
 				else {
-					var r = getRequestObject();
-					if (!r) return;
+					var req = createXMLHttpObject();
+					if (!req) return;
 									
-					var suc, err, data;
-										
-					if (typeof request.success === 'function') suc = request.success;
-					if (typeof request.error === 'function') err = request.error;
+					var success, error, data, done = false;
+					
+					if (typeof request.success === 'function') success = request.success;
+					if (typeof request.error === 'function') error = request.error;
 					if (request.hasOwnProperty('data')) data = encodeURIComponent(request.data);
-					var type = request.hasOwnProperty('type') ? request.type : 'GET';
+					var method = request.hasOwnProperty('type') ? request.type : 'GET';
 					var url = request.hasOwnProperty('type') ? request.url : null;
 
-					r.open(type, url, true);
-					r.setRequestHeader('Cache-Control', 'no-cache');
-					r.timeout = 3000;
-					r.ontimeout = function () { error(r); }
+					req.open(method, url, true);
+					req.setRequestHeader('Cache-Control', 'no-cache');
+					req.timeout = 3000;
+					req.ontimeout = function () { error(req); }
 					
-					r.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-					if (data) r.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-					r.onreadystatechange = function () {
-						if (r.readyState != 4) return;
-						if (r.status != 200 && r.status != 304) {
-							err(r);
+					req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+					if (data) req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+					req.onreadystatechange = function () {
+						if (req.readyState != 4) return;
+						if (req.status != 200 && req.status != 304) {
+							error(req);
 						}
-						else suc(r.responseText);
+						else success(req.responseText);
 					}
 					
-					if (r.readyState == 4) suc(r); return;
-					r.send(data);
+					if (req.readyState == 4) {
+						success(req); return;
+					}
+					
+					req.send(data);
 				}
 				
 			},
@@ -512,7 +523,7 @@
 					isLoaded = true;
 					Cache.fire("statusChange", 1);
 				} else if (navigator.onLine) {
-				  
+				  				  
 				  Ajax.load({
 				  	url: 'ping.js', 
 				  	type: "GET",
@@ -845,12 +856,22 @@
 				
 				// check device
 				var useragent = navigator.userAgent.toLowerCase();
-				if (useragent.search("iphone") > 0 || useragent.search("ipod") > 0) this.device = 'Phone';
-				else if (useragent.search("ipad") > 0) this.device = 'Tablet';
-				else if (useragent.search("mobile") > 0 && this.OS == 'Android') this.device = 'Phone';
-				else if (this.OS == 'Android') this.device = 'Tablet';
-				else this.device = 'Desktop';
-				if (this.OS == 'Android' || useragent.search("galaxy_tab") > 0) this.device = 'Tablet';
+				if (useragent.search("iphone") > 0 || useragent.search("ipod") > 0) this.device = 'phone';
+				else if (useragent.search("ipad") > 0) this.device = 'tablet';
+				else if (useragent.search("mobile") > 0 && this.OS == 'Android') this.device = 'phone';
+				else if (this.OS == 'Android') this.device = 'tablet';
+				else this.device = 'desktop';
+				if (this.OS == 'Android' && useragent.search("galaxy_tab") > 0) this.device = 'tablet';
+				
+				// check scrolling
+				if (this.device == 'desktop') this.nativeScroll = true;
+				else if (this.OS == 'iOS' && navigator.userAgent.match(/ OS 5_/i)) this.nativeScroll = true;
+				else if (navigator.userAgent.match(/ HTC/i) || navigator.userAgent.match(/ Desire_A8181/i)
+				  || navigator.userAgent.match(/ myTouch4G/i) || navigator.userAgent.match(/ ADR6200/i)) {
+				    this.nativeScroll = true;
+				} else {
+					this.nativeScroll = false;
+				}
 				
 			},
 			
@@ -872,7 +893,7 @@
 				var index = dataString.indexOf(this.versionSearchString);
 				if (index == -1) return;
 				var str = dataString.substring(index+this.versionSearchString.length+1).split(' ', 1).pop();
-				return str.split('.', 2).join('.');
+				return str.split('.', 2).join('.').replace(';', '');
 			},
 			
 			dataBrowser: [
@@ -907,17 +928,15 @@
 			browser: BrowserDetect.browser,
 			version: BrowserDetect.version,
 			os: BrowserDetect.OS,
-			device: BrowserDetect.device
+			device: BrowserDetect.device,
+			scroll: BrowserDetect.nativeScroll
 		}
 	
 	})();
 	
-	alert(navigator.userAgent);
-	alert(Browser.os + ' ' + Browser.browser + ' ' + Browser.version + ' ' + Browser.device);
-	
-	
 	Orange 					= this.Orange = {};
-  Orange.version 	= '0.3';
+	Orange.version 	= '0.3';
+	Orange.__import = this.__import = __import;
 	Orange.modules 	= {};
 
 	Orange.add = add;
@@ -925,7 +944,7 @@
 	Orange.namespace = namespace;
 
   Orange.Ajax 				= Ajax;
-//	Orange.Browser 			= Browser;
+	Orange.Browser 			= Browser;
 	Orange.Cache 				= Cache;
 	Orange.Class 				= this.Class = Class;
 	Orange.Events 			= Events;

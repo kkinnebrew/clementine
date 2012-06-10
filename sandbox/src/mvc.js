@@ -167,6 +167,8 @@ Orange.add('mvc', function(O) {
 		initialize: function(config) {
 			if (typeof config === 'undefined') return;
 			this.config = config;
+			var name = this.config.name;
+			if ((/[^A-Za-z:0-9_\[\]]/g).test(name)) throw 'Invalid character in source name "' + name + '"';
 		},
 		
 		getName: function() {
@@ -179,6 +181,10 @@ Orange.add('mvc', function(O) {
 		
 		isPersistent: function() {
 			return false;
+		},
+		
+		destroy: function() {
+			delete this.config;
 		}
 	
 	});
@@ -220,6 +226,67 @@ Orange.add('mvc', function(O) {
 		}
 	
 	});
+	
+	
+	LocalStorageSource = Source.extend({
+	
+		isPersistent: function() {
+			return true;
+		},
+		
+		supportsModels: function() {
+			return true;
+		},
+		
+		getPath: function(type) {
+			return 'model:' + this.getName() + ':' + type;
+		},
+		
+		getAll: function(type) {
+			return Storage.get(this.getPath(type)) || undefined;
+		},
+		
+		get: function(type, id) {
+			var data = Storage.get(this.getPath(type)) || {};
+			return data.hasOwnProperty(id) ? data[id] : undefined;
+		},
+		
+		setAll: function(type, data) {
+			if (data instanceof Array) throw 'Invalid input, expecting object';
+			return Storage.set(this.getPath(type), data);
+		},
+		
+		set: function(type, id, object) {
+			if (id === null) id = this.nextKey(type);
+			if (typeof object === 'undefined') return;
+			var data = Storage.get(this.getPath(type));
+			data = data || {};
+			data[id] = object;
+			Storage.set(this.getPath(type), data);
+			return id;
+		},
+		
+		remove: function(type, id) {
+			var data = Storage.get(this.getPath(type));
+			delete data[id];
+			Storage.set(this.getPath(type), data);
+			return true;
+		},
+		
+		flush: function(type) {
+			 Storage.remove(this.getPath(type));
+		},
+		
+		nextKey: function(type) {
+			var size = 0, key, keys = [];
+			var obj = Storage.get(this.getPath(type));
+			for (key in obj) {
+				if (obj.hasOwnProperty(key) && !isNaN(key)) keys.push(parseInt(key, 10));
+			} 
+			return (keys.length > 0) ? Math.max.apply(Math, keys) + 1 : 1;
+		}
+	
+	});
 
 	O.Application = Application;
 //	O.Collection	= Collection;
@@ -229,7 +296,7 @@ Orange.add('mvc', function(O) {
 	O.View				= View;
 //	
 	O.AjaxSource 								= AjaxSource;
-//	O.LocalStorageSource 				= LocalStorageSource;
+	O.LocalStorageSource 				= LocalStorageSource;
 //	O.RestSource 								= RestSource;
 //	O.PersistenceManager				= PersistenceManager;
 //	O.PersistentStorageSource		= PersistentStorageSource;

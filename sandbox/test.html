@@ -12,21 +12,11 @@ Orange.use('mvc', function(O) {
 		required: []
 	});
 	
-	var source = new O.AjaxSource({
-		name: '123'
+	var source = new O.LocalStorageSource({
+		name: 'mysource'
 	});
 	
-	source.request({
-		url: '/contacts/contacts/',
-		type: 'GET',
-		contentType: 'text/json',
-		success: function(data) {
-			console.log(data);
-		},
-		error: function() {
-			console.log('error');
-		}
-	});
+	source.destroy();
 
 });
 

@@ -508,12 +508,18 @@ Orange.add('mvc', function(O) {
 	Model = Class.extend({
 		
 		initialize: function(data) {
+		
 			this.getName();
 			var field = this.constructor.getKey();
-			this.isSaved = (data || {}).hasOwnProperty(field);
-			this.id = this.isSaved ? data[field] : null;
+			this._isSaved = ((data || {}).hasOwnProperty(field) && !(data || {}).hasOwnProperty('_unsaved')) ? true : false;
+			this.id = (data || {}).hasOwnProperty(field) ? data[field] : null;
 			this.data = data || {};
-			if (data.hasOwnProperty('_unsaved')) this.isSaved = false;
+			this.hasChanges = false;
+			this.fields = this.constructor.getFields();
+			this.events = [];
+			
+			this.events.push(this.constructor.on('datachange', Class.proxy(this.mergeDelta, this)));
+			this.events.push(this.constructor.on('datasync', Class.proxy(this.syncDelta, this)));
 		},
 		
 		getName: function() {
@@ -529,31 +535,36 @@ Orange.add('mvc', function(O) {
 		},
 		
 		get: function(name) {
+			if (!this.fields.hasOwnProperty(name)) throw "Field does not exist";
 			return this.data[name];
 		},
 		
 		set: function(name, value) {
+			if (!this.fields.hasOwnProperty(name)) throw "Field does not exist";
 			this.data[name] = value;
-			this.isSaved = false;
+			this.hasChanges = true;
 		},
 		
-		clear: function() {
+		clear: function(name) {
+			if (!this.fields.hasOwnProperty(name)) throw "Field does not exist";
 			delete this.data[name];
-			this.isSaved = false;
+			this.hasChanges = true;
 		},
 		
 		refresh: function() {
 			var item = this.constructor.get(this.getId());
 			this.data = item.toObject();
-			this.isSaved = true;
-			// prevent duplicate refreshes
+			this.hasChanges = false;
 		},
 		
 		save: function(success, error, context) {
-			if (this.isSaved) return;
+			if (!this.hasChanges) return;
 			var successFunc = function(data) {
-				this.isSaved = true;
-				if (typeof success === 'function') success(data);
+				this.hasChanges = false;
+				this._isSaved = data.isSaved();
+				this.id = data.getId();
+				data.destroy();
+				if (typeof success === 'function') success(this);
 			};
 			this.constructor.set(this.data, Class.proxy(successFunc, this), error, context);
 		},
@@ -565,14 +576,24 @@ Orange.add('mvc', function(O) {
 			this.destroy();
 		},
 		
-		mergeChanges: function(deltas) {
-			
-			// merge values
-			
+		mergeDelta: function(e) {
+			var delta = e.data;
+			if (this.id && delta.id == this.id) {
+				if (delta.action == 'set') this.data = delta.item;
+				else if (delta.action == 'delete') this.destroy();
+			}
+		},
+		
+		syncDelta: function(e) {
+			var delta = e.data;
+			if (this.id && delta.id == this.oldId) {
+				this.id = delta.id;
+				this.data[this.constructor.getKey()] = delta.id;
+			}
 		},
 		
 		isSaved: function() {
-			return this.isSaved;
+			return this._isSaved;
 		},
 		
 		exists: function() {
@@ -592,9 +613,13 @@ Orange.add('mvc', function(O) {
 		},
 		
 		destroy: function() {
-			this.isSaved = false;
+			this._isSaved = false;
 			this.id = null;
 			this.data = {};
+			for (var i = 0, len = this.events.length; i < len; i++) {
+				this.events[i].detach();
+			}
+			this.events = [];
 		}
 		
 	});
@@ -644,6 +669,7 @@ Orange.add('mvc', function(O) {
 		var context = typeof context === 'function' ? context : this;
 		var successFunc = function(data) {
 			var mappedData = Model.mapItem.call(this, data);
+			this.fire('datachange', { action: 'set', id: mappedData[this.getKey()], item: mappedData });
 			success.call(context, new this(mappedData));
 		};
 		PersistenceManager.set(this, id, Model.unmapItem.call(this, item), Class.proxy(successFunc, this), Class.proxy(error, context));
@@ -652,6 +678,7 @@ Orange.add('mvc', function(O) {
 	Model.remove = function(id, success, error, context) {
 		var context = typeof context === 'function' ? context : this, deltaId = id;
 		var successFunc = function(data) {
+			this.fire('datachange', { action: 'delete', id: id });
 			success.call(context, deltaId);
 		};
 		PersistenceManager.remove(this, id, Class.proxy(successFunc, this), Class.proxy(error, context));
@@ -671,7 +698,8 @@ Orange.add('mvc', function(O) {
 	},
 	
 	Model.mapItem = function(data) {
-		var model = {}, fields = this.getFields();											
+		var model = {}, fields = this.getFields();		
+		if (data['_unsaved']) model['_unsaved'] = true;									
 		for (var field in fields) {
 			var source = fields[field].name, 
 					value = (data.hasOwnProperty(source)) && data[source] != null ? data[source] : undefined;		
@@ -751,10 +779,60 @@ Orange.add('mvc', function(O) {
 	Collection = Class.extend({
 		
 		initialize: function(model, data) {
+			
 			this.model = model
 			this.data = data;
 			this.active = data;
 			this.list = this.toArray();
+			this.events = [];
+			
+			this.events.push(this.model.on('datachange', Class.proxy(this.mergeDeltas, this)));
+			this.events.push(this.model.on('datasync', Class.proxy(this.syncDeltas, this)));
+			
+		},
+		
+		mergeDeltas: function(e) {
+			
+			console.log("merging deltas");
+			
+			var delta = e.data;
+			
+			console.log(delta);
+				
+			if (delta.action == 'set') {
+				this.data[delta.id] = delta.item;
+				if (this.active.hasOwnProperty(delta.id)) this.active[delta.id] = delta.item;
+			} else if (delta.action == 'delete') {
+				if (this.data.hasOwnProperty(delta.id)) delete this.data[delta.id];
+				if (this.active.hasOwnProperty(delta.id)) delete this.active[delta.id];
+			}
+			
+			this.list = this.toArray();
+			
+		},
+		
+		syncDeltas: function(e) {
+			
+			console.log("syncing deltas");
+			
+			var delta = e.data;
+			
+			if (this.data.hasOwnProperty(delta.oldId)) {
+				
+				var item = this.data['c' + delta.oldId];
+				delete this.data['c' + delta.oldId];
+				this.data[delta.id] = item;
+				this.data[delta.id][this.model.getKey()] = delta.id;
+				if (this.data[delta.id]['_unsaved']) delete this.data[delta.id]['_unsaved'];
+				
+				if (this.active.hasOwnProperty(delta.oldId)) {
+					delete this.active[delta.oldId]
+					this.active[delta.id] = item;
+				}
+				
+				this.list = this.toArray();
+			}
+			
 		},
 		
 		getModel: function() {
@@ -795,6 +873,13 @@ Orange.add('mvc', function(O) {
 		
 		getModel: function() {
 			return this.model;
+		},
+		
+		destroy: function() {
+			for (var i = 0, len = this.events.length; i < len; i++) {
+				this.events[i].detach();
+			}
+			this.events = [];
 		}
 		
 	});
@@ -834,8 +919,12 @@ Orange.add('mvc', function(O) {
 					var c = creates[key];
 					c[model.getId()] = 'c' + key;
 					data['c' + key] = c;
+					data['c' + key]['_unsaved'] = true;
 				}
-				for (var key in updates) data[key] = updates[key];
+				for (var key in updates) {
+					data[key] = updates[key];
+					data[key]['_unsaved'] = true;
+				}
 				for (var key in deletes) delete data[key];
 								
 				if (isSyncing) for (var key in pending) data[pending[model.getId()]] = pending[key];
@@ -900,7 +989,11 @@ Orange.add('mvc', function(O) {
 				}
 				if (!cid && updates && updates.hasOwnProperty(id) && data == null) data = updates[id];
 				if (!cid && deletes && deletes.hasOwnProperty(id)) throw "Cannot fetch deleted item";
-								
+				
+				if (data) {
+					data['_unsaved'] = true;
+				}
+				
 				if (item != undefined || data) success((!data) ? item : data);
 				else error.call(this);
 			}
@@ -1016,17 +1109,22 @@ Orange.add('mvc', function(O) {
 			
 			isSyncing = true;
 			
-			var createSuccessFunc = function(data, id, name, newId) {
+			var createSuccessFunc = function(data, id, model, name, newId) {
 								
 				this.createDS.remove(name, id);
 				this.cacheDS.set(name, newId, data);
+				
+				model.fire('datasync', {
+					oldId: id,
+					id: newId
+				});
 				
 				this.syncCount--;
 				this.checkSyncStatus();
 			
 			};
 			
-			var updateSuccessFunc = function(data, id, name) {
+			var updateSuccessFunc = function(data, id, model, name) {
 						
 				this.updateDS.remove(name, id);
 				this.cacheDS.set(name, id, data);
@@ -1036,7 +1134,7 @@ Orange.add('mvc', function(O) {
 			
 			};
 			
-			var deleteSuccessFunc = function(id, name) {
+			var deleteSuccessFunc = function(id, model, name) {
 								
 				this.deleteDS.remove(name, id);
 				this.cacheDS.remove(name, id);
@@ -1066,21 +1164,21 @@ Orange.add('mvc', function(O) {
 				var item = object.item;
 				delete item[model.getId()];
 				model.getSource().set(model.getName(), null, item, Class.proxy(function(data) {				
-					createSuccessFunc.call(this, data, id, model.getName(), data[model.getId()]);				
+					createSuccessFunc.call(this, data, id, model, model.getName(), data[model.getId()]);				
 				}, this), this.onSyncFailure);
 			}, this);
 			
 			var syncUpdate = Class.proxy(function(id, object) {
 				var model = object.model;
 				model.getSource().set(model.getName(), id, object.item, Class.proxy(function(data) {				
-					updateSuccessFunc.call(this, data, id, model.getName());				
+					updateSuccessFunc.call(this, data, id, model, model.getName());				
 				}, this), this.onSyncFailure);
 			}, this);
 			
 			var syncDelete = Class.proxy(function(id, object) {
 				var model = object.model;
 				model.getSource().remove(model.getName(), id, Class.proxy(function(data) {				
-					deleteSuccessFunc.call(this, id, model.getName());				
+					deleteSuccessFunc.call(this, id, model, model.getName());				
 				}, this), this.onSyncFailure);
 			}, this);
 		

@@ -5,7 +5,7 @@
 <script type="text/javascript" src="plugins/cakephp/cakephp.js"></script>
 <script type="text/javascript">
 
-var submitContact, updateContact, deleteContact, getAllContact, getContact;
+var submitContact, updateContact, deleteContact, getAllContact, getContact, myColl, Contact;
 
 Orange.use('mvc', 'cakephp', function(O) {
 
@@ -21,7 +21,7 @@ Orange.use('mvc', 'cakephp', function(O) {
 		path: '/contacts'
 	});
 	
-	var Contact = Model.extend({
+	Contact = Model.extend({
 		
 		getName: function() {
 			return 'contact';
@@ -95,7 +95,7 @@ Orange.use('mvc', 'cakephp', function(O) {
 	getAllContact = function() {
 			
 		Contact.getAll({}, function(data) {
-		
+				
 			var contacts = data.toObject();
 			$("#items").empty();
 			
@@ -112,12 +112,16 @@ Orange.use('mvc', 'cakephp', function(O) {
 		var contactId = $('form[name="get"] input[name="contactId"]').val();
 		
 		if(contactId <= 0) return;
-		
+				
 		Contact.get(contactId, function(data) {
+		
+			myColl = data;
 		
 			var contact = data.toObject();
 			
 			$("#item").html(contact.contactId + ' ' + contact.firstName + ' ' + contact.lastName + ' ' + contact.email);
+			
+			console.log(data);
 			
 		}, error);
 	
@@ -126,7 +130,20 @@ Orange.use('mvc', 'cakephp', function(O) {
 
 });
 
-
+function showCollection() {
+	//console.log(myColl);
+	
+	var contact = new Contact();
+	
+	contact.set('firstName', 'Kevin');
+	contact.set('lastName', 'Kinn');
+	
+	contact.save();
+	
+	setTimeout(function() {
+		console.log(contact);
+	}, 1000);
+}
 
 </script>
 
@@ -196,3 +213,5 @@ Orange.use('mvc', 'cakephp', function(O) {
 	<input type="button" onclick="deleteContact()" value="Delete" />
 
 </form>
+
+<input type="button" onclick="showCollection()" value="Show Collection" />

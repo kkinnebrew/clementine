@@ -517,6 +517,7 @@ Orange.add('mvc', function(O) {
 			this.hasChanges = false;
 			this.fields = this.constructor.getFields();
 			this.events = [];
+			this.eventTarget = new Events(null, this);
 			
 			this.events.push(this.constructor.on('datachange', Class.proxy(this.mergeDelta, this)));
 			this.events.push(this.constructor.on('datasync', Class.proxy(this.syncDelta, this)));
@@ -616,6 +617,19 @@ Orange.add('mvc', function(O) {
 			return this.data;
 		},
 		
+		on: function(ev, call, context) {
+			var proxy = (typeof context !== 'undefined') ? function() { call.apply(context, arguments); } : call;
+			return this.eventTarget.on.call(events, ev, proxy);
+		},
+		
+		fire: function() {
+			return this.eventTarget.fire.apply(events, arguments);
+		},
+		
+		detach: function() {
+			return this.eventTarget.detach.apply(events, arguments);
+		},
+		
 		destroy: function() {
 			this._isSaved = false;
 			this.id = null;
@@ -623,6 +637,7 @@ Orange.add('mvc', function(O) {
 			for (var i = 0, len = this.events.length; i < len; i++) {
 				this.events[i].detach();
 			}
+			this.eventTarget.destroy();
 			this.events = [];
 		}
 		
@@ -792,6 +807,7 @@ Orange.add('mvc', function(O) {
 			this.active = data;
 			this.list = this.toArray();
 			this.events = [];
+			this.eventTarget = new Events(null, this);
 			
 			this.events.push(this.model.on('datachange', Class.proxy(this.mergeDeltas, this)));
 			this.events.push(this.model.on('datasync', Class.proxy(this.syncDeltas, this)));
@@ -885,10 +901,24 @@ Orange.add('mvc', function(O) {
 			return this.model;
 		},
 		
+		on: function(ev, call, context) {
+			var proxy = (typeof context !== 'undefined') ? function() { call.apply(context, arguments); } : call;
+			return this.eventTarget.on.call(events, ev, proxy);
+		},
+		
+		fire: function() {
+			return this.eventTarget.fire.apply(events, arguments);
+		},
+		
+		detach: function() {
+			return this.eventTarget.detach.apply(events, arguments);
+		},
+		
 		destroy: function() {
 			for (var i = 0, len = this.events.length; i < len; i++) {
 				this.events[i].detach();
 			}
+			this.eventTarget.destroy();
 			this.events = [];
 		}
 		

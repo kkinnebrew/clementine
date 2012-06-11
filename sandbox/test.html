@@ -103,6 +103,10 @@ Orange.use('mvc', 'cakephp', function(O) {
 				$("#items").append($('<li>' + id + ' ' + contacts[id].firstName + ' ' + contacts[id].lastName + ' ' + contacts[id].email + '</li>'));
 			}
 			
+			myColl = data;
+			
+			console.log(myColl);
+			
 		}, error);
 	
 	};
@@ -131,18 +135,16 @@ Orange.use('mvc', 'cakephp', function(O) {
 });
 
 function showCollection() {
-	//console.log(myColl);
 	
-	var contact = new Contact();
 	
-	contact.set('firstName', 'Kevin');
-	contact.set('lastName', 'Kinn');
-	
-	contact.save();
-	
-	setTimeout(function() {
-		console.log(contact);
-	}, 1000);
+	console.log(myColl);
+}
+
+function clearItem() {
+	var contact = Contact.get(85, function(data) {
+		data.remove();
+		console.log("removed");
+	});
 }
 
 </script>
@@ -214,4 +216,5 @@ function showCollection() {
 
 </form>
 
+<input type="button" onclick="clearItem()" value="Clear Item" />
 <input type="button" onclick="showCollection()" value="Show Collection" />

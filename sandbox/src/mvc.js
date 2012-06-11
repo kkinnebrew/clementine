@@ -570,10 +570,14 @@ Orange.add('mvc', function(O) {
 		},
 		
 		remove: function(success, error, context) {
+			var successFunc = function() {
+				this.destroy();
+				if (success) success.call(context);
+			};
+		
 			if (this.exists()) {
-				this.constructor.remove(this.id, success, error, context);
+				this.constructor.remove(this.id, Class.proxy(successFunc, this), error, context);
 			}
-			this.destroy();
 		},
 		
 		mergeDelta: function(e) {
@@ -660,7 +664,7 @@ Orange.add('mvc', function(O) {
 			var mappedData = Model.mapItem.call(this, data);
 			success.call(context, new this(mappedData));
 		};
-		PersistenceManager.get(this, id, Class.proxy(successFunc, this), Class.proxy(error, context));
+		PersistenceManager.get(this, id, Class.proxy(successFunc, this), error ? Class.proxy(error, context) : function() {});
 	};
 	
 	Model.set = function(item, success, error, context) {
@@ -670,18 +674,19 @@ Orange.add('mvc', function(O) {
 		var successFunc = function(data) {
 			var mappedData = Model.mapItem.call(this, data);
 			this.fire('datachange', { action: 'set', id: mappedData[this.getKey()], item: mappedData });
-			success.call(context, new this(mappedData));
+			if (success) success.call(context, new this(mappedData));
 		};
-		PersistenceManager.set(this, id, Model.unmapItem.call(this, item), Class.proxy(successFunc, this), Class.proxy(error, context));
+		PersistenceManager.set(this, id, Model.unmapItem.call(this, item), Class.proxy(successFunc, this), error ? Class.proxy(error, context) : function() {});
 	};
 	
 	Model.remove = function(id, success, error, context) {
 		var context = typeof context === 'function' ? context : this, deltaId = id;
 		var successFunc = function(data) {
+			console.log("removing");
 			this.fire('datachange', { action: 'delete', id: id });
-			success.call(context, deltaId);
+			if (success) success.call(context, deltaId);
 		};
-		PersistenceManager.remove(this, id, Class.proxy(successFunc, this), Class.proxy(error, context));
+		PersistenceManager.remove(this, id, Class.proxy(successFunc, this), error ? Class.proxy(error, context) : function() {});
 	};
 	
 	Model.on = function(ev, call, context) {
@@ -690,6 +695,8 @@ Orange.add('mvc', function(O) {
 	},
 	
 	Model.fire = function() {
+		console.log("123");
+		console.log(this.events);
 		return this.events.fire.apply(this.events, arguments);
 	},
 	
@@ -788,6 +795,9 @@ Orange.add('mvc', function(O) {
 			
 			this.events.push(this.model.on('datachange', Class.proxy(this.mergeDeltas, this)));
 			this.events.push(this.model.on('datasync', Class.proxy(this.syncDeltas, this)));
+			
+			console.log("parm");
+			console.log(this.model.events);
 			
 		},
 		

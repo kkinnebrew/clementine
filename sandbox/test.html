@@ -2,9 +2,12 @@
 <script type="text/javascript" src="lib/inflection.js"></script>
 <script type="text/javascript" src="src/commons.js"></script>
 <script type="text/javascript" src="src/mvc.js"></script>
+<script type="text/javascript" src="plugins/cakephp/cakephp.js"></script>
 <script type="text/javascript">
 
-Orange.use('mvc', function(O) {
+var submitContact, updateContact, deleteContact, getAllContact, getContact;
+
+Orange.use('mvc', 'cakephp', function(O) {
 
 	var app = new O.Application('test', {
 		version: '1.0',
@@ -12,24 +15,184 @@ Orange.use('mvc', function(O) {
 		location: true,
 		required: []
 	});
-	
-	var source = new O.CakeSource({
-		name: 'mysource',
+		
+	var ContactsSource = new O.CakePHP.CakeSource({
+		name: 'contacts_source',
 		path: '/contacts'
+	});
+	
+	var Contact = Model.extend({
+		
+		getName: function() {
+			return 'contact';
+		},
+		
+		getFields: function() {
+			return {
+				contactId: { name: 'id', type: 'key', nullable: false, primaryKey: true },
+				firstName: { name: 'first_name', type: 'text', nullable: false },
+				lastName: { name: 'last_name', type: 'text', nullable: false },
+				email: { name: 'email', type: 'email', nullable: true },
+			}
+		},
+		
+		getSource: function() {
+			return ContactsSource;
+		}
+		
 	});
 	
 	var success = function(data) {
 		console.log(data);
-	}
+	};
 	
 	var error = function() {
-		console.log("Error");
-	}
+		console.log("error");
+	};
 	
-	source.getAll('contacts', success, error);
+	submitContact = function() {
 	
-	source.destroy();
+		var firstName = $('form[name="create"] input[name="firstName"]').val();
+		var lastName = $('form[name="create"] input[name="lastName"]').val();
+		var email = $('form[name="create"] input[name="email"]').val();
+		
+		var contact = {
+			firstName: firstName,
+			lastName: lastName,
+			email: email
+		};
+	
+		Contact.set(contact, success, error);
+	
+	};
+	
+	updateContact = function() {
+	
+		var contactId = $('form[name="update"] input[name="contactId"]').val();
+		var firstName = $('form[name="update"] input[name="firstName"]').val();
+		var lastName = $('form[name="update"] input[name="lastName"]').val();
+		var email = $('form[name="update"] input[name="email"]').val();
+		
+		var contact = {
+			contactId: contactId,
+			firstName: firstName,
+			lastName: lastName,
+			email: email
+		};
+	
+		Contact.set(contact, success, error);
+	
+	};
+	
+	deleteContact = function() {
+	
+		var contactId = $('form[name="delete"] input[name="contactId"]').val();
+	
+		Contact.remove(contactId, success, error);
+	
+	};
+	
+	getAllContact = function() {
+			
+		Contact.getAll({}, function(data) {
+		
+			var contacts = data.toObject();
+			$("#items").empty();
+			
+			for(var id in contacts) {
+				$("#items").append($('<li>' + id + ' ' + contacts[id].firstName + ' ' + contacts[id].lastName + ' ' + contacts[id].email + '</li>'));
+			}
+			
+		}, error);
+	
+	};
+	
+	getContact = function() {
+	
+		var contactId = $('form[name="get"] input[name="contactId"]').val();
+		
+		if(contactId <= 0) return;
+		
+		Contact.get(contactId, function(data) {
+		
+			var contact = data.toObject();
+			
+			$("#item").html(contact.contactId + ' ' + contact.firstName + ' ' + contact.lastName + ' ' + contact.email);
+			
+		}, error);
+	
+	};
+	
 
 });
 
+
+
 </script>
+
+<p>Get All Form</p>
+
+<form name="getAll">
+	
+	<input type="button" onclick="getAllContact()" value="Get All" />
+
+</form>
+
+<ul id="items">
+
+</ul>
+
+<p>Get Form</p>
+
+<form name="get">
+
+	<input type="text" name="contactId" placeholder="Contact ID" />
+	<input type="button" onclick="getContact()" value="Get" />
+
+</form>
+
+<ul id="items">
+
+</ul>
+
+<p id="item">
+
+</p>
+
+<input type="button" value="Get" />
+
+
+<p>Create Form</p>
+
+<form name="create">
+
+	<input type="text" name="firstName" placeholder="First Name" />
+	<input type="text" name="lastName" placeholder="Last Name" />
+	<input type="text" name="email" placeholder="Email" />
+	
+	<input type="button" onclick="submitContact()" value="Save" />
+
+</form>
+
+<p>Update Form</p>
+
+<form name="update">
+
+	<input type="text" name="contactId" placeholder="Contact ID" />
+	<input type="text" name="firstName" placeholder="First Name" />
+	<input type="text" name="lastName" placeholder="Last Name" />
+	<input type="text" name="email" placeholder="Email" />
+	
+	<input type="button" onclick="updateContact()" value="Update" />
+
+</form>
+
+<p>Delete Form</p>
+
+<form name="delete">
+
+	<input type="text" name="contactId" placeholder="Contact ID" />
+	
+	<input type="button" onclick="deleteContact()" value="Delete" />
+
+</form>

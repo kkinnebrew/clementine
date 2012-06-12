@@ -1,0 +1,287 @@
+<html>
+
+<head>
+
+<title>Test Suite</title>
+
+<script type="text/javascript" src="lib/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="src/commons.js"></script>
+<script type="text/javascript" src="src/mvc.js"></script>
+
+<script type="text/javascript">
+
+Orange.use('mvc', function(O) {
+
+	function assertEqual(val1, val2) {
+		return val1 === val2;
+	}
+
+	$(document).ready(function() {
+	
+		// run user agent metrics
+		$("#useragent .useragent").text(navigator.userAgent);
+		$("#useragent .os").text(O.Browser.os);
+		$("#useragent .device").text(O.Browser.device);
+		$("#useragent .browser").text(O.Browser.browser);
+		$("#useragent .version").text(O.Browser.version);
+		
+		console.log('TEST: UserAgent Complete');
+	
+		// class creation, extension
+		var TestClass = Class.extend({
+		
+			testMethodOne: function() {
+				return 'yes';
+			},
+			
+			testMethodTwo: function() {
+				return 'no';
+			}
+		
+		});
+		
+		var TestChild = TestClass.extend({
+		
+			testMethodOne: function() {
+				return this._super();
+			},
+			
+			myMethod: function() {
+				return 'poo';
+			}
+		
+		});
+		
+		var TestClassInstance = new TestClass();
+		var TestChildInstance = new TestChild();
+		
+		if (typeof TestClass !== 'undefined') $("#oop .define").text("Passed").addClass('passed');
+		if (typeof TestChild !== 'undefined') $("#oop .extend").text("Passed").addClass('passed');
+		
+		if (TestClassInstance instanceof TestClass) $("#oop .instance").text("Passed").addClass('passed');
+		if (TestChildInstance instanceof TestChild) $("#oop .child").text("Passed").addClass('passed');
+		if (TestChildInstance instanceof TestClass) $("#oop .parent").text("Passed").addClass('passed');
+		
+		if (assertEqual(TestClassInstance.testMethodTwo(), 'no')) $("#oop .call").text("Passed").addClass('passed');
+		if (assertEqual(TestChildInstance.testMethodOne(), 'yes')) $("#oop .supercall").text("Passed").addClass('passed');
+		
+		console.log('TEST: OOP Complete');
+		
+		var App = new O.Application({
+			name: 'test',
+			version: '1.0',
+			log: 'info',
+			location: true,
+			required: ['mvc', 'ui', 'cakephp']
+		});
+		
+		var AppState = {
+			CONFIGURE: 3,
+			CACHE: 4,
+			STORAGE: 5,
+			VERSION: 6,
+			LOCATION: 7,
+			LOAD: 8,
+			ONLINE: 9,
+			OFFLINE: 10
+		};
+		
+		App.on('_complete', function(e) {
+			switch(e.data) {
+				case 3:
+					$("#app .dependency").text("Complete").addClass('passed'); break;
+				case 4:
+					$("#app .config").text("Complete").addClass('passed'); break;
+				case 5:
+					$("#app .cache").text("Complete").addClass('passed'); break;
+				case 6:
+					$("#app .storage").text("Complete").addClass('passed'); break;
+				case 7:
+					$("#app .version").text("Complete").addClass('passed'); break;
+				case 8:
+					$("#app .location").text("Complete").addClass('passed'); break;
+			}
+		});
+		
+		App.on('load', function() {
+			$("#app .load").text("Complete").addClass('passed');
+		});
+		
+		App.on('unload', function() {
+			$("#app .unload").text("Complete").addClass('passed');
+		});
+		
+		App.on('online', function() {
+			$("#app .online").text("Complete").addClass('passed');
+			$("#app .offline").text("").removeClass('passed');
+		});
+		
+		App.on('offline', function() {
+			$("#app .online").text("").removeClass('passed');
+			$("#app .offline").text("Complete").addClass('passed');
+		});
+		
+		App.load();
+				
+		console.log('TEST: Application Complete');
+	
+	});
+
+});
+
+</script>
+
+<style type="text/css">
+
+table {
+	border: 2px solid #999;
+	min-width: 260px;
+}
+
+table td {
+	padding: 3px 6px;
+}
+
+table td.passed {
+	background-color: #090;
+	color: #FFF;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>OrangeUI Test Suite</h1>
+
+<h2>User Agent</h2>
+
+<table id="useragent">
+
+	<tr>
+		<td><strong>User Agent</strong></td>
+		<td class="useragent"></td>
+	</tr>
+
+	<tr>
+		<td><strong>Operating System</strong></td>
+		<td class="os"></td>
+	</tr>
+	
+	<tr>
+		<td><strong>Device</strong></td>
+		<td class="device"></td>
+	</tr>
+	
+	<tr>
+		<td><strong>Browser</strong></td>
+		<td class="browser"></td>
+	</tr>
+	
+	<tr>
+		<td><strong>Version</strong></td>
+		<td class="version"></td>
+	</tr>
+
+</table>
+
+<h2>OOP</h2>
+
+<table id="oop">
+
+	<tr>
+		<td><strong>Define Class</strong></td>
+		<td class="define">Failed</td>
+	</tr>
+	
+	<tr>
+		<td><strong>Extend Class</strong></td>
+		<td class="extend">Failed</td>
+	</tr>
+
+	<tr>
+		<td><strong>Instantiate Class</strong></td>
+		<td class="instance">Failed</td>
+	</tr>
+
+	<tr>
+		<td><strong>Instantiate Child</strong></td>
+		<td class="child">Failed</td>
+	</tr>
+	
+	<tr>
+		<td><strong>Child is Instance of Parent</strong></td>
+		<td class="parent">Failed</td>
+	</tr>
+	
+	<tr>
+		<td><strong>Call Method</strong></td>
+		<td class="call">Failed</td>
+	</tr>
+	
+	<tr>
+		<td><strong>Call Super Method</strong></td>
+		<td class="supercall">Failed</td>
+	</tr>
+
+</table>
+
+<h2>Application</h2>
+
+<table id="app">
+	
+	<tr>
+		<td><strong>Dependency Load</strong></td>
+		<td class="dependency">Failed</td>
+	</tr>
+	
+	<tr>
+		<td><strong>Configuring</strong></td>
+		<td class="config">Failed</td>
+	</tr>
+
+	<tr>
+		<td><strong>Cache Load</strong></td>
+		<td class="cache">Failed</td>
+	</tr>
+
+	<tr>
+		<td><strong>Storage Load</strong></td>
+		<td class="storage">Failed</td>
+	</tr>
+	
+	<tr>
+		<td><strong>Update Version</strong></td>
+		<td class="version">Failed</td>
+	</tr>
+	
+	<tr>
+		<td><strong>Fetch Location</strong></td>
+		<td class="location">Failed</td>
+	</tr>
+	
+	<tr>
+		<td><strong>Primary Load</strong></td>
+		<td class="load">Failed</td>
+	</tr>
+	
+	<tr>
+		<td><strong>Online Load</strong></td>
+		<td class="online"></td>
+	</tr>
+	
+	<tr>
+		<td><strong>Online Load</strong></td>
+		<td class="offline"></td>
+	</tr>
+	<tr>
+		<td><strong>Unload</strong></td>
+		<td class="unload"></td>
+	</tr>
+
+</table>
+
+</body>
+
+</html>

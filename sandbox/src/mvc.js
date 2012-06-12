@@ -23,74 +23,309 @@ Orange.add('mvc', function(O) {
 	 * initial loading logic. the onLoad() method should be
 	 * overriden for a custom application.
 	 */
-	Application = Class.extend({
+//	Application = Class.extend({
+//	
+//		initialize: function(name, config) {
+//			
+//			this.name = name.replace(/[^A-Za-z:0-9_\[\]]/g);
+//			this.config = config;
+//			this.isOnline = false;
+//			this.isLoaded = false;
+//
+			// load dependencies
+//			for (var i = 0, len = this.config.required.length; i < len; i++) {
+//				Loader.loadModule(this.config.required[i]);
+//			}
+//			
+			// bind onload to window
+//			window.onload = Class.proxy(function() {
+//				this.isLoaded = true;
+//				PersistenceManager.init();
+//				Cache.init();
+//				this.onLoad();
+//			}, this);
+//			
+			// set logging
+//			if (this.config.hasOwnProperty('logging')) Log.setLevel(this.config.logging);
+//			
+			// bind offline events
+//			Cache.on('statusChange', Class.proxy(function(e) {
+//								
+//				if (!this.isLoaded) return;
+//				
+//				if (e.data == 1) {
+//					Storage.goOnline();
+//					if (this.config.location) Location.get();
+//					this.onOnline.call(this);
+//					Log.info('Application went online');
+//				} else {
+//					Storage.goOffline();
+//					this.onOffline.call(this);
+//					Log.info('Application went offline');
+//				}
+//				
+				// handle versioning
+//				if (Storage.get('appVersion') !== this.config.version) {
+//					PersistenceManager.flush();
+//					Storage.set('appVersion', this.config.version);
+//				}
+//				
+//			}, this));
+//		},
+//		
+//		onLoad: function() {}, // run at first load before anything else
+//		onOffline: function() {}, // run before the application goes offline
+//		onOnline: function() {}, // run before the application comes online
+//		
+//		goOnline: function() {
+//			this.isOnline = true;
+//		},
+//		
+//		goOffline: function() {
+//			this.isOnline = false;
+//		},
+//		
+//		isOnline: function() {
+//			return this.isOnline;
+//		},
+//		
+//		destroy: function() {
+//		
+//		}
+//	
+//	});
+
+	var AppState = {
+		INIT: 1,
+		REQUIRE: 2,
+		CONFIGURE: 3,
+		CACHE: 4,
+		STORAGE: 5,
+		VERSION: 6,
+		LOCATION: 7,
+		LOAD: 8,
+		ONLINE: 9,
+		OFFLINE: 10
+	};
 	
-		initialize: function(name, config) {
-			
-			this.name = name.replace(/[^A-Za-z:0-9_\[\]]/g);
+	/**
+	 * fires [load, unload, online, offline]
+	 *
+	 */
+	Application = Class.extend({
+		
+		initialize: function(config) {
+		
+			// validate requirements
+			if (!config.hasOwnProperty('name')) throw 'App missing "name"';
+			if (!config.hasOwnProperty('required')) config.required = [];
+			if (!config.hasOwnProperty('location')) config.location = false;
+			if (!config.hasOwnProperty('log')) config.log = 'none';
+		
+			// store config
 			this.config = config;
+		
+			// setup event target
+			this.events = new Events(null, this);
+			
+			// set states
 			this.isOnline = false;
 			this.isLoaded = false;
-
+			
+			// bind event
+			this.on('_complete', this.onComplete, this);
+		
+			console.log("initialize");
+		
+		},
+		
+		load: function() {
+			
+			// being launch sequence
+			this.fire('_complete', AppState.REQUIRE);
+			
+		},
+		
+		unload: function() {
+		
+			// prevent premature unloading
+			if (!this.isLoaded) return;
+		
+			console.log("unload");
+			
+			// fire unload event
+			this.fire('unload');
+		
+		},
+		
+		initRequired: function() {
+		
 			// load dependencies
 			for (var i = 0, len = this.config.required.length; i < len; i++) {
 				Loader.loadModule(this.config.required[i]);
 			}
+		
+			console.log("required");
+			this.fire('_complete', AppState.CONFIGURE);
+		
+		},
+	
+		initConfig: function() {
+		
+			// set logging level
+			Log.setLevel(this.config.log);
 			
-			// bind onload to window
-			window.onload = Class.proxy(function() {
-				this.isLoaded = true;
-				PersistenceManager.init();
-				Cache.init();
-				this.onLoad();
-			}, this);
+			console.log("config");
+			this.fire('_complete', AppState.CACHE);
+		
+		},
+		
+		initCache: function() {
 			
-			// set logging
-			if (this.config.hasOwnProperty('logging')) Log.setLevel(this.config.logging);
-			
-			// bind offline events
+			// bind caching event
 			Cache.on('statusChange', Class.proxy(function(e) {
-								
-				if (!this.isLoaded) return;
 				
-				if (e.data == 1) {
-					Storage.goOnline();
-					if (this.config.location) Location.get();
-					this.onOnline.call(this);
-					Log.info('Application went online');
-				} else {
-					Storage.goOffline();
-					this.onOffline.call(this);
-					Log.info('Application went offline');
-				}
+				// detach one time event
+				Cache.detach();
 				
-				// handle versioning
-				if (Storage.get('appVersion') !== this.config.version) {
-					PersistenceManager.flush();
-					Storage.set('appVersion', this.config.version);
-				}
-				
+				// set online status
+				this.isOnline = e.data == 1;
+						
+				console.log("cache");
+				if (!this.loaded) this.fire('_complete', AppState.STORAGE);
+														
 			}, this));
+			
+			// setup caching
+			Cache.init();
+						
 		},
 		
-		onLoad: function() {}, // run at first load before anything else
-		onOffline: function() {}, // run before the application goes offline
-		onOnline: function() {}, // run before the application comes online
+		initStorage: function() {
+			
+			// initialize persistence manager
+			if (!this.isLoaded) PersistenceManager.init();
+			
+			// change storage status
+			if (this.isOnline) Storage.goOnline();
+			else Storage.goOffline();
+			
+			console.log("storage");
+			if (!this.isLoaded) this.fire('_complete', AppState.VERSION);
 		
-		goOnline: function() {
-			this.isOnline = true;
 		},
 		
-		goOffline: function() {
-			this.isOnline = false;
+		initVersion: function() {
+		
+			// flush cache if new version
+			if (this.config.hasOwnProperty('version') && Storage.get('appVersion') !== this.config.version) {
+				PersistenceManager.flush();
+				Storage.set('appVersion', this.config.version);
+			}
+		
+			console.log("version");
+			this.fire('_complete', AppState.LOCATION);
+		
 		},
 		
-		isOnline: function() {
-			return this.isOnline;
+		initLocation: function() {
+		
+			// fetch location
+			if (this.config.location) Location.get();
+			
+			console.log("location");
+			if (!this.isLoaded) this.fire('_complete', AppState.LOAD);
+		
 		},
 		
-		destroy: function() {
+		onLoad: function() {
 		
+			// prevent duplicate loading
+			if (this.isLoaded) return;
+			
+			// set as loaded
+			this.isLoaded = true;
+		
+			console.log("load");
+			
+			// fire load event
+			this.fire('load');
+						
+			// go online
+			if (this.isOnline) this.onOnline();
+			else this.onOffline();
+			
+			// bind online offline event
+			Cache.on('statusChange', Class.proxy(function(e) {
+
+				// set online status
+				this.isOnline = e.data == 1;
+				
+				// run events		
+				this.initStorage();
+				this.initLocation();
+				
+				// call online/offline
+				if (this.isOnline) this.onOnline();
+				else this.onOffline();
+														
+			}, this));
+			
+		},
+		
+		onOnline: function() {
+		
+			Log.info('Application went online');
+			
+			// fire offline event
+			this.fire('offline');
+		
+		},
+		
+		onOffline: function() {
+		
+			Log.info('Application is offline');
+			
+			// fire online event
+			this.fire('online');
+		
+		},
+		
+		onComplete: function(e) {
+		
+			// prevent loading after the fact
+			if (this.isLoaded) return;
+		
+			switch(e.data) {
+				case AppState.REQUIRE:
+					this.initRequired.call(this); break;
+				case AppState.CONFIGURE:
+					this.initConfig.call(this); break;
+				case AppState.CACHE:
+					this.initCache.call(this); break;
+				case AppState.STORAGE:
+					this.initStorage.call(this); break;
+				case AppState.VERSION:
+					this.initVersion.call(this); break;
+				case AppState.LOCATION:
+					this.initLocation.call(this); break;
+				case AppState.LOAD:
+				this.onLoad.call(this); break;
+			}
+		
+		},
+		
+		on: function(ev, call, context) {
+			var proxy = (typeof context !== 'undefined') ? function() { call.apply(context, arguments); } : call;
+			return this.events.on.call(this.events, ev, proxy);
+		},
+		
+		fire: function() {
+			return this.events.fire.apply(this.events, arguments);
+		},
+		
+		detach: function() {
+			return this.events.detach.apply(this.events, arguments);
 		}
 	
 	});
@@ -930,6 +1165,8 @@ Orange.add('mvc', function(O) {
 			this.updateDS = new PersistentStorageSource({ name: 'update' });
 			this.deleteDS = new PersistentStorageSource({ name: 'delete' });
 			this.pendingDS = new PersistentStorageSource({ name: 'pending' });
+			
+			console.log("persistence manager loaded");
 			
 			Cache.on('statusChange', Class.proxy(this.onStatusChange, this));
 			

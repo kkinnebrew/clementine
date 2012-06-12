@@ -132,6 +132,61 @@
 	 * events on. this can be used in your other classes
 	 * to give them even functionality
 	 */
+//	Events = Class.extend({
+//	
+//		on: function(ev, call) {
+//			if (!this._listeners) this._listeners = {};
+//			if (!this._listeners.hasOwnProperty(ev)) {
+//				this._listeners[ev] = [];
+//			}
+//			this._listeners[ev].push(call);	
+//			return new EventHandle(this, ev, call);
+//		},
+//		
+//		fire: function(ev, data) {
+//				
+//			var parent = this._parent ? this._parent : null,
+//					self = this._self ? this._self : null;
+//	
+//			if (typeof ev === 'string') ev = new EventTarget(ev, this._self, this._self, data);
+//			if (typeof ev.type !== 'string') throw "Error: Invalid 'type' when firing event";
+//			
+//			if (!this._listeners) this._listeners = {};
+//			if (this._listeners[ev.type] instanceof Array) {
+//				var listeners = this._listeners[ev.type];
+//				for (var i = 0, len = listeners.length; i < len; i++) listeners[i].call(this, ev);
+//			}
+//			if (parent != null && parent._eventTarget instanceof EventTarget && ev.bubbles) {
+//				ev.currentTarget = parent;
+//				parent._eventTarget.fire.call(parent._eventTarget, ev, data);
+//			}
+//			
+//		},
+//		
+//		detach: function(ev, call) {
+//		
+//			if (this._listeners && this._listeners[ev] instanceof Array) {
+//				var listeners = this._listeners[ev];
+//				for (var i = 0, len = listeners.length; i < len; i++) {
+//					if (typeof call !== 'undefined' && listeners[i] === call) {
+//						listeners.splice(i, 1);
+//						break;
+//					} else listeners.splice(i, 1);
+//				}
+//			} else if (typeof ev === 'undefined') {
+//				this._listeners = {};
+//			}
+//		
+//		},
+//		
+//		destroy: function() {
+//			for(var listener in this._listeners) {
+//				listener.detach();
+//			}
+//		}
+//	
+//	});
+	 
 	Events = (function() {
 	
 		function Events(parent, self) {
@@ -825,12 +880,12 @@
 				
 				// check device
 				var useragent = navigator.userAgent.toLowerCase();
-				if (useragent.search("iphone") > 0 || useragent.search("ipod") > 0) this.device = 'phone';
-				else if (useragent.search("ipad") > 0) this.device = 'tablet';
-				else if (useragent.search("mobile") > 0 && this.OS == 'Android') this.device = 'phone';
-				else if (this.OS == 'Android') this.device = 'tablet';
-				else this.device = 'desktop';
-				if (this.OS == 'Android' && useragent.search("galaxy_tab") > 0) this.device = 'tablet';
+				if (useragent.search("iphone") > 0 || useragent.search("ipod") > 0) this.device = 'Phone';
+				else if (useragent.search("ipad") > 0) this.device = 'Tablet';
+				else if (useragent.search("mobile") > 0 && this.OS == 'Android') this.device = 'Phone';
+				else if (this.OS == 'Android') this.device = 'Tablet';
+				else this.device = 'Desktop';
+				if (this.OS == 'Android' && useragent.search("galaxy_tab") > 0) this.device = 'Tablet';
 				
 				// check scrolling
 				if (this.device == 'desktop') this.nativeScroll = true;

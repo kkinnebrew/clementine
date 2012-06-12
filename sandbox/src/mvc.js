@@ -117,7 +117,7 @@ Orange.add('mvc', function(O) {
 		initialize: function(config) {
 		
 			// validate requirements
-			if (!config.hasOwnProperty('name')) throw 'App missing "name"';
+			if (!config.hasOwnProperty('name') || (new RegExp(/[^A-Za-z:0-9_\[\]]/g)).test(config.name)) throw 'Invalid application name';
 			if (!config.hasOwnProperty('required')) config.required = [];
 			if (!config.hasOwnProperty('location')) config.location = false;
 			if (!config.hasOwnProperty('log')) config.log = 'none';
@@ -134,28 +134,15 @@ Orange.add('mvc', function(O) {
 			
 			// bind event
 			this.on('_complete', this.onComplete, this);
-		
-			console.log("initialize");
-		
+				
 		},
 		
 		load: function() {
-			
-			// being launch sequence
 			this.fire('_complete', AppState.REQUIRE);
-			
 		},
 		
 		unload: function() {
-		
-			// prevent premature unloading
-			if (!this.isLoaded) return;
-		
-			console.log("unload");
-			
-			// fire unload event
-			this.fire('unload');
-		
+			if (this.isLoaded) this.fire('unload');
 		},
 		
 		initRequired: function() {
@@ -165,7 +152,6 @@ Orange.add('mvc', function(O) {
 				Loader.loadModule(this.config.required[i]);
 			}
 		
-			console.log("required");
 			this.fire('_complete', AppState.CONFIGURE);
 		
 		},
@@ -175,7 +161,6 @@ Orange.add('mvc', function(O) {
 			// set logging level
 			Log.setLevel(this.config.log);
 			
-			console.log("config");
 			this.fire('_complete', AppState.CACHE);
 		
 		},
@@ -191,7 +176,6 @@ Orange.add('mvc', function(O) {
 				// set online status
 				this.isOnline = e.data == 1;
 						
-				console.log("cache");
 				if (!this.loaded) this.fire('_complete', AppState.STORAGE);
 														
 			}, this));
@@ -210,7 +194,6 @@ Orange.add('mvc', function(O) {
 			if (this.isOnline) Storage.goOnline();
 			else Storage.goOffline();
 			
-			console.log("storage");
 			if (!this.isLoaded) this.fire('_complete', AppState.VERSION);
 		
 		},
@@ -223,7 +206,6 @@ Orange.add('mvc', function(O) {
 				Storage.set('appVersion', this.config.version);
 			}
 		
-			console.log("version");
 			this.fire('_complete', AppState.LOCATION);
 		
 		},
@@ -233,7 +215,6 @@ Orange.add('mvc', function(O) {
 			// fetch location
 			if (this.config.location) Location.get();
 			
-			console.log("location");
 			if (!this.isLoaded) this.fire('_complete', AppState.LOAD);
 		
 		},
@@ -245,9 +226,7 @@ Orange.add('mvc', function(O) {
 			
 			// set as loaded
 			this.isLoaded = true;
-		
-			console.log("load");
-			
+					
 			// fire load event
 			this.fire('load');
 						
@@ -1165,9 +1144,7 @@ Orange.add('mvc', function(O) {
 			this.updateDS = new PersistentStorageSource({ name: 'update' });
 			this.deleteDS = new PersistentStorageSource({ name: 'delete' });
 			this.pendingDS = new PersistentStorageSource({ name: 'pending' });
-			
-			console.log("persistence manager loaded");
-			
+						
 			Cache.on('statusChange', Class.proxy(this.onStatusChange, this));
 			
 		};

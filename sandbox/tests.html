@@ -25,7 +25,7 @@ Orange.use('mvc', function(O) {
 		$("#useragent .browser").text(O.Browser.browser);
 		$("#useragent .version").text(O.Browser.version);
 		
-		console.log('TEST: UserAgent Complete');
+		//console.log('TEST: UserAgent Complete');
 	
 		// class creation, extension
 		var TestClass = Class.extend({
@@ -65,7 +65,7 @@ Orange.use('mvc', function(O) {
 		if (assertEqual(TestClassInstance.testMethodTwo(), 'no')) $("#oop .call").text("Passed").addClass('passed');
 		if (assertEqual(TestChildInstance.testMethodOne(), 'yes')) $("#oop .supercall").text("Passed").addClass('passed');
 		
-		console.log('TEST: OOP Complete');
+		//console.log('TEST: OOP Complete');
 		
 		var App = new O.Application({
 			name: 'test',
@@ -123,7 +123,7 @@ Orange.use('mvc', function(O) {
 		
 		App.load();
 				
-		console.log('TEST: Application Complete');
+		//console.log('TEST: Application Complete');
 	
 	});
 

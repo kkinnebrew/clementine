@@ -110,7 +110,7 @@ Orange.add('mvc', function(O) {
 			}, this));
 			
 			// setup caching
-			Cache.init();
+			Cache.init(true);
 						
 		},
 		

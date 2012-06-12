@@ -131,62 +131,7 @@
 	 * the event object to bind, fire, and unbind
 	 * events on. this can be used in your other classes
 	 * to give them even functionality
-	 */
-//	Events = Class.extend({
-//	
-//		on: function(ev, call) {
-//			if (!this._listeners) this._listeners = {};
-//			if (!this._listeners.hasOwnProperty(ev)) {
-//				this._listeners[ev] = [];
-//			}
-//			this._listeners[ev].push(call);	
-//			return new EventHandle(this, ev, call);
-//		},
-//		
-//		fire: function(ev, data) {
-//				
-//			var parent = this._parent ? this._parent : null,
-//					self = this._self ? this._self : null;
-//	
-//			if (typeof ev === 'string') ev = new EventTarget(ev, this._self, this._self, data);
-//			if (typeof ev.type !== 'string') throw "Error: Invalid 'type' when firing event";
-//			
-//			if (!this._listeners) this._listeners = {};
-//			if (this._listeners[ev.type] instanceof Array) {
-//				var listeners = this._listeners[ev.type];
-//				for (var i = 0, len = listeners.length; i < len; i++) listeners[i].call(this, ev);
-//			}
-//			if (parent != null && parent._eventTarget instanceof EventTarget && ev.bubbles) {
-//				ev.currentTarget = parent;
-//				parent._eventTarget.fire.call(parent._eventTarget, ev, data);
-//			}
-//			
-//		},
-//		
-//		detach: function(ev, call) {
-//		
-//			if (this._listeners && this._listeners[ev] instanceof Array) {
-//				var listeners = this._listeners[ev];
-//				for (var i = 0, len = listeners.length; i < len; i++) {
-//					if (typeof call !== 'undefined' && listeners[i] === call) {
-//						listeners.splice(i, 1);
-//						break;
-//					} else listeners.splice(i, 1);
-//				}
-//			} else if (typeof ev === 'undefined') {
-//				this._listeners = {};
-//			}
-//		
-//		},
-//		
-//		destroy: function() {
-//			for(var listener in this._listeners) {
-//				listener.detach();
-//			}
-//		}
-//	
-//	});
-	 
+	 */	 
 	Events = (function() {
 	
 		function Events(parent, self) {
@@ -418,9 +363,7 @@
 		
 			load: function(request) {
 						
-				if (typeof $ !== 'undefined') {
-					return $.ajax(request).responseText;
-				} 
+				if (typeof $ !== 'undefined') return $.ajax(request).responseText;
 				else {
 					var req = createXMLHttpObject();
 					if (!req) return;
@@ -435,7 +378,7 @@
 
 					req.open(method, url, true);
 					req.setRequestHeader('Cache-Control', 'no-cache');
-					req.timeout = 3000;
+					req.timeout = 5000;
 					req.ontimeout = function () { error(req); }
 					
 					req.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
@@ -453,6 +396,12 @@
 					}
 					
 					req.send(data);
+					
+					var timeout = setTimeout(ajaxTimeout, 5000);
+					
+					function ajaxTimeout(){
+						req.abort();
+					}
 				}
 				
 			},
@@ -566,6 +515,7 @@
 				isOnline = true;
 				isLoaded = true;
 				Cache.fire("statusChange", 1);
+				if (poll) setTimeout(statusCallback, 10 * 1000);
 				return;
 			}
 			
@@ -578,9 +528,11 @@
 					isLoaded = true;
 					Cache.fire("statusChange", 1);
 				} else if (navigator.onLine) {
-				  				  
+				  
+				  var id = Math.floor(Math.random()*10000);
+				  
 				  Ajax.load({
-				  	url: 'ping.js', 
+				  	url: 'ping.js?q='+id, 
 				  	type: "GET",
 				  	success: function(req) {
 					  	if (isOnline === false) {
@@ -609,7 +561,7 @@
 				}
 				
 				active = null;
-				if (poll) setTimeout(statusCallback, 10 * 1000);			
+				if (poll) setTimeout(statusCallback, 10 * 1000);
 				
 			}, (isLoaded ? 100 : 0));
 			

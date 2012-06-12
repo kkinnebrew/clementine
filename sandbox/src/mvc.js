@@ -31,7 +31,7 @@ Orange.add('mvc', function(O) {
 			this.config = config;
 			this.isOnline = false;
 			this.isLoaded = false;
-			
+
 			// load dependencies
 			for (var i = 0, len = this.config.required.length; i < len; i++) {
 				Loader.loadModule(this.config.required[i]);
@@ -40,8 +40,9 @@ Orange.add('mvc', function(O) {
 			// bind onload to window
 			window.onload = Class.proxy(function() {
 				this.isLoaded = true;
-				this.onLoad();
+				PersistenceManager.init();
 				Cache.init();
+				this.onLoad();
 			}, this);
 			
 			// set logging
@@ -54,22 +55,22 @@ Orange.add('mvc', function(O) {
 				
 				if (e.data == 1) {
 					Storage.goOnline();
-					PersistenceManager.init();
 					if (this.config.location) Location.get();
 					this.onOnline.call(this);
+					Log.info('Application went online');
 				} else {
 					Storage.goOffline();
 					this.onOffline.call(this);
+					Log.info('Application went offline');
+				}
+				
+				// handle versioning
+				if (Storage.get('appVersion') !== this.config.version) {
+					PersistenceManager.flush();
+					Storage.set('appVersion', this.config.version);
 				}
 				
 			}, this));
-				
-			// handle versioning
-			if (Storage.get('appVersion') !== this.config.version) {
-				PersistenceManager.flush();
-				Storage.set('appVersion', this.config.version);
-			}
-
 		},
 		
 		onLoad: function() {}, // run at first load before anything else
@@ -86,6 +87,10 @@ Orange.add('mvc', function(O) {
 		
 		isOnline: function() {
 			return this.isOnline;
+		},
+		
+		destroy: function() {
+		
 		}
 	
 	});
@@ -697,7 +702,6 @@ Orange.add('mvc', function(O) {
 	Model.remove = function(id, success, error, context) {
 		var context = typeof context === 'function' ? context : this, deltaId = id;
 		var successFunc = function(data) {
-			console.log("removing");
 			this.fire('datachange', { action: 'delete', id: id });
 			if (success) success.call(context, deltaId);
 		};
@@ -710,8 +714,6 @@ Orange.add('mvc', function(O) {
 	},
 	
 	Model.fire = function() {
-		console.log("123");
-		console.log(this.events);
 		return this.events.fire.apply(this.events, arguments);
 	},
 	
@@ -811,20 +813,13 @@ Orange.add('mvc', function(O) {
 			
 			this.events.push(this.model.on('datachange', Class.proxy(this.mergeDeltas, this)));
 			this.events.push(this.model.on('datasync', Class.proxy(this.syncDeltas, this)));
-			
-			console.log("parm");
-			console.log(this.model.events);
-			
+
 		},
 		
 		mergeDeltas: function(e) {
-			
-			console.log("merging deltas");
-			
+						
 			var delta = e.data;
-			
-			console.log(delta);
-				
+							
 			if (delta.action == 'set') {
 				this.data[delta.id] = delta.item;
 				if (this.active.hasOwnProperty(delta.id)) this.active[delta.id] = delta.item;
@@ -838,9 +833,7 @@ Orange.add('mvc', function(O) {
 		},
 		
 		syncDeltas: function(e) {
-			
-			console.log("syncing deltas");
-			
+						
 			var delta = e.data;
 			
 			if (this.data.hasOwnProperty(delta.oldId)) {
@@ -859,10 +852,6 @@ Orange.add('mvc', function(O) {
 				this.list = this.toArray();
 			}
 			
-		},
-		
-		getModel: function() {
-			return this.model;
 		},
 		
 		count: function() {
@@ -1132,7 +1121,9 @@ Orange.add('mvc', function(O) {
 		PersistenceManager.onStatusChange = function(e) {
 						
 			if (e.data == 1 && !isSyncing) {
-				this.onSync();				
+				setTimeout(Class.proxy(function() {
+					this.onSync();		
+				}, this), 150);		
 			} else {
 				if (isSyncing) {
 					this.onSyncFailure.call(this);
@@ -1233,12 +1224,12 @@ Orange.add('mvc', function(O) {
 			isSyncing = false;
 			isLive = !(Cache.isActive() && !Cache.isOnline());
 		
-			Log.info("Unsaved data pushed to server.");
+			Log.info("Synced with server");
 			
 		};
 		
 		PersistenceManager.onSyncFailure = function() {
-			Log.info("Could not push unsaved data to server.");
+			Log.info("Could sync with server");
 		};
 		
 		PersistenceManager.checkSyncStatus = function() {

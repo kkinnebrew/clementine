@@ -21,9 +21,9 @@ Orange.add('ui', function(O) {
 	 * lookup of root view controller and default loading
 	 * of root view
 	 */
-	Application.prototype.onLaunch = function(online) {
+	Application.prototype.onLoad = function(online) {
 		
-		var root = $('[data-root="true"]'),
+		var root = $('[data-root]'),
 		type = root.attr('data-control'),
 		name = root.attr('data-name');
 		if (typeof type === 'undefined' || typeof name === 'undefined') throw 'Root view not found';
@@ -115,10 +115,10 @@ Orange.add('ui', function(O) {
 		},
 		
 		bindList: function(list, live) {
-		
+				
 			// check if already loaded
 			if (this.loaded) return;
-			
+
 			// bind data
 			this._bindList(this.node, list);
 			
@@ -155,7 +155,7 @@ Orange.add('ui', function(O) {
 				}
 				
 			}
-			
+						
 			// insert into dom
 			node.replaceWith(output);
 		
@@ -352,7 +352,7 @@ Orange.add('ui', function(O) {
 			// process elements
 			for (var i = 0, len = elements.length; i < len; i++) {
 				var el = $(elements[i]), name = el.attr('data-name');
-				if (typeof name !== 'undefined' && name.length > 0) this.elements[name] = el.removeAttr('data-name');
+				if (typeof name !== 'undefined' && name.length > 0) this.elements[name] = el.removeAttr('data-name').addClass(name);
 			}
 			
 			// process types
@@ -380,7 +380,7 @@ Orange.add('ui', function(O) {
 		 */
 		getClasses: function() {
 			var classes = typeof this.typeList !== 'undefined' ? this.typeList : '';
-			return classes + ' ' + this.data.name;
+			return classes + ' ' + this.data.name ? this.data.name : '';
 		},
 	
 		/**
@@ -520,6 +520,7 @@ Orange.add('ui', function(O) {
 		
 			// run functions
 			console.log(this.data.name + ' ' + "Unload");
+			this.target.remove();
 		
 			// fire unloaded event
 			this.fire('_unloaded');
@@ -717,17 +718,30 @@ Orange.add('ui', function(O) {
 		
 		
 		hasView: function(name) {
-			return typeof this._views[name] !== 'undefined';
+			return typeof this.views[name] !== 'undefined';
 		},				
 		
 		hasForm: function(name) {
-			return typeof this._forms[name] !== 'undefined';
+			return typeof this.forms[name] !== 'undefined';
 		},
 		
 		hasElement: function(name) {
-			return typeof this._elements[name] !== 'undefined';
+			return typeof this.elements[name] !== 'undefined';
 		},
 		
+		
+		setView: function(name, view) {
+			console.log(this);
+			if (this.views.hasOwnProperty(name)) throw "View already exists";
+			this.views[name] = view;
+		},
+		
+		clearView: function(name) {
+			if (this.views.hasOwnProperty(name)) {
+				this.views[name].destroy();
+				delete this.views[name];
+			}
+		},
 		
 		on: function(event, callback, context) {
 			var proxy = (typeof context !== 'undefined') ? function() { callback.apply(context, arguments); } : callback;
@@ -742,6 +756,13 @@ Orange.add('ui', function(O) {
 			return this.eventTarget.fire.apply(this.eventTarget, arguments);
 		},
 		
+		bindList: function(model) {
+		
+			this.dataBinding = new O.Binding(this.target);
+			this.dataBinding.clear();
+			this.dataBinding.bindList(model);
+		
+		},
 		
 		toString: function() {
 			return '[' + this.getType() + ' ' + this.data.name + ']';
@@ -788,6 +809,7 @@ Orange.add('ui', function(O) {
 	};
 	
 	ViewController.get = function(name) {
+		if (name == 'ui-view') return this;
 		if (!this.views.hasOwnProperty(name)) throw "View '" + name + '" not found';
 		return this.views[name];
 	};
@@ -832,14 +854,6 @@ Orange.add('ui', function(O) {
 	O.Binding = Binding;
 	O.Form		= Form;
 	
-//	O.GridViewController			= GridViewController;
-//	O.LightboxViewController	= LightboxViewController;
-//	O.ListViewController			= ListViewController;
-//	O.MapViewController				= MapViewController;
-//	O.ProgressViewController	= ProgressViewController;
-//	O.TableViewController			= TableViewController;
-//	O.TabViewController				= TabViewController;
-//	O.TooltipViewController		= TooltipViewController;
 	O.MultiViewController			= MultiViewController;
 	O.ViewController					= ViewController;
 	

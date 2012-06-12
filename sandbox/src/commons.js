@@ -506,7 +506,7 @@
 		var events = new Events(null, Cache)
 		
 		var statusCallback = function() {
-
+	
 			if(navigator.onLine && !isLoaded) {
 				isOnline = true;
 				isLoaded = true;
@@ -515,7 +515,7 @@
 			}
 			
 			stop();
-												
+						
 			active = setTimeout(function() {
 
 				if (navigator.onLine && !isLoaded) {
@@ -896,7 +896,8 @@
 			version: BrowserDetect.version,
 			os: BrowserDetect.OS,
 			device: BrowserDetect.device,
-			scroll: BrowserDetect.nativeScroll
+			scroll: BrowserDetect.nativeScroll,
+			touch: (BrowserDetect.OS == 'Android' || BrowserDetect.OS == 'iOS')
 		}
 	
 	})();
@@ -915,7 +916,7 @@
 	Orange.Cache 				= Cache;
 	Orange.Class 				= this.Class = Class;
 	Orange.Events 			= Events;
-	Orange.Loaded				= Loader;
+	Orange.Loader				= Loader;
 	Orange.Location 		= Location;
   Orange.Log 					= this.Log = Log;  
   Orange.Storage 			= Storage;

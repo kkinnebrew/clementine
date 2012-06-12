@@ -8,7 +8,7 @@
 
 Orange.add('ui', function(O) {
 
-	var Binding, Form, Input, MultiViewController, ViewController;
+	var UIApplication, Binding, Form, Input, MultiViewController, ViewController;
 
 	// import dependencies
 	var Application = __import('Application'), 
@@ -21,27 +21,36 @@ Orange.add('ui', function(O) {
 	 * lookup of root view controller and default loading
 	 * of root view
 	 */
-	Application.prototype.onLoad = function(online) {
+	UIApplication = Application.extend({
+	
+		onLoad: function() {
+			
+			// fetch root element
+			var root = $('[data-root]'),
+			type = root.attr('data-control'),
+			name = root.attr('data-name');
+			if (typeof type === 'undefined' || typeof name === 'undefined') throw 'Root view not found';
+			
+			// remove root attribute
+			root.removeAttr('data-root');
+			
+			// load view
+			var c = ViewController.get(type);
+			var controller = new c(null, root);
+			
+			controller.on('load', function() {	
+				controller.show();
+			});
 		
-		var root = $('[data-root]'),
-		type = root.attr('data-control'),
-		name = root.attr('data-name');
-		if (typeof type === 'undefined' || typeof name === 'undefined') throw 'Root view not found';
+			// load controller	
+			controller.load();
+			
+			// call superclass
+			this._super();
 		
-		// remove root attribute
-		root.removeAttr('data-root');
-		
-		// load view
-		var c = ViewController.get(type);
-		var controller = new c(null, root);
-		
-		controller.on('load', function() {	
-			controller.show();
-		});
-		
-		controller.load();
-							
-	};
+		}
+	
+	});
 	
 	/**
 	 * bindings are used to apply live data to DOM elements
@@ -851,6 +860,7 @@ Orange.add('ui', function(O) {
 	
 	});
 	
+	O.UIApplication = Application;
 	O.Binding = Binding;
 	O.Form		= Form;
 	

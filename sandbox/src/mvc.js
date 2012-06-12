@@ -18,83 +18,7 @@ Orange.add('mvc', function(O) {
 			Location 	= __import('Location'),
 			Storage 	= __import('Storage');
 
-	/**
-	 * the application stores all the configuration and
-	 * initial loading logic. the onLoad() method should be
-	 * overriden for a custom application.
-	 */
-//	Application = Class.extend({
-//	
-//		initialize: function(name, config) {
-//			
-//			this.name = name.replace(/[^A-Za-z:0-9_\[\]]/g);
-//			this.config = config;
-//			this.isOnline = false;
-//			this.isLoaded = false;
-//
-			// load dependencies
-//			for (var i = 0, len = this.config.required.length; i < len; i++) {
-//				Loader.loadModule(this.config.required[i]);
-//			}
-//			
-			// bind onload to window
-//			window.onload = Class.proxy(function() {
-//				this.isLoaded = true;
-//				PersistenceManager.init();
-//				Cache.init();
-//				this.onLoad();
-//			}, this);
-//			
-			// set logging
-//			if (this.config.hasOwnProperty('logging')) Log.setLevel(this.config.logging);
-//			
-			// bind offline events
-//			Cache.on('statusChange', Class.proxy(function(e) {
-//								
-//				if (!this.isLoaded) return;
-//				
-//				if (e.data == 1) {
-//					Storage.goOnline();
-//					if (this.config.location) Location.get();
-//					this.onOnline.call(this);
-//					Log.info('Application went online');
-//				} else {
-//					Storage.goOffline();
-//					this.onOffline.call(this);
-//					Log.info('Application went offline');
-//				}
-//				
-				// handle versioning
-//				if (Storage.get('appVersion') !== this.config.version) {
-//					PersistenceManager.flush();
-//					Storage.set('appVersion', this.config.version);
-//				}
-//				
-//			}, this));
-//		},
-//		
-//		onLoad: function() {}, // run at first load before anything else
-//		onOffline: function() {}, // run before the application goes offline
-//		onOnline: function() {}, // run before the application comes online
-//		
-//		goOnline: function() {
-//			this.isOnline = true;
-//		},
-//		
-//		goOffline: function() {
-//			this.isOnline = false;
-//		},
-//		
-//		isOnline: function() {
-//			return this.isOnline;
-//		},
-//		
-//		destroy: function() {
-//		
-//		}
-//	
-//	});
-
+	// application config
 	var AppState = {
 		INIT: 1,
 		REQUIRE: 2,
@@ -107,10 +31,12 @@ Orange.add('mvc', function(O) {
 		ONLINE: 9,
 		OFFLINE: 10
 	};
-	
+
 	/**
+	 * the application stores all the configuration and
+	 * initial loading logic. the onLoad() method should be
+	 * overriden for a custom application.
 	 * fires [load, unload, online, offline]
-	 *
 	 */
 	Application = Class.extend({
 		
@@ -129,7 +55,7 @@ Orange.add('mvc', function(O) {
 			this.events = new Events(null, this);
 			
 			// set states
-			this.isOnline = false;
+			this._isOnline = false;
 			this.isLoaded = false;
 			
 			// bind event
@@ -142,7 +68,10 @@ Orange.add('mvc', function(O) {
 		},
 		
 		unload: function() {
-			if (this.isLoaded) this.fire('unload');
+			if (this.isLoaded) {
+				this.fire('unload');
+				this.events.detach();
+			}
 		},
 		
 		initRequired: function() {
@@ -174,7 +103,7 @@ Orange.add('mvc', function(O) {
 				Cache.detach();
 				
 				// set online status
-				this.isOnline = e.data == 1;
+				this._isOnline = e.data == 1;
 						
 				if (!this.loaded) this.fire('_complete', AppState.STORAGE);
 														
@@ -191,7 +120,7 @@ Orange.add('mvc', function(O) {
 			if (!this.isLoaded) PersistenceManager.init();
 			
 			// change storage status
-			if (this.isOnline) Storage.goOnline();
+			if (this._isOnline) Storage.goOnline();
 			else Storage.goOffline();
 			
 			if (!this.isLoaded) this.fire('_complete', AppState.VERSION);
@@ -219,37 +148,48 @@ Orange.add('mvc', function(O) {
 		
 		},
 		
-		onLoad: function() {
+		_onLoad: function() {
 		
 			// prevent duplicate loading
 			if (this.isLoaded) return;
 			
+			console.log("213");
+						
 			// set as loaded
 			this.isLoaded = true;
-					
-			// fire load event
-			this.fire('load');
 						
 			// go online
-			if (this.isOnline) this.onOnline();
-			else this.onOffline();
+			this.onLoad();
 			
 			// bind online offline event
 			Cache.on('statusChange', Class.proxy(function(e) {
 
 				// set online status
-				this.isOnline = e.data == 1;
+				this._isOnline = e.data == 1;
 				
 				// run events		
 				this.initStorage();
 				this.initLocation();
 				
 				// call online/offline
-				if (this.isOnline) this.onOnline();
+				if (this._isOnline) this.onOnline();
 				else this.onOffline();
 														
 			}, this));
 			
+		},
+		
+		onLoad: function() {
+		
+			Log.info('Application loaded');
+			
+			// fire load event
+			this.fire('load');
+		
+			// go online
+			if (this._isOnline) this.onOnline();
+			else this.onOffline();
+		
 		},
 		
 		onOnline: function() {
@@ -305,6 +245,10 @@ Orange.add('mvc', function(O) {
 		
 		detach: function() {
 			return this.events.detach.apply(this.events, arguments);
+		},
+		
+		isOnline: function() {
+			return this._isOnline;
 		}
 	
 	});

@@ -152,15 +152,13 @@ Orange.add('mvc', function(O) {
 		
 			// prevent duplicate loading
 			if (this.isLoaded) return;
-			
-			console.log("213");
-						
+									
 			// set as loaded
 			this.isLoaded = true;
 						
 			// go online
 			this.onLoad();
-			
+						
 			// bind online offline event
 			Cache.on('statusChange', Class.proxy(function(e) {
 
@@ -229,7 +227,7 @@ Orange.add('mvc', function(O) {
 				case AppState.LOCATION:
 					this.initLocation.call(this); break;
 				case AppState.LOAD:
-				this.onLoad.call(this); break;
+				this._onLoad.call(this); break;
 			}
 		
 		},

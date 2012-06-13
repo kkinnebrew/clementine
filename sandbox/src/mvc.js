@@ -18,20 +18,6 @@ Orange.add('mvc', function(O) {
 			Location 	= __import('Location'),
 			Storage 	= __import('Storage');
 
-	// application config
-	var AppState = {
-		INIT: 1,
-		REQUIRE: 2,
-		CONFIGURE: 3,
-		CACHE: 4,
-		STORAGE: 5,
-		VERSION: 6,
-		LOCATION: 7,
-		LOAD: 8,
-		ONLINE: 9,
-		OFFLINE: 10
-	};
-
 	/**
 	 * the application stores all the configuration and
 	 * initial loading logic. the onLoad() method should be
@@ -57,44 +43,18 @@ Orange.add('mvc', function(O) {
 			// set states
 			this._isOnline = false;
 			this.isLoaded = false;
-			
-			// bind event
-			this.on('_complete', this.onComplete, this);
 				
 		},
 		
 		load: function() {
-			this.fire('_complete', AppState.REQUIRE);
-		},
-		
-		unload: function() {
-			if (this.isLoaded) {
-				this.fire('unload');
-				this.events.detach();
-			}
-		},
-		
-		initRequired: function() {
-		
+			
 			// load dependencies
 			for (var i = 0, len = this.config.required.length; i < len; i++) {
 				Loader.loadModule(this.config.required[i]);
 			}
-		
-			this.fire('_complete', AppState.CONFIGURE);
-		
-		},
-	
-		initConfig: function() {
-		
+			
 			// set logging level
 			Log.setLevel(this.config.log);
-			
-			this.fire('_complete', AppState.CACHE);
-		
-		},
-		
-		initCache: function() {
 			
 			// bind caching event
 			Cache.on('statusChange', Class.proxy(function(e) {
@@ -105,13 +65,20 @@ Orange.add('mvc', function(O) {
 				// set online status
 				this._isOnline = e.data == 1;
 						
-				if (!this.loaded) this.fire('_complete', AppState.STORAGE);
+				if (!this.loaded) this.initStorage.call(this);
 														
 			}, this));
 			
 			// setup caching
 			Cache.init(true);
-						
+			
+		},
+		
+		unload: function() {
+			if (this.isLoaded) {
+				this.fire('unload');
+				this.events.detach();
+			}
 		},
 		
 		initStorage: function() {
@@ -123,19 +90,14 @@ Orange.add('mvc', function(O) {
 			if (this._isOnline) Storage.goOnline();
 			else Storage.goOffline();
 			
-			if (!this.isLoaded) this.fire('_complete', AppState.VERSION);
-		
-		},
-		
-		initVersion: function() {
-		
 			// flush cache if new version
-			if (this.config.hasOwnProperty('version') && Storage.get('appVersion') !== this.config.version) {
+			if (!this.isLoaded && this.config.hasOwnProperty('version') && Storage.get('appVersion') !== this.config.version) {
 				PersistenceManager.flush();
 				Storage.set('appVersion', this.config.version);
 			}
-		
-			this.fire('_complete', AppState.LOCATION);
+			
+			// setup location
+			this.initLocation.call(this);
 		
 		},
 		
@@ -144,7 +106,8 @@ Orange.add('mvc', function(O) {
 			// fetch location
 			if (this.config.location) Location.get();
 			
-			if (!this.isLoaded) this.fire('_complete', AppState.LOAD);
+			// call load
+			if (!this.isLoaded) this._onLoad.call(this);
 		
 		},
 		
@@ -205,30 +168,6 @@ Orange.add('mvc', function(O) {
 			
 			// fire online event
 			this.fire('online');
-		
-		},
-		
-		onComplete: function(e) {
-		
-			// prevent loading after the fact
-			if (this.isLoaded) return;
-		
-			switch(e.data) {
-				case AppState.REQUIRE:
-					this.initRequired.call(this); break;
-				case AppState.CONFIGURE:
-					this.initConfig.call(this); break;
-				case AppState.CACHE:
-					this.initCache.call(this); break;
-				case AppState.STORAGE:
-					this.initStorage.call(this); break;
-				case AppState.VERSION:
-					this.initVersion.call(this); break;
-				case AppState.LOCATION:
-					this.initLocation.call(this); break;
-				case AppState.LOAD:
-				this._onLoad.call(this); break;
-			}
 		
 		},
 		

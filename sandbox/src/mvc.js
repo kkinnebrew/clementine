@@ -47,7 +47,7 @@ Orange.add('mvc', function(O) {
 		},
 		
 		load: function() {
-			
+
 			// load dependencies
 			for (var i = 0, len = this.config.required.length; i < len; i++) {
 				Loader.loadModule(this.config.required[i]);

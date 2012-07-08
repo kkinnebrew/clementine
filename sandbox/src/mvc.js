@@ -8,7 +8,7 @@
 
 Orange.add('mvc', function(O) {
 
-	var Application, Controller, View, Source, AjaxSource, LocalStorageSource, RestSource;
+	var Application, Controller, View, Source, AjaxSource, LocalStorageSource, RestSource, PersistentStorageSource, Model, Collection, PersistenceManager;
 	
 	// import dependencies
 	var Ajax 			= __import('Ajax'),

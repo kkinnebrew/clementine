@@ -13,7 +13,7 @@ Orange.add('ios', function(O) {
 	
 	var ViewController = __import('ViewController'), Collection = __import('Collection'), Binding = __import('Binding');
 	
-	Application = O.Application.extend({
+	Application = O.UIApplication.extend({
 	
 		onLoad: function(online) {
 

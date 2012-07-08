@@ -162,7 +162,8 @@ Orange.use('mvc', 'cakephp', 'ui', 'ios', function(O) {
 		
 	});
 	
-	var test = new O.iOS.Application('test', {
+	var test = new O.iOS.Application({
+		name: 'test',
 		location: true,
 		logging: 'INFO',
 		poll: false,

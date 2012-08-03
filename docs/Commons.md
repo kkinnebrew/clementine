@@ -7,13 +7,32 @@ The Commons module is a base set of tools to help improve the structure of your 
 * HTML5 wrapper functions
 * Module dependency management
 
-## Class
+## Documentation
 
-OrangeUI provides basic OOP tools via the **Class** object, which can be used to create and extend classes, include mixins, and proxy functions.
+### Class
 
 * [extend](#class-extend)
 * [include](#class-include)
 * [proxy](#class-proxy)
+
+### Events
+
+* [on](#events-on)
+* [once](#events-once)
+* [fire](#events-fire)
+* [detach](#events-detach)
+
+### EventHandle
+
+* [detach](#event-handle-detach)
+
+### EventTarget
+
+* [stopPropagation](#event-target-stop-propagation)
+
+## Class
+
+OrangeUI provides basic OOP tools via the **Class** object, which can be used to create and extend classes, include mixins, and proxy functions.
 
 <a name="class-extend" />
 ### extend(object)
@@ -113,12 +132,12 @@ Returns a function bound to a given context object for execution at a later time
 **Example**
 
 ```js
+// proxies a function with a context object
 Class.proxy(function() {
 	console.log(this.name); // prints 'my-context'
 }, { name: 'my-context' });
 ```
 
----------------------------------------
 
 ## Events
 
@@ -128,6 +147,7 @@ The `on()` function will return an event handle that can be used to detach the e
 
 ### Event
 
+<a name="class-extend" />
 #### once(event, callback, context)
 
 subscribes a callback to an event just once

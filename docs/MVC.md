@@ -81,6 +81,8 @@ The MVC module provides a Model-ViewController-View structure that sits on top o
 
 * [destroy()](#model-destroy)
 
+**includes the Events mixin*
+
 ### Source
 
 * [initialize()](#source-initialize)
@@ -123,3 +125,4 @@ The MVC module provides a Model-ViewController-View structure that sits on top o
 
 * [destroy()](#view-controller-destroy)
 
+**includes the Events mixin*

@@ -11,23 +11,25 @@ The Commons module is a base set of tools to help improve the structure of your 
 
 ### Class
 
-* [extend](#class-extend)
-* [include](#class-include)
-* [proxy](#class-proxy)
+* [extend()](#class-extend)
+* [include()](#class-include)
+* [proxy()](#class-proxy)
 
 ### Events
 
-* [on](#events-on)
-* [once](#events-once)
-* [fire](#events-fire)
-* [detach](#events-detach)
+* [on()](#events-on)
+* [once()](#events-once)
+* [fire()](#events-fire)
+* [detach()](#events-detach)
 
 ### EventHandle
 
-* [detach](#event-handle-detach)
+* [detach()](#event-handle-detach)
 
 ### EventTarget
 
+* [currentTarget](#event-target-current-target)
+* [target](#event-target-target)
 * [stopPropagation](#event-target-stop-propagation)
 
 ## Class
@@ -147,15 +149,7 @@ The `on()` function will return an event handle that can be used to detach the e
 
 ### Event
 
-<a name="class-extend" />
-#### once(event, callback, context)
-
-subscribes a callback to an event just once
-
-**event** a string of the event to listen for 
-**callback** a function to execute when the event is fired 
-**context** an optional context to proxy the callback with 
-
+<a name="events-on" />
 #### on(event, callback, context)
 
 subscribes a callback to an event and returns a handle
@@ -166,6 +160,17 @@ subscribes a callback to an event and returns a handle
 
 *returns EventHandle*
 
+
+<a name="events-once" />
+#### once(event, callback, context)
+
+subscribes a callback to an event just once
+
+**event** a string of the event to listen for 
+**callback** a function to execute when the event is fired 
+**context** an optional context to proxy the callback with 
+
+<a name="events-fire" />
 #### fire(event, data)
 
 fires an event and passes a payload to the callback
@@ -173,6 +178,7 @@ fires an event and passes a payload to the callback
 **event** a string of the event to fire 
 **data** a payload to pass to all registered callbacks 
 
+<a name="events-detach" />
 #### detach(event, callback)
 
 detaches listeners from a given object. will detach all listeners for an event when a callback is not set, and all listeners when no arguments are passed.
@@ -182,6 +188,7 @@ detaches listeners from a given object. will detach all listeners for an event w
 
 ### EventHandle
 
+<a name="event-handle-detach" />
 #### detach()
 
 detaches the listener bound to the given EventHandle
@@ -190,14 +197,17 @@ detaches the listener bound to the given EventHandle
 
 The EventTarget is passed as the `e` argument to all callback functions when an event is fired. If a class as defined its `_parent` reference, the EventTarget will attempt to bubble events up the hierachy until it either reaches a parent of `null` or `stopPropagation()` is called.
 
+<a name="event-target-current-target" />
 #### currentTarget
 
 the current object the event is firing on
 
+<a name="event-target-target" />
 #### target
 
 the object the event was originally triggered on
 
+<a name="event-target-stop-propagation" />
 #### stopPropagation()
 
 stops the bubbling of an event up the parent hierarchy when called inside a callback

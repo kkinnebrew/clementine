@@ -45,7 +45,7 @@ The Commons module is a base set of tools to help improve the structure of your 
 * [updateNetworkStatus()](#cache-update-network-status)
 * [isActive()](#cache-is-active)
 
-**includes Events mixin*
+**includes the Events mixin*
 
 ### Storage
 

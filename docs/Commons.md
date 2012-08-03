@@ -1,4 +1,4 @@
-# Overview
+# Commons
 
 The Commons module is a base set of tools to help improve the structure of your application. It provides you with:
 
@@ -147,131 +147,290 @@ OrangeUI provides the *Event* mixin that can be used to bind events to objects. 
 
 The `on()` function will return an event handle that can be used to detach the event at a later time. Callbacks receive an `e` argument and a `data` argument when executed, the `e` argument including the target, currentTarget, and access to call `e.stopPropagation` to prevent event bubbling. The `data` argument is set to the optional second argument passed to the `fire()` method to trigger an event.
 
-### Event
-
 <a name="events-on" />
-#### on(event, callback, context)
+### on(event, callback, context)
 
-subscribes a callback to an event and returns a handle
+Subscribes a callback to a given event and returns an **EventHandle** instance for later detaching.
 
-**event**	a string of the event to listen for 
-**callback** a function to execute when the event is fired 
-**context** an optional context to proxy the callback with 
+**Arguments**
 
-*returns EventHandle*
+* event -	a string of the event to listen for 
+* callback - a function to execute when the event is fired 
+* context - an optional context to proxy the callback with 
 
+**Examples**
+
+```js
+// bind an 'load' event
+myEventedClass.on('load', function(e, data) {
+	console.log('Loaded!');
+});
+
+```js
+// or with an optional context
+
+var context = {
+	msg: "Appeared!"
+};
+
+myEventedClass.on('appear', function(e, data) {
+	console.log(this.msg); // prints 'Appeared!'
+}, context);
+```
+
+---------------------------------------
 
 <a name="events-once" />
-#### once(event, callback, context)
+### once(event, callback, context)
 
-subscribes a callback to an event just once
+Subscribes a callback to an event just once. Once the event is fired, all callbacks defined using `once()` will be detached.
 
-**event** a string of the event to listen for 
-**callback** a function to execute when the event is fired 
-**context** an optional context to proxy the callback with 
+**Arguments**
+
+* event - a string of the event to listen for 
+* callback - a function to execute when the event is fired 
+* context - an optional context to proxy the callback with 
+
+**Examples**
+
+```js
+// bind once event
+myEventedClass.once('appear', function(e, data) {
+	console.log('Firing');
+});
+
+myEventedClass.fire('appear'); // prints 'Firing'
+myEventedClass.fire('appear'); // prints nothing
+
+```
+
+---------------------------------------
 
 <a name="events-fire" />
-#### fire(event, data)
+### fire(event, [data])
 
-fires an event and passes a payload to the callback
+Fires an event of a given name and passes an optional payload to all subscribing callbacks.
 
-**event** a string of the event to fire 
-**data** a payload to pass to all registered callbacks 
+**Arguments**
+
+* event - a string of the event to fire 
+* data - a payload to pass to all registered callbacks 
+
+**Examples**
+
+```js
+// bind once event
+myEventedClass.on('load', function(e) {
+	console.log('Loaded!');
+});
+
+myEventedClass.fire('appear'); // prints 'Loaded!'
+```
+
+```js
+// bind once event
+myEventedClass.on('appear', function(e, data) {
+	console.log(data);
+});
+
+// prints { msg: 'hello' }
+myEventedClass.fire('appear', { msg: 'hello'});
+```
+
+---------------------------------------
 
 <a name="events-detach" />
-#### detach(event, callback)
+### detach([event], [callback])
 
-detaches listeners from a given object. will detach all listeners for an event when a callback is not set, and all listeners when no arguments are passed.
+Detaches listeners from a given object. It will detach all listeners for an event when a callback is not set, and all listeners on that object when no arguments are passed.
 
-**event**	(optional) the event to unbind listeners for 
-**callback** (optional)	 the callback to unbind for an event 
+**Arguments**
 
-### EventHandle
+* event -	the event string to unbind listeners for 
+* callback - the callback to unbind from an given event 
+
+**Examples**
+
+```js
+// unbinds a specific listener
+var onLoad = function(e) {
+	console.log('Loaded!');
+};
+
+// bind the event
+myEventedClass.on('load', onLoad);
+
+// detach that event
+myEventedClass.detach('load', onLoad);
+```
+
+```js
+// unbinds all listeners for 'load'
+myEventedClass.detach('load');
+```
+
+```js
+// unbinds all listeners
+myEventedClass.detach();
+```
+
+## EventHandle
 
 <a name="event-handle-detach" />
-#### detach()
+### detach()
 
-detaches the listener bound to the given EventHandle
+Detaches the listener bound to the given EventHandle
 
-### EventTarget
+**Examples**
 
-The EventTarget is passed as the `e` argument to all callback functions when an event is fired. If a class as defined its `_parent` reference, the EventTarget will attempt to bubble events up the hierachy until it either reaches a parent of `null` or `stopPropagation()` is called.
+```js
+var handle = myEventedClass.on('load', function(e) {
+	console.log('Loaded!');
+});
+
+handle.detach(); // detaches the event
+```
+
+## EventTarget
+
+The EventTarget is passed as the `e` argument to all callback functions when an event is fired. If a class has defined its `_parent` reference, the EventTarget will attempt to bubble events up the hierachy until it either reaches a parent of `null` or `stopPropagation()` is called.
 
 <a name="event-target-current-target" />
-#### currentTarget
+### currentTarget
 
-the current object the event is firing on
+Returns the current object the event is firing on.
+
+---------------------------------------
 
 <a name="event-target-target" />
-#### target
+### target
 
-the object the event was originally triggered on
+Returns the object the event was originally triggered on.
+
+---------------------------------------
 
 <a name="event-target-stop-propagation" />
-#### stopPropagation()
+### stopPropagation()
 
-stops the bubbling of an event up the parent hierarchy when called inside a callback
+Stops the bubbling of an event up the parent hierarchy when called inside a callback.
+
+**Examples**
+
+```js
+myEventedClassParent.on('load', function(e) {
+	console.log('Loaded Parent!');
+});
+
+myEventedClass._parent = myEventedClassParent;
+
+myEventedClass.on('load', function(e) {
+	e.stopPropagation();
+	console.log('Loaded!');
+});
+
+myEventedClassChild._parent = myEventedClass;
+
+myEventedClassChild.on('load', function(e) {
+	console.log('Loaded Child!');
+});
+
+handle.fire('load');
+
+// prints 'Loaded Child!'
+// prints 'Loaded!'
+// doesn't print 'Loaded Parent!'
+```
 
 ## Modules
 
-Modules give an easy way to manage dependencies and organize logically separate code components. Since client-side code is executed as it is included in your HTML files, modules are registered via the `add()` function on the global object. This method specifics the code to add as well as the modules it is dependent on, and the version of the module. To add a module
+Modules give an easy way to manage dependencies and organize logically separate code components. Since client-side code is executed as it is included in your HTML files, modules are registered via the `add()` function on the global object. This method specifics the code to add as well as the modules it is dependent on, and the version of the module.
 
-	Orange.add('my-module', function() {
+### add(module, fn, dep, version)
+
+Adds a module with a given name and associates it with a given number of dependencies and versions.
+
+**Arguments**
+
+* module - the module string name 
+* fn - the function containing the modules code 
+* dep -	an array of module dependency name strings 
+* version -	the string version number of the module 
+
+**Examples**
+
+```js
+Orange.add('my-module', function() {
 		
-		// my code here
+	// my code here
 
-	}, ['my-other-module'], '0.1');
+}, ['my-other-module'], '0.1');
+```
 
-specify the modules name, the function containing the module code, an array of dependencies by name, and the version number of the module.
+---------------------------------------
 
-To load required components, OrangeUI uses a convention similar to that seen in NodeJS. The actual code components available in a module must be required or exported. For example, to require individual components, the `include()` function may be used. 
+### use(dependencies…, fn)
 
-Orange.add('my-module', function(exports) {
+On occasion, it might be necessary to run adhoc code without necessarily creating a module. This can be done using the `use()` method, which loads required dependencies for the code. The code within the function will be run immediately when `use()` is executed.
+
+**Arguments**
+
+* dependencies* - (multiple) the string names of the modules 
+* fn - a function containing the adhoc code 
+
+**Examples**
+
+```js
+Orange.use('my-module-one', 'my-module-two', function() {
 		
-		var myClass = include('myClass');
+	// code goes here
 
-		var newClass = myClass.extend({
-			getName: function() {
-				return 'newClass';
-			}
-		});
-		
-		exports.newClass = newClass; // the class is an attribute
+});
+```
 
-		// or
+---------------------------------------
 
-		exports = newClass; // the class is the entire object
+### include(module)
 
-	}, ['my-other-module'], '0.1');
+ To load required components, OrangeUI uses a convention similar to that seen in NodeJS. Requires and loads an external module and returns the object associated with that module's `exports` object.
+
+**Arguments**
+
+* module - the name of the module to import
+
+**Examples**
+
+```js
+// returns the exports object of module myClass
+var myClass = include('myClass');
+```
+
+---------------------------------------
+
+### exports
 
 To export private code components, the exports object is passed to the function. It can either be set in its entirety, or have attributes added to it.
 
-On occasion, it might be necessary to run adhoc code without necessarily creating a module. This can be done using the `use()` method, which loads required dependencies for the code.
+**Examples**
 
-	Orange.use('my-module-one', 'my-module-two', function() {
+```js
+Orange.add('my-module', function(exports) {
 		
-		// code goes here
+	var myClass = include('myClass');
 
+	var newClass = myClass.extend({
+		getName: function() {
+			return 'newClass';
+		}
 	});
+		
+	exports.newClass = newClass; // the class is an attribute
 
-The code within the function will be run immediately when `use()` is executed.
+	// or
 
-#### add(module, fn, dep, version)
+	exports = newClass; // the class is the entire object
 
-stops the bubbling of an event up the parent hierarchy when called inside a callback
-
-**module** the module string name 
-**fn** the function containing the modules code 
-**dep**	an array of module dependency name strings 
-**version**	the string version number of the module 
-
-#### use(dependencies…, fn)
-
-immediately calls the given code after loading the required
-dependencies
-
-**dependencies**	 (multiple) the string names of the modules 
-**fn** a function containing the adhoc code 
+}, ['my-other-module'], '0.1');
+```
 
 ## Logging
 

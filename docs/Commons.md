@@ -383,7 +383,7 @@ On occasion, it might be necessary to run adhoc code without necessarily creatin
 
 **Arguments**
 
-* dependencies* - (multiple) the string names of the modules 
+* dependencies - (multiple) the string names of the modules 
 * fn - a function containing the adhoc code 
 
 **Examples**

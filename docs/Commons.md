@@ -2,91 +2,123 @@
 
 The Commons module is a base set of tools to help improve the structure of your application. It provides you with:
 
-- Object-oriented javascript objects
-- Event mixin for objects
-- HTML5 wrapper functions
-- Module dependency management
+* Object-oriented javascript objects
+* Event mixin for objects
+* HTML5 wrapper functions
+* Module dependency management
 
-## Object Oriented Javascript
+## Class
 
-OrangeUI provides basic OOP tools via the *Class* object, which can be used to create and extend classes, include mixins, and proxy functions. Class method `extend()` can be used to create new classes and subclass existing classes. Each base class definition expects an initialize() method. For example: 
+OrangeUI provides basic OOP tools via the **Class** object, which can be used to create and extend classes, include mixins, and proxy functions.
 
-	var MyClass = Class.extend({
+* [extend](#class-extend)
+* [include](#class-include)
+* [proxy](#class-proxy)
 
-		initialize: function() {
-			console.log('Hello World');
-		},
+<a name="class-extend" />
+### extend(object)
 
-		getAge: function() {
-			return 25;
-		}
+Class method `extend()` can be used to create new classes and subclass existing classes. Each base class definition expects an initialize() method. Calling `this._super()` in an instance method will access and execute the superclass' method.
 
-	});
+**Arguments**
 
-	var MySubClass = MyClass.extend({
+* object - the javascript object representing the class instance methods. The object must implement the method initialize() as its constructor if it is not inheriting from another class.
 
-		getName: function() {
-			return 'Hello';
-		}
+**Example**
 
-	});
+```js
+// creates a new class 'MyClass'
+var MyClass = Class.extend({
 
-creates a new class `MyClass` with a constructor which prints out 'Hello World' and another class 'MySubClass', which retains all the properties of `MyClass` but also includes the function `getName()`.
+	initialize: function() {
+		console.log('Hello World');
+	},
 
-The methods of a class' parent superclass can be accessed by calling the `this._super()` method within that function.
+	getAge: function() {
+		return 25;
+	}
 
-	var MySubClass = MyClass.extend({
+});
+
+// creates a subclass of 'MyClass'
+var MySubClass = MyClass.extend({
+
+	getMyAge: function() {
+		return 'My age is ' + this.getAge();
+	}
+
+});
+```
+
+```js
+// accessing the superclass
+var MySubClass = MyClass.extend({
 	
-		getAge: function() {
-			return this._super() + 5; // returns 30
-		}
+	getAge: function() {
+		return this._super() + 5; // returns 30
+	}
 
-	});
+});
+```
 
-The *Class* object also includes the method `include()`, which will merge a mixin into an existing class. For example:
+---------------------------------------
 
-	var MyClass = Class.extend({
-		
-		initialize: function() {
-			console.log('Hello World');
-		}
+<a name="class-include" />
+### include(mixin)
 
-	});
+Binds a mixin of functions to an existing class so that all mixin methods are available to instances of that class.
 
-	var MyMixin = {
-		myMethodOne: function() {
-			return 'one';
-		},
-		myMethodTwo: function() {
-			return 'two';
-		}
-	};
+**Arguments**
 
-	MyClass.include(MyMixin);
+* mixin - the object containing the functions to add to the given class
 
-	var instance = new MyClass();
-	instance.myMethodTwo(); // will return 'two'
+**Example**
 
-by including the above mixin, the class `MyClass` now includes all the methods available in the given mixin.
+```js
+var MyClass = Class.extend({
+	
+	initialize: function() {
+		console.log('Hello World');
+	}
 
-The *Class* object also provides the `proxy()` function, similar to jQuery's `$.proxy()` that allows you to bind a context to a given function.
+});
 
+var MyMixin = {
+	myMethodOne: function() {
+		return 'one';
+	},
+	myMethodTwo: function() {
+		return 'two';
+	}
+};
+
+MyClass.include(MyMixin);
+
+var instance = new MyClass();
+instance.myMethodTwo(); // will return 'two'
+```
+
+---------------------------------------
+
+<a name="class-proxy" />
 ### proxy(function, context)
 
-Returns a function bound to a given context object for execution at a later time.
+Returns a function bound to a given context object for execution at a later time. This provides the same functionality as jQuery's `$.proxy()` function.
 
-__Arguments__
+**Arguments**
 
 * function - the function to bind the context to
 * context - the object to use as the context
 
-__Example__
+**Example**
 
 ```js
 Class.proxy(function() {
 	console.log(this.name); // prints 'my-context'
 }, { name: 'my-context' });
 ```
+
+---------------------------------------
 
 ## Events
 

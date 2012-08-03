@@ -22,7 +22,7 @@ OrangeUI is a rapid development javascript framework for soundly built web appli
 
 The goal of this framework is to give you a customizable base for building your web application that completely decouples your data sources from your controller logic and presentation. In addition, it allows the creation of reusable components to speed up development time. OrangeUI sets up standards for how to organize your application code, decouple your styles and UI elements, and interact with web services.
 
-## Installing OrangeUI
+## Including OrangeUI
 
 To use OrangeUI on your project, all you need to do is include the [orangeui] library at the top of your root html file.
 

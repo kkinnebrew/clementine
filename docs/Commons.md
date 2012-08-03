@@ -55,7 +55,7 @@ The Commons module is a base set of tools to help improve the structure of your 
 * [set()](#storage-set)
 * [remove()](#storage-remove)
 * [flush()](#storage-flush)
-* [flushExpired](#storage-flush-expired)
+* [flushExpired()](#storage-flush-expired)
 * [isSupported()](#storage-is-supported)
 
 ### Location
@@ -469,3 +469,28 @@ Orange.add('my-module', function(exports) {
 ## Storage - HTML5 Local Storage
 
 ## Location - HTML5 Geolocation
+
+Commons provides a wrapper for **HTML5 Geolocation** fetching of the current location from the user's browser. The **Location** object supports the `getLocation()` method, which accepts a success and failure callback. The location is fetched asynchronously.
+
+### getLocation(success, failure)
+
+Submits an asynchronous request for the location of the user's browser. The success callback will receive the coordinates object returned as its argument.
+
+**Arguments**
+
+* success(coords) - the callback that the location coordinates will be passed to.
+* failure(err) - the callback that will be called if the coordinates cannot be retreived
+
+**Examples**
+
+```js
+Location.getLocation(function(coords) {
+		
+		alert(coords); // success
+		
+	}, function(err) {
+	
+		alert('Location error', err); // failure
+	
+	});
+```

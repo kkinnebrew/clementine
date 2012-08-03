@@ -22,6 +22,12 @@ The MVC module provides a Model-ViewController-View structure that sits on top o
 
 ### Collection
 
+* [initialize()](#binding-initialize)
+* [bindModel()](#binding-bind-model)
+* [bindCollection()](#binding-bind-collection)
+* [clear()](#binding-clear)
+* [destroy()](#binding-destroy)
+
 * [initialize()](#collection-initialize)
 
 * [get()](#collection-get)

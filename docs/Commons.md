@@ -1,6 +1,6 @@
 # Overview
 
-The Commons module is a base set of tools to help _improve_ the structure of your application. It provides you with:
+The Commons module is a base set of tools to help improve the structure of your application. It provides you with:
 
 - Object-oriented javascript objects
 - Event mixin for objects
@@ -71,16 +71,14 @@ by including the above mixin, the class `MyClass` now includes all the methods a
 
 The *Class* object also provides the `proxy()` function, similar to jQuery's `$.proxy()` that allows you to bind a context to a given function.
 
-proxy(function, context)
+#### proxy(function, context)
 
-*Binds a function to a given context object*
+Binds a function to a given context object
 
-**function**	the function to bind the context to
-**context**		the object to use as the context
+**function** the function to bind the context to 
+**context** the object to use as the context 
 
-returns function
-
-------------------------
+*returns function*
 
 ## Events
 
@@ -94,49 +92,39 @@ The `on()` function will return an event handle that can be used to detach the e
 
 subscribes a callback to an event just once
 
-**event**				a string of the event to listen for
-**callback**		a function to execute when the event is fired
-**context**			an optional context to proxy the callback with
-
-------------------------
+**event** a string of the event to listen for 
+**callback** a function to execute when the event is fired 
+**context** an optional context to proxy the callback with 
 
 #### on(event, callback, context)
 
 subscribes a callback to an event and returns a handle
 
-**event**				a string of the event to listen for
-**callback**		a function to execute when the event is fired
-**context**			an optional context to proxy the callback with
+**event**	a string of the event to listen for 
+**callback** a function to execute when the event is fired 
+**context** an optional context to proxy the callback with 
 
-returns EventHandle
-
-------------------------
+*returns EventHandle*
 
 #### fire(event, data)
 
 fires an event and passes a payload to the callback
 
-**event**				a string of the event to fire
-**data**				a payload to pass to all registered callbacks
-
-------------------------
+**event** a string of the event to fire 
+**data** a payload to pass to all registered callbacks 
 
 #### detach(event, callback)
 
 detaches listeners from a given object. will detach all listeners for an event when a callback is not set, and all listeners when no arguments are passed.
 
-**event**			(optional) the event to unbind listeners for
-**callback**	(optional)	 the callback to unbind for an event
-
-------------------------
+**event**	(optional) the event to unbind listeners for 
+**callback** (optional)	 the callback to unbind for an event 
 
 ### EventHandle
 
 #### detach()
 
 detaches the listener bound to the given EventHandle
-
-------------------------
 
 ### EventTarget
 
@@ -146,19 +134,13 @@ The EventTarget is passed as the `e` argument to all callback functions when an 
 
 the current object the event is firing on
 
-------------------------
-
 #### target
 
 the object the event was originally triggered on
 
-------------------------
-
 #### stopPropagation()
 
 stops the bubbling of an event up the parent hierarchy when called inside a callback
-
-------------------------
 
 ## Modules
 
@@ -208,20 +190,18 @@ The code within the function will be run immediately when `use()` is executed.
 
 stops the bubbling of an event up the parent hierarchy when called inside a callback
 
-**module**		the module string name
-**fn**				the function containing the modules code
-**dep**				an array of module dependency name strings
-**version**		the string version number of the module
+**module** the module string name 
+**fn** the function containing the modules code 
+**dep**	an array of module dependency name strings 
+**version**	the string version number of the module 
 
 #### use(dependencies…, fn)
 
 immediately calls the given code after loading the required
 dependencies
 
-**dependencies**			(multiple) the string names of the modules
-**fn**							a function containing the adhoc code
-
-------------------------
+**dependencies**	 (multiple) the string names of the modules 
+**fn** a function containing the adhoc code 
 
 ## Logging
 

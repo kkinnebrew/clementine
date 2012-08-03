@@ -610,6 +610,7 @@ console.log(support); // prints true or false
 
 Commons provides a wrapper for **HTML5 Geolocation** fetching of the current location from the user's browser. The **Location** object supports the `getLocation()` method, which accepts a success and failure callback. The location is fetched asynchronously.
 
+<a name="location-get-location" />
 ### getLocation(success, failure)
 
 Submits an asynchronous request for the location of the user's browser. The success callback will receive the coordinates object returned as its argument.

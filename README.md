@@ -2,24 +2,23 @@
 
 OrangeUI is a javascript framework for building dynamic, interactive web applications in the browser.
 
-It is meant as a tool to rapidly develop web based applications, giving the developer a pattern for organizing individual views and decoupling their interaction logic. It provides a base set of modules handling HTML5 features in its Commons package, classes for interacting with webservices, and an Model-ViewController-View like structure to create more complex UI controls.
+Many of the features of OrangeUI are stable, however the framework is still in active development and things are bound to change. Try it out on a project and make suggestions or report bugs [here].
 
 ## Getting Started
 
 ## Why does OrangeUI exist?
 
+It is meant as a tool to rapidly develop web based applications, giving the developer a pattern for organizing individual views and decoupling their interaction logic. It provides a base set of modules handling HTML5 features in its Commons package, classes for interacting with webservices, and an Model-ViewController-View like structure to create more complex UI controls.
+
 ## Installing OrangeUI
 
 ## Release History
 
-8/1/2012 - v0.4.0 - Adding web service persistence, view controller hide/show states.
-7/8/2012 - v0.3.0 - Including view controller event helper functions, auto context proxying.
-5/7/2012 - v0.2.0 - Updated view inheritance, bug fixes from prior version.
-2/25/2012 - v0.1.0 - Initial release, unstable.
+* 8/1/2012 - v0.4.0 - Adding web service persistence, view controller hide/show states.
+* 7/8/2012 - v0.3.0 - Including view controller event helper functions, auto context proxying.
+* 5/7/2012 - v0.2.0 - Updated view inheritance, bug fixes from prior version.
+* 2/25/2012 - v0.1.0 - Initial release, unstable.
 
-
-
-================
 ## Commons
 
 The Commons Library is a base set of tools to help improve the structure of your application. Included are a set of HTML5 feature wrappers (localStorage, offline mode, geolocation) as well as a class-based module pattern similar to what is included with YUI.
@@ -412,4 +411,4 @@ All interaction between View Controllers should be handled by custom events. The
 
 ---------------------------  
 
-Done
+[here]: https://github.com/brew20k/orangeui/issues?labels=&sort=created&state=open

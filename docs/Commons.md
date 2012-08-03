@@ -41,13 +41,13 @@ The Commons module is a base set of tools to help improve the structure of your 
 
 ### Cache
 
-*includes Events mixin*
-
-* [init](#cache-init)
+* [init()](#cache-init)
 * [updateNetworkStatus()](#cache-update-network-status)
 * [isActive()](#cache-is-active)
 
 * [statusChange](#cache-status-change)
+
+**includes Events mixin*
 
 ### Storage
 

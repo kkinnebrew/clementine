@@ -1,6 +1,6 @@
 # Overview
 
-The Commons module is a base set of tools to help improve the structure of your application. It provides you with:
+The Commons module is a base set of tools to help _improve_ the structure of your application. It provides you with:
 
 - Object-oriented javascript objects
 - Event mixin for objects
@@ -31,9 +31,9 @@ OrangeUI provides basic OOP tools via the *Class* object, which can be used to c
 
 	});
 
-creates a new class `MyClass` with a constructor which prints out 'Hello World' and another class 'MySubClass', which retains all the properties of 'MyClass' but also includes the function `getName()'.
+creates a new class `MyClass` with a constructor which prints out 'Hello World' and another class 'MySubClass', which retains all the properties of 'MyClass` but also includes the function `getName()`.
 
-The methods of a class' parent superclass can be accessed by calling the `this._super()' method within that function.
+The methods of a class' parent superclass can be accessed by calling the `this._super()` method within that function.
 
 	var MySubClass = MyClass.extend({
 	
@@ -86,7 +86,7 @@ returns function
 
 OrangeUI provides the *Event* mixin that can be used to bind events to objects. Objects including this mixin have access to the `once()`, `on()`, `fire()`, and `detach()` methods to handle all event listening on an object. An optional parent can be passed to the mixin to allow for event bubbling up a heirarchy you define.
 
-The 'on()' function will return an event handle that can be used to detach the event at a later time. Callbacks receive an `e` argument and a `data` argument when executed, the `e` argument including the target, currentTarget, and access to call `e.stopPropagation` to prevent event bubbling. The `data` argument is set to the optional second argument passed to the `fire()` method to trigger an event.
+The `on()` function will return an event handle that can be used to detach the event at a later time. Callbacks receive an `e` argument and a `data` argument when executed, the `e` argument including the target, currentTarget, and access to call `e.stopPropagation` to prevent event bubbling. The `data` argument is set to the optional second argument passed to the `fire()` method to trigger an event.
 
 ### Event
 

@@ -100,15 +100,20 @@ The MVC module provides a Model-ViewController-View structure that sits on top o
 * [hide()](#view-controller-hide)
 * [setState()](#view-controller-set-state)
 * [getState()](#view-controller-get-state)
+* [getParent()](#view-controller-get-parent)
+* [getViews()](#view-controller-get-views)
 * [getView()](#view-controller-get-view)
+* [getForms()](#view-controller-get-forms)
 * [getForm()](#view-controller-get-form)
 * [getElement()](#view-controller-get-element)
-* [findView()](#view-controller-find-view)
-* [findForm()](#view-controller-find-form)
-* [findElement()](#view-controller-find-element)
+* [hasView()](#view-controller-has-view)
+* [hasForm()](#view-controller-has-form)
+* [hasElement()](#view-controller-has-element)
 * [addViewController()](#view-controller-add-view-controller)
 * [removeViewController()](#view-controller-remove-view-controller)
 * [find()](#view-controller-lookup)
 * [destroy()](#view-controller-destroy)
+
+
 
 **includes the Events mixin*

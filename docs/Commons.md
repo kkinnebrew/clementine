@@ -599,6 +599,12 @@ Storage.flushExpired();
 
 Returns a boolean value checking if the localStorage cache is supported.
 
+**Examples**
+
+```js
+var support = Storage.isSupported();
+console.log(support); // prints true or false
+```
 
 ## Location - HTML5 Geolocation
 

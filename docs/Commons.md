@@ -468,6 +468,99 @@ Orange.add('my-module', function(exports) {
 
 ## Storage - HTML5 Local Storage
 
+The **Commons** module provides a wrapper for the HTML5 localStorage feature, adding support for the serializing of Javascript objects and setting autoexpirable keys. The **Storage** object supports `get()`, `set()`, `remove()`, `flush()`, and `flushExpired()`.
+
+<a name="storage-get" />
+### get(key, [defaultValue])
+
+Returns the value for a key from localStorage.
+
+**Arguments**
+
+* key - a key to lookup from the local storage object  
+* defaultValue - the default value to return when the key is not found  
+
+**Examples**
+
+```js
+var myKey = Storage.get('myKey');
+```
+
+---------------------------
+
+<a name="storage-set" />
+### set(key, value, [ttl])
+
+Sets an object value to localStorage for a given key.
+
+**Arguments**
+
+* key - a key store the local storage object to  
+* value - the value to store for the given key  
+* ttl - optional how long before the object should be auto flushed in milliseconds
+
+**Examples**
+
+```js
+// store a string
+Storage.set('myKey', 'myValue');
+
+// or an object
+Storage.set('myKey', { value: 'myValue' });
+```
+
+---------------------------
+
+<a name="storage-remove" />
+### remove(key)
+
+Removes an object from localStorage for a given key.
+
+**Arguments**
+
+* key - a key to remove from localStorage
+
+**Examples**
+
+```js
+Storage.remove('myKey');
+```
+
+---------------------------
+
+<a name="storage-flush" />
+### flush(force)
+
+Flushes all object from the localStorage object. Objects will not be flushed in offlineMode unless force is set to `true`.
+
+**Arguments**
+
+* force - whether to force clearing in offline mode
+
+**Examples**
+
+```js
+Storage.flush();
+```
+
+---------------------------
+
+<a name="storage-flush-expired" />
+### flushExpired(force)
+
+Flushes all expired objects from the localStorage object. Objects will not be flushed in offlineMode unless force is set to `true`.
+
+**Arguments**
+
+* force -  whether to force clearing in offline mode 
+
+**Examples**
+
+```js
+Storage.flushExpired();
+```
+
+
 ## Location - HTML5 Geolocation
 
 Commons provides a wrapper for **HTML5 Geolocation** fetching of the current location from the user's browser. The **Location** object supports the `getLocation()` method, which accepts a success and failure callback. The location is fetched asynchronously.

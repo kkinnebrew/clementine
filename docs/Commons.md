@@ -45,8 +45,6 @@ The Commons module is a base set of tools to help improve the structure of your 
 * [updateNetworkStatus()](#cache-update-network-status)
 * [isActive()](#cache-is-active)
 
-* [statusChange](#cache-status-change)
-
 **includes Events mixin*
 
 ### Storage
@@ -466,6 +464,42 @@ Orange.add('my-module', function(exports) {
 
 ## Cache - HTML5 Offline Mode
 
+Commons provides built in support for HTML5's offline mode caching and online/offline javascript events. In conjunction with a **cache.manifest** file for your web application resources, it is possible to create a fully functional offline web application in the browser.
+
+Offline caching can be accessed through the **Cache** object, which supports `updateNetworkStatus()` method for checking the current connection and fires the custom online/offline event **statusChange** with a boolean payload for if the connection is online. You can also bind events on to the Cache object to listen for status changes.
+
+<a name="cache-init" />
+### init()
+
+Initializes the Cache and starts listening for online or offline events. 
+
+**Examples**
+
+```js
+Cache.init();
+```
+
+<a name="cache-update-network-status" />
+### updateNetworkStatus()
+
+Requests a manual update of the current status of the web application's network connection. Supported browsers will fire `statusChange` events when the browser goes online/offline, and fall back to polling if the navigator.onLine property is not available.
+
+**Examples**
+
+```js
+Cache.updateNetworkStatus(); // will fire 'statusChange' event
+```
+
+<a name="cache-is-active" />
+### isActive()
+
+Returns a boolean value stating whether the Cache has been initialized.
+
+```js
+var active = Cache.isActive();
+console.log(active); // prints true or false
+```
+
 ## Storage - HTML5 Local Storage
 
 The **Commons** module provides a wrapper for the HTML5 localStorage feature, adding support for the serializing of Javascript objects and setting autoexpirable keys. The **Storage** object supports `get()`, `set()`, `remove()`, `flush()`, and `flushExpired()`.
@@ -559,6 +593,11 @@ Flushes all expired objects from the localStorage object. Objects will not be fl
 ```js
 Storage.flushExpired();
 ```
+
+<a name="storage-is-supported" />
+### isSupported()
+
+Returns a boolean value checking if the localStorage cache is supported.
 
 
 ## Location - HTML5 Geolocation

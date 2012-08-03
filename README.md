@@ -1,10 +1,23 @@
-# OrangeUI Wiki
+# OrangeUI
 
 OrangeUI is a javascript framework for building dynamic, interactive web applications in the browser.
 
-## Introduction
+It is meant as a tool to rapidly develop web based applications, giving the developer a pattern for organizing individual views and decoupling their interaction logic. It provides a base set of modules handling HTML5 features in its Commons package, classes for interacting with webservices, and an Model-ViewController-View like structure to create more complex UI controls.
 
-The OrangeUI framework is meant as a tool to rapidly develop web based applications, giving the developer a pattern for organizing individual views and their interaction. It provides a base set of modules handling HTML5 features in its Commons package, as well as allows the extending of current view classes to create more complex UI controls.
+## Getting Started
+
+## Why does OrangeUI exist?
+
+## Installing OrangeUI
+
+## Release History
+
+8/1/2012 - v0.4.0 - Adding web service persistence, view controller hide/show states.
+7/8/2012 - v0.3.0 - Including view controller event helper functions, auto context proxying.
+5/7/2012 - v0.2.0 - Updated view inheritance, bug fixes from prior version.
+2/25/2012 - v0.1.0 - Initial release, unstable.
+
+
 
 ================
 ## Commons

@@ -32,6 +32,13 @@ The Commons module is a base set of tools to help improve the structure of your 
 * [target](#event-target-target)
 * [stopPropagation](#event-target-stop-propagation)
 
+### Modules
+
+* [add](#module-add)
+* [use](#module-use)
+* [include](#module-include)
+* [exports](#module-exports)
+
 ## Class
 
 OrangeUI provides basic OOP tools via the **Class** object, which can be used to create and extend classes, include mixins, and proxy functions.
@@ -345,6 +352,7 @@ handle.fire('load');
 
 Modules give an easy way to manage dependencies and organize logically separate code components. Since client-side code is executed as it is included in your HTML files, modules are registered via the `add()` function on the global object. This method specifics the code to add as well as the modules it is dependent on, and the version of the module.
 
+<a name="modules-add" />
 ### add(module, fn, dep, version)
 
 Adds a module with a given name and associates it with a given number of dependencies and versions.
@@ -368,6 +376,7 @@ Orange.add('my-module', function() {
 
 ---------------------------------------
 
+<a name="modules-use" />
 ### use(dependencies…, fn)
 
 On occasion, it might be necessary to run adhoc code without necessarily creating a module. This can be done using the `use()` method, which loads required dependencies for the code. The code within the function will be run immediately when `use()` is executed.
@@ -389,6 +398,7 @@ Orange.use('my-module-one', 'my-module-two', function() {
 
 ---------------------------------------
 
+<a name="modules-include" />
 ### include(module)
 
  To load required components, OrangeUI uses a convention similar to that seen in NodeJS. Requires and loads an external module and returns the object associated with that module's `exports` object.
@@ -406,6 +416,7 @@ var myClass = include('myClass');
 
 ---------------------------------------
 
+<a name="modules-exports" />
 ### exports
 
 To export private code components, the exports object is passed to the function. It can either be set in its entirety, or have attributes added to it.

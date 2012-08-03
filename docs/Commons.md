@@ -624,11 +624,11 @@ Submits an asynchronous request for the location of the user's browser. The succ
 ```js
 Location.getLocation(function(coords) {
 		
-		alert(coords); // success
+	alert(coords); // success
 		
-	}, function(err) {
+}, function(err) {
 	
-		alert('Location error', err); // failure
+	alert('Location error', err); // failure
 	
-	});
+});
 ```

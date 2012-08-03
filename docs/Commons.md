@@ -39,6 +39,29 @@ The Commons module is a base set of tools to help improve the structure of your 
 * [include()](#modules-include)
 * [exports](#modules-exports)
 
+### Cache
+
+*includes Events mixin*
+
+* [init](#cache-init)
+* [updateNetworkStatus()](#cache-update-network-status)
+* [isActive()](#cache-is-active)
+
+* [statusChange](#cache-status-change)
+
+### Storage
+
+* [get()](#storage-get)
+* [set()](#storage-set)
+* [remove()](#storage-remove)
+* [flush()](#storage-flush)
+* [flushExpired](#storage-flush-expired)
+* [isSupported()](#storage-is-supported)
+
+### Location
+
+* [getLocation()](#location-get-location)
+
 ## Class
 
 OrangeUI provides basic OOP tools via the **Class** object, which can be used to create and extend classes, include mixins, and proxy functions.
@@ -441,10 +464,8 @@ Orange.add('my-module', function(exports) {
 }, ['my-other-module'], '0.1');
 ```
 
-## Logging
+## Cache - HTML5 Offline Mode
 
-## HTML5 - Offline Mode
+## Storage - HTML5 Local Storage
 
-## HTML5 - Local Storage
-
-## HTML5 - Geolocation
+## Location - HTML5 Geolocation

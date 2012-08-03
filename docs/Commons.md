@@ -31,7 +31,7 @@ OrangeUI provides basic OOP tools via the *Class* object, which can be used to c
 
 	});
 
-creates a new class `MyClass` with a constructor which prints out 'Hello World' and another class 'MySubClass', which retains all the properties of 'MyClass` but also includes the function `getName()`.
+creates a new class `MyClass` with a constructor which prints out 'Hello World' and another class 'MySubClass', which retains all the properties of `MyClass` but also includes the function `getName()`.
 
 The methods of a class' parent superclass can be accessed by calling the `this._super()` method within that function.
 

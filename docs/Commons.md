@@ -71,14 +71,20 @@ by including the above mixin, the class `MyClass` now includes all the methods a
 
 The *Class* object also provides the `proxy()` function, similar to jQuery's `$.proxy()` that allows you to bind a context to a given function.
 
-#### proxy(function, context)
+### proxy(function, context)
 
-Binds a function to a given context object
+Returns a function bound to a given context object for execution at a later time.
 
-**function** the function to bind the context to 
-**context** the object to use as the context 
+__Arguments__
 
-*returns function*
+* function - the function to bind the context to
+* context - the object to use as the context
+
+__Example__
+
+	Class.proxy(function() {
+		console.log(this.name); // prints 'my-context'
+	}, { name: 'my-context' });
 
 ## Events
 

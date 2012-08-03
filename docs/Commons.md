@@ -341,7 +341,7 @@ myEventedClassChild.on('load', function(e) {
 	console.log('Loaded Child!');
 });
 
-handle.fire('load');
+myEventedClassChild.fire('load');
 
 // prints 'Loaded Child!'
 // prints 'Loaded!'
@@ -355,7 +355,7 @@ Modules give an easy way to manage dependencies and organize logically separate 
 <a name="modules-add" />
 ### add(module, fn, dep, version)
 
-Adds a module with a given name and associates it with a given number of dependencies and versions.
+Adds a module with a given name and associates it with a given number of dependencies and versions. The `add()` method is available globally on the `Orange` object.
 
 **Arguments**
 
@@ -379,7 +379,7 @@ Orange.add('my-module', function() {
 <a name="modules-use" />
 ### use(dependencies…, fn)
 
-On occasion, it might be necessary to run adhoc code without necessarily creating a module. This can be done using the `use()` method, which loads required dependencies for the code. The code within the function will be run immediately when `use()` is executed.
+On occasion, it might be necessary to run adhoc code without necessarily creating a module. This can be done using the `use()` method, which loads required dependencies for the code. The code within the function will be run immediately when `use()` is executed. The `use()` method is available globally on the `Orange` object.
 
 **Arguments**
 
@@ -401,7 +401,7 @@ Orange.use('my-module-one', 'my-module-two', function() {
 <a name="modules-include" />
 ### include(module)
 
- To load required components, OrangeUI uses a convention similar to that seen in NodeJS. Requires and loads an external module and returns the object associated with that module's `exports` object.
+ To load required components, OrangeUI uses a convention similar to that seen in NodeJS. Requires and loads an external module and returns the object associated with that module's `exports` object. The `include()` method is available in the global scope.
 
 **Arguments**
 
@@ -435,8 +435,6 @@ Orange.add('my-module', function(exports) {
 	});
 		
 	exports.newClass = newClass; // the class is an attribute
-
-	// or
 
 	exports = newClass; // the class is the entire object
 

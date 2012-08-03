@@ -82,9 +82,11 @@ __Arguments__
 
 __Example__
 
-	Class.proxy(function() {
-		console.log(this.name); // prints 'my-context'
-	}, { name: 'my-context' });
+```js
+Class.proxy(function() {
+	console.log(this.name); // prints 'my-context'
+}, { name: 'my-context' });
+```
 
 ## Events
 

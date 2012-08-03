@@ -9,6 +9,8 @@ The MVC module provides a Model-ViewController-View structure that sits on top o
 * [initialize()](#app-initialize)
 * [launch()](#app-launch)
 * [isOnline()](#app-is-online)
+* [setState()](#app-set-state)
+* [getState()](#app-get-state)
 
 **includes the Events mixin*
 
@@ -96,6 +98,8 @@ The MVC module provides a Model-ViewController-View structure that sits on top o
 * [unload()](#view-controller-unload)
 * [show()](#view-controller-show)
 * [hide()](#view-controller-hide)
+* [setState()](#view-controller-set-state)
+* [getState()](#view-controller-get-state)
 * [getView()](#view-controller-get-view)
 * [getForm()](#view-controller-get-form)
 * [getElement()](#view-controller-get-element)

@@ -34,10 +34,10 @@ The Commons module is a base set of tools to help improve the structure of your 
 
 ### Modules
 
-* [add()](#module-add)
-* [use()](#module-use)
-* [include()](#module-include)
-* [exports](#module-exports)
+* [add()](#modules-add)
+* [use()](#modules-use)
+* [include()](#modules-include)
+* [exports](#modules-exports)
 
 ## Class
 

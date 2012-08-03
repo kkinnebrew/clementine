@@ -30,13 +30,13 @@ The Commons module is a base set of tools to help improve the structure of your 
 
 * [currentTarget](#event-target-current-target)
 * [target](#event-target-target)
-* [stopPropagation](#event-target-stop-propagation)
+* [stopPropagation()](#event-target-stop-propagation)
 
 ### Modules
 
-* [add](#module-add)
-* [use](#module-use)
-* [include](#module-include)
+* [add()](#module-add)
+* [use()](#module-use)
+* [include()](#module-include)
 * [exports](#module-exports)
 
 ## Class

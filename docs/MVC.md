@@ -22,39 +22,26 @@ The MVC module provides a Model-ViewController-View structure that sits on top o
 
 ### Collection
 
-* [initialize()](#binding-initialize)
-* [bindModel()](#binding-bind-model)
-* [bindCollection()](#binding-bind-collection)
-* [clear()](#binding-clear)
-* [destroy()](#binding-destroy)
-
 * [initialize()](#collection-initialize)
-
 * [get()](#collection-get)
 * [filter()](#collection-filter)
 * [unfilter()](#collection-unfilter)
 * [sort()](#collection-sort)
 * [clear()](#collection-clear)
-
 * [count()](#collection-count)
 * [getModel()](#collection-get-model)
-
 * [toArray()](#collection-to-array)
 * [toObject()](#collection-to-object)
-
 * [destroy()](#collection-destroy)
 
 ### Form
 
 * [initialize()](#form-initialize)
-
 * [get()](#form-get)
 * [set()](#form-set)
 * [clear()](#form-clear)
-
 * [setData()](#form-set-data)
 * [getData()](#form-get-data)
-
 * [destroy()](#form-destroy)
 
 ### Model
@@ -62,7 +49,6 @@ The MVC module provides a Model-ViewController-View structure that sits on top o
 **Class Methods**
 
 * [extend()](#model-class-extend)
-
 * [getAll()](#model-class-get-all)
 * [get()](#model-class-get)
 * [set()](#model-class-set)
@@ -71,20 +57,16 @@ The MVC module provides a Model-ViewController-View structure that sits on top o
 **Instance Methods**
 
 * [initialize()](#model-initialize)
-
 * [getId()](#model-get-id)
 * [getModel()](#model-get-model)
-
 * [get()](#model-get)
 * [set()](#model-set)
 * [clear()](#model-clear)
 * [refresh()](#model-refresh)
 * [save()](#model-save)
 * [remove()](#model-remove)
-
 * [isSaved()](#model-is-saved)
 * [toObject()](#model-to-object)
-
 * [destroy()](#model-destroy)
 
 **includes the Events mixin*
@@ -110,25 +92,19 @@ The MVC module provides a Model-ViewController-View structure that sits on top o
 **Instance Methods**
 
 * [initialize()](#view-controller-initialize)
-
 * [load()](#view-controller-load)
 * [unload()](#view-controller-unload)
 * [show()](#view-controller-show)
 * [hide()](#view-controller-hide)
-
 * [getView()](#view-controller-get-view)
 * [getForm()](#view-controller-get-form)
 * [getElement()](#view-controller-get-element)
-
 * [findView()](#view-controller-find-view)
 * [findForm()](#view-controller-find-form)
 * [findElement()](#view-controller-find-element)
-
 * [addViewController()](#view-controller-add-view-controller)
 * [removeViewController()](#view-controller-remove-view-controller)
-
 * [find()](#view-controller-lookup)
-
 * [destroy()](#view-controller-destroy)
 
 **includes the Events mixin*

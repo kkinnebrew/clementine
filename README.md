@@ -40,10 +40,15 @@ Depending on the features you choose to use, OrangeUI is dependent on the follow
 ## Release History
 
 * 8/1/2012 - v0.4.0 - Adding web service persistence, view controller hide/show states.
-* 7/8/2012 - v0.3.0 - Including view controller event helper functions, auto context proxying.
-* 5/7/2012 - v0.2.0 - Updated view inheritance, bug fixes from prior version.
-* 2/25/2012 - v0.1.0 - Initial release, unstable.
+* 5/16/2012 - v0.3.0 - Including view controller event helper functions, auto context proxying.
+* 3/30/2012 - v0.2.0 - Updated view inheritance, bug fixes from prior version.
+* 7/21/2011 - v0.1.0 - Initial release, unstable.
 
+## License
+
+Copyright (c) 2009-12 Kevin Kinnebrew
+Licensed under the MIT license.
+<https://github.com/brew20k/scaffold/blob/master/LICENSE>
 
 [here]: https://github.com/brew20k/orangeui/issues?labels=&sort=created&state=open
 [orangeui]: https://github.com/brew20k/orangeui/tree/master/build

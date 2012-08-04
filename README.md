@@ -28,7 +28,7 @@ Depending on the features you choose to use, Clementine is dependent on the foll
 
 Copyright (c) 2009-12 Kevin Kinnebrew
 Licensed under the MIT license.
-<https://github.com/brew20k/scaffold/blob/master/LICENSE>
+<https://github.com/brew20k/clementine/blob/master/LICENSE>
 
 [here]: https://github.com/brew20k/clementine/issues?labels=&sort=created&state=open
 [OrangeUI]:https://github.com/brew20k/orangeui

@@ -48,7 +48,7 @@ Depending on the features you choose to use, OrangeUI is dependent on the follow
 
 Copyright (c) 2009-12 Kevin Kinnebrew
 Licensed under the MIT license.
-<https://github.com/brew20k/scaffold/blob/master/LICENSE>
+<https://github.com/brew20k/orangeui/blob/master/LICENSE>
 
 [here]: https://github.com/brew20k/orangeui/issues?labels=&sort=created&state=open
 [orangeui]: https://github.com/brew20k/orangeui/tree/master/build

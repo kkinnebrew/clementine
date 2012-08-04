@@ -8,13 +8,13 @@ For additional documentation see the [OrangeUI] Docs.
 
 ## Including Clementine
 
-To use OrangeUI on your project, all you need to do is include the clementine library at the top of your root html file.
+To use Clementine on your project, all you need to do is include the clementine library at the top of your root html file.
 
 ```html
 <script type="text/javascript" href="clementine.js"></script>
 ```
 
-Depending on the features you choose to use, OrangeUI is dependent on the following libraries:
+Depending on the features you choose to use, Clementine is dependent on the following libraries:
 
 * jQuery - for AJAX and DOM Selectors
 

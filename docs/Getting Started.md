@@ -144,7 +144,7 @@ The **ViewController** class also allows us to implement the following methods t
 * willUnload()
 * didUnload()
 
-These methods allow you to precisely interact with the DOM to bind and unbind events. In our case, we've retrieved the view controller's target (which corresponds to the search field) and bound a `keypress` event to it in the `didAppear()` method. We've added a `onKeyPress()` event handler method to the controller, and passed it into the event binding to handle the `keypress` event. Finally, we've unbound the event in the `willDisappear()` method, enforcing our Rule #5: "Never bind an event, without unbinding it later."
+These methods allow you to precisely interact with the DOM to bind and unbind events. In our case, we've retrieved the view controller's target (which corresponds to the search field) and bound a `keypress` event to it in the `onDidAppear()` method. We've added a `onKeyPress()` event handler method to the controller, and passed it into the event binding to handle the `keypress` event. Finally, we've unbound the event in the `onWillDisappear()` method, enforcing our Rule #5: "Never bind an event, without unbinding it later."
 
 We now have a controller that binds a `keypress` event to an input field. How now are we handling the actual keypress. The handler checks the keycode of the keyPress for the enter key. When the enter key is pressed, it fetches the value of the search field (the target) with  
 
@@ -240,3 +240,182 @@ Any callback bound to an event receives to parameters, `e` the event object, and
 In our case, we remember that the **SearchFieldController** fired an event *search* with a payload of the keyword that was in the search field. What we've done is had **ContactsSearchListController** listen for the *search* event to be fired by the SearchFieldController. When that happens, the `onSearch()` event handler is called, and passed the keyword to search on. For the moment we're printing it to the console.
 
 ### Step Three: Communicating between views
+
+We've now bound an event to the search field to listen for the press of the enter key, fired a custom event up the parent view controller, and listened for and handled that custom event. For the moment we're simply printing the keyword passed by the event to the console. The final step is to build the list controller and have it filter when that keyword is pressed. We first define our **ContactsListController** with the following.
+
+```js
+var ContactsListController = ViewController.extend({
+	getType: function() {
+		return 'contacts-list'
+	},
+	filter: function(keyword) {
+		var pattern = new RegExp(keyword, 'i');
+		this.target.find('li').each(function() {
+			var text = $(this).text();
+			if (!pattern.test(text)) { $(this).addClass('hidden'); }
+			else { $(this).removeClass('hidden'); }
+		});
+	}
+});
+```
+
+All we've added to the contacts list controller is a method called `filter()`, which takes in a keyword and attempts to filter out the `<li>` elements whose body text doesn't match that keyword.
+
+We also then modify our original **ContactsSearchListController**, updating the `onSearch()` event handler to use this new method. We replace our console statement with
+
+```js
+	this.getView('contacts-list').filter(data);
+```
+
+which retrieves the **ContactsListController** and calls the new filter method we just created on it, hiding and showing the `<li>` rows appropriately. The keyword is passed to the event handler via the payload, which we set when calling `this.fire('search', keyword)`. We have effectively built three controllers to manage three views, handling searching, list filtering, and tying the two views together.
+
+### Step 4: Abstracting components
+
+Up until this point, it may seem as if the overhead of extra time and code is not worth the effort of decoupling components. The benefit comes only when we look at more complex applications.
+
+Let's take the perspective that this is only one section of a multi-section application where managing contacts is only a minor feature. This application may require the use of filterable lists on several pages, each list populated with different kinds of data. We may even see this list / detail-view pattern repeat on multiple pages. We can spend some time abstracting components from what we just created, to make them reusable in other parts of the application. 
+
+Starting again with the views, we can abstract away the contacts specific naming and conventions to end up with the following
+
+```html
+<body>
+	<section data-control="contacts-app">
+		<div data-control="searchable-list">
+			<input data-control="search-field" type="search" name="keyword" />
+			<ul data-control="item-list">
+				<!-- individual items go here -->
+			</ul>
+		</div>
+		<div data-control="item-detail">
+			<!-- details go here -->
+		</div>
+	</section>
+</body>
+```
+
+We see we haven't really changed the markup much, only renamed some components to make it more reusable. Now we can implement our reusable view controllers. We can even go a step further and abstract our search field into a simple text field, since our controller doesn't care one way or another if our field is a `<input type="search" />` or a `<input type="text" />`.
+
+The **ViewController** class gives us another helper function to clean our code of repetitive behaviors. Implementing the `getBindings()` method to return a JSON object of event bindings requires us to no longer override the `onDidAppear()` and `onWillDisappear()` methods. This method should return an object keyed by either the *data-name* or selector of the view/element to be bound to, and the event names to be bound. Passing true as a value to an event key will automatically search for a method on the class in the form `onBlank()`. Instead, passing a string of the actual callback name can be done for custom named callbacks. Additionally, the 'target' selector will match the `this.target` object itself.
+
+```js
+var InputFieldController = ViewController.extend({
+	getType: function() {
+		return 'input-field'
+	},
+	getBindings: function() {
+		return { 'target': { keypress: true } }
+	},
+	onKeyPress: function(e) {
+		var code = (e.keyCode ? e.keyCode : e.which);
+		if (code === 13) {
+			var keyword = this.target.val();
+			this.fire('enter', keyword);
+		}
+	}
+});
+```
+
+```js
+var SearchableListController = ViewController.extend({
+	getType: function() {
+		return 'searchable-list'
+	},
+	getBindings: function() {
+		return { 'input-field': { 'enter': 'onSearch' } }
+	},
+	onSearch: function(e, data) {
+		this.getView('list').filter(data);
+	}
+});
+```
+
+```js
+var ListController = ViewController.extend({
+	getType: function() {
+		return 'item-list'
+	},
+	filter: function(keyword) {
+		var pattern = new RegExp(keyword, 'i');
+		this.target.find('li').each(function() {
+			var text = $(this).text();
+			if (!pattern.test(text)) { $(this).addClass('hidden'); }
+			else { $(this).removeClass('hidden'); }
+		});
+	}
+});
+```
+
+We now have an **InputFieldController**, **ListController**, and **SearchableListController** which all can be reused. Notice however that the **SearchableListController** is still dependent on the other two controllers, and is therefore coupled to their implementation. Specifically, it must have prior knowledge that there will be two child views of type *list* and *input-field*. We assume that this level of coupling is appropriate, because our controller is tied only to the interface of the two components, not the components themselves. For example, someone could write a custom *ListController* themselves that includes `set()` and `get()` methods and include it in the view as follows
+
+```js
+var MutableListController = ListController.extend({
+	getType: function() {
+		return 'mutable-list'
+	},
+	set: function(data) {
+		var li = document.createElement('li');
+		li.innerHTML = data;
+		this.target.append(li)
+	},	
+	clear: function() {
+		tis.target.find('li').remove();
+	}
+});
+```
+
+```html
+<body>
+	<section data-control="contacts-app">
+		<div data-control="searchable-list">
+			<input data-control="search-field" type="search" name="keyword" />
+			<ul data-control="mutable-list" data-name="list">
+				<!-- individual items go here -->
+			</ul>
+		</div>
+		<div data-control="item-detail">
+			<!-- details go here -->
+		</div>
+	</section>
+</body>
+```
+
+As long as the custom **MutableListController** implements the same methods as the **ListController**, there should be no conflicts or changes required to the rest of the code base. We therefore define controllers by the following criteria.
+
+1. What events do they emit?
+2. What views to they require?
+3. What methods do they implement?
+
+Specifically for the controllers we've already built, here are the critera.
+
+<table>
+	<tr>
+		<th>Controller</th>
+		<th>Events</th>
+		<th>Views</th>
+		<th>Methods</th>
+	</tr>
+	<tr>
+		<td>InputFieldController</td>
+		<td>enter</td>
+		<td>-</td>
+		<td>-</td>
+	</tr>
+	<tr>
+		<td>SearchableListController</td>
+		<td>-</td>
+		<td>search-field, list</td>
+		<td>-</td>
+	</tr>
+	<tr>
+		<td>ListController</td>
+		<td>-</td>
+		<td>-</td>
+		<td>filter</td>
+	</tr>
+	<tr>
+		<td>MutableListController*</td>
+		<td>-</td>
+		<td>-</td>
+		<td>filter, set, clear</td>
+	</tr>
+</table>

@@ -22,7 +22,7 @@ We first want to outline our view structure in HTML. We know the basic component
 
 ```html
 <body>
-	<section class="contacts">
+	<section class="contacts-app">
 		<div class="left-content contact-search-list">
 			<input type="search" name="keyword" />
 			<ul class="contacts-list">
@@ -42,7 +42,7 @@ Following the conventions of OrangeUI we would break the above HTML into its log
 
 ```html
 <body>
-	<section data-control="contacts">
+	<section data-control="contacts-app">
 		<div data-control="contacts-search-list">
 			<input data-control="search-field" type="search" name="keyword" />
 			<ul data-control="contacts-list">
@@ -187,7 +187,7 @@ The goal of OrangeUI is decoupling and reusable components. Up until now our app
 
 ```html
 <body>
-	<section data-control="contacts" data-name="contacts-app">
+	<section data-control="contacts-app" data-name="contacts-app">
 		<div data-control="contacts-search-list" data-name="contacts-search-list">
 			<input data-control="search-field" data-name="contact-keyword" type="search" name="keyword" />
 			<ul data-control="contacts-list" data-name="contacts-list">
@@ -201,11 +201,25 @@ The goal of OrangeUI is decoupling and reusable components. Up until now our app
 </body>
 ```
 
-The attribute `data-name` is to the instance, what `data-control` was to the class. In other words, `data-name` allows us to uniquely identify views by name, when we use a `data-control` multiple times. In our case these appear to be redundant, can for simplicity, when they are omitted they fall back to the same value as `data-control`. However thinking ahead to a web application that may have multiple lists, multiple search fields in the same view, how do we uniquely identify those in code?
+The attribute `data-name` is to the instance, what `data-control` was to the class. In other words, `data-name` allows us to uniquely identify views by name, when we use a `data-control` multiple times. In our case these appear to be redundant, can for simplicity, when they are omitted they fall back to the same value as `data-control`. With them omitted, the views become the following:
 
--------------------------
+```html
+<body>
+	<section data-control="contacts-app">
+		<div data-control="contacts-search-list">
+			<input data-control="search-field" data-name="contact-keyword" type="search" name="keyword" />
+			<ul data-control="contacts-list">
+				<!-- individual contacts go here -->
+			</ul>
+		</div>
+		<div data-control="contact-detail">
+			<!-- details go here -->
+		</div>
+	</section>
+</body>
+```
 
-Getting back to our use of *contact-keyword*, we can now see that the `data-name` attribute on the input field is set to *contact-keyword*, our unique identifier should two search fields be used in the same view. The **ViewController** class gives us a `getView()` method, which returns the child view controller corresponding to the view with a given `data-name` attribute. In our case, calling
+Getting back to our use of *contact-keyword*, we can now see that the `data-name` attribute on the search field is set to *contact-keyword*, our unique identifier should two search fields be used in the same view. The **ViewController** class gives us a `getView()` method, which returns the child view controller corresponding to the view with a given `data-name` attribute. In our case, calling
 
 ```js
 this.getView('contact-keyword').on('search', this.onSearch, this);

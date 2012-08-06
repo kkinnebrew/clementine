@@ -286,7 +286,7 @@ Starting again with the views, we can abstract away the contacts specific naming
 				<!-- individual items go here -->
 			</ul>
 		</div>
-		<div data-control="item-detail">
+		<div data-control="contact-detail">
 			<!-- details go here -->
 		</div>
 	</section>
@@ -372,7 +372,7 @@ var MutableListController = ListController.extend({
 				<!-- individual items go here -->
 			</ul>
 		</div>
-		<div data-control="item-detail">
+		<div data-control="contact-detail">
 			<!-- details go here -->
 		</div>
 	</section>
@@ -419,3 +419,111 @@ Specifically for the controllers we've already built, here are the critera.
 		<td>filter, set, clear</td>
 	</tr>
 </table>
+
+The UI module of OrangeUI provides base implementations of many of these views, <a href="#">see them here.</a>
+
+### Step 6: Finishing touches
+
+We've managed to put together the left side of a simple contacts application. To finish it off, we'll build two more controllers, our overall application controller, the **ContactsAppController**, and our controller to manage displaying the contact details, **ContactDetailController**. For the moment we'll hold of taking about how to connect this to a webservice and rely on mock data. First we'll write out our final view markup.
+
+```html
+<body>
+	<section data-control="contacts-app">
+		<div data-control="searchable-list">
+			<input data-control="search-field" type="search" name="keyword" />
+			<ul data-control="list"></ul>
+		</div>
+		<div data-control="contact-detail">
+			<span class="first-name"></span>
+			<span class="last-name"></span>
+			<span class="phone"></span>
+		</div>
+	</section>
+</body>
+```
+
+and then our controllers to match the view.
+
+```js
+var ContactsAppController = ViewController.extend({
+	getType: function() {
+		return 'contacts-app'
+	},
+	getBindings: function() {
+		'searchable-list': { 'select': true; }}
+	},
+	onDidAppear: function() {
+		
+		// our mock data
+		var contacts = {
+			1: { firstName: 'John', lastName: 'D', phone: '333-4411' },
+			2: { firstName: 'Jack', lastName: 'S', phone: '543-2344' },
+			3: { firstName: 'Steph', lastName: 'Y', phone: '342-1222' },
+			4: { firstName: 'Kevin', lastName: 'K', phone: '523-2141' }
+		};
+
+		// pass to the list
+		this.getView('searchable-list').setData(contacts);
+
+	},
+	onSelect: function(e, data) {
+		this.getView('contact-detail').setData(data);
+	}
+});
+```
+
+```js
+var SearchableListController = ViewController.extend({
+	getType: function() {
+		return 'searchable-list'
+	},
+	getBindings: function() {
+		return { 'input-field': { 'enter': 'onSearch' } }
+	},
+	setData: function(data) {
+		this.getView('list').setData(data);
+	},
+	onSearch: function(e, data) {
+		this.getView('list').filter(data);
+	}
+});
+```
+
+```js
+var ListController = ListController.extend({
+	getType: function() {
+		return 'mutable-list'
+	},
+	getBindings: function() {
+		return { 'li': { 'click': 'onSelect' }}
+	}
+	setData: function(data) {
+		this.data = data;
+		for (var i in data) {
+			var li = document.createElement('li');
+			li.id = i;
+			li.innerHTML = data[i].firstName + ' ' + data[i].lastName;
+			this.target.append(li);
+		}
+	},
+	onSelect: function(e) {
+		var id = $(this).attr('id');
+		this.fire('select', this.data[i]);
+	}
+});
+```
+
+```js
+var ContactDetailController = ViewController.extend({
+	getType: function() {
+		return 'contact-detail'
+	},
+	setContact: function(data) {
+		this.target.find('first-name').text(data.firstName);
+		this.target.find('last-name').text(data.lastName);
+		this.target.find('phone').text(data.phone);
+	}
+});
+```
+
+We've added a *select* event to the list and passed our mock data to the populate the list items. When the user clicks on an `<li>` item the *select* event is fired with a payload of the contact object. This propagates up the hierarchy until it reaches the **ContactsAppController**. When that controller hears the *select* event it passes the payload data to the **ContactDetailController**, which renders it in the view.

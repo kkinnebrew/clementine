@@ -20,7 +20,7 @@ OrangeUI is a rapid development javascript framework for soundly built web appli
 - History and route management
 - Standardized UI controls
 
-The goal of this framework is to give you a customizable base for building your web application that completely decouples your data sources from your controller logic and presentation. In addition, it allows the creation of reusable components to speed up development time. OrangeUI sets up standards for how to organize your application code, decouple your styles and UI elements, and interact with web services.
+The goal of this framework is to give you a customizable base for building your web application that completely decouples your data sources from your controller logic and presentation. In addition, it allows the creation of reusable components to speed up development time. OrangeUI sets up standards for how to organize your application code, decouple your styles and UI elements, and interact with web services. For a walkthrough of the basics, [go here].
 
 ## Including OrangeUI
 
@@ -50,5 +50,6 @@ Copyright (c) 2009-12 Kevin Kinnebrew
 Licensed under the MIT license.
 <https://github.com/brew20k/orangeui/blob/master/LICENSE>
 
+[go here]: https://github.com/brew20k/orangeui/blob/master/docs/Getting%20Started.md
 [here]: https://github.com/brew20k/orangeui/issues?labels=&sort=created&state=open
 [orangeui]: https://github.com/brew20k/orangeui/tree/master/build

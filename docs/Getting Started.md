@@ -76,19 +76,19 @@ For every view (a data-control element) there needs to be an associated view con
 
 The idea of a hierarchy of view controllers is that they match one-to-one with the structure of the DOM. Just as we saw the hierarchy of the views we built:
 
-* contacts-app
-    * contacts-search-list
-				 * search-field
-				 * contacts-list
-    * contact-detail
+- contacts-app
+   - contacts-search-list
+      - search-field
+      - contacts-list
+- contact-detail
 
 their associated controllers should follow the same pattern. How do we do this? We build five associated controllers to match these views:
 
-* ContactsAppController
-		* ContactsSearchListController
-			* SearchFieldController
-			* ContactsListController
-		* ContactDetailController
+- ContactsAppController
+   - ContactsSearchListController
+      - SearchFieldController
+      - ContactsListController
+- ContactDetailController
 
 You can see that this follows the same hierarchy as the views above. How do we define these controllers in Javascript? Let's define the **ContactSearchListController** as an example.
 

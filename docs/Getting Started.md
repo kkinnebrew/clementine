@@ -2,23 +2,25 @@
 
 ## View Controller Architecture
 
-The architecture of OrangeUI attempts to emulate the hierarchical structure of the DOM via View Controllers while decoupling code components so they can be reused. It uses the subscriber pattern to manage communication between view controllers, where individual view controllers in the hierarchy manage only their children.
+OrangeUI attempts to emulate the hierarchical structure of the DOM via View Controllers while decoupling code components so they can be reused. It provides custom event bindings to manage communication between view controllers, where individual view controllers in the hierarchy manage only their children.
 
-**Principles**
+## Rules
 
-1. Controller and view hierarchies match one-to-one
-2. One controller instance can manage one view
+1. For every view is a view controller instance
+2. A controller instance should manage only one view
 3. Controllers only call methods on their children
-4. Controllers fire events up to their parents
-5. Never bind an event, without unbinding it later
+4. Controllers fire events to communicate with their parents
+5. Manually unbind all manually bound events
 
 ## Example
 
-Suppose we're building a simple address book web app. We want to have a searchable list of contacts on the left, and a detail view for the contact that's currently selected on the right. How would we structure the application?
+Suppose we're building a simple address book web application. We want to have a searchable list of contacts on the left, and a detail view displaying the currently selected contact on the right. In the next few minutes, we'll build this app with OrangeUI.
 
 ### Step 1: Start with your views
 
-We first want to outline our view structure in HTML. We know the basic components of what our views will look like already, even though we haven't ironed out the details. Traditionally we might start with something like this.
+In OrangeUI, views are simply HTML. Our views should follow the conventions of good HTML; they exist strictly to describe the structure, not the style our application.
+
+We first want to outline what views we need and how the will be organized. Even though we haven't ironed out the details, we know the basic structure and arrangement of our application's views. In a traditional, page like application, we might start with something like this,
 
 ```html
 <body>
@@ -36,9 +38,9 @@ We first want to outline our view structure in HTML. We know the basic component
 </body>
 ```
 
-This works fine, but imagine we have several other future features of this app (managing a list of todo's perhaps) that follow a similar pattern (searchable list on the left, details on the right.) We would want to reuse those components.
+This works fine for our simple application, but imagine we implementing several other features in the future (managing a list of todo's, sending messages, etc). It would be helpful to abstract out our standardized components (lists, buttons, toolbars), to use again in other application features that follow a similar pattern.
 
-Following the conventions of OrangeUI we would break the above HTML into its logical components. In principle, each component should have only one function, they should not be coupled together. OrangeUI denotes each logical section with the `data-control` attribute. This attribute will ultimately correspond to the Javascript controller that manages it.
+To take the forward thinking approach, we would first break the above HTML into its logical components, ie views. In principle, each component should have only one function (a list, a search field, a table) or should simply combine simple components to make more complex ones (a searchable list, a slideshow). Each of these are views. OrangeUI denotes each of these logical sections with a `data-control` attribute. This attribute will ultimately correspond to the Javascript controller that manages the associated view. Writing our HTML in this new pattern, 
 
 ```html
 <body>
@@ -56,11 +58,11 @@ Following the conventions of OrangeUI we would break the above HTML into its log
 </body>
 ```
 
-We've now broken everything into a logical hierarchy of components. The control `contacts` wraps the entire application. The `contacts-search-list` wraps the searchable list. The `contacts-list` wraps the list of contact items. The `contact-detail` wraps the detail pane holding information about the contact.
+we've now broken everything into a logical components. Given the DOM's tree structure, we see that our views are also nested in a similar way. Our view *contacts-app* wraps the entire application as a logical group. It's two child views, *contacts-list-search* and *contact-detail* wrap together the search and list functionality, and the contact detail pane respectively. The children of *contacts-list-search* contain their logic sections as well, *search-field* handling the HTML input field, and the *contacts-list* wrapping a list of individual contact list items.
 
-Now this may seem like overkill at the moment, and it probably is for this simple example, but as we'll see soon, it illustrates that as applications become more complex, having reusable components such as lists will become very valuable.
+We begin to see how the tree structure allows us flexibility, to swap components and their decendents in and out. This may seem like overkill, and it probably is for this simple example, but as we'll see soon, it will illustrate that as applications become more complex, having reusable components such as lists and fields become more valuable.
 
-To recap, we have an **contacts-app** control, a **contacts-search-list** control, a **contacts-list** control, and a **contact-detail** control. They are organized in the following hierarchy:
+To recap, we have an *contacts-app* view, a *contacts-search-list* view, a *search-field* view, a *contacts-list* view, and a *contact-detail* view. They are organized in the following hierarchy:
 
 - contacts-app
    - contacts-search-list
@@ -68,7 +70,11 @@ To recap, we have an **contacts-app** control, a **contacts-search-list** contro
       - contacts-list
 - contact-detail
 
-Now let's talk about interaction. We can see fairly quickly that the search field will some how need to tell the list to update when a keyword is typed. The contacts-list will need to tell contact-detail to update its values when an item in the list is clicked. The complexity of single page apps appear when we begin to handle interaction. This is where we begin to involve **View Controllers**.
+Now that we have our views organized, we need to discuss interactivity. How do we make our views interactive with Javascript without creating spaghetti code.
+
+It is clear that the *search-field* will need to filter the *contacts-list* when the enter key is pressed. The *contacts-list* will need to tell the *contact-detail* pane to display a specific contact when it's selected from the list. These are fairly simple interactions, however it is quite easy to write coupled code as the complexity of single page apps such as this expand.
+
+This is where we begin to involve **View Controllers**.
 
 ### Step 2: View Controllers
 

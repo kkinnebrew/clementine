@@ -16,7 +16,7 @@ The architecture of OrangeUI attempts to emulate the hierarchical structure of t
 
 Suppose we're building a simple address book web app. We want to have a searchable list of contacts on the left, and a detail view for the contact that's currently selected on the right. How would we structure the application?
 
-### Step One: Start with your views
+### Step 1: Start with your views
 
 We first want to outline our view structure in HTML. We know the basic components of what our views will look like already, even though we haven't ironed out the details. Traditionally we might start with something like this.
 
@@ -70,7 +70,7 @@ To recap, we have an **contacts-app** control, a **contacts-search-list** contro
 
 Now let's talk about interaction. We can see fairly quickly that the search field will some how need to tell the list to update when a keyword is typed. The contacts-list will need to tell contact-detail to update its values when an item in the list is clicked. The complexity of single page apps appear when we begin to handle interaction. This is where we begin to involve **View Controllers**.
 
-### Step Two: View Controllers
+### Step 2: View Controllers
 
 For every view (a data-control element) there needs to be an associated view controller. We created five different views in our HTML for the prior example, let's now make their associated controllers.
 
@@ -239,7 +239,7 @@ Any callback bound to an event receives to parameters, `e` the event object, and
 
 In our case, we remember that the **SearchFieldController** fired an event *search* with a payload of the keyword that was in the search field. What we've done is had **ContactsSearchListController** listen for the *search* event to be fired by the SearchFieldController. When that happens, the `onSearch()` event handler is called, and passed the keyword to search on. For the moment we're printing it to the console.
 
-### Step Three: Communicating between views
+### Step 3: Communicating between views
 
 We've now bound an event to the search field to listen for the press of the enter key, fired a custom event up the parent view controller, and listened for and handled that custom event. For the moment we're simply printing the keyword passed by the event to the console. The final step is to build the list controller and have it filter when that keyword is pressed. We first define our **ContactsListController** with the following.
 

@@ -62,11 +62,11 @@ Now this may seem like overkill at the moment, and it probably is for this simpl
 
 To recap, we have an **contacts-app** control, a **contacts-search-list** control, a **contacts-list** control, and a **contact-detail** control. They are organized in the following hierarchy:
 
-* contacts-app
-    * contacts-search-list
-           * search-field
-           * contacts-list
-    * contact-detail
+- contacts-app
+   - contacts-search-list
+      - search-field
+      - contacts-list
+- contact-detail
 
 Now let's talk about interaction. We can see fairly quickly that the search field will some how need to tell the list to update when a keyword is typed. The contacts-list will need to tell contact-detail to update its values when an item in the list is clicked. The complexity of single page apps appear when we begin to handle interaction. This is where we begin to involve **View Controllers**.
 

@@ -37,6 +37,11 @@ Depending on the features you choose to use, OrangeUI is dependent on the follow
 * jQuery - for AJAX and DOM Selectors
 * Socket.io - for real time data
 
+## Documentation
+
+* [Commons]
+* [MVC]
+
 ## Release History
 
 * 8/1/2012 - v0.4.0 - Adding web service persistence, view controller hide/show states.
@@ -53,3 +58,5 @@ Licensed under the MIT license.
 [Getting Started]: https://github.com/brew20k/orangeui/blob/master/docs/Getting%20Started.md
 [here]: https://github.com/brew20k/orangeui/issues?labels=&sort=created&state=open
 [orangeui]: https://github.com/brew20k/orangeui/tree/master/build
+[Commons]: https://github.com/brew20k/orangeui/blob/master/docs/Commons.md
+[MVC]: https://github.com/brew20k/orangeui/blob/master/docs/MVC.md

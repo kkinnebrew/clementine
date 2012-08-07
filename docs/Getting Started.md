@@ -16,7 +16,7 @@ OrangeUI attempts to emulate the hierarchical structure of the DOM via View Cont
 
 Suppose we're building a simple address book web application. We want to have a searchable list of contacts on the left, and a detail view displaying the currently selected contact on the right. In the next few minutes, we'll build this app with OrangeUI.
 
-### Step 1: Start with your views
+### Step 1: Building Hierarchy with Views
 
 In OrangeUI, views are simply HTML. Our views should follow the conventions of good HTML; they exist strictly to describe the structure, not the style our application.
 
@@ -72,23 +72,15 @@ To recap, we have an *contacts-app* view, a *contacts-search-list* view, a *sear
 
 Now that we have our views organized, we need to discuss interactivity. How do we make our views interactive with Javascript without creating spaghetti code.
 
-It is clear that the *search-field* will need to filter the *contacts-list* when the enter key is pressed. The *contacts-list* will need to tell the *contact-detail* pane to display a specific contact when it's selected from the list. These are fairly simple interactions, however it is quite easy to write coupled code as the complexity of single page apps such as this expand.
+It is clear that the *search-field* will need to filter the *contacts-list* when the enter key is pressed. The *contacts-list* will need to tell the *contact-detail* pane to display a specific contact when it's selected from the list. 
 
-This is where we begin to involve **View Controllers**.
+These are fairly simple interactions, however it is quite easy to write messy, coupled code as the complexity of single page apps such as this expand. Particularly when nested callbacks get out of control or when there is no longer a transparent way to see how events are being bound and unbound, its easy to leak memory, create bugs, and altogether write unmaintainable code. This is where we begin to involve **View Controllers**.
 
-### Step 2: View Controllers
+### Step 2: Taming Code with Controllers
 
-For every view (a data-control element) there needs to be an associated view controller. We created five different views in our HTML for the prior example, let's now make their associated controllers.
+OrangeUI's *View Controller* class acts as both a helper in the lifecycle of each of your applications views, and as a scaffold to enforce coding best practices. Those `data-control` attributes we added earlier, each of those corresponds to a view controller. We've managed to logically separate our views, now we're logically separating our interaction logic as well. 
 
-The idea of a hierarchy of view controllers is that they match one-to-one with the structure of the DOM. Just as we saw the hierarchy of the views we built:
-
-- contacts-app
-   - contacts-search-list
-      - search-field
-      - contacts-list
-- contact-detail
-
-their associated controllers should follow the same pattern. How do we do this? We build five associated controllers to match these views:
+Let's take a look at the five different views we created in the previous step, and now make their associated controllers. Just as we traced out the hierarchy of our views within the DOM, we do the same for our controllers. In fact, when our application is initialized, a tree of view controllers instances is built to exactly match that of our DOM view hierarchy. The five associated view controllers would be initialized as follows,
 
 - ContactsAppController
    - ContactsSearchListController
@@ -96,7 +88,9 @@ their associated controllers should follow the same pattern. How do we do this? 
       - ContactsListController
 - ContactDetailController
 
-You can see that this follows the same hierarchy as the views above. How do we define these controllers in Javascript? Let's define the **ContactSearchListController** as an example.
+matching that of each view. Each view controller instance and each view controller have a one-to-one relationship. The section of the DOM represented by the view will be managed and manipulated only my this one view controller. Now let's define these view controller classes. When the page is first loaded, an instance of each class is instantiated as OrangeUI traverses down the DOM tree, reading off each `data-control` attribute. We therefore can use each of these `data-control` attributes multiple times, (ie. two `data-control="search-field`'s on one page if we wanted). 
+
+Let's define the **ContactSearchListController** as an example.
 
 ```js
 var ContactsSearchListController = ViewController.extend({
@@ -106,9 +100,11 @@ var ContactsSearchListController = ViewController.extend({
 });
 ```
 
-That's it. We've defined our first view controller. The only required method on the view controller is the `getType()` method, which returns a string matching the name of the view we defined earlier. When OrangeUI parses the DOM, it reads off each `data-control` attribute and looks to see if there is an associated View Controller with a `getType()` string that matches. If there is, it instantiates an instance of the that view controller, and then moves on to its immediate children repeating the process.
+That's it. We've defined our first view controller. The only required method on the view controller to implement is the `getType()` method, which returns a string matching the name of the view we defined earlier. When OrangeUI traverses down the DOM tree looking for `data-control` attributes, it reads off each attribute and looks to see if there is an associated View Controller defined whose `getType()` method it matches. If there is, it instantiates an instance of the that view controller, and then moves on to its immediate children repeating the process until it can't find any more views.
 
-For the moment our view controller doesn't do anything. Let's add some functionality to one of them. Take the **SearchFieldController**. Remember we want it to search our list when the user types something and hits enter. To do that, we need to write the following.
+*Additionally, it converts the `data-control` attribute to a class name, so that adding a redundant class is unnecessary.*
+
+For the moment our view controller doesn't do anything; we haven't added any methods to it yet. To add functionality to a controller, the **SearchFieldController** for example, we simply begin to implement existing methods or add new methods to the controller class. Remember we want the `<input data-control="search-field" />` view to search our list when the user types something and hits enter. To do that, we'll add an event listener to that DOM element to listen for key presses.
 
 ```js
 var SearchFieldController = ViewController.extend({
@@ -131,7 +127,7 @@ var SearchFieldController = ViewController.extend({
 });
 ```
 
-Let's step through this code method by method. The **ViewController** class gives you access to the `this.target`, which stores a reference to the DOM element of the view. In this case, the `this.target` is equal to the DOM element
+Let's step through this code method by method. First, the **ViewController** class gives you access to the `this.target` instance variable, which stores a reference to the view controller's associated view element. As OrangeUI traversed down the DOM tree, it passed references to each of the `data-control` DOM elements into each view controller instance it created. For the **SearchFieldController**, the `this.target` variable references the DOM element:
 
 ```html
 <input data-control="search-field" type="search" name="keyword" />

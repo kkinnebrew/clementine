@@ -12,7 +12,7 @@ OrangeUI is not simply an MVC framework. It was created in an attempt to improve
 4. Controllers fire events to communicate with their parents
 5. Manually unbind all manually bound events
 
-## Tutorial
+## Tutorial 1: View Controllers
 
 Suppose we're building a simple address book web application. We want to have a searchable list of contacts on the left, and a detail view displaying the currently selected contact on the right. In the next few minutes, we'll build this app with OrangeUI.
 
@@ -177,7 +177,7 @@ We've used a few new methods in the above code. This controller looks very simil
 
 ### Part 3: Decoupling Communication between Views
 
-The goal of OrangeUI is decoupling and reusing components, specifically views and view controllers. Up until now our app is too simple to reuse anything. The primary adversary to decoupling our view controllers is managing how they communicate with each other. When the **SearchFieldController** wants to tell the **ContactListController** to filter its list items, the code for that shouldn't exist in either controller, otherwise the become unreusable. Instead, we look back to **Rule #3: Controllers only call methods on their children**. All interaction between views should be done only by the parent controller, in this case, the **ContactsSearchListController**.
+The goal of OrangeUI is the decoupling and reusing components, specifically views and view controllers. Up until now our app is too simple to reuse anything. The primary adversary to decoupling our view controllers is managing how they communicate with each other. When the **SearchFieldController** wants to tell the **ContactListController** to filter its list items, the code for that shouldn't exist in either controller, otherwise the become unreusable. Instead, we look back to **Rule #3: Controllers only call methods on their children**. All interaction between views should be done only by the parent controller, in this case, the **ContactsSearchListController**.
 
 Interaction between view controllers can take two forms. When view controllers want to communicate with their child view controllers, they may simply call methods on their children. 
 However when child views want to communicate with their parent, in enforce reusability, they should not have any knowledge of what form their parent takes. Thus to communicate up the hierarchy to a parent view, a view controller will fire a custom event using the `this.fire()` method.
@@ -281,11 +281,11 @@ The `filter()` method takes in a keyword and attempts to filter out the `<li>` e
 
 ### Step 4: Abstracting Reusable Components
 
-Up until this point, it may seem as if the overhead of extra time and code is not worth the effort of decoupling components. The benefit comes only when we look at more complex applications.
+Up until now, the extra effort we've taken to decouple our views and view controllers has had little impact, mostly because our application is so simple. The benefit comes when we start looking at more complex applications.
 
-Let's take the perspective that this is only one section of a multi-section application where managing contacts is only a minor feature. This application may require the use of filterable lists on several pages, each list populated with different kinds of data. We may even see this list / detail-view pattern repeat on multiple pages. We can spend some time abstracting components from what we just created, to make them reusable in other parts of the application. 
+Let's take the perspective that this is only one section of a multi-section application where managing contacts is only a minor feature. This application may require the use of filterable lists on several pages, each list populated with different kinds of data. We may even see this list / detail-view pattern repeat on multiple pages. We can abstract common patterns from what we've just created to make them reusable in other parts of the application. 
 
-Starting again with the views, we can abstract away the contacts specific naming and conventions to end up with the following
+First we'll abstract away the *contact* specific naming conventions of our views.
 
 ```html
 <body>
@@ -303,9 +303,15 @@ Starting again with the views, we can abstract away the contacts specific naming
 </body>
 ```
 
-We see we haven't really changed the markup much, only renamed some components to make it more reusable. Now we can implement our reusable view controllers. We can even go a step further and abstract our search field into a simple text field, since our controller doesn't care one way or another if our field is a `<input type="search" />` or a `<input type="text" />`.
+We haven't really changed much of the markup, we've only renamed some components to make them more reusable. Now we can implement our reusable view controllers. We can even go a step further and abstract our search field into a simple text field, since our controller doesn't care one way or another if our field is a `<input type="search" />` or a `<input type="text" />`.
 
-The **ViewController** class gives us another helper function to clean our code of repetitive behaviors. Implementing the `getBindings()` method to return a JSON object of event bindings requires us to no longer override the `onDidAppear()` and `onWillDisappear()` methods. This method should return an object keyed by either the *data-name* or selector of the view/element to be bound to, and the event names to be bound. Passing true as a value to an event key will automatically search for a method on the class in the form `onBlank()`. Instead, passing a string of the actual callback name can be done for custom named callbacks. Additionally, the 'target' selector will match the `this.target` object itself.
+The **ViewController** class gives us many helper functions to clean our code of repetitive behaviors. The `getBindings()` method can be used to organize all the event bindings of the view controller so we no longer need to override the `onDidAppear()` and `onWillDisappear()` methods. 
+
+This method should return an object keyed by either the *data-name* value or selector of the view/element to be bound to. As a value it will take an object keyed by event names, where passing true as a value to an event key will automatically map to a method in the form `onBlank()`. Instead, you can also pass the name of the actual callback as a string instead of the boolean, if the callback does not follow that convention. 
+
+*Using 'target' as a selector will match the `this.target` object itself.*
+
+We've abstracted and refactored our prior views to be the following.
 
 ```js
 var InputFieldController = ViewController.extend({
@@ -355,7 +361,7 @@ var ListController = ViewController.extend({
 });
 ```
 
-We now have an **InputFieldController**, **ListController**, and **SearchableListController** which all can be reused. Notice however that the **SearchableListController** is still dependent on the other two controllers, and is therefore coupled to their implementation. Specifically, it must have prior knowledge that there will be two child views of type *list* and *input-field*. We assume that this level of coupling is appropriate, because our controller is tied only to the interface of the two components, not the components themselves. For example, someone could write a custom *ListController* themselves that includes `set()` and `get()` methods and include it in the view as follows
+We now have an **InputFieldController**, **ListController**, and **SearchableListController** which all can be reused. Notice however that the **SearchableListController** is still dependent on the other two controllers, and is therefore coupled to their implementation. Specifically, it must have prior knowledge that there will be two child views of type *list* and *input-field*. We assume that this level of coupling is appropriate, because our controller is tied only to the interface of the two components, not the components themselves. For example, someone could write a custom *ListController* that includes `set()` and `get()` methods and include it in the view as follows
 
 ```js
 var MutableListController = ListController.extend({
@@ -378,18 +384,14 @@ var MutableListController = ListController.extend({
 	<section data-control="contacts-app">
 		<div data-control="searchable-list">
 			<input data-control="search-field" type="search" name="keyword" />
-			<ul data-control="mutable-list" data-name="list">
-				<!-- individual items go here -->
-			</ul>
+			<ul data-control="mutable-list" data-name="list"></ul>
 		</div>
-		<div data-control="contact-detail">
-			<!-- details go here -->
-		</div>
+		<div data-control="contact-detail"></div>
 	</section>
 </body>
 ```
 
-As long as the custom **MutableListController** implements the same methods as the **ListController**, there should be no conflicts or changes required to the rest of the code base. We therefore define controllers by the following criteria.
+As long as the custom **MutableListController** implements the same methods as the **ListController**, which the above does because it is subclassing the ListController, there should be no conflicts or changes required to the rest of the code base. We therefore define controllers by the following criteria.
 
 1. What events do they emit?
 2. What views to they require?
@@ -430,18 +432,18 @@ Specifically for the controllers we've already built, here are the critera.
 	</tr>
 </table>
 
-The UI module of OrangeUI provides base implementations of many of these views, <a href="#">see them here.</a>
+The UI module of OrangeUI provides base implementations of many of these standard views, <a href="#">see them here.</a>
 
-### Step 6: Finishing touches
+### Part 5: Tying It All Together
 
-We've managed to put together the left side of a simple contacts application. To finish it off, we'll build two more controllers, our overall application controller, the **ContactsAppController**, and our controller to manage displaying the contact details, **ContactDetailController**. For the moment we'll hold of taking about how to connect this to a webservice and rely on mock data. First we'll write out our final view markup.
+We've managed to put together the left side of a simple contacts application. To finish it off, we'll build two more controllers, our overall application controller, the **ContactsAppController**, and our controller to manage displaying the contact details, **ContactDetailController**. We'll also add methods to pass data to our list for rendering. For the moment we'll hold of on talking about how to connect this to a webservice and rely only on mock data. First we'll write out our final view markup.
 
 ```html
 <body>
-	<section data-control="contacts-app">
+	<section data-control="contacts-app" data-root="true">
 		<div data-control="searchable-list">
 			<input data-control="search-field" type="search" name="keyword" />
-			<ul data-control="list"></ul>
+			<ul data-control="item-list"></ul>
 		</div>
 		<div data-control="contact-detail">
 			<span class="first-name"></span>
@@ -452,7 +454,7 @@ We've managed to put together the left side of a simple contacts application. To
 </body>
 ```
 
-and then our controllers to match the view.
+Notice we've added a new attribute to the *contacts-app* element, the `data-root="true"`. When we run our application in the browser, this tells OrangeUI where to start parsing our views. Finally we update our controllers to match the view.
 
 ```js
 var ContactsAppController = ViewController.extend({
@@ -536,4 +538,15 @@ var ContactDetailController = ViewController.extend({
 });
 ```
 
-We've added a *select* event to the list and passed our mock data to the populate the list items. When the user clicks on an `<li>` item the *select* event is fired with a payload of the contact object. This propagates up the hierarchy until it reaches the **ContactsAppController**. When that controller hears the *select* event it passes the payload data to the **ContactDetailController**, which renders it in the view.
+We've added a *select* event to the list and passed our mock data to the populate the list items. When the user clicks on an `<li>` item the *select* event is fired with a payload of the contact object. This propagates up the hierarchy until it reaches the **ContactsAppController**. When that controller receives the *select* event it passes the payload data to the **ContactDetailController**, which renders it in the view.
+
+Our last step is simply to instantiate the application. We simply register a new **Application** in a Javascript block in our view.
+
+```html
+<script type="text/javascript">
+var contacts = new Application({ name: 'contacts' });
+</script>
+```
+
+This will bind a handler for our `document.onload` that will initialize the application one all the page's assets are loaded. In our next tutorial, we'll discuss interacting with web services and defining models.
+

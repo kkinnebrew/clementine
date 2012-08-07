@@ -16,7 +16,7 @@ OrangeUI is not simply an MVC framework. It was created in an attempt to improve
 
 Suppose we're building a simple address book web application. We want to have a searchable list of contacts on the left, and a detail view displaying the currently selected contact on the right. In the next few minutes, we'll build this app with OrangeUI.
 
-### Step 1: Building Hierarchy with Views
+### Part 1: Building Hierarchy with Views
 
 In OrangeUI, views are simply HTML. Our views should follow the conventions of good HTML; they exist strictly to describe the structure, not the style our application.
 
@@ -76,7 +76,7 @@ It is clear that the *search-field* will need to filter the *contacts-list* when
 
 These are fairly simple interactions, however it is quite easy to write messy, coupled code as the complexity of single page apps such as this expand. Particularly when nested callbacks get out of control or when there is no longer a transparent way to see how events are being bound and unbound, its easy to leak memory, create bugs, and altogether write unmaintainable code. This is where we begin to involve **View Controllers**.
 
-### Step 2: Taming Code with Controllers
+### Part 2: Taming Code with Controllers
 
 OrangeUI's *View Controller* class acts as both a helper in the lifecycle of each of your applications views, and as a scaffold to enforce coding best practices. Those `data-control` attributes we added earlier, each of those corresponds to a view controller. We've managed to logically separate our views, now we're logically separating our interaction logic as well. 
 
@@ -100,11 +100,11 @@ var ContactsSearchListController = ViewController.extend({
 });
 ```
 
-That's it. We've defined our first view controller. The only required method on the view controller to implement is the `getType()` method, which returns a string matching the name of the view we defined earlier. When OrangeUI traverses down the DOM tree looking for `data-control` attributes, it reads off each attribute and looks to see if there is an associated View Controller defined whose `getType()` method it matches. If there is, it instantiates an instance of the that view controller, and then moves on to its immediate children repeating the process until it can't find any more views.
+That's it, we've defined our first view controller. The only method on the view controller you are required to implement is `getType()`, which returns a string matching the name of the view we defined earlier. When OrangeUI traverses down the DOM tree looking for `data-control` attributes, it reads off each attribute value and looks to see if a **View Controller** is defined having a matching `getType()` string. If there is, it instantiates an instance of the that view controller, and then moves on to its immediate children repeating the process until it can't find any more views.
 
 *Additionally, it converts the `data-control` attribute to a class name, so that adding a redundant class is unnecessary.*
 
-For the moment our view controller doesn't do anything; we haven't added any methods to it yet. To add functionality to a controller, the **SearchFieldController** for example, we simply begin to implement existing methods or add new methods to the controller class. Remember we want the `<input data-control="search-field" />` view to search our list when the user types something and hits enter. To do that, we'll add an event listener to that DOM element to listen for key presses.
+For the moment our view controller doesn't do anything; we haven't added any methods to it yet. To add functionality to a controller, let's move to the **SearchFieldController**. We simply begin to implement existing methods or add new methods to the controller class. Remember we want the `<input data-control="search-field" />` view to search our list when the user types something and hits enter. To do that, we'll add an event listener to the input field that listens for key presses.
 
 ```js
 var SearchFieldController = ViewController.extend({
@@ -127,13 +127,13 @@ var SearchFieldController = ViewController.extend({
 });
 ```
 
-Let's step through this code method by method. First, the **ViewController** class gives you access to the `this.target` instance variable, which stores a reference to the view controller's associated view element. As OrangeUI traversed down the DOM tree, it passed references to each of the `data-control` DOM elements into each view controller instance it created. For the **SearchFieldController**, the `this.target` variable references the DOM element:
+Let's step through this code method by method. First, the **ViewController** class gives you access to the `this.target` instance variable, which stores a reference to the view controller's associated view element. As OrangeUI traversed down the DOM tree, it passed references of each of the `data-control` DOM elements into each view controller instance it created. For the **SearchFieldController**, the `this.target` variable references the DOM element:
 
 ```html
 <input data-control="search-field" type="search" name="keyword" />
 ```
 
-The `this.target` enforces rule #2, "One controller instance can manage one view." In this case, the target is the search field itself. The view controller only has access to that part of the DOM, nothing more.
+The `this.target` enforces **Rule #2, "A controller instance should manage only one view."** In this case, the target is the search field itself. The view controller only has access to its own part of the DOM, nothing more.
 
 The **ViewController** class also allows us to implement the following methods that manage the view lifecycle.
 
@@ -146,23 +146,18 @@ The **ViewController** class also allows us to implement the following methods t
 * willUnload()
 * didUnload()
 
-These methods allow you to precisely interact with the DOM to bind and unbind events. In our case, we've retrieved the view controller's target (which corresponds to the search field) and bound a `keypress` event to it in the `onDidAppear()` method. We've added a `onKeyPress()` event handler method to the controller, and passed it into the event binding to handle the `keypress` event. Finally, we've unbound the event in the `onWillDisappear()` method, enforcing our Rule #5: "Never bind an event, without unbinding it later."
+These methods allow you to more precisely tie actions to the view state, to bind and unbind events and manipulate the DOM. In our case, we've retrieved the view controller's target and bound a `keypress` event to it in the `onDidAppear()` method. We've added a `onKeyPress()` event handler method to the controller, and bound it to the `keypress` event. Finally, we've unbound the event in the `onWillDisappear()` method, enforcing our **Rule #5: "Manually unbind all manually bound events."**
 
-We now have a controller that binds a `keypress` event to an input field. How now are we handling the actual keypress. The handler checks the keycode of the keyPress for the enter key. When the enter key is pressed, it fetches the value of the search field (the target) with  
+Now we need to tell the other views that the user has pressed the enter key and wants to search for something. In the `onKeyPress()` event, we're checking the keycode of the keypress and calling the following if it's an enter key.
 
 ```js
 var keyword = this.target.val();
-```
-
-And then fires a new custom event, **search** with the keyword variable as its payload.
-
-```js
 this.fire('search', keyword);
 ```
 
-We'll talk about this in a moment. For now, we have a view controller that simply fires a 'search' event with the keyword that it wants to search.
+By firing a custom event from the view controller, parent view controller can subscribe to and listen for when that event is fired. The keyword is passed as an optional second argument to the `this.fire()` method, which will be received by all callbacks bound to the event. We'll discuss this in more depth in a moment. For now, we have a **SearchFieldController** that simply fires a 'search' event when the enter key is pressed.
 
-Let's move up the hierarchy now to the parent of the **SearchFieldController**, the **ContactsSearchListController**. This view controller corresponds to the view containing both `search-field` and `contact-list`, its children. We can write this controller in the same way we've written the prior.
+Stepping away from the **SearchFieldController**, we move up the hierarchy to its parent, the **ContactsSearchListController**. This view controller corresponds to the view containing both the *search-field* and *contact-list* views as its children. We can write this controller in the same way we've written the prior.
 
 ```js
 var ContactsSearchListController = ViewController.extend({
@@ -170,28 +165,32 @@ var ContactsSearchListController = ViewController.extend({
 		return 'contacts-search-list';
 	}
 	onDidAppear: function(e) {
-		this.getView('contact-keyword').on('search', this.onSearch, this);
-	},
-	onWillDisappear: function(e) {
-		this.getView('contact-keyword').off();
+		this.getView('search-field').on('search', this.onSearch, this);
 	},
 	onSearch: function(e, data) {
-		console.log(data);
+		this.getView('contact-list').filter(data);
 	}
 });
 ```
 
-We've used a few new methods in the above code. This controller looks very similar to the prior, however we've used the `getView` method and passed in the value *contact-keyword*. We'll step back for a moment to the view to explain this.
+We've used a few new methods in the above code. This controller looks very similar to the prior, however we've used the `getView` method and passed in the values *search-field* and *contact-list*. We'll step back for a moment to the view to explain this.
 
--------------------------
+### Part 3: Decoupling Communication between Views
 
-The goal of OrangeUI is decoupling and reusable components. Up until now our app is too simple to reuse anything. Taking a look at the prior code, we see that we now have added another attribute along with the `data-control` attributes, `data-name`.
+The goal of OrangeUI is decoupling and reusing components, specifically views and view controllers. Up until now our app is too simple to reuse anything. The primary adversary to decoupling our view controllers is managing how they communicate with each other. When the **SearchFieldController** wants to tell the **ContactListController** to filter its list items, the code for that shouldn't exist in either controller, otherwise the become unreusable. Instead, we look back to **Rule #3: Controllers only call methods on their children**. All interaction between views should be done only by the parent controller, in this case, the **ContactsSearchListController**.
+
+Interaction between view controllers can take two forms. When view controllers want to communicate with their child view controllers, they may simply call methods on their children. 
+However when child views want to communicate with their parent, in enforce reusability, they should not have any knowledge of what form their parent takes. Thus to communicate up the hierarchy to a parent view, a view controller will fire a custom event using the `this.fire()` method.
+
+OrangeUI provides helper methods to make children view controllers accessible to the parent. The `this.getView()` method will return the child view of the parent with a given type.
+
+Now what if a view controller had two child views of the same type, for example two search fields with a `data-control="search-field"`. How would that parent view controller access them using the `this.getView()` method. Let's refactor our view markup from earlier to make this possible.
 
 ```html
 <body>
 	<section data-control="contacts-app" data-name="contacts-app">
 		<div data-control="contacts-search-list" data-name="contacts-search-list">
-			<input data-control="search-field" data-name="contact-keyword" type="search" name="keyword" />
+			<input data-control="search-field" data-name="search-field" type="search" name="keyword" />
 			<ul data-control="contacts-list" data-name="contacts-list">
 				<!-- individual contacts go here -->
 			</ul>
@@ -203,47 +202,64 @@ The goal of OrangeUI is decoupling and reusable components. Up until now our app
 </body>
 ```
 
-The attribute `data-name` is to the instance, what `data-control` was to the class. In other words, `data-name` allows us to uniquely identify views by name, when we use a `data-control` multiple times. In our case these appear to be redundant, can for simplicity, when they are omitted they fall back to the same value as `data-control`. With them omitted, the views become the following:
+We see that we now have added another attribute along with the `data-control` attributes, `data-name`. The attribute `data-name` is to the instance, what `data-control` was to the class. In other words, `data-name` allows us to uniquely identify views by name, when we use a `data-control` multiple times.
+
+In our case these appear to be redundant because we are not using any view multiple times. In the case of two side-by-side lists, however, this would become necessary.
+
+```html
+<div data-control="my-app" data-name="my-app">
+	<ul data-control="list" data-name="left-list"></ul>
+	<ul data-control="list" data-name="right-list"></ul>
+</div>
+```
+You can see we're now using the same `data-control` attribute for both lists, but their `data-name` instance names are different. Now the parent controller *my-app* can access each child view controller with a unique name using `this.getView(name)`. 
+
+Now this makes sense for complex apps where view controllers are used multiple times, but it seems fairly redundant in our case. In our app, we are simply using the same value for the `data-control` and `data-name` value.
+
+To clean up our syntax, OrangeUI will simply use the value of the `data-control` attribute as the `data-name` when `data-name` is omitted. Looking at our prior example where *my-app* is used twice, we now can omit the `data-name` attribute for brevity, and let OrangeUI assume it is the same as the `data-control` attribute.
+
+```html
+<div data-control="my-app">
+	<ul data-control="list" data-name="left-list"></ul>
+	<ul data-control="list" data-name="right-list"></ul>
+</div>
+```
+
+The same goes for our view markup, which now can be written as the following
 
 ```html
 <body>
 	<section data-control="contacts-app">
 		<div data-control="contacts-search-list">
-			<input data-control="search-field" data-name="contact-keyword" type="search" name="keyword" />
-			<ul data-control="contacts-list">
-				<!-- individual contacts go here -->
-			</ul>
+			<input data-control="search-field" type="search" name="keyword" />
+			<ul data-control="contacts-list"></ul>
 		</div>
-		<div data-control="contact-detail">
-			<!-- details go here -->
-		</div>
+		<div data-control="contact-detail"></div>
 	</section>
 </body>
 ```
 
-Getting back to our use of *contact-keyword*, we can now see that the `data-name` attribute on the search field is set to *contact-keyword*, our unique identifier should two search fields be used in the same view. The **ViewController** class gives us a `getView()` method, which returns the child view controller corresponding to the view with a given `data-name` attribute. In our case, calling
+Getting back to our **ContactsSearchListController**, we see that in the `onDidAppear()` method, the view is binding a listener for the *search* event on the *search-field* view controller.
 
 ```js
 this.getView('contact-keyword').on('search', this.onSearch, this);
 ```
 
-in the ContactSearchListController first, gets the child view controller with the name *contact-keyword*, and then proceeds to bind a listener for the custom event 'search'. It passes a custom event handler, the `this.onSearch` method in to handle the event.
+Notice, however, that we have not created a separate `onWillDisappear()` method to unbind that listener, as we've seen should be done in **Rule #5: Manually unbind all manually bound events**. OrangeUI will automatically unbind all the event handlers bound to any child view in the `onWillDisappear()` method. 
 
 Let's take a moment to talk about events. Every view controller gives you the ability to bind, fire, and detach events. Just as you would bind an event to an input field or a button, you can bind custom handlers to events on a view controller. The view controller includes the following methods for event binding:
 
-* on(event, handler, [context])
+* on(event, callback, [context])
 * fire(event, [payload])
-* detach([event], [handler]);
+* detach([event], [callback]);
 
-The `on()` method takes in an optional third parameter to proxy the handler with (similar to jQuery's $.proxy()). The fire method takes in a data payload: an object to be passed to all callbacks bound to that event.
+The `on()` method takes in an optional third parameter to proxy the callback function with (similar to jQuery's $.proxy()). The fire method takes in a data payload: an object to be passed to all callbacks bound to that event.
 
-Any callback bound to an event receives to parameters, `e` the event object, and `data` the payload passed when the event was fired.
+Any callback bound to an event receives two parameters, `e` the event object, and optionally `data`, the payload passed when the event was fired.
 
-In our case, we remember that the **SearchFieldController** fired an event *search* with a payload of the keyword that was in the search field. What we've done is had **ContactsSearchListController** listen for the *search* event to be fired by the SearchFieldController. When that happens, the `onSearch()` event handler is called, and passed the keyword to search on. For the moment we're printing it to the console.
+In our case, we remember that the **SearchFieldController** fired an event *search* with a payload of the keyword that was in the search field. What we've done is had **ContactsSearchListController** listen for the *search* event to be fired by the **SearchFieldController**. When that happens, the `onSearch()` event callback is called and passed the keyword to search on in the `data` parameter. We are fetching the child view controller for the list, and passing that keyword to it via the `filter()` method which we will implement in a moment.
 
-### Step 3: Communicating between views
-
-We've now bound an event to the search field to listen for the press of the enter key, fired a custom event up the parent view controller, and listened for and handled that custom event. For the moment we're simply printing the keyword passed by the event to the console. The final step is to build the list controller and have it filter when that keyword is pressed. We first define our **ContactsListController** with the following.
+We've now bound an event to the *search-field* to listen for the press of the enter key, fired a custom event up to the parent *contacts-search-list* controller, and listened for and handled that custom event, passing the keyword to the list. The next step is to build the list controller and have it search/filter the list when the enter key is pressed and the event fired. We first define our **ContactsListController** and implement a filter method. We'll leave building our list from mock data until later.
 
 ```js
 var ContactsListController = ViewController.extend({
@@ -261,17 +277,9 @@ var ContactsListController = ViewController.extend({
 });
 ```
 
-All we've added to the contacts list controller is a method called `filter()`, which takes in a keyword and attempts to filter out the `<li>` elements whose body text doesn't match that keyword.
+The `filter()` method takes in a keyword and attempts to filter out the `<li>` elements whose body text doesn't match that keyword. We have effectively built three view controllers to manage three views, handled searching, list filtering, and tied the two views together.
 
-We also then modify our original **ContactsSearchListController**, updating the `onSearch()` event handler to use this new method. We replace our console statement with
-
-```js
-	this.getView('contacts-list').filter(data);
-```
-
-which retrieves the **ContactsListController** and calls the new filter method we just created on it, hiding and showing the `<li>` rows appropriately. The keyword is passed to the event handler via the payload, which we set when calling `this.fire('search', keyword)`. We have effectively built three controllers to manage three views, handling searching, list filtering, and tying the two views together.
-
-### Step 4: Abstracting components
+### Step 4: Abstracting Reusable Components
 
 Up until this point, it may seem as if the overhead of extra time and code is not worth the effort of decoupling components. The benefit comes only when we look at more complex applications.
 

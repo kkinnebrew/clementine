@@ -1,8 +1,8 @@
 # Getting Started
 
-## View Controller Architecture
+## Motivation
 
-OrangeUI attempts to emulate the hierarchical structure of the DOM via View Controllers while decoupling code components so they can be reused. It provides custom event bindings to manage communication between view controllers, where individual view controllers in the hierarchy manage only their children.
+OrangeUI is not simply an MVC framework. It was created in an attempt to improve the organization and modularity of front-end code, specifically that for single page web applications. OrangeUI uses view controllers to emulate the hierarchical structure of the DOM while decoupling individual code components so they can be reused. It provides custom Javascript event bindings to manage communication between view controllers, view lifecycle management, all the while decoupling interaction logic, data, structure, and style.
 
 ## Rules
 
@@ -12,7 +12,7 @@ OrangeUI attempts to emulate the hierarchical structure of the DOM via View Cont
 4. Controllers fire events to communicate with their parents
 5. Manually unbind all manually bound events
 
-## Example
+## Tutorial
 
 Suppose we're building a simple address book web application. We want to have a searchable list of contacts on the left, and a detail view displaying the currently selected contact on the right. In the next few minutes, we'll build this app with OrangeUI.
 

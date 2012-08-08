@@ -542,13 +542,17 @@ var ViewController = Class.extend({
 		for (var view in views) {
 			var events = views[view];
 			for (var event in events) {
-				var func = (typeof events[event] === 'function') ? events[event] : null;
-			if (event == 'touchclick') event = Browser.isTouch ? 'touchend' : 'click';
+			  var func = null;
+			  if (typeof events[event] === "function") { func = events[event]; }
+			  else if (this.hasOwnProperty(events[event])) { func = this[events[event]]; }			  
+			  if (event == 'touchclick') event = Browser.isTouch ? 'touchend' : 'click';
 				if (func === null) {
 					var name = event.charAt(0).toUpperCase() + event.slice(1);
 					func = (events[event] === true && typeof this['on' + name] === 'function') ? this['on' + name] : null;
 				}
-				if (func !== null && this.views.hasOwnProperty(view)) {	
+				if (view === '$target') {
+				  this.target.on(event, $.proxy(func, this))
+				} else if (func !== null && this.views.hasOwnProperty(view)) {	
 						this.getView(view).on(event, $.proxy(func,  this));
 				}
 				else if (func !== null && this.elements.hasOwnProperty(view)) {

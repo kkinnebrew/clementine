@@ -9,11 +9,14 @@ The Commons module is a base set of tools to help improve the structure of your 
 
 ## Documentation
 
+### Functions
+
+* [proxy()](#function-proxy)
+
 ### Class
 
 * [extend()](#class-extend)
 * [include()](#class-include)
-* [proxy()](#class-proxy)
 
 ### Events
 
@@ -44,6 +47,7 @@ The Commons module is a base set of tools to help improve the structure of your 
 * [init()](#cache-init)
 * [updateNetworkStatus()](#cache-update-network-status)
 * [isActive()](#cache-is-active)
+* [isOnline()](#cache-is-online)
 
 **includes the Events mixin*
 
@@ -58,7 +62,28 @@ The Commons module is a base set of tools to help improve the structure of your 
 
 ### Location
 
-* [getLocation()](#location-get-location)
+* [get()](#location-get)
+
+## Functions
+
+<a name="function-proxy" />
+### proxy(function, context)
+
+Returns a function bound to a given context object for execution at a later time. This provides the same functionality as jQuery's `$.proxy()` function.
+
+**Arguments**
+
+* function - the function to bind the context to
+* context - the object to use as the context
+
+**Example**
+
+```js
+// proxies a function with a context object
+Class.proxy(function() {
+	console.log(this.name); // prints 'my-context'
+}, { name: 'my-context' });
+```
 
 ## Class
 
@@ -145,27 +170,6 @@ MyClass.include(MyMixin);
 
 var instance = new MyClass();
 instance.myMethodTwo(); // will return 'two'
-```
-
----------------------------------------
-
-<a name="class-proxy" />
-### proxy(function, context)
-
-Returns a function bound to a given context object for execution at a later time. This provides the same functionality as jQuery's `$.proxy()` function.
-
-**Arguments**
-
-* function - the function to bind the context to
-* context - the object to use as the context
-
-**Example**
-
-```js
-// proxies a function with a context object
-Class.proxy(function() {
-	console.log(this.name); // prints 'my-context'
-}, { name: 'my-context' });
 ```
 
 
@@ -500,6 +504,16 @@ var active = Cache.isActive();
 console.log(active); // prints true or false
 ```
 
+<a name="cache-is-online" />
+### isOnline()
+
+Returns a boolean value stating whether the Cache is currently online.
+
+```js
+var online = Cache.isOnline();
+console.log(online); // prints true or false
+```
+
 ## Storage - HTML5 Local Storage
 
 The **Commons** module provides a wrapper for the HTML5 localStorage feature, adding support for the serializing of Javascript objects and setting autoexpirable keys. The **Storage** object supports `get()`, `set()`, `remove()`, `flush()`, and `flushExpired()`.
@@ -610,8 +624,8 @@ console.log(support); // prints true or false
 
 Commons provides a wrapper for **HTML5 Geolocation** fetching of the current location from the user's browser. The **Location** object supports the `getLocation()` method, which accepts a success and failure callback. The location is fetched asynchronously.
 
-<a name="location-get-location" />
-### getLocation(success, failure)
+<a name="location-get" />
+### get(success, failure)
 
 Submits an asynchronous request for the location of the user's browser. The success callback will receive the coordinates object returned as its argument.
 

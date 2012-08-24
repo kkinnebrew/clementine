@@ -1,0 +1,19 @@
+{
+    "name": "ClementineJS",
+    "description": "A lightweight companion to OrangeUI, a rapid development javascript framework for soundly built web applications",
+    "version": "0.4",
+    "author": "Kevin Kinnebrew",
+    "homepage": "https://github.com/brew20k/clementine",
+    "license": {
+      "type": "MIT",
+      "url": "https://github.com/brew20k/clementine/blob/master/LICENSE"
+    },
+    "repository": {
+      "type" : "git",
+      "url": "https://github.com/brew20k/clementine.git"
+    },
+    "dependencies": {
+        "jquery": "1.7.x"
+    },
+    "devDependencies": {}
+}

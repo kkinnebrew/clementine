@@ -21,8 +21,5 @@
       "expect.js": "*",
       "grunt-mocha": "*",
       "grunt": "*"
-    },
-    "scripts": {
-      "test": "grunt mocha"
-    },
+    }
 }

@@ -1,0 +1,25 @@
+{
+    "name": "OrangeUI",
+    "description": "A rapid development javascript framework for soundly built web applications",
+    "version": "0.5.0",
+    "author": "Kevin Kinnebrew",
+    "homepage": "https://github.com/brew20k/orangeui",
+    "license": {
+      "type": "MIT",
+      "url": "https://github.com/brew20k/orangeui/blob/master/LICENSE"
+    },
+    "repository": {
+      "type" : "git",
+      "url": "https://github.com/brew20k/orangeui.git"
+    },
+    "dependencies": {
+      "jquery": "1.7.x"
+    },
+    "devDependencies": {
+      "assert": "*",
+      "grunt-css": "*",
+      "mocha": "*",
+      "expect.js": "*",
+      "grunt-mocha": "*"
+    }
+}

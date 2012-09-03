@@ -41,6 +41,7 @@ Depending on the features you choose to use, OrangeUI is dependent on the follow
 
 * [Commons]
 * [MVC]
+* [UI]
 
 ## Release History
 

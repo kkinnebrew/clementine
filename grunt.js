@@ -109,6 +109,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha');
     
   // Default task.
-  grunt.registerTask('default', 'lint concat min');
+  grunt.registerTask('default', 'lint mocha concat min');
 
 };

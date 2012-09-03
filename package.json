@@ -16,7 +16,6 @@
       "jquery": "1.7.x"
     },
     "devDependencies": {
-      "assert": "*",
       "grunt-css": "*",
       "mocha": "*",
       "expect.js": "*",

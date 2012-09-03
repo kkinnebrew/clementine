@@ -33,19 +33,19 @@ module.exports = function(grunt) {
       dist: {
         src: [
           '<banner:meta.banner>',
-          'src/orange.js',
-          'src/cache.js',
-          'src/collection.js',
-          'src/form.js',
-          'src/location.js',
-          'src/model.js',
-          'src/service.js',
-          'src/storage.js',
-          'src/view.js',
-          'src/auth.js',
-          'src/binding.js',
-          'src/controller.js',
-          'src/app.js'
+          'lib/orange.js',
+          'lib/cache.js',
+          'lib/collection.js',
+          'lib/form.js',
+          'lib/location.js',
+          'lib/model.js',
+          'lib/service.js',
+          'lib/storage.js',
+          'lib/view.js',
+          'lib/auth.js',
+          'lib/binding.js',
+          'lib/controller.js',
+          'lib/app.js'
         ],
         dest: 'build/<%= pkg.version %>/orange-<%= pkg.version %>.js'
       }

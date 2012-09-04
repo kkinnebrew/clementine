@@ -284,37 +284,58 @@ function proxy(fn, context) {
     return {
     
       addModule: function(name, fn, req) {
-      
-        if (!name.match(/[\^\-A-Za-z_]/g)) { throw 'Invalid module name'; }
-        
+              
         var mod = {
           name: name,
           fn: fn,
           req: (req !== undefined) ? req : []
         };
         
-        modules[name] = mod;
+        modules[name] = [mod];
+        
+      },
+      
+      appendModule: function(name, fn, req) {
+              
+        var mod = {
+          name: name,
+          fn: fn,
+          req: (req !== undefined) ? req : []
+        };
+        
+        if (typeof modules[name] === 'undefined') {
+          modules[name] = [mod];
+        } else {
+          modules[name].push(mod);
+        }
         
       },
       
       loadModule: function(name) {
-                
+          
+        var exports = {};
+              
         if (active.hasOwnProperty(name)) {
-          return;
+          return Orange.modules[name];
         }
         
         if (modules[name] !== undefined) {
         
           active[name] = true;
           
-          for (var i = 0, len = modules[name].req.length; i < len; i++) {
-            if (modules[name].req[i] === name) { continue; }
-            this.loadModule(modules[name].req[i]);
+          for (var i = 0; i < modules[name].length; i++) {
+            modules[name][i].fn.call(window, exports);
           }
-          
-          modules[name].fn.call(window, exports);
+
           Orange.modules[name] = exports;
+          
+          Orange.Log.info('Loaded module ' + name);
+          
+          return Orange.modules[name];
+          
         }
+        
+        throw 'Could not require module';
         
       }
       
@@ -334,7 +355,6 @@ function proxy(fn, context) {
     function logMessage(type, msg, ex) {
     
       if (this.level > type) {
-        this.fire('msg', { message: msg, ex: ex });
         if (ex) {
           console.log('[' + levels[type] + ']', msg, ex); }
         else {
@@ -353,6 +373,8 @@ function proxy(fn, context) {
     }
     
     Log.prototype.setLevel = function(level) {
+      
+      level = level.toUpperCase();
       
       if (level in levels) {
         switch (level) {
@@ -420,18 +442,22 @@ function proxy(fn, context) {
       req = clone(args).splice(0, args.length-1);
     if (typeof req[0] !== 'function') {
       for (var i = 0, len = req.length; i < len; i++) {
-        Orange.Loader.loadModule(req[i]);
+        Loader.loadModule(req[i]);
       }
     }
     fn.call(window, Orange);
   }
   
+  function append() {
+    var args = arguments,
+      name = args[0],
+      fn = ( typeof args[1] === 'function' ) ? args[1] : null,
+      req = args[2];
+    Loader.appendModule(name, fn, req);
+  }
+  
   function include(name) {
-    if (typeof Orange.modules[name] !== undefined) {
-      return Orange.modules[name];
-    } else {
-      throw 'Could not require module';
-    }
+    return Loader.loadModule(name);
   }
   
   
@@ -444,6 +470,7 @@ function proxy(fn, context) {
   
   Orange.add          = add;
   Orange.use          = use;
+  Orange.append       = append;
   Orange.include      = this.include = include;
   
   Orange.Browser      = Browser = Browser;
@@ -452,7 +479,6 @@ function proxy(fn, context) {
   Orange.EventHandle  = EventHandle;
   Orange.Loader       = Loader;
   Orange.Log          = this.Log = new Log();
-    
   
 }.call(this));
 
@@ -1004,7 +1030,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       
     },
     
-    getName: function() {
+    getType: function() {
       throw 'Cannot instantiate model';
     },
     
@@ -1079,7 +1105,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     
     var m = Class.extend.call(this, def);
     
-    var required = ['getName', 'getFields'];
+    var required = ['getType', 'getFields'];
     for (var i = 0; i < required.length; i++) {
       if (!def.hasOwnProperty(required[i])) {
         throw "Class missing '" + required[i] + "()' implementation";
@@ -1087,7 +1113,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       m[required[i]] = def[required[i]];
     }
     
-    Model.models[m.getName()] = m;
+    if (!Model.hasOwnProperty('models')) { Model.models = {}; }
+    
+    Model.models[m.getType()] = m;
     
   };
   
@@ -1443,7 +1471,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     
     var s = Class.extend.call(this, def);
     
-    var required = ['getName', 'getPath', 'getAuth'];
+    var required = ['getType'];
     for (var i = 0; i < required.length; i++) {
       if (!def.hasOwnProperty(required[i])) {
         throw "Class missing '" + required[i] + "()' implementation";
@@ -1451,7 +1479,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       s[required[i]] = def[required[i]];
     }
     
-    Service.services[s.getName()] = s;
+    if (!Service.hasOwnProperty('services')) { Service.services = {}; }
+    
+    Service.services[s.getType()] = s;
     
   };
   
@@ -1950,6 +1980,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         }
       }
       
+      // copy name
+      if (!this.data.hasOwnProperty('name')) { this.data.name = this.data.control; }
+      
       // finds immediate descendant children
       var childFunc = function(selector) {
         var childList = [];
@@ -2132,6 +2165,11 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       return this;
     },
     
+    remove: function() {
+      this.add(this._remove);
+      return this;
+    },
+    
     _load: function() {
       
       // return if already loading
@@ -2220,6 +2258,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       
     },
     
+    _remove: function() {
+    
+    },
     
     // state transitions
     
@@ -2861,18 +2902,18 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         
         // set connection
         if (online) {
-          this.goOnline();
+          this.onOnline();
         } else {
-          this.goOffline();
+          this.onOffline();
         }
         
         // bind cache event
         Cache.on('online', function(e) {
           
           if (e.data) {
-            this.goOnline();
+            this.onOnline();
           } else {
-            this.goOffline();
+            this.onOffline();
           }
           
         }, this);

@@ -113,9 +113,11 @@ var SearchFieldController = ViewController.extend({
 	}
 	onDidAppear: function(e) {
 		this.target.on('keypress', this.onKeyPress, this);
+		this._super();
 	},
 	onWillDisappear: function(e) {
 		this.target.off();
+		this._super();
 	},
 	onKeyPress: function(e) {
 		var code = (e.keyCode ? e.keyCode : e.which);
@@ -166,6 +168,7 @@ var ContactsSearchListController = ViewController.extend({
 	}
 	onDidAppear: function(e) {
 		this.getView('search-field').on('search', this.onSearch, this);
+		this._super();
 	},
 	onSearch: function(e, data) {
 		this.getView('contact-list').filter(data);
@@ -476,6 +479,8 @@ var ContactsAppController = ViewController.extend({
 
 		// pass to the list
 		this.getView('searchable-list').setData(contacts);
+		
+		this._super();
 
 	},
 	onSelect: function(e, data) {

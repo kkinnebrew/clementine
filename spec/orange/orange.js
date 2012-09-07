@@ -337,7 +337,7 @@ describe('Events', function() {
       SubClass.include(Events);
       subClassInstance = new SubClass();
       subSubClassInstance = new SubClass();
-      subSubClassInstance._parent = subClassInstance;
+      subSubClassInstance.parent = subClassInstance;
       
     });
     
@@ -411,7 +411,7 @@ describe('Events', function() {
       SubClass.include(Events);
       subClassInstance = new SubClass();
       subSubClassInstance = new SubClass();
-      subSubClassInstance._parent = subClassInstance;
+      subSubClassInstance.parent = subClassInstance;
       
     });
     

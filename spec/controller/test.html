@@ -1,0 +1,282 @@
+<script src="http://code.jquery.com/jquery-1.8.1.min.js" type="text/javascript"></script>
+<script src="../../lib/orange.js" type="text/javascript" charset="utf-8"></script>
+<script src="../../lib/model.js" type="text/javascript" charset="utf-8"></script>
+<script src="../../lib/collection.js" type="text/javascript" charset="utf-8"></script>
+<script src="../../lib/binding.js" type="text/javascript" charset="utf-8"></script>
+<script src="../../lib/form.js" type="text/javascript" charset="utf-8"></script>
+<script src="../../lib/view.js" type="text/javascript" charset="utf-8"></script>
+<script src="../../lib/controller.js" type="text/javascript" charset="utf-8"></script>
+
+<script type="text/javascript">
+
+Orange.use(function() {
+  
+  var ViewController = Orange.ViewController;
+  
+  var ContactsAppController = ViewController.extend({
+  
+    getType: function() {
+      return 'contacts-app';
+    },
+    
+    getBindings: function() {
+      return {
+        'add-btn': { 'touchclick': this.$onAdd }
+      };
+    },
+    
+    getOutlets: function() {
+      return {
+        'add-btn': 'element',
+        'id': 'element',
+        'between': 'view',
+      };
+    },
+    
+    getRoutes: function() {
+      
+      function onFirst(current, params) {
+        if (!current || current === 'second') {
+          this.getElement('first').removeClass('hidden');
+          this.getElement('second').addClass('hidden');
+        }
+        this.getElement('id').text(params.id);
+      }
+      
+      function onSecond(current, params) {
+        if (!current || current === 'first') {
+          this.getElement('first').addClass('hidden');
+          this.getElement('second').removeClass('hidden');
+        }
+      }
+    
+      return {
+        'first/:id': onFirst,
+        'second': onSecond
+      };
+    },
+    
+    $onAdd: function() {
+      if (this.getRoute() === 'second') {
+        this.setRoute('first');
+      } else {
+        this.setRoute('second');
+      }
+    }
+  
+  });
+  
+  var BetweenController = ViewController.extend({
+  
+    getType: function() {
+      return 'between';
+    },
+    
+    getOutlets: function() {
+      return {
+        'contacts-list': 'view'
+      }
+    }
+  
+  });
+  
+  var ContactsListController = ViewController.extend({
+  
+    getType: function() {
+      return 'contacts-list';
+    },
+    
+    getBindings: function() {
+      return {
+        'plus-btn': { 'touchclick': this.$onPlus },
+        'minus-btn': { 'touchclick': this.$onMinus }
+      }
+    },
+    
+    getOutlets: function() {
+      return {
+        'one': 'element',
+        'two': 'element',
+        'plus-btn': 'element',
+        'minus-btn': 'element'
+      }
+    },
+    
+    getRoutes: function() {
+            
+      function onOne(current, params) {
+        if (!current || current === 'two') {
+          this.getElement('one').removeClass('hidden');
+          this.getElement('two').addClass('hidden');
+        }
+      }
+      
+      function onTwo(current, params) {
+        if (!current || current === 'one') {
+          this.getElement('one').addClass('hidden');
+          this.getElement('two').removeClass('hidden');
+        }
+      }
+    
+      return {
+        'one': onOne,
+        'two': onTwo
+      };
+    
+    },
+    
+    $onPlus: function(e) {
+      this.clearState().setRoute('one');
+      this.fire('test', 'kevin');
+    },
+    
+    $onMinus: function(e) {
+      this.setState('state-one', 500).setRoute('two').setState('state-two', 500);//.setState('state-three', 500);
+    }
+  
+  });
+  
+  $(document).ready(function() {
+    $("body").removeClass("preload");
+    var root = new ContactsAppController(null, $('[data-root]'));
+    root.load().show();
+    $(window).on('hashchange', function() {
+      var hash = location.hash.replace('#', '');
+      var route = [];
+      if (hash.match('/')) {
+        route = hash.split('/');
+      } else if (hash) {
+        route = [hash];
+      }
+      root.setHashRoute(route.slice(0));
+    });
+    $(window).trigger('hashchange');
+  });
+
+});
+
+</script>
+
+<style type="text/css">
+
+html, body {
+  font-family: "Helvetica Neue";
+}
+
+.preload * {
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -ms-transition: none !important;
+  -o-transition: none !important;
+}
+
+header {
+  background: #EEE;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 20px;
+}
+
+h1 {
+  float: left;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+}
+
+.add-btn, .plus-btn, .minus-btn {
+  background: #333;
+  color: #FFF;
+  cursor: pointer;
+  display: inline-block;
+  float: right;
+  height: 40px;
+  width: 40px;
+  -webkit-transition: background 200ms ease-in-out 0s;
+}
+
+.add-btn:hover {
+  background: #666;
+  -webkit-transition: background 200ms ease-in-out 0s;
+}
+
+div.hidden {
+  display: none;
+}
+
+.first, .second, .one, .two {
+  display: inline-block;
+}
+
+.first, .one {
+  background: #F00;
+  height: 40px;
+  width: 100px;
+}
+
+.second, .two {
+  background: #0F0;
+  height: 40px;
+  width: 100px;
+}
+
+.first.hidden, .one.hidden {
+  opacity: .3;
+  display: inline-block;
+}
+
+.second.hidden, .two.hidden {
+  opacity: .3;
+  display: inline-block;
+}
+
+.contacts-list.state-one {
+   background: #F00; 
+}
+
+.contacts-list.state-two {
+  background: #F0F;
+}
+
+.contacts-list.state-three {
+  background: #00F;
+}
+
+</style>
+
+<body class="preload">
+
+<div data-control="contacts-app" data-default="first" data-root>
+
+  <header>
+    <h1>Contacts App</h1>
+    <div data-name="add-btn"></div>
+  </header>
+  
+  <div data-name="first" class="hidden">First <span data-name="id">0</span></div>
+  <div data-name="second" class="hidden">Second</div>
+  
+  <div data-control="between">
+  
+    <div data-control="contacts-list" data-default="one">
+      
+      <div data-name="plus-btn"></div>
+      <div data-name="minus-btn" style="background: #F00;">-</div>
+      
+      <ul>
+        <li><a href="#first/5">Contact One</a></li>
+        <li><a href="#second">Contact Two</a></li>
+        <li><a href="#second/two">Contact Three</a></li>
+        <li><a href="#first/3/two">Contact Four</a></li>
+      </ul>
+      
+      <div data-name="one" class="hidden">One</div>
+      <div data-name="two" class="hidden">Two</div>
+      
+    </div>
+  
+  </div>
+  
+</div>
+
+</body>

@@ -2349,8 +2349,8 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     
     },
     
-    setHashRoute: function(routes) {
-      this.add(this._setHashRoute, [routes], 0);
+    setHashRoute: function(routes, subhash) {
+      this.add(this._setHashRoute, [routes, subhash], 0);
       return this;
     },
   
@@ -2358,29 +2358,23 @@ Array.prototype.indexOf = [].indexOf || function(item) {
      * handles history management of views
      * @param routes  an array of states
      */
-    _setHashRoute: function(routes) {
+    _setHashRoute: function(routes, subhash) {
     
       // store route history
       var i = 0;
       var view;
-      var hashString = location.hash.replace('#', '');
-      if (hashString) {
-        var hash = hashString.match('/') ? hashString.split('/') : [hashString];
-        for (i=0; i<routes.length; i++) {
-          hash.pop();
-        }
-        this._routes = hash.join('/');
-      } else {
-        this._routes = '';
-      }
+      var def = false;
+      
+      subhash = subhash ? subhash : '';
     
       if (this.getParam('default')) {
         if (!routes || routes.length === 0) {
           routes = [this.getParam('default')];
+          def = true;
         }
       } else {
         for (view in this._views) {
-          this.getView(view).setHashRoute(routes.slice(0));
+          this.getView(view).setHashRoute(routes.slice(0), subhash);
         }
         this.next();
         return;
@@ -2391,22 +2385,34 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       var key = getRouteForKey.call(this, route);
       var callbacks = this.getRoutes();
       var params = {};
+      var param;
+      var empty = 0;
       
       // get route params
       if (key.match('/')) {
         var parts = key.split('/');
         for (i=1; i<parts.length; i++) {
-          params[parts[i].replace(':', '')] = routes.shift();
-          this.setParam(parts[i].replace(':', ''), params[parts[i].replace(':', '')] || null);
+          param = routes.shift();
+          params[parts[i].replace(':', '')] = param || 'empty';
+          this.setParam(parts[i].replace(':', ''), param || null);
+          if (!param) { empty++; }
         }
       }
+
+      this._routes = subhash || '';
       
+      subhash += (subhash.length > 0) ? ('/' + route) : route;
+
+      for (var p in params) {
+        subhash += '/' + params[p];
+      }
+            
       if (callbacks.hasOwnProperty(key)) {
         callbacks[key].call(this, this.route, params);
       }
-      
+
       for (view in this._views) {
-        this.getView(view).setHashRoute(routes.slice(0));
+        this.getView(view).setHashRoute(routes.slice(0), subhash);
       }
       
       this.route = route;

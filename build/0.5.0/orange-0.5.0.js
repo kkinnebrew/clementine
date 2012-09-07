@@ -2315,7 +2315,6 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     },
     
     getRoute: function() {
-      console.log(this);
       return this.route;
     },
   
@@ -2363,14 +2362,12 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       // store route history
       var i = 0;
       var view;
-      var def = false;
       
       subhash = subhash ? subhash : '';
     
       if (this.getParam('default')) {
         if (!routes || routes.length === 0) {
           routes = [this.getParam('default')];
-          def = true;
         }
       } else {
         for (view in this._views) {
@@ -2393,7 +2390,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         var parts = key.split('/');
         for (i=1; i<parts.length; i++) {
           param = routes.shift();
-          params[parts[i].replace(':', '')] = param || 'empty';
+          params[parts[i].replace(':', '')] = param || 'null';
           this.setParam(parts[i].replace(':', ''), param || null);
           if (!param) { empty++; }
         }

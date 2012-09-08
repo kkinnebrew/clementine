@@ -131,7 +131,11 @@ Orange.use(function() {
     },
     
     $onMinus: function(e) {
-      this.setState('state-one', 500).setRoute('two').setState('state-two', 500);//.setState('state-three', 500);
+      this.setRoute('two').setState('state-one', 1000).setState('state-two', 1000);//.setState('state-three', 500);
+      var that = this;
+      setTimeout(function() {
+        that.stop();
+      }, 900);
     }
   
   });

@@ -98,7 +98,8 @@ Orange.use(function() {
         'one': 'element',
         'two': 'element',
         'plus-btn': 'element',
-        'minus-btn': 'element'
+        'minus-btn': 'element',
+        'bind-spot': 'element'
       }
     },
     
@@ -123,6 +124,33 @@ Orange.use(function() {
         '/two': onTwo
       };
     
+    },
+    
+    onDidAppear: function(e) {
+    
+      this.bind('bind-spot', {
+        one: 'This is One',
+        two: 'This is Two',
+        list: [
+          {
+            'first': 'THis is the first first',
+            'second': 'This is the first second'
+          },
+          {
+            'hello': 'two',
+            'first': 'THis is the second first',
+            'second': 'This is the second second'
+          },
+          {
+            'hello': 'one',
+            'first': 'THis is the third first',
+            'second': 'This is the third second'
+          }
+        ]
+      });
+      
+      this._super();
+      
     },
     
     $onPlus: function(e) {
@@ -248,16 +276,9 @@ div.hidden {
   background: #00F;
 }
 
-.error {
-  height: 40px;
-  width: 100%;
-}
-
 </style>
 
 <body class="preload">
-
-<div class="error"></div>
 
 <div data-control="contacts-app" data-root>
 
@@ -285,6 +306,20 @@ div.hidden {
       
       <div data-name="one" class="hidden">One</div>
       <div data-name="two" class="hidden">Two</div>
+      
+      <section data-name="bind-spot">
+        <h3>Title</h3>
+        <div itemprop="one"></div>
+        <div itemprop="two"></div>
+        
+        <ul itemprop="list">
+          <li itemscope>
+            <div itemprop="first"></div>
+            <div itemprop="second"></div>
+          </li>
+        </ul>
+        
+      </section>
       
     </div>
   

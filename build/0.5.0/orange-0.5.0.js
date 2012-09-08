@@ -1834,6 +1834,8 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         }
       }
       
+      
+      
     },
     
     unbind: function() {
@@ -2003,6 +2005,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       
       // setup queue
       this._queue = [];
+      
+      // setup bindings
+      this._bindings = {};
       
       // store states
       this._loaded = false;
@@ -2916,13 +2921,12 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         throw ('Invalid Resource: Element "' + element + '" is not defined');
       }
       
-      if (this.bindings.hasOwnProperty(element)) {
-       this.bindings[element].unbind();
-       delete this.bindings[element];
+      if (this._bindings.hasOwnProperty(element)) {
+        this.unbind(element);
       }
       
-      this.bindings[element] = new Binding(this.getElement(element));
-      this.bindings[element].bind(data);
+      this._bindings[element] = new Binding(this.getElement(element));
+      this._bindings[element].bind(data);
       
     },
   
@@ -2932,9 +2936,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         throw ('Invalid Resource: Element "' + element + '" is not defined');
       }
       
-      if (this.bindings.hasOwnProperty(element)) {
-       this.bindings[element].unbind();
-       delete this.bindings[element];
+      if (this._bindings.hasOwnProperty(element)) {
+       this._bindings[element].unbind();
+       delete this._bindings[element];
       }
       
     },

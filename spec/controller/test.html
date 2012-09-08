@@ -119,7 +119,7 @@ Orange.use(function() {
       }
     
       return {
-        '/': onOne,
+        '/one': onOne,
         '/two': onTwo
       };
     
@@ -137,6 +137,7 @@ Orange.use(function() {
   });
   
   $(document).ready(function() {
+      
     $("body").removeClass("preload");
     var root = new ContactsAppController(null, $('[data-root]'));
     root.load().show();
@@ -155,6 +156,7 @@ Orange.use(function() {
       root.setHashRoute(route.slice(0));
     });
     $(window).trigger('hashchange');
+    
   });
 
 });
@@ -246,11 +248,18 @@ div.hidden {
   background: #00F;
 }
 
+.error {
+  height: 40px;
+  width: 100%;
+}
+
 </style>
 
 <body class="preload">
 
-<div data-control="contacts-app" data-default="first" data-root>
+<div class="error"></div>
+
+<div data-control="contacts-app" data-root>
 
   <header>
     <h1>Contacts App</h1>
@@ -262,7 +271,7 @@ div.hidden {
   
   <div data-control="between">
   
-    <div data-control="contacts-list" data-default="one">
+    <div data-control="contacts-list">
       
       <div data-name="plus-btn"></div>
       <div data-name="minus-btn" style="background: #F00;">-</div>

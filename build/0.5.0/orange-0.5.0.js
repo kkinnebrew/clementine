@@ -2404,6 +2404,11 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         route = '';
       }
       
+      if (!key) {
+        Log.error('Not Found: Address "' + location.hash.replace('#!', '') + '" does not resolve to resource');
+        return;
+      }
+      
       var parts = key.substr(1).split('/');
       var params = {};
       var param;

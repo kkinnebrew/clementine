@@ -126,16 +126,12 @@ Orange.use(function() {
     },
     
     $onPlus: function(e) {
-      this.clearState().setRoute('one');
+      this.stop().clearState().setRoute('one');
       this.fire('test', 'kevin');
     },
     
     $onMinus: function(e) {
-      this.setRoute('two').setState('state-one', 1000).setState('state-two', 1000);//.setState('state-three', 500);
-      var that = this;
-      setTimeout(function() {
-        that.stop();
-      }, 900);
+      this.setRoute('two').setState('state-one', 500).setState('state-two', 500).setState('state-three', 500);
     }
   
   });

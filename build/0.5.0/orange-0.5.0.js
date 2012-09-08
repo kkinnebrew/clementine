@@ -2005,6 +2005,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       // store states
       this._loaded = false;
       this._visible = false;
+      this._stopping = false;
       
       // setup events
       this.setupTransitions();
@@ -2295,13 +2296,22 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       if (next) {
         next.fn.apply(this, next.args);
         if (next.fn === this._setState || next.fn === this._clearState) {
-          setTimeout(proxy(function() {
+          this._process = setTimeout(proxy(function() {
             this.next();
           }, this), next.wait);
         }
       } else {
         this._running = false;
       }
+    },
+    
+    stop: function() {
+      this._queue = [];
+      if (this._process) {
+        clearTimeout(this._process);
+        this.next();
+      }
+      return this;
     },
     
     
@@ -2799,7 +2809,6 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     // ------------------------------------------------------------------------------------------------
     
     setParam: function(name, value) {
-      console.log(this.getParam('name') + ': ' + name + ' = "' + value + '"');
       this._attrs[name] = value;
     },
     

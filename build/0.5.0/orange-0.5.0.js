@@ -2181,6 +2181,12 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       // get routes
       var routes = this.getRoutes();
       
+      var def = getRouteForKey.call(this, '');
+            
+      if (!def && !this.getParam('default') && Object.keys(routes).length > 0) {
+        throw ('Invalid Syntax: View Controller "' + this.getParam('name') + '" must define either a [data-default] or generic / route');
+      }
+      
       for (var route in routes) {
         if (route.charAt(0) !== '/') {
           throw ('Invalid Syntax: Route "' + route + '" in ' + this.getParam('name') + ' must begin with forward slash');
@@ -2342,16 +2348,14 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       }
       
       var key = getRouteForKey.call(this, route);
-      
+            
       if (this.route === route) {
         this.next();
         return;
       }
-      
-      console.log(key);
-      
+            
       var base = key.match(/[^:]*/).pop();
-      
+
       if (base.charAt(base.length-1) === '/') {
           base = base.slice(0, -1);
       }
@@ -2405,8 +2409,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       }
       
       if (!key) {
-        Log.error('Not Found: Address "' + location.hash.replace('#!', '') + '" does not resolve to resource');
-        return;
+        key = getRouteForKey.call(this, this.getParam('default'));
       }
       
       var parts = key.substr(1).split('/');

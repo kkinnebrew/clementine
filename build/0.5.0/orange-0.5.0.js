@@ -1949,12 +1949,12 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     }
     
     for (var route in routes) {
-      base = route.substr(route.indexOf('/') === 0 ? 1 : 0).split('/').shift();
+      base = route.substr(1).split('/').shift();
       if (base.indexOf(':') !== -1 || !base) {
         def = '/' + base;
       }
       if (base === key) {
-        return route.charAt(0) === '/' ? route : ('/' + route);
+        return route;
       }
     }
     
@@ -2181,8 +2181,10 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       // get routes
       var routes = this.getRoutes();
       
-      if (!this.getParam('default') && Object.keys(routes).length > 0) {
-        throw ('Invalid Markup: ViewController "' + this.getParam('name') + '" implements routes but is missing [data-default]');
+      for (var route in routes) {
+        if (route.charAt(0) !== '/') {
+          throw ('Invalid Syntax: Route "' + route + '" in ' + this.getParam('name') + ' must begin with forward slash');
+        }
       }
       
     },
@@ -2345,6 +2347,8 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         this.next();
         return;
       }
+      
+      console.log(key);
       
       var base = key.match(/[^:]*/).pop();
       

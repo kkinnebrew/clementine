@@ -51,7 +51,7 @@ Orange.use(function() {
       }
     
       return {
-        'first/:id': onFirst,
+        '/:id': onFirst,
         'second': onSecond
       };
     },
@@ -119,8 +119,8 @@ Orange.use(function() {
       }
     
       return {
-        'one': onOne,
-        'two': onTwo
+        '/': onOne,
+        '/two': onTwo
       };
     
     },
@@ -141,13 +141,17 @@ Orange.use(function() {
     var root = new ContactsAppController(null, $('[data-root]'));
     root.load().show();
     $(window).on('hashchange', function() {
-      var hash = location.hash.replace('#', '');
-      var route = [];
-      if (hash.match('/')) {
-        route = hash.split('/');
-      } else if (hash) {
-        route = [hash];
+      var hash = location.hash;
+      if (hash.substr(0,2) === '#!') {
+        hash = hash.replace('#!', '');
+      } else {
+        hash = hash.replace('#', '');
       }
+      var route = [];
+      if (hash.charAt(0) === '/') {
+        hash = hash.substr(1);
+      }
+      route = hash.split('/');
       root.setHashRoute(route.slice(0));
     });
     $(window).trigger('hashchange');
@@ -264,10 +268,10 @@ div.hidden {
       <div data-name="minus-btn" style="background: #F00;">-</div>
       
       <ul>
-        <li><a href="#first/5">Contact One</a></li>
-        <li><a href="#second">Contact Two</a></li>
-        <li><a href="#second/two">Contact Three</a></li>
-        <li><a href="#first/3/two">Contact Four</a></li>
+        <li><a href="#/5">Contact One</a></li>
+        <li><a href="#/second">Contact Two</a></li>
+        <li><a href="#/second/two">Contact Three</a></li>
+        <li><a href="#/3/two">Contact Four</a></li>
       </ul>
       
       <div data-name="one" class="hidden">One</div>

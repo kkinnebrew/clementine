@@ -1,5 +1,5 @@
 /**
- * OrangeUI | 0.5.0 | 09.07.2012
+ * OrangeUI | 0.5.0 | 09.08.2012
  * https://github.com/brew20k/orangeui
  * Copyright (c) 2012 Kevin Kinnebrew
  */
@@ -1938,25 +1938,27 @@ Array.prototype.indexOf = [].indexOf || function(item) {
    * @param key  the key to lookup
    * @return string
    */
-  function getRouteForKey(key) {
+  function getRouteForKey(key, skip) {
   
-    var callbacks = this.getRoutes();
-    var alt;
+    var routes = this.getRoutes();
+    var def;
+    var base;
     
-    for (var route in callbacks) {
-      if (route.match('/')) {
-        if (route.split('/').shift() === key) {
-          return route;
-        } else if (route.split('/').shift() === this.getParam('default')) {
-          alt = route;
-        }
-      } else if (route === key) {
-        return route;
-      } else if (route === this.getParam('default')) {
-        alt = route;
+    if (key && key.charAt(0) === '/') {
+      key = key.substr(1);
+    }
+    
+    for (var route in routes) {
+      base = route.substr(route.indexOf('/') === 0 ? 1 : 0).split('/').shift();
+      if (base.indexOf(':') !== -1 || !base) {
+        def = '/' + base;
+      }
+      if (base === key) {
+        return route.charAt(0) === '/' ? route : ('/' + route);
       }
     }
-    return route;
+    
+    return skip ? null : def;
   }
   
   // ------------------------------------------------------------------------------------------------
@@ -2332,7 +2334,11 @@ Array.prototype.indexOf = [].indexOf || function(item) {
      * handles internal state management of views
      */
     _setRoute: function(route) {
-            
+      
+      if (route.substr(0, 1) !== '/') {
+        route = '/' + route;
+      }
+      
       var key = getRouteForKey.call(this, route);
       
       if (this.route === route) {
@@ -2340,18 +2346,13 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         return;
       }
       
-      var callbacks = this.getRoutes();
-      var params = {};
+      var base = key.match(/[^:]*/).pop();
       
-      // get route params
-      if (key.match('/')) {
-        var parts = key.split('/');
-        for (var i=1; i<parts.length; i++) {
-          params[parts[i].replace(':', '')] = this.getParam(parts[i].replace(':', '')) || null;
-        }
+      if (base.charAt(base.length-1) === '/') {
+          base = base.slice(0, -1);
       }
       
-      var hash = '#' + this._routes + (this._routes ? '/' : '') + route;
+      var hash = '#!' + this._routes + base;
       location.hash = hash;
       
       this.next();
@@ -2368,63 +2369,73 @@ Array.prototype.indexOf = [].indexOf || function(item) {
      * @param routes  an array of states
      */
     _setHashRoute: function(routes, subhash) {
-    
-      // store route history
-      var i = 0;
-      var view;
       
-      subhash = subhash ? subhash : '';
-    
-      if (this.getParam('default')) {
-        if (!routes || routes.length === 0) {
-          routes = [this.getParam('default')];
-        }
-      } else {
-        for (view in this._views) {
+      function updateChildren(routes, subhash) {
+        for (var view in this._views) {
           this.getView(view).setHashRoute(routes.slice(0), subhash);
         }
+      }
+      
+      // store subhash
+      subhash = subhash ? subhash : '';
+      
+      // get routes
+      var callbacks = this.getRoutes();
+      
+      // check if controller implements routes
+      if (Object.keys(callbacks).length === 0) {
+        updateChildren.call(this, routes, subhash);
         this.next();
         return;
       }
-            
-      var route = routes.shift();
       
-      var key = getRouteForKey.call(this, route);
-      var callbacks = this.getRoutes();
+      // get next route
+      var route = routes.slice(0).shift();
+      var key = getRouteForKey.call(this, route, true);
+      
+      if (key) {
+        routes.shift();
+      } else {
+        key = getRouteForKey.call(this, route);
+        route = '';
+      }
+      
+      var parts = key.substr(1).split('/');
       var params = {};
       var param;
-      var empty = 0;
       
-      // get route params
-      if (key.match('/')) {
-        var parts = key.split('/');
-        for (i=1; i<parts.length; i++) {
-          param = routes.shift();
-          params[parts[i].replace(':', '')] = param || 'null';
-          this.setParam(parts[i].replace(':', ''), param || null);
-          if (!param) { empty++; }
-        }
-      }
-
+      // store routes
       this._routes = subhash || '';
       
-      subhash += (subhash.length > 0) ? ('/' + route) : route;
-
-      for (var p in params) {
-        subhash += '/' + params[p];
+      // append subhash
+      if (route) {
+        subhash += ('/' + route);
       }
-            
+      
+      // fetch params
+      for (var i=0; i<parts.length; i++) {
+        if (parts[i].charAt(0) === ':') {
+          param = routes.shift() || null;
+          params[parts[i].substr(1)] = param;
+          this.setParam(parts[i].substr(1), param);
+          subhash += '/' + param;
+        }
+      }
+      
+      // execute callback
       if (callbacks.hasOwnProperty(key)) {
         callbacks[key].call(this, this.route, params);
       }
-
-      for (view in this._views) {
-        this.getView(view).setHashRoute(routes.slice(0), subhash);
-      }
       
+      // update children
+      updateChildren.call(this, routes, subhash);
+      
+      // store new route
       this.route = route;
-      this.next();
       
+      // trigger the queue
+      this.next();
+
     },
     
     

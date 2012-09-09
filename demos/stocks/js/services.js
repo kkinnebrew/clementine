@@ -2,7 +2,7 @@
 // TickerType Services
 // ------------------------------------------------------------------------------------------------
 
-Orange.add('tickertype-services', function(exports) {
+Orange.add('tt-services', function(exports) {
 
   var AccountService;
   var PortfolioService;
@@ -15,6 +15,7 @@ Orange.add('tickertype-services', function(exports) {
   
   var Model        = Orange.Model;
   var Service      = Orange.Service;
+  var Storage      = Orange.Storage;
   
   
   // ------------------------------------------------------------------------------------------------
@@ -112,7 +113,7 @@ Orange.add('tickertype-services', function(exports) {
       return '/mock';
     },
     
-    authenticate: function(email, password, success, error, context) {
+    authenticate: function(success, error, context) {
       
       var map = {
         map: AccountMap,
@@ -125,9 +126,15 @@ Orange.add('tickertype-services', function(exports) {
         }
       };
       
+      var token = Storage.get('authtoken');
+      
+      if (!token) {
+        error.call(context);
+        return;
+      }
+      
       var params = {
-        email: email,
-        password: password
+        token: token
       };
       
       this.request('/account.json', 'GET', params, map, success, error, context);

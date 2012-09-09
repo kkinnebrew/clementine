@@ -94,6 +94,7 @@ module.exports = function(grunt) {
         proxy: true,
         include: true,
         describe: true,
+        app: true,
         md5: true,
         it: true,
         clone: true,

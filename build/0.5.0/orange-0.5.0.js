@@ -1,5 +1,5 @@
 /**
- * OrangeUI | 0.5.0 | 09.08.2012
+ * OrangeUI | 0.5.0 | 09.09.2012
  * https://github.com/brew20k/orangeui
  * Copyright (c) 2012 Kevin Kinnebrew
  */
@@ -584,7 +584,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
   Cache.init = function(callback, context) {
   
     if (inited) { return; }
-    poll = true;
+    poll = false;
     inited = true;
     
     $(window).bind('offline', statusCallback);
@@ -1497,13 +1497,17 @@ Array.prototype.indexOf = [].indexOf || function(item) {
   
   Service = Class.extend({
     
-    initialize: function(config) {
+    initialize: function(path, auth) {
       
       // set online
-      this.isOnline = true;
+      this.isOnline = false;
       
       // set local cache
       this.cache = [];
+      
+      // store config
+      this.auth = auth || null;
+      this.path = path || '';
 
     },
     
@@ -3247,7 +3251,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     // constructors
     
     initialize: function(config) {
-      
+                  
       // validate configs
       if (!config.hasOwnProperty('name')) { throw 'Invalid application'; }
     
@@ -3256,14 +3260,27 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       this.required = config.hasOwnProperty('required') ? config.required : [];
       this.loaded = false;
       this.online = false;
-      this.env = 'PROD';
+      this.env = config.hasOwnProperty('env') ? config.env : 'PROD';
        
       // load dependencies
       for (var i = 0, len = this.required.length; i < len; i++) {
         Loader.loadModule(this.required[i]);
       }
       
+      // setup vars
+      this.servicePaths = {};
+      this.services = {};
+      this.serviceConfig = {};
+      this.authService = null;
+      this.constants = {};
+      this.templates = [];
+      
+      // states
+      this.authenticated = false;
+      this.viewLoaded = false;
+      
     },
+    
     
     // features management
     
@@ -3277,9 +3294,17 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         
         // get config
         var config = this.serviceConfig[service];
+        var params = {};
+        
+        // get paths
+        if (Object.keys(config.paths).length > 0 && typeof config.paths[this.env] !== undefined) {
+          params = { path: config.paths[this.env], auth: config.auth };
+        } else {
+          params = { path: this.servicePaths[this.env], auth: config.auth };
+        }
         
         // create new instance
-        var svc = new s(config.paths[this.env], config.auth);
+        var svc = new s(params.path, params.auth);
         
         // store service
         this.services[service] = svc;
@@ -3289,8 +3314,14 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     
     authenticate: function(success, failure, context) {
       
+      // check if defined
+      if (!this.authService) {
+        success.call(context);
+        return;
+      }
+      
       // check for service
-      if (this.services.hasOwnProperty(this.authService)) {
+      if (!this.services.hasOwnProperty(this.authService)) {
         throw 'Cannot load authentication service';
       }
       
@@ -3298,9 +3329,14 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       var service = this.services[this.authService];
       
       // attempt to authenticate
-      service.authenticate(success, failure, context);
+      if (typeof service.authenticate === 'function') {
+        service.authenticate(success, failure, context);
+      } else {
+        throw 'Authentication service must implement authenticate()';
+      }
       
     },
+    
     
     // environment setup
     
@@ -3311,12 +3347,22 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     setLogging: function(levels) {
       this.levels = levels;
     },
-
+    
+    
+    // constant management
+    
+    setConstant: function(name, value) {
+      this.constants[name] = value;
+    },
+    
+    getConstant: function(name) {
+      return this.constants.hasOwnProperty(name) ? this.constants[name] : null;
+    },
     
     // services management
     
     getService: function(name) {
-      return this.services[name];
+      return this.services.hasOwnProperty(name) ? this.services[name] : null;
     },
     
     registerService: function(name, auth, paths) {
@@ -3330,48 +3376,45 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       this.authService = name;
     },
     
+    registerServicePaths: function(paths) {
+      this.servicePaths = paths;
+    },
+    
+    
     // view management
     
     registerViews: function(views) {
-      View.load(views); // handle callback
+      if (views instanceof Array) {
+        this.templates = views;
+      }
     },
+    
     
     // event handling
     
     onHashChange: function(last) {
-    
-      // parse the hash
-      var hash = location.hash.replace('#').split('/');
       
-      // pass to controllers
-      this.root.setRoute(hash, last);
-    
-    },
-    
-    onReady: function() {
+      // get the hash
+      var hash = location.hash;
       
-      // find root element
-      this.rootEl = $('[data-root]');
-      
-      // find root controller
-      var c = ViewController.get(this.rootEl.attr('data-control'));
-      
-      // initialize root
-      this.root = new c(null, this.rootEl, this);
-      
-      // load the app
-      this.root.load().show();
-      
-      // set network status
-      if (this.online) {
-        this.root.goOnline();
+      if (hash.substr(0,2) === '#!') {
+        hash = hash.replace('#!', '');
       } else {
-        this.root.goOffline();
+        hash = hash.replace('#', '');
       }
       
-      // set route if it exists
-      this.onHashChange();
       
+      var route = [];
+      
+      if (hash.charAt(0) === '/') {
+        hash = hash.substr(1);
+      }
+      
+      route = hash.split('/');
+      
+      // set the hash to the root controller
+      this.root.setHashRoute(route.slice(0));
+    
     },
     
     onOnline: function() {
@@ -3385,10 +3428,12 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       }
       
       // pass to storage
-      this.storage.goOnline();
+      Storage.goOnline();
       
       // pass to controllers
-      this.root.goOnline();
+      if (this.root) {
+        this.root.goOnline();
+      }
       
     },
     
@@ -3406,20 +3451,55 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       Storage.goOffline();
       
       // pass to controllers
-      this.root.goOffline();
+      if (this.root) {
+        this.root.goOffline();
+      }
       
     },
     
     onAuthSuccess: function() {
       
-      // bind the only event
-      window.onload = proxy(this.onReady, this);
+      // find root element
+      var rootEl = $('[data-root]');
       
+      if (rootEl.length === 0) {
+        throw 'Invalid Markup: No [data-root] view found';
+      }
+      
+      var control = rootEl.attr('data-control');
+      
+      if (!control) {
+        throw 'Invalid Markup: Root View missing [data-control]';
+      }
+      
+      // find root controller
+      var c = ViewController.get(control);
+      
+      // initialize root
+      this.root = new c(null, rootEl);
+      
+      // load the app
+      this.root.load().show();
+      
+      // set network status
+      if (this.online) {
+        this.root.goOnline();
+      } else {
+        this.root.goOffline();
+      }
+            
+      // trigger hash change
+      $(window).trigger('hashchange');
+      
+      // show the application
+      $('body').removeClass('preload');
+            
     },
     
     onAuthFailure: function() {
       
       // redirect to login, or something
+      console.log("Could not authenticate");
       
     },
     
@@ -3461,8 +3541,21 @@ Array.prototype.indexOf = [].indexOf || function(item) {
           
         }, this);
         
-        // authorize the user
-        this.authenticate(this.onAuthSuccess, this.onAuthFailure, this);
+        // authenticate the user
+        this.authenticate(proxy(function() {
+          this.authenticated = true;
+          if (this.viewLoaded) {
+            this.onAuthSuccess.call(this);
+          }
+        }, this), this.onAuthFailure, this);
+        
+        // load the underlying views
+        View.register(this.templates, proxy(function() {
+          this.viewLoaded = true;
+          if (this.authenticated) {
+            this.onAuthSuccess.call(this);
+          }
+        }, this));
         
       }, this);
     
@@ -3472,10 +3565,30 @@ Array.prototype.indexOf = [].indexOf || function(item) {
   
   
   // ------------------------------------------------------------------------------------------------
+  // Global Functions
+  // ------------------------------------------------------------------------------------------------
+  
+  function config(fn) {
+    if (typeof fn === 'function') {
+      $(document).ready(function() {
+        var config = $('[data-app]').text();
+        if (config) {
+          config = JSON.parse(config);
+          var app = new Application(config);
+          fn.call(this, app);
+          app.launch();
+        }
+      });
+    }
+  }
+  
+  
+  // ------------------------------------------------------------------------------------------------
   // Exports
   // ------------------------------------------------------------------------------------------------
   
-  Orange.Application = Application;
+  Orange.Application  = Application;
+  Orange.config       = config;
   
 
 }(Orange));

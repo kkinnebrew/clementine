@@ -2,7 +2,7 @@
 // TickerType Models
 // ------------------------------------------------------------------------------------------------
 
-Orange.add('tickertype-models', function(exports) {
+Orange.add('tt-models', function(exports) {
 
   var Account;
   var Portfolio;

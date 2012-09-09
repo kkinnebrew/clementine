@@ -7,7 +7,7 @@
 
 <title>TickerType</title>
 
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="lib/jquery-1.8.1.min.js"></script>
 <script type="text/javascript" src="lib/md5.min.js"></script>
 <script type="text/javascript" src="../../build/0.5.0/orange-0.5.0.js"></script>
 
@@ -16,76 +16,31 @@
 <script type="text/javascript" src="js/models.js"></script>
 <script type="text/javascript" src="js/services.js"></script>
 
-<script type="text/javascript">
-
-Orange.use('tickertype-models', 'tickertype-services', function() {
-
-  var AccountService = include('tickertype-services').AccountService;
-  var PortfolioService = include('tickertype-services').PortfolioService;
-  var QuoteService = include('tickertype-services').QuoteService;
-  
-  var as = new AccountService();
-  
-  function success(data) {
-    console.log('success', data.toObject());
-  }
-  
-  function failure() {
-    console.log("failed", arguments);
-  }
-  
-  as.authenticate('kevin.kinnebrew@gmail.com', 'pass', success, failure);
-  
-  as.getActiveUser(success, failure);
-  
-  var ps = new PortfolioService();
-  
-  ps.getPortfolio(function(data) {
-    
-    console.log('success', data.toObject());
-  
-    ps.getPositionsForPortfolio(data, function(data) {
-            
-      var collection = [];
-      
-      for (var i=0; i<data.length; i++) {
-        collection.push(data[i].toObject());
-      }
-      
-      console.log('success', collection);
-      
-      ps.getLinesForPosition(data[1], function(data) {
-      
-        var collection = [];
-        
-        for (var i=0; i<data.length; i++) {
-          collection.push(data[i].toObject());
-        }
-        
-        console.log('success', collection);
-      
-      }, failure);
-      
-    }, failure);
-  
-  }, failure);
-  
-  var qs = new QuoteService();
-  
-  qs.getSymbol('BAC', success, failure);
-  
-  
-});
-
+<script type="text/json" data-app>
+{
+  "name": "tickertype",
+  "title": "Ticker Type",
+  "description": "A simple stock tracking application",
+  "version": "1.0.0",
+  "author": "Kevin Kinnebrew",
+  "required": ["tt-config", "tt-controllers", "tt-models", "tt-services"],
+  "env": "DEV"
+}
 </script>
 
-<link type="text/css" rel="stylesheet" href="css/app.css"
+<link type="text/css" rel="stylesheet" href="css/app.css" />
 
 </head>
 
-<body>
+<body class="preload">
 
 <h1>TickerType</h1>
+
+<div data-control="view" data-name="ticker-type-app" data-root>
+
+  <p>Hello</p>
+
+</div>
 
 </body>
 

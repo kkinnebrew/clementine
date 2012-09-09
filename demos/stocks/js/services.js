@@ -140,7 +140,10 @@ Orange.add('tickertype-services', function(exports) {
    * @name portfolio
    * @requires portfolio
    * @requires position
+   * @requires positionLine
    * @endpoint getPortfolio
+   * @endpoint getPositionsForPortfolio
+   * @endpoint getLinesForPosition
    */
   PortfolioService = Service.extend({
     
@@ -183,7 +186,7 @@ Orange.add('tickertype-services', function(exports) {
       };
       
       var params = {
-        portfolioId: modelOrId(portfolio)
+        portfolioId: this.modelOrId(portfolio)
       };
       
       this.request('/positions.json', 'GET', params, map, success, error, context);
@@ -204,7 +207,7 @@ Orange.add('tickertype-services', function(exports) {
       };
       
       var params = {
-        positionId: modelOrId(position)
+        positionId: this.modelOrId(position)
       };
       
       this.request('/positionLines.json', 'GET', params, map, success, error, context);
@@ -213,6 +216,11 @@ Orange.add('tickertype-services', function(exports) {
     
   });
   
+  /**
+   * @name quote
+   * @requires symbol
+   * @endpoint getSymbol
+   */
   QuoteService = Service.extend({
     
     getType: function() {
@@ -249,21 +257,6 @@ Orange.add('tickertype-services', function(exports) {
     }
     
   });
-  
-  
-  // ------------------------------------------------------------------------------------------------
-  // Functions
-  // ------------------------------------------------------------------------------------------------
-  
-  function modelOrId(object) {
-    if (object instanceof Model) {
-      return object.getId();
-    } else if (typeof object !== 'object') {
-      return object;
-    } else {
-      throw new Error('Invalid Input: Expecting model or id', object);
-    }
-  }
   
   
   // ------------------------------------------------------------------------------------------------

@@ -1739,6 +1739,16 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       // return object
       return cache || null;
       
+    },
+    
+    modelOrId: function(object) {
+      if (object instanceof Model) {
+        return object.getId();
+      } else if (typeof object !== 'object') {
+        return object;
+      } else {
+        throw new Error('Invalid Input: Expecting model or id', object);
+      }
     }
     
   });

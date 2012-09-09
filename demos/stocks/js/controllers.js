@@ -130,7 +130,8 @@ Orange.add('tt-controllers', function(exports) {
         'two': 'element',
         'plus-btn': 'element',
         'minus-btn': 'element',
-        'bind-spot': 'element'
+        'bind-spot': 'element',
+        'account': 'element'
       };
     },
     
@@ -160,8 +161,36 @@ Orange.add('tt-controllers', function(exports) {
     onDidAppear: function(e) {
     
       function success(user) {
+      
+        var user2 = user.clone();
+        
         this.bind('bind-spot', user);
-        console.log(user.toObject());
+        this.bind('account', user2);
+
+        user.on('change', function() {
+          console.log('user1 changed');
+        });
+        
+        user2.on('change', function() {
+          console.log('user2 changed');
+        });
+        
+        setTimeout(function() {
+          user2.set('firstName', 'Rachel');
+          user2.set('lastName', 'Samaniego');
+        }, 1000);
+        
+        setTimeout(function() {
+          user.update({
+            id: "1234",
+            firstName: 'Steph',
+            lastName: 'Yang',
+            username: "triviatrish@gmail.com",
+            createDate: '2012-01-08',
+            loginDate: '2012-02-16'
+          });
+        }, 2000);
+        
       }
       
       function failure() {

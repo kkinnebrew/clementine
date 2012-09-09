@@ -98,6 +98,7 @@ module.exports = function(grunt) {
         md5: true,
         it: true,
         clone: true,
+        firstChildren: true,
         expect: true,
         noop: true,
         before: true,

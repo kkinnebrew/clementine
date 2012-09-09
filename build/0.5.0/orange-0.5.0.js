@@ -34,6 +34,22 @@ function proxy(fn, context) {
   };
 }
 
+function firstChildren(obj, selector) {
+  var childList = [];
+  obj.find(selector).each(function() {
+    var include = false, parent = $(this).parent();
+    while (parent.length !== 0 && !include) {
+      if ($(parent).not($(obj)).length === 0) {
+        include = true; break;
+      } else if ($(parent).not('[data-control]').length === 0) {
+        include = false; break;
+      } parent = $(parent).parent();
+    }
+    if (include) { childList.push($(this)); }
+  });
+  return childList;
+}
+
 jQuery.fn.outerHTML = function(s) {
   return s ? this.before(s).remove() : jQuery('<p>').append(this.eq(0).clone()).html();
 };
@@ -993,28 +1009,13 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       var key = this.getKey();
       
       // store data
+      this._source = data || {};
       this._id = null;
       this._data = {};
       this._changed = false;
-      
-      var isKey = false;
             
-      // fetch fields
-      var fields = this.getFields();
-      
       // process data
-      for (var i in fields) {
-        isKey = fields[i].type === Model.Field.KEY;
-        if (data.hasOwnProperty(i) && typeof data[i] !== 'undefined') {
-          if (isKey) {
-            this._id = Model.clean(data[i], fields[i]);
-          } else {
-            this._data[i] = Model.clean(data[i], fields[i]);
-          }
-        } else if (fields[i].hasOwnProperty('required') && fields[i].required || isKey) {
-          throw 'Field Missing: "' + i + '" on model "' + this.getType() + '"';
-        }
-      }
+      this.processData(data);
           
     },
     
@@ -1039,6 +1040,37 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       throw 'Cannot instantiate model';
     },
     
+    processData: function(data, update) {
+    
+      // deltas
+      var deltas = [];
+    
+      // vars
+      var isKey = false;
+    
+      // fetch fields
+      var fields = this.getFields();
+      
+      // process data
+      for (var i in fields) {
+        isKey = fields[i].type === Model.Field.KEY;
+        if (data.hasOwnProperty(i) && typeof data[i] !== 'undefined') {
+          if (isKey) {
+            this._id = Model.clean(data[i], fields[i]);
+            deltas.push({ action: 'id', name: i, value: this._id });
+          } else {
+            this._data[i] = Model.clean(data[i], fields[i]);
+            deltas.push({ action: 'set', name: i, value: this._data[i] });
+          }
+        } else if (fields[i].hasOwnProperty('required') && fields[i].required || (isKey && !update)) {
+          throw 'Field Missing: "' + i + '" on model "' + this.getType() + '"';
+        }
+      }
+            
+      return deltas;
+      
+    },
+    
     get: function(name) {
       var fields = this.getFields();
       if (!fields.hasOwnProperty(name)) {
@@ -1058,6 +1090,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       }
       this._data[name] = value;
       this._changed = true;
+      this.fire('change', [{ action: 'set', name: name, value: value }]);
     },
     
     clear: function(name) {
@@ -1067,6 +1100,21 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       }
       delete this._data[name];
       this._changed = true;
+      this.fire('change', [{ action: 'clear', name: name }]);
+    },
+    
+    update: function(data) {
+      
+      // process data
+      var deltas = this.processData(data, true);
+      
+      // fire event
+      this.fire('change', deltas);
+    
+    },
+    
+    clone: function() {
+      return new this.constructor(this._source);
     },
     
     getId: function() {
@@ -1925,67 +1973,193 @@ Array.prototype.indexOf = [].indexOf || function(item) {
   
   var Collection  = Orange.Collection;
   var Model       = Orange.Model;
+
   
   // ------------------------------------------------------------------------------------------------
   // Class Definition
   // ------------------------------------------------------------------------------------------------
   
   Binding = Class.extend({
-    
+  
     initialize: function(target) {
-      
-      // store target
+    
+      // store reference
       this.target = target;
-      this.template = target.clone();
-      this.loaded = false;
       
+      // store template
+      this.template = target.html();
+      
+      // store list template
+      this.listTemplate = null;
+      
+      // store data reference
+      this.data = null;
+      
+      // event handle
+      this.handles = [];
+      
+      // set state
+      this.bound = false;
+      this.binding = false;
+    
     },
     
-    bind: function(data, callback) {
-    
-      if (this.loaded) {
+    bind: function(data, live) {
+      
+      // skip if already binding
+      if (this.binding) {
+        console.log('Error: Already binding');
+        return;
+      }
+      
+      // set as binding
+      this.binding = true;
+      
+      // unbind if already bound
+      if (this.bound) {
         this.unbind();
       }
       
+      // set as bound
+      this.bound = true;
+      
+      // store data
+      this.data = data;
+      
+      // process by type
       if (data instanceof Collection) {
-        this.bindList(this.target, data.toArray(), data.getKey(), data.getItemType());
+        this.bindCollection(this.target, data);
+        this.handles.push(data.on('change', this.onCollectionUpdate, this));
       } else if (data instanceof Array) {
         this.bindList(this.target, data);
       } else if (data instanceof Model) {
-        this.bindModel(this.target, data.toObject(), data.getKey(), data.getItemType());
+        this.bindModel(this.target, data);
+        this.handles.push(data.on('change', this.onModelUpdate, this));
       } else if (typeof data === 'object') {
         this.bindData(this.target, data);
-      } else { return; }
+      }
       
-      this.loaded = true;
-      
-      if (typeof callback === 'function') { callback.call(this); }
+      // set as done
+      this.binding = false;
       
     },
     
-    bindList: function(target, list, id, type) {
-
-      var instance;
-      var template;
-      var itemscope = target.find('[itemscope]:first');
-      var output = target.clone().empty();
+    onCollectionUpdate: function(e) {
       
-      if (!itemscope.length) {
-        target.remove();
-        return;
+      // store deltas
+      var delta = e.data;
+      
+      console.log('collection changed');
+    
+    },
+    
+    onModelUpdate: function(e) {
+        
+      // store deltas
+      var deltas = e.data;
+      
+      // get id
+      var id = e.target.getId();
+      
+      // get type
+      var type = e.target.getType();
+      
+      if (e.target.getItemType()) {
+        type = e.target.getItemType();
       }
-          
-      // clone the template, remove the root
-      itemscope.remove();
-      template = itemscope.clone();
-            
-      if (list instanceof Array) {
-        for (var i=0; i<list.length; i++) {
-          instance = template.clone();
-          output.append(instance);
-          if (id) { this.bindModel(instance, list[id], id, type); }
-          else { this.bindData(instance, list[i]); }
+      
+      if (deltas instanceof Array && deltas.length > 0) {
+        for (var i=0; i<deltas.length; i++) {
+          this.onModelKeyUpdate(deltas[i], id, type);
         }
+      }
+    
+    },
+    
+    onModelKeyUpdate: function(delta, id, type) {
+      
+      // store deltas
+      var action = delta.action;
+      var name = delta.name;
+      var value = delta.value;
+      
+      // set target
+      var target;
+      
+      
+      
+      if (this.target.attr('itemid') === id.toString() && this.target.attr('itemtype') === type) {
+        target = this.target;
+        if (action === 'id') {
+          this.target.attr('itemid', value);
+        }
+      } else {
+        target = this.target.find('[itemid="' + id + '"][itemtype="' + type + '"]');
+        if (action === 'id') {
+          target.attr('itemid', value);
+        }
+      }
+            
+      // get all items
+      var items = firstChildren(target, '[itemprop="' + name + '"]');
+      
+      // process items
+      for (var i=0; i<items.length; i++) {
+        if (action === 'set') {
+          if (value instanceof Date) {
+            this.bindItem(items[i], value);
+          } else if (typeof data === 'object') {
+            this.bindItem(items[i], value);
+          } else {
+            this.bindItem(items[i], value);
+          }
+        } else if (action === 'clear') {
+          items[i].empty();
+        }
+      }
+    
+    },
+    
+    bindCollection: function(target, collection) {
+    
+      // bind list
+      this.bindList(target, collection.toArray());
+    
+    },
+    
+    bindList: function(target, list) {
+            
+      // find and store list template
+      var itemscope = target.find('[itemscope]:first');
+      var template = itemscope.clone();
+      var output = target.clone();
+      var instance;
+      
+      // return if not found
+      if (!itemscope.length) {
+        throw 'Invalid Markup: Cannot bind collection to view missing [itemscope]';
+      }
+      
+      // remove itemscope
+      itemscope.remove();
+      itemscope = null;
+      
+      // iterate over list
+      for (var i=0; i<list.length; i++) {
+        
+        // create instance
+        instance = template.clone();
+        
+        // bind individual items
+        if (list[i] instanceof Model) {
+          this.bindModel(instance, list[i]);
+        } else {
+          this.bindData(instance, list[i]);
+        }
+        
+        // append to output
+        output.append(instance);
+      
       }
       
       // replace the target
@@ -1993,99 +2167,111 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       
     },
     
-    bindModel: function(target, model, id, type) {
+    bindModel: function(target, model) {
     
-      if (type) {
-        this.target.attr('itemtype', type);
+      if (model.getItemType()) {
+        target.attr('itemtype', model.getItemType());
+      } else {
+        target.attr('itemtype', model.getType());
       }
-    
-      this.target.attr('itemid', model[id]);
-      this.target.attr('itemscope');
-      this.bindData(this.target, model);
       
+      // add microdata attributes
+      target.attr('itemid', model.getId());
+      target.attr('itemscope');
+      
+      // bind underlying
+      this.bindData(target, model.toObject());
+    
     },
     
     bindData: function(target, data) {
       
       var items = [];
-      var item;
-      var name;
-      var format;
+      var prop;
       
-      function childFunc(selector) {
-      
-        var childList = [];
-        target.find(selector).each(function() {
-        
-          var include = false;
-          var parent = $(this).parent();
-          
-          while (parent.length !== 0 && !include) {
-            if ($(parent).not(target).length === 0) {
-                include = true; break;
-            } else if ($(parent).not('[data-control]').length === 0) {
-              include = false; break;
-            } parent = $(parent).parent();
-          }
-          
-          if (include) { childList.push($(this)); }
-          
-        });
-        
-        return childList;
-        
-      }
-      
+      // if data is string or date, return
       if (typeof data === 'string' && target.has('[itemscope]')) {
-        target.text(data);
-        return;
+        this.bindItem(target, data); return;
+      } else if (data instanceof Date) {
+        this.bindItem(target, data); return;
       }
       
-      items = childFunc.call(this, '[itemprop]');
-            
-      for (var i=0; i<items.length; i++) {
+      // get immediate [itemprop] elements
+      items = firstChildren(target, '[itemprop]');
       
-        item = items[i];
-        name = item.attr('itemprop');
-        
-        if (data.hasOwnProperty(name)) {
-          if (data[name] instanceof Array) {
-            this.bindList(item, data[name]);
-          } else if (data[name] instanceof Date) {
-            item.attr('datetime', data[name].toString());
-            format = item.attr('data-format');
-            if (format && format.length > 0) {
-              item.text(data[name].format(format.toLowerCase()));
-              item.removeAttr('data-format');
-            } else {
-              item.text(data[name].getMonth() + '/' + data[name].getDate() + '/' + data[name].getFullYear());
-            }
-          } else if (typeof data[name] === 'object') {
-            this.bindData(item, data[name]);
-          } else if (typeof data[name] === 'string' || typeof data[name] === 'number') {
-            if (item.prop('tagName') === 'META') {
-              item.attr('content', data[name]);
-            } else {
-              item.text(data[name]);
-            }
+      // bind each item
+      for (var i=0; i<items.length; i++) {
+        prop = items[i].attr('itemprop') || null;
+        if (prop && data.hasOwnProperty(prop)) {
+          if (data[prop] instanceof Array) {
+            this.bindList(items[i], data[prop]);
+          } else if (data[prop] instanceof Date) {
+            this.bindItem(items[i], data[prop]);
+          } else if (typeof data[prop] === 'object') {
+            this.bindData(items[i], data[prop]);
+          } else {
+            this.bindItem(items[i], data[prop]);
           }
-        } else {
-          item.remove();
         }
       }
       
-      
-      
     },
     
+    bindItem: function(target, data) {
+    
+      if (data instanceof Date) {
+            
+        // add microdata attributes
+        target.attr('datetime', data.toString());
+        var format = target.attr('data-format');
+        if (format && format.length > 0) {
+          target.text(data.format(format.toLowerCase()));
+        } else {
+          target.text(data.getMonth() + '/' + data.getDate() + '/' + data.getFullYear());
+        }
+        
+      } else if (typeof data === 'string' || typeof data === 'number') {
+                
+        // apply content attribute if meta tag
+        if (target.prop('tagName') === 'META') {
+          target.attr('content', data);
+        } else {
+          target.text(data);
+        }
+        
+      }
+    
+    },
+        
     unbind: function() {
-      this.target.replaceWith(this.template.clone());
+      
+      // null out reference
+      this.data = null;
+      
+      // remove events
+      if (this.handles.length) {
+        for (var i=0; i<this.handles.length; i++) {
+          this.handles[i].detach();
+        }
+      }
+      
+      // clear handles
+      this.handles = [];
+      
+      // replace target
+      this.target.html(this.template);
+      
     },
     
     destroy: function() {
+      
       delete this.target;
       delete this.template;
-      delete this.loaded;
+      delete this.data;
+      delete this.handle;
+      delete this.bound;
+      delete this.binding;
+      
     }
     
   });
@@ -2115,6 +2301,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
   var Binding     = Orange.Binding;
   var Browser     = Orange.Browser;
   var Form        = Orange.Form;
+  var Model       = Orange.Model;
   var View        = Orange.View;
   
   
@@ -2153,28 +2340,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     }
     return attrs;
   }
-  
-  /**
-   * @param obj       the object to operate on
-   * @param selector  the selector to look for
-   * @return array    the array of child $() objects found
-   */
-  function firstChildren(obj, selector) {
-    var childList = [];
-    obj.find(selector).each(function() {
-      var include = false, parent = $(this).parent();
-      while (parent.length !== 0 && !include) {
-        if ($(parent).not($(obj)).length === 0) {
-          include = true; break;
-        } else if ($(parent).not('[data-control]').length === 0) {
-          include = false; break;
-        } parent = $(parent).parent();
-      }
-      if (include) { childList.push($(this)); }
-    });
-    return childList;
-  }
-  
+    
   /**
    * returns the route string for a given key
    * @param key  the key to lookup
@@ -2251,6 +2417,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       
       // setup bindings
       this._bindings = {};
+      this._handles = {};
       
       // store states
       this._loaded = false;
@@ -3171,10 +3338,21 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       if (this._bindings.hasOwnProperty(element)) {
         this.unbind(element);
       }
+    
+      if (this._handles.hasOwnProperty(element)) {
+        this._handles[element].detach();
+        delete this._handles[element];
+      }
+      
+      if (data instanceof Model) {
+        this._handles[element] = data.on('change', function(e) {
+          this.bind(element, e.target);
+        }, this);
+      }
       
       this._bindings[element] = new Binding(this.getElement(element));
       this._bindings[element].bind(data);
-      
+            
     },
   
     unbind: function(element) {
@@ -3188,6 +3366,17 @@ Array.prototype.indexOf = [].indexOf || function(item) {
        delete this._bindings[element];
       }
       
+      if (this._handles.hasOwnProperty(element)) {
+        this._handles[element].detach();
+        delete this._handles[element];
+      }
+      
+    },
+    
+    onChange: function(e) {
+    
+      console.log('change', e);
+    
     },
     
     

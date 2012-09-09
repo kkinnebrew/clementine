@@ -9,6 +9,7 @@
 
 <script type="text/javascript" src="lib/jquery-1.8.1.min.js"></script>
 <script type="text/javascript" src="lib/md5.min.js"></script>
+<script type="text/javascript" src="lib/date-format-1.2.3.js"></script>
 <script type="text/javascript" src="../../build/0.5.0/orange-0.5.0.js"></script>
 
 <script type="text/javascript" src="js/config.js"></script>
@@ -62,16 +63,15 @@
       <div data-name="two" class="hidden">Two</div>
       
       <section data-name="bind-spot">
-        <h3>Title</h3>
-        <div itemprop="one"></div>
-        <div itemprop="two"></div>
         
-        <ul itemprop="list">
-          <li itemscope>
-            <div itemprop="first"></div>
-            <div itemprop="second"></div>
-          </li>
-        </ul>
+        <meta itemprop="id" />
+        <div itemprop="username"></div>
+        <div class="name">
+          <span itemprop="firstName"></span>
+          <span itemprop="lastName"></span>
+        </div>
+        <div itemprop="createDate" data-format="M/D/YYYY"></div>
+        <div itemprop="loginDate"  data-format="M/D/YYYY"></div>
         
       </section>
       

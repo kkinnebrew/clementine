@@ -29,6 +29,10 @@ Orange.add('tt-models', function(exports) {
       return 'account';
     },
     
+    getItemType: function() {
+      return 'http://www.orangelit.com/microdata/account/';
+    },
+    
     getFields: function() {
       return {
         id:          { type: Field.KEY, numeric: true },

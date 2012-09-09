@@ -14,7 +14,7 @@ Orange.add('tt-controllers', function(exports) {
   // ------------------------------------------------------------------------------------------------
   
   var ViewController = Orange.ViewController;
-  
+
   
   // ------------------------------------------------------------------------------------------------
   // Controller Definitions
@@ -159,27 +159,17 @@ Orange.add('tt-controllers', function(exports) {
     
     onDidAppear: function(e) {
     
-      this.bind('bind-spot', {
-        one: 'This is One',
-        two: 'This is Two',
-        list: [
-          {
-            'first': 'THis is the first first',
-            'second': 'This is the first second'
-          },
-          {
-            'hello': 'two',
-            'first': 'THis is the second first',
-            'second': 'This is the second second'
-          },
-          {
-            'hello': 'one',
-            'first': 'THis is the third first',
-            'second': 'This is the third second'
-          }
-        ]
-      });
+      function success(user) {
+        this.bind('bind-spot', user);
+        console.log(user.toObject());
+      }
       
+      function failure() {
+        console.log('failure');
+      }
+    
+      this.app.getService('account').getActiveUser(success, failure, this);
+            
       this._super();
       
     },
@@ -205,4 +195,4 @@ Orange.add('tt-controllers', function(exports) {
   exports.ContactsListController = ContactsListController;
   
   
-});
+}, ['tt-services']);

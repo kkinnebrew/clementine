@@ -1022,6 +1022,10 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       throw 'Cannot instantiate model';
     },
     
+    getItemType: function() {
+      return null;
+    },
+    
     getKey: function() {
       var fields = this.getFields();
       for(var field in fields) {
@@ -1944,11 +1948,11 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       }
       
       if (data instanceof Collection) {
-        this.bindList(this.target, data.toArray(), data.getModel().getId());
+        this.bindList(this.target, data.toArray(), data.getKey(), data.getItemType());
       } else if (data instanceof Array) {
         this.bindList(this.target, data);
       } else if (data instanceof Model) {
-        this.bindModel(this.target, data.toObject(), data.getModel().getId());
+        this.bindModel(this.target, data.toObject(), data.getKey(), data.getItemType());
       } else if (typeof data === 'object') {
         this.bindData(this.target, data);
       } else { return; }
@@ -1959,7 +1963,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       
     },
     
-    bindList: function(target, list, id) {
+    bindList: function(target, list, id, type) {
 
       var instance;
       var template;
@@ -1979,7 +1983,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         for (var i=0; i<list.length; i++) {
           instance = template.clone();
           output.append(instance);
-          if (id) { this.bindModel(instance, list[id], id); }
+          if (id) { this.bindModel(instance, list[id], id, type); }
           else { this.bindData(instance, list[i]); }
         }
       }
@@ -1989,11 +1993,15 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       
     },
     
-    bindModel: function(target, model, id) {
+    bindModel: function(target, model, id, type) {
+    
+      if (type) {
+        this.target.attr('itemtype', type);
+      }
     
       this.target.attr('itemid', model[id]);
       this.target.attr('itemscope');
-      this.bindData(model);
+      this.bindData(this.target, model);
       
     },
     
@@ -2002,6 +2010,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       var items = [];
       var item;
       var name;
+      var format;
       
       function childFunc(selector) {
       
@@ -2042,10 +2051,23 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         if (data.hasOwnProperty(name)) {
           if (data[name] instanceof Array) {
             this.bindList(item, data[name]);
+          } else if (data[name] instanceof Date) {
+            item.attr('datetime', data[name].toString());
+            format = item.attr('data-format');
+            if (format && format.length > 0) {
+              item.text(data[name].format(format.toLowerCase()));
+              item.removeAttr('data-format');
+            } else {
+              item.text(data[name].getMonth() + '/' + data[name].getDate() + '/' + data[name].getFullYear());
+            }
           } else if (typeof data[name] === 'object') {
             this.bindData(item, data[name]);
-          } else if (typeof data[name] === 'string') {
-            item.text(data[name]);
+          } else if (typeof data[name] === 'string' || typeof data[name] === 'number') {
+            if (item.prop('tagName') === 'META') {
+              item.attr('content', data[name]);
+            } else {
+              item.text(data[name]);
+            }
           }
         } else {
           item.remove();
@@ -2198,10 +2220,13 @@ Array.prototype.indexOf = [].indexOf || function(item) {
      * @param parent  the parent controller
      * @param target  html view or reference
      */
-    initialize: function(parent, target) {
-      
+    initialize: function(parent, target, app) {
+
       // mark uninitialized
       this._initialized = false;
+      
+      // store app
+      this.app = app;
       
       // store references
       this.parent = parent || null;
@@ -2307,7 +2332,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         }
         
         c = ViewController.get(type);
-        views[name] = new c(this, children[i]);
+        views[name] = new c(this, children[i], this.app);
         
       }
       
@@ -3164,7 +3189,16 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       }
       
     },
-      
+    
+    
+    // ------------------------------------------------------------------------------------------------
+    // Services
+    // ------------------------------------------------------------------------------------------------
+    
+    getService: function(name) {
+      return this.app.getService(name);
+    },
+    
     
     // ------------------------------------------------------------------------------------------------
     // Connection Management
@@ -3498,7 +3532,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       var c = ViewController.get(control);
       
       // initialize root
-      this.root = new c(null, rootEl);
+      this.root = new c(null, rootEl, this);
       
       // load the app
       this.root.load().show();

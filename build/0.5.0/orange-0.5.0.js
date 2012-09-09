@@ -1382,10 +1382,16 @@ Array.prototype.indexOf = [].indexOf || function(item) {
   };
   
   Storage.goOnline = function() {
+    if (!online) {
+      console.log('Storage: Went online');
+    }
     online = true;
   };
   
   Storage.goOffline = function() {
+    if (online) {
+      console.log('Storage: Went offline');
+    }
     online = false;
   };
     
@@ -2810,7 +2816,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     onWillLoad: function() {
           
       // DEBUG
-      console.log(this.getParam('name') + ' ' + "Will Load");
+      // console.log(this.getParam('name') + ' ' + "Will Load");
       
       // fire load event
       this.fire('_load');
@@ -2842,7 +2848,8 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     onDidLoad: function() {
 
       // DEBUG
-      console.log(this.getParam('name') + ' ' + "Did Load");
+      // console.log(this.getParam('name') + ' ' + "Did Load");
+      console.log(this.getParam('name') + " Loaded");
       
       // mark as loaded
       this._loaded = true;
@@ -2858,7 +2865,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     onWillUnload: function() {
     
       // run functions
-      console.log(this.getParam('name') + ' ' + "Will Unload");
+      // console.log(this.getParam('name') + ' ' + "Will Unload");
       
       // ex. clear data
       
@@ -2893,8 +2900,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     
     onDidUnload: function() {
     
-      // run functions
-      console.log(this.getParam('name') + ' ' + "Did Unload");
+      // DEBUG
+      // console.log(this.getParam('name') + ' ' + "Did Unload");
+      console.log(this.getParam('name') + " Unloaded");
 
       // mark unloaded
       this._loaded = false;
@@ -2913,7 +2921,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     onWillAppear: function() {
             
       // run functions
-      console.log(this.getParam('name') + ' ' + "Will Appear");
+      // console.log(this.getParam('name') + ' ' + "Will Appear");
             
       // bind events
       var views = this.getBindings();
@@ -2973,8 +2981,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     
     onDidAppear: function(e) {
         
-      // run functions
-      console.log(this.getParam('name') + ' ' + "Did Appear");
+      // DEBUG
+      // console.log(this.getParam('name') + ' ' + "Did Appear");
+      console.log(this.getParam('name') + " Appeared");
       
       // mark as visible
       this._visible = true;
@@ -2990,7 +2999,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     onWillDisappear: function() {
       
       // run functions
-      console.log(this.getParam('name') + ' ' + "Will Disappear");
+      // console.log(this.getParam('name') + ' ' + "Will Disappear");
       
       // unbind events
       for (var view in this._views) { this.getView(view).detach(); }
@@ -3026,8 +3035,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     
     onDidDisappear: function(e) {
       
-      // run functions
-      console.log(this.getParam('name') + ' ' + "Did Disappear");
+      // DEBUG
+      // console.log(this.getParam('name') + ' ' + "Did Disappear");
+      console.log(this.getParam('name') + " Disappeared");
       
       // remove hidden class
       this.target.addClass('hidden');
@@ -3419,6 +3429,10 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     
     onOnline: function() {
       
+      if (!this.online) {
+        console.log('Application: Went online');
+      }
+      
       // store connection
       this.online = true;
       
@@ -3439,6 +3453,10 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     
     onOffline: function() {
       
+      if (this.online) {
+        console.log('Application: Went offline');
+      }
+      
       // store connection
       this.online = false;
       
@@ -3458,6 +3476,10 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     },
     
     onAuthSuccess: function() {
+      
+      if (this.authService) {
+        console.log('User: Authenticated successfully');
+      }
       
       // find root element
       var rootEl = $('[data-root]');
@@ -3555,6 +3577,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         // load the underlying views
         View.register(this.templates, proxy(function() {
           this.viewLoaded = true;
+          console.log('Views: loaded and cached');
           if (this.authenticated) {
             this.onAuthSuccess.call(this);
           }

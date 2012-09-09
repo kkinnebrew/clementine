@@ -41,9 +41,8 @@ Orange.add('tt-controllers', function(exports) {
     
     getOutlets: function() {
       return {
-        'add-btn': 'element',
-        'id': 'element',
-        'between': 'view'
+        elements: ['add-btn', 'id'],
+        views: ['between']
       };
     },
     
@@ -94,7 +93,7 @@ Orange.add('tt-controllers', function(exports) {
     
     getOutlets: function() {
       return {
-        'contacts-list': 'view'
+        views: ['contacts-list']
       };
     }
   
@@ -126,12 +125,7 @@ Orange.add('tt-controllers', function(exports) {
     
     getOutlets: function() {
       return {
-        'one': 'element',
-        'two': 'element',
-        'plus-btn': 'element',
-        'minus-btn': 'element',
-        'bind-spot': 'element',
-        'account': 'element'
+        elements: ['one', 'two', 'plus-btn', 'minus-btn', 'bind-spot', 'account']
       };
     },
     
@@ -166,14 +160,6 @@ Orange.add('tt-controllers', function(exports) {
         
         this.bind('bind-spot', user);
         this.bind('account', user2);
-
-        user.on('change', function() {
-          console.log('user1 changed');
-        });
-        
-        user2.on('change', function() {
-          console.log('user2 changed');
-        });
         
         setTimeout(function() {
           user2.set('firstName', 'Rachel');

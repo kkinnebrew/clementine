@@ -2563,28 +2563,33 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       // get outlets
       var outlets = this.getOutlets();
       var errors = [];
-      var ex;
+      var ex, i;
             
-      // manage outlets
-      for (var name in outlets) {
-        switch (outlets[name]) {
-          case 'view':
-            if (!this.hasView(name)) {
-              errors.push(name);
-            }
-            break;
-          case 'form':
-            if (!this.hasForm(name)) {
-              errors.push(name);
-            }
-            break;
-          case 'element':
-            if (!this.hasElement(name)) {
-              errors.push(name);
-            }
-            break;
-          default:
-            break;
+      // validate views
+      if (outlets.hasOwnProperty('views')) {
+        for (i=0; i<outlets.views.length; i++) {
+          if (!this.hasView(outlets.views[i])) {
+            errors.push(outlets.views[i]);
+          }
+        }
+      }
+      
+      
+      // validate forms
+      if (outlets.hasOwnProperty('forms')) {
+        for (i=0; i<outlets.forms.length; i++) {
+          if (!this.hasForm(outlets.forms[i])) {
+            errors.push(outlets.forms[i]);
+          }
+        }
+      }
+      
+      // validate elements
+      if (outlets.hasOwnProperty('elements')) {
+        for (i=0; i<outlets.elements.length; i++) {
+          if (!this.hasElement(outlets.elements[i])) {
+            errors.push(outlets.elements[i]);
+          }
         }
       }
             

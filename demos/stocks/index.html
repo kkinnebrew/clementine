@@ -24,8 +24,7 @@
   "description": "A simple stock tracking application",
   "version": "1.0.0",
   "author": "Kevin Kinnebrew",
-  "required": ["tt-config", "tt-controllers", "tt-models", "tt-services"],
-  "env": "DEV"
+  "required": ["tt-config", "tt-controllers", "tt-models", "tt-services"]
 }
 </script>
 
@@ -87,6 +86,27 @@
         <div itemprop="loginDate"  data-format="MMMM D, YYYY"></div>
         
       </section>
+      
+      <table data-name="positions">
+        
+        <td>
+          <th>Symbol</th>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Cost</th>
+        </td>
+        
+        <tr itemscope>
+        
+          <meta itemprop="id" />
+          <td itemprop="symbol"></td>
+          <td itemprop="quantity"></td>
+          <td itemprop="price"></td>
+          <td itemprop="cost"></td>
+        
+        </tr>
+      
+      </ul>
       
     </div>
   

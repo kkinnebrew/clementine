@@ -125,7 +125,7 @@ Orange.add('tt-controllers', function(exports) {
     
     getOutlets: function() {
       return {
-        elements: ['one', 'two', 'plus-btn', 'minus-btn', 'bind-spot', 'account']
+        elements: ['one', 'two', 'plus-btn', 'minus-btn', 'bind-spot', 'account', 'positions']
       };
     },
     
@@ -184,7 +184,21 @@ Orange.add('tt-controllers', function(exports) {
       }
     
       this.app.getService('account').getActiveUser(success, failure, this);
-            
+      
+      function positionsSuccess(positions) {
+      
+        this.bind('positions', positions);
+                
+        setTimeout(function() {
+        
+          positions[2].set('price', 100);
+        
+        }, 1000);
+      
+      }
+      
+      this.app.getService('portfolio').getPositionsForPortfolio(1, positionsSuccess, failure, this);
+      
       this._super();
       
     },

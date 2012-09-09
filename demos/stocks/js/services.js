@@ -149,7 +149,7 @@ Orange.add('tt-services', function(exports) {
         from: 'object',
         to: 'model',
         offline: false,
-        cache: false,
+        cache: true,
         callback: function(source) {
           return source.account;
         }

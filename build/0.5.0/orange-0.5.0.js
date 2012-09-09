@@ -1057,7 +1057,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         if (data.hasOwnProperty(i) && typeof data[i] !== 'undefined') {
           if (isKey) {
             this._id = Model.clean(data[i], fields[i]);
-            deltas.push({ action: 'id', name: i, value: this._id });
+            deltas.push({ action: 'set', name: i, value: this._id });
           } else {
             this._data[i] = Model.clean(data[i], fields[i]);
             deltas.push({ action: 'set', name: i, value: this._data[i] });
@@ -1104,6 +1104,15 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     },
     
     update: function(data) {
+      
+      var key = this.getKey();
+      
+      // check if contains key
+      if (data.hasOwnProperty(key)) {
+        if (data[key] !== this._id) {
+          this.fire('change', [{ action: 'id', name: key, value: data[key] }]);
+        }
+      }
       
       // process data
       var deltas = this.processData(data, true);
@@ -2032,6 +2041,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         this.handles.push(data.on('change', this.onCollectionUpdate, this));
       } else if (data instanceof Array) {
         this.bindList(this.target, data);
+        for (var i=0; i<data.length; i++) {
+          this.handles.push(data[i].on('change', this.onModelUpdate, this));
+        }
       } else if (data instanceof Model) {
         this.bindModel(this.target, data);
         this.handles.push(data.on('change', this.onModelUpdate, this));
@@ -2085,9 +2097,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       
       // set target
       var target;
-      
-      
-      
+            
       if (this.target.attr('itemid') === id.toString() && this.target.attr('itemtype') === type) {
         target = this.target;
         if (action === 'id') {
@@ -2128,7 +2138,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     },
     
     bindList: function(target, list) {
-            
+                  
       // find and store list template
       var itemscope = target.find('[itemscope]:first');
       var template = itemscope.clone();
@@ -2161,10 +2171,10 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         output.append(instance);
       
       }
-      
+            
       // replace the target
-      target.replaceWith(output);
-      
+      target.html(output.html());
+            
     },
     
     bindModel: function(target, model) {
@@ -2417,7 +2427,6 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       
       // setup bindings
       this._bindings = {};
-      this._handles = {};
       
       // store states
       this._loaded = false;
@@ -3343,18 +3352,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       if (this._bindings.hasOwnProperty(element)) {
         this.unbind(element);
       }
-    
-      if (this._handles.hasOwnProperty(element)) {
-        this._handles[element].detach();
-        delete this._handles[element];
-      }
-      
-      if (data instanceof Model) {
-        this._handles[element] = data.on('change', function(e) {
-          this.bind(element, e.target);
-        }, this);
-      }
-      
+
       this._bindings[element] = new Binding(this.getElement(element));
       this._bindings[element].bind(data);
             
@@ -3371,17 +3369,6 @@ Array.prototype.indexOf = [].indexOf || function(item) {
        delete this._bindings[element];
       }
       
-      if (this._handles.hasOwnProperty(element)) {
-        this._handles[element].detach();
-        delete this._handles[element];
-      }
-      
-    },
-    
-    onChange: function(e) {
-    
-      console.log('change', e);
-    
     },
     
     
@@ -3495,16 +3482,18 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     
       // store configs
       this.name = config.name;
+      this.version = config.hasOwnProperty('version') ? config.version : null;
       this.required = config.hasOwnProperty('required') ? config.required : [];
       this.loaded = false;
       this.online = false;
+      
       this.env = config.hasOwnProperty('env') ? config.env : 'PROD';
        
       // load dependencies
       for (var i = 0, len = this.required.length; i < len; i++) {
         Loader.loadModule(this.required[i]);
       }
-      
+            
       // setup vars
       this.servicePaths = {};
       this.services = {};
@@ -3768,6 +3757,21 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         Log.setLevel('DEBUG');
       } else {
         Log.setLevel(this.levels[this.env]);
+      }
+      
+      // handling versioning
+      var version = Storage.get('appversion');
+      var env = Storage.get('appenv');
+      
+      if (this.version && (this.version !== version || this.env !== env)) {
+        
+        // flush storage
+        Storage.flush(true);
+        
+        // store new version and env codes
+        Storage.set('appversion', this.version);
+        Storage.set('appenv', this.env);
+        
       }
       
       // check network status

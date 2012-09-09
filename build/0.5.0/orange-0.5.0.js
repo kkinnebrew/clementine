@@ -16,7 +16,9 @@ function clone(o) {
     if (i === 'clone') {
       continue;
     }
-    if (o[i] && typeof o[i] === "object") {
+    if (o[i] && o[i] instanceof Date) {
+      newObj[i] = new Date(o[i]);
+    } else if (o[i] && typeof o[i] === "object") {
       newObj[i] = clone(o[i]);
     } else {
       newObj[i] = o[i];
@@ -978,33 +980,40 @@ Array.prototype.indexOf = [].indexOf || function(item) {
   
   var Collection           = Orange.Collection;
   var Events               = Orange.Events;
-
   
   // ------------------------------------------------------------------------------------------------
   // Class Definition
   // ------------------------------------------------------------------------------------------------
     
   Model = Class.extend({
-    
+  
     initialize: function(data) {
       
       // get keys
       var key = this.getKey();
       
-      // setup config
-      this.id = (data || {}).hasOwnProperty(key) ? data[key] : null;
-      this.data = {};
-      this.fields = this.getFields();
-      this.hasChanges = false;
-      
+      // store data
+      this._id = null;
+      this._data = {};
+      this._changed = false;
+            
       // process data
       var fields = this.getFields();
       for (var field in fields) {
-        if (data.hasOwnProperty('field')) {
-          this.data[field] = data[field];
+        if (data.hasOwnProperty(field)) {
+          if (fields[field].hasOwnProperty('required')) {
+            if (fields[field].required && (typeof data[field] === 'undefined' || data[field] === null)) {
+              throw 'Field Missing: "' + field + '" on model "' + this.getType() + '"';
+            }
+          }
+          if (fields[field].type === Model.Field.KEY) {
+            this._id = Model.clean(data[field], fields[field]);
+          } else {
+            this._data[field] = Model.clean(data[field], fields[field]);
+          }
         }
       }
-      
+            
     },
     
     getType: function() {
@@ -1024,49 +1033,66 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       throw 'Cannot instantiate model';
     },
     
-    get: function(field) {
-      if (!this.fields.hasOwnProperty(name)) {
-        throw "Field does not exist";
+    get: function(name) {
+      var fields = this.getFields();
+      if (!fields.hasOwnProperty(name)) {
+        throw 'Invalid Input: Field for model "' + name + '" does not exist';
       }
-      return this.data[name];
+      return this._data[name];
     },
     
-    set: function(field, value) {
-      if (!this.fields.hasOwnProperty(name)) {
-        throw "Field does not exist";
+    set: function(name, value) {
+      var fields = this.getFields();
+      if (!fields.hasOwnProperty(name)) {
+        throw 'Invalid Input: Field for model "' + name + '" does not exist';
       }
-      this.data[name] = value;
-      this.hasChanges = true;
+      value = Model.clean(value, fields[name]);
+      if (typeof value === 'undefined') {
+        throw 'Invalid Input: Value is undefined for field "' + name + '"';
+      }
+      this._data[name] = value;
+      this._changed = true;
     },
     
-    clear: function(field) {
-      if (!this.fields.hasOwnProperty(name)) {
-        throw "Field does not exist";
+    clear: function(name) {
+      var fields = this.getFields();
+      if (!fields.hasOwnProperty(name)) {
+        throw 'Invalid Input: Field for model "' + name + '" does not exist';
       }
-      delete this.data[name];
-      this.hasChanges = true;
+      delete this._data[name];
+      this._changed = true;
     },
     
     getId: function() {
-      return this.id;
+      return this._id;
     },
     
     getModel: function() {
       return this.constructor;
     },
     
+    isChanged: function() {
+      return this._changed;
+    },
+    
     toObject: function() {
-      return this.data;
+      var obj = clone(this._data);
+      obj[this.getKey()] = this._id;
+      return obj;
     },
     
     destroy: function() {
-      delete this.id;
-      delete this.data;
-      delete this.fields;
-      delete this.hasChanges;
+      delete this._id;
+      delete this._data;
+      delete this._changed;
     }
-    
+  
   }).include(Events);
+  
+  
+  // ------------------------------------------------------------------------------------------------
+  // Model Class Methods
+  // ------------------------------------------------------------------------------------------------
   
   Model.get = function(name) {
     
@@ -1078,8 +1104,32 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     
   };
   
-  Model.extend = function(def) {
+  Model.registerType = function(key, callback) {
     
+    if (!Model.hasOwnProperty('types')) {
+      Model.types = {};
+    }
+    
+    Model.types[key] = callback;
+    
+  };
+  
+  Model.clean = function(data, params) {
+    
+    if (!Model.hasOwnProperty('types')) {
+      Model.types = {};
+    }
+    
+    if (Model.types.hasOwnProperty(params.type) && typeof Model.types[params.type] === 'function') {
+      return Model.types[params.type].call(this, data, params);
+    } else {
+      return data;
+    }
+    
+  };
+  
+  Model.extend = function(def) {
+        
     var m = Class.extend.call(this, def);
     
     var required = ['getType', 'getFields'];
@@ -1090,9 +1140,18 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       m[required[i]] = def[required[i]];
     }
     
+    var fields = def.getFields();
+    for (var field in fields) {
+      if (!fields[field].hasOwnProperty('type')) {
+        throw 'Invalid Field: Missing type declaration';
+      }
+    }
+    
     if (!Model.hasOwnProperty('models')) { Model.models = {}; }
     
     Model.models[m.getType()] = m;
+        
+    return m;
     
   };
   
@@ -1106,17 +1165,75 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     KEY:       1,
     TEXT:      2,
     URL:       3,
-    ASSET:     4,
+    DATE:      4,
     OBJECT:    5,
     ARRAY:     6,
-    MAP:       7,
-    MODEL:     8
+    MODEL:     8,
+    MONEY:     9,
+    PERCENT:   10,
+    NUMBER:    11
     
   };
   
-  Model.Asset = {
-    IMAGE: 1
-  };
+  
+  // ------------------------------------------------------------------------------------------------
+  // Model Validators
+  // ------------------------------------------------------------------------------------------------
+  
+  Model.registerType(Model.Field.KEY, function(data, params) {
+    if (params.hasOwnProperty('numeric')) {
+      data = !isNaN(data) ? parseInt(data, 10) : undefined;
+    }
+    if (!data) {
+      throw 'Invalid Data: Missing primary key';
+    }
+    return data;
+  });
+  
+  Model.registerType(Model.Field.TEXT, function(data, params) {
+    return typeof data === 'string' ? data : undefined;
+  });
+  
+  Model.registerType(Model.Field.URL, function(data, params) {
+    return typeof data === 'string' ? data : undefined;
+  });
+  
+  Model.registerType(Model.Field.DATE, function(data, params) {
+    var date;
+    try {
+      date = new Date(data);
+    } catch(e) {
+      console.log('date parse failed');
+    }
+    return date instanceof Date ? date : undefined;
+  });
+  
+  Model.registerType(Model.Field.OBJECT, function(data, params) {
+    return typeof data === 'object' ? data : undefined;
+  });
+  
+  Model.registerType(Model.Field.ARRAY, function(data, params) {
+    return data instanceof Array ? data : undefined;
+  });
+  
+  Model.registerType(Model.Field.MODEL, function(data, params) {
+    return data;
+  });
+  
+  Model.registerType(Model.Field.MONEY, function(data, params) {
+    if (typeof data === 'string') {
+      data = data.replace(/[$,]/g, '');
+    }
+    return !isNaN(data) ? parseFloat(data) : undefined;
+  });
+  
+  Model.registerType(Model.Field.PERCENT, function(data, params) {
+    return !isNaN(data) ? parseFloat(data) : undefined;
+  });
+  
+  Model.registerType(Model.Field.NUMBER, function(data, params) {
+    return !isNaN(data) ? parseFloat(data) : undefined;
+  });
   
   
   // ------------------------------------------------------------------------------------------------
@@ -1124,350 +1241,6 @@ Array.prototype.indexOf = [].indexOf || function(item) {
   // ------------------------------------------------------------------------------------------------
   
   Orange.Model = Model;
-  
-
-}(Orange));
-// ------------------------------------------------------------------------------------------------
-// Service Class
-// ------------------------------------------------------------------------------------------------
-
-(function(Orange) {
-
-  var Service;
-  
-  // ------------------------------------------------------------------------------------------------
-  // Dependencies
-  // ------------------------------------------------------------------------------------------------
-  
-  var Model                = Orange.Model;
-  var Storage              = Orange.Storage;
-  
-  
-  // ------------------------------------------------------------------------------------------------
-  // Class Definition
-  // ------------------------------------------------------------------------------------------------
-  
-  Service = Class.extend({
-    
-    initialize: function(config) {
-      
-      // store base url
-      if (config.hasOwnProperty('baseUrl')) {
-        if (config.baseUrl[config.baseUrl.length-1] === '/') {
-          this.baseUrl = config.baseUrl.substr(0, config.baseUrl.length-1);
-        } else {
-          this.baseUrl = config.baseUrl;
-        }
-      } else {
-        throw 'Cannot instantiate service';
-      }
-
-    },
-    
-    getName: function() {
-      throw 'Cannot instantiate service';
-    },
-    
-    getPath: function() {
-      throw 'Cannot instantiate service';
-    },
-
-    mapStatus: function(data) {
-      return data;
-    },
-    
-    mapError: function(data) {
-      return data;
-    },
-    
-    mapErrorMessage: function(data) {
-      return data;
-    },
-    
-    mapResponse: function(data) {
-      return data;
-    },
-    
-    goOnline: function() {
-      this.isOnline = true;
-    },
-    
-    goOffline: function() {
-      this.isOnline = false;
-    },
-    
-    request: function(path, method, params, conf, success, failure) {
-      
-      // build request url
-      var url = this.baseUrl + path;
-      
-      // validate method
-      if (!(method in ['GET', 'POST', 'PUT', 'DELETE'])) {
-        throw 'Invalid method type';
-      }
-      
-      // validate conf
-      if (!this.validateConf(conf)) {
-        throw 'Invalid configuration';
-      }
-      
-      // build error function
-      function onError(err) {
-        
-        var msg;
-        
-        switch(err) {
-          case 'parse':
-            msg = 'Error parsing response';
-            break;
-          case 'offline':
-            msg = 'Service offline';
-            break;
-          default:
-            msg = 'Service error';
-        }
-        
-        // call failure
-        failure(msg);
-        
-      }
-      
-      // check the connection
-      if (!this.isOnline) {
-      
-        // check offline support
-        if (conf.offline && method === 'GET') {
-          
-          // look for cached response
-          var response = this.retrieveResponse(path, method, params);
-          
-          // if it exists, call success
-          if (response) {
-            success(response);
-            return;
-          }
-          
-        }
-        
-        // call error
-        onError('offline');
-        return;
-      
-      }
-      
-      // build success function
-      function onSuccess(data) {
-        
-        try {
-        
-          // process result
-          data = conf.callback(data);
-          
-          // map result
-          if (conf.from === 'array' && conf.to === 'collection') {
-            data = this.parseArrayToCollection(data, conf.map);
-          } else if (conf.from === 'object' && conf.to === 'collection') {
-            data = this.parseObjectToCollection(data, conf.map);
-          } else if (conf.from === 'object' && conf.to === 'model') {
-            data = this.parseObjectToModel(data, conf.map);
-          }
-          
-          // cache result
-          if (conf.cache) {
-          
-            // push results to cache
-            this.cacheResponse(path, method, data);
-            
-          }
-          
-          // call success
-          success(data);
-        
-        } catch(e) {
-          onError('parse');
-        }
-      
-      }
-      
-      // call service
-      $.ajax({
-        url: url,
-        type: method,
-        data: params,
-        success: onSuccess,
-        error: onError
-      });
-      
-    },
-    
-    validateConf: function(conf) {
-      var params = ['map', 'from', 'to', 'offline', 'cache', 'callback'];
-      for (var i=0; i<params.length; i++) {
-        if (!conf.hasOwnProperty(params[i])) {
-          return false;
-        }
-        if (params[i] === 'map') {
-          if (!this.validateMap(conf[params[i]])) {
-            return false;
-          }
-        }
-      }
-    },
-    
-    validateMap: function(map) {
-      var valid = true;
-      if (!map.hasOwnProperty('model')) {
-        valid = false;
-      } else {
-        if (!Model.get(map.model)) {
-          valid = false;
-        }
-      }
-      if (!map.hasOwnProperty('params')) {
-        valid = false;
-      }
-      return valid;
-    },
-    
-    parseObjectToModel: function(obj, map) {
-      
-      var mappedObj = {};
-      var model;
-      var result;
-      
-      for (var field in map.params) {
-        if (obj.hasOwnProperty(map.params[field])) {
-          mappedObj[field] = obj[map.params[field]];
-        }
-      }
-      
-      model = Model.get(map.model);
-      result = new model(mappedObj);
-      
-      return result || false;
-      
-    },
-    
-    parseArrayToCollection: function(obj, map) {
-    
-      var objects = [];
-      var object;
-    
-      if (typeof obj !== 'Array') {
-        return false;
-      }
-      
-      for (var i=0; i<obj.length; i++) {
-        object = this.parseObjectToModel(obj, map);
-        if (object) {
-          objects.push(object);
-        }
-      }
-      
-      return objects;
-    
-    },
-    
-    parseObjectToCollection: function(obj, map) {
-      var list = [];
-      for (var i in obj) {
-        list.push(obj);
-      }
-      this.parseArrayToCollection(list, map);
-    },
-    
-    cacheResponse: function(path, method, response) {
-    
-      var cache;
-    
-      // build cache object
-      if (response instanceof Array) {
-        cache = [];
-        for (var i=0; i<response.length; i++) {
-          if (response[i] instanceof Model) {
-            cache.push({
-              model: response[i].getModel().getType(),
-              id: response[i].getId()
-            });
-          } else {
-            cache.push(response[i]);
-          }
-        }
-      } else if (response instanceof Model) {
-        
-        cache = {
-          model: response.getModel().getType(),
-          id: response.getId()
-        };
-        
-      } else {
-        cache = response;
-      }
-      
-      // build key
-      var key = this.getName() + ':' + method + ':' + path;
-      
-      // fetch key
-      return Storage.set(key, cache);
-    
-    },
-    
-    retrieveResponse: function(path, method) {
-    
-      // build key
-      var key = this.getName() + ':' + method + ':' + path;
-      
-      // fetch key
-      var cache = Storage.get(key);
-      
-      // return object
-      return cache || null;
-      
-    }
-    
-  });
-  
-  
-  // ------------------------------------------------------------------------------------------------
-  // Object Methods
-  // ------------------------------------------------------------------------------------------------
-  
-  Service.get = function(name) {
-    
-    if (!Service.hasOwnProperty('services')) {
-      Service.services = {};
-    }
-    
-    if (Service.services.hasOwnProperty(name)) {
-      return Service.services[name];
-    }
-  
-  };
-  
-  Service.extend = function(def) {
-    
-    var s = Class.extend.call(this, def);
-    
-    var required = ['getType'];
-    for (var i = 0; i < required.length; i++) {
-      if (!def.hasOwnProperty(required[i])) {
-        throw "Class missing '" + required[i] + "()' implementation";
-      }
-      s[required[i]] = def[required[i]];
-    }
-    
-    if (!Service.hasOwnProperty('services')) { Service.services = {}; }
-    
-    Service.services[s.getType()] = s;
-    
-  };
-  
-  
-  // ------------------------------------------------------------------------------------------------
-  // Exports
-  // ------------------------------------------------------------------------------------------------
-  
-  Orange.Service = Service;
   
 
 }(Orange));
@@ -1544,7 +1317,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
   
   Storage.set = function(key, value, ttl) {
   
-    if (!supported || typeof value === 'undefined' || !key.match(/[^A-Za-z:0-9_\[\]]/g)) {
+    if (!supported || typeof value === 'undefined' || !!key.match(/[^A-Za-z:0-9_\[\]]/g)) {
       return false;
     }
         
@@ -1595,13 +1368,394 @@ Array.prototype.indexOf = [].indexOf || function(item) {
   Storage.goOffline = function() {
     online = false;
   };
-  
+    
   
   // ------------------------------------------------------------------------------------------------
   // Exports
   // ------------------------------------------------------------------------------------------------
   
   Orange.Storage = Storage;
+  
+
+}(Orange));
+// ------------------------------------------------------------------------------------------------
+// Service Class
+// ------------------------------------------------------------------------------------------------
+
+(function(Orange) {
+
+  var Service;
+  
+  // ------------------------------------------------------------------------------------------------
+  // Dependencies
+  // ------------------------------------------------------------------------------------------------
+  
+  var Collection  = Orange.Collection;
+  var Model       = Orange.Model;
+  var Storage     = Orange.Storage;
+  
+  
+  // ------------------------------------------------------------------------------------------------
+  // Private Functions
+  // ------------------------------------------------------------------------------------------------
+  
+  function validateConfiguration(conf) {
+    var params = ['map', 'from', 'to', 'offline', 'cache', 'callback'];
+    for (var i=0; i<params.length; i++) {
+      if (!conf.hasOwnProperty(params[i])) {
+        return false;
+      }
+      if (params[i] === 'map') {
+        if (!validateMap(conf[params[i]])) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  
+  function validateMap(map) {
+    if (!map.hasOwnProperty('model') || !Model.get(map.model) || !map.hasOwnProperty('params')) {
+      return false;
+    }
+    return true;
+  }
+  
+  function mapArrayToCollection(map, data) {
+    
+    var objects = [];
+    var object;
+  
+    if (typeof data !== 'Array') {
+      return false;
+    }
+    
+    for (var i=0; i<data.length; i++) {
+      object = mapObjectToModel(data, map);
+      if (object) {
+        objects.push(object);
+      }
+    }
+    
+    return objects;
+    
+  }
+  
+  function mapObjectToCollection(map, data) {
+    
+    var list = [];
+    for (var i in data) {
+      list.push(data);
+    }
+    mapArrayToCollection(list, map);
+    
+  }
+  
+  function mapObjectToModel(map, data) {
+    
+    var mappedObj = {};
+    var model;
+    var result;
+    
+    for (var field in map.params) {
+      if (data.hasOwnProperty(map.params[field])) {
+        mappedObj[field] = data[map.params[field]];
+      }
+    }
+    
+    model = Model.get(map.model);
+    result = new model(mappedObj);
+    
+    return result || false;
+  
+  }
+  
+  // ------------------------------------------------------------------------------------------------
+  // Class Definition
+  // ------------------------------------------------------------------------------------------------
+  
+  Service = Class.extend({
+    
+    initialize: function(config) {
+      
+      // set online
+      this.isOnline = true;
+      
+      // set local cache
+      this.cache = [];
+
+    },
+    
+    getType: function() {
+      throw 'Cannot instantiate service';
+    },
+    
+    getPath: function() {
+      return '';
+    },
+    
+    goOnline: function() {
+      this.isOnline = true;
+    },
+    
+    goOffline: function() {
+      this.isOnline = false;
+    },
+    
+    request: function(path, method, params, conf, success, failure, context) {
+      
+      // build request url
+      var url = this.getPath() + path;
+      var response;
+      
+      // validate method
+      if (['GET', 'POST', 'PUT', 'DELETE'].indexOf(method) === -1) {
+        throw 'Invalid method type';
+      }
+      
+      // validate conf
+      if (!validateConfiguration(conf)) {
+        throw 'Invalid configuration';
+      }
+      
+      // build key
+      var keys = Object.keys(params).sort();
+      var key = 'service:' + this.getType() + ':';
+      
+      for (var i=0; i<keys.length; i++) {
+        key += keys[i] + ':' + md5(params[keys[i]]) + ':';
+      }
+            
+      // build error function
+      function onError(err) {
+        
+        var msg;
+        
+        switch(err) {
+          case 'parse':
+            msg = 'Error parsing response';
+            break;
+          case 'offline':
+            msg = 'Service offline';
+            break;
+          default:
+            msg = 'Service error';
+        }
+        
+        // call failure
+        failure.call(context, msg);
+        
+      }
+      
+      // check if cached
+      if (conf.cache && this.cache.hasOwnProperty(key)) {
+        
+        // check if expired
+        if (this.cache[key] > new Date().getTime()) {
+          
+          try {
+                    
+            // look for cached response
+            response = this.retrieveResponse(key, conf.map.model, params);
+
+          } catch(e) {}
+          
+          // if it exists, call success
+          if (response) {
+            success.call(context, response);
+            return;
+          }
+          
+        }
+        
+      }
+      
+      // check the connection
+      if (!this.isOnline) {
+      
+        // check offline support
+        if (conf.offline && method === 'GET') {
+
+          try {
+          
+            // look for cached response
+            response = this.retrieveResponse(key, conf.map.model, params);
+
+          } catch(e) {}
+          
+          // if it exists, call success
+          if (response) {
+            success.call(context, response);
+            return;
+          }
+          
+        }
+        
+        // call error
+        onError('offline');
+        return;
+      
+      }
+      
+      // build success function
+      function onSuccess(data) {
+        
+        try {
+        
+          // process result
+          data = conf.callback(data);
+          
+          // map result
+          if (conf.from === 'array' && conf.to === 'collection') {
+            data = mapArrayToCollection(conf.map, data);
+          } else if (conf.from === 'object' && conf.to === 'collection') {
+            data = mapObjectToCollection(conf.map, data);
+          } else if (conf.from === 'object' && conf.to === 'model') {
+            data = mapObjectToModel(conf.map, data);
+          }
+          
+          // cache result
+          if (conf.cache && method === 'GET') {
+          
+            // push results to cache
+            this.cacheResponse(key, data);
+            
+          }
+          
+          // call success
+          success.call(context, data);
+        
+        } catch(e) {
+          onError('parse');
+        }
+      
+      }
+      
+      // call service
+      $.ajax({
+        url: url,
+        type: method,
+        data: params,
+        success: proxy(onSuccess, this),
+        error: onError
+      });
+      
+    },
+    
+    cacheResponse: function(key, response) {
+    
+      var cache;
+      var type = 'object';
+      
+      // build cache object
+      if (response instanceof Array) {
+        cache = [];
+        for (var i=0; i<response.length; i++) {
+          if (response[i] instanceof Model) {
+            cache.push(response[i].getId());
+            Storage.set(response[i].getType() + ':' + response[i].getId(), response[i].toObject());
+            type = 'collection';
+          } else {
+            cache.push(response[i]);
+            type = 'array';
+          }
+        }
+      } else if (response instanceof Model) {
+        cache = response.getId();
+        Storage.set(response.getType() + ':' + cache, response.toObject());
+        type = 'model';
+      } else {
+        cache = response;
+      }
+      
+      this.cache[key] = new Date().getTime() + 1000*60;
+      
+      // set key
+      return Storage.set(key, {
+        type: type,
+        data: cache
+      });
+    
+    },
+    
+    retrieveResponse: function(key, model, method) {
+
+      // fetch key
+      var cache = Storage.get(key);
+      var modelClass = Model.get(model);
+      
+      // validate type
+      var type = cache.type;
+      var data = cache.data;
+      
+      if (type === 'model') {
+        var item = Storage.get(model + ':' + data);
+        var m = new modelClass(item);
+        return m || null;
+      } else if (type === 'collection') {
+        var objs = [];
+        var obj;
+        for (var i=0; i<cache.length; i++) {
+          obj = new modelClass(Storage.get(model + ':' + cache[i]));
+          if (obj) {
+            objs.push(obj);
+          }
+        }
+        return objs;
+      }
+      
+      // return object
+      return cache || null;
+      
+    }
+    
+  });
+  
+  
+  // ------------------------------------------------------------------------------------------------
+  // Object Methods
+  // ------------------------------------------------------------------------------------------------
+  
+  Service.get = function(name) {
+    
+    if (!Service.hasOwnProperty('services')) {
+      Service.services = {};
+    }
+    
+    if (Service.services.hasOwnProperty(name)) {
+      return Service.services[name];
+    }
+  
+  };
+  
+  Service.extend = function(def) {
+    
+    var s = Class.extend.call(this, def);
+    
+    if (!Service.hasOwnProperty('services')) {
+      Service.services = {};
+    }
+    
+    var required = ['getType'];
+    for (var i = 0; i < required.length; i++) {
+      if (!def.hasOwnProperty(required[i])) {
+        throw "Class missing '" + required[i] + "()' implementation";
+      }
+      s[required[i]] = def[required[i]];
+    }
+    
+    Service.services[s.getType()] = s;
+    
+    return s;
+    
+  };
+  
+  
+  // ------------------------------------------------------------------------------------------------
+  // Exports
+  // ------------------------------------------------------------------------------------------------
+  
+  Orange.Service = Service;
   
 
 }(Orange));

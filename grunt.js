@@ -8,7 +8,7 @@ module.exports = function(grunt) {
       banner: '/**\n * <%= pkg.title || pkg.name %> | <%= pkg.version %> | ' + '<%= grunt.template.today("mm.dd.yyyy") %>\n' + ' * <%= pkg.homepage ? pkg.homepage : "" %>\n' + ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author %>\n */'
     },
     lint: {
-      files: ['grunt.js', 'lib/*.js', 'spec/**/*.js']
+      files: ['grunt.js', 'lib/*.js', 'demos/stocks/js/*.js', 'spec/**/*.js']
     },
     qunit: {
       files: []
@@ -39,8 +39,8 @@ module.exports = function(grunt) {
           'lib/form.js',
           'lib/location.js',
           'lib/model.js',
-          'lib/service.js',
           'lib/storage.js',
+          'lib/service.js',
           'lib/view.js',
           'lib/auth.js',
           'lib/binding.js',
@@ -94,7 +94,9 @@ module.exports = function(grunt) {
         proxy: true,
         include: true,
         describe: true,
+        md5: true,
         it: true,
+        clone: true,
         expect: true,
         noop: true,
         before: true,
@@ -109,6 +111,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha');
     
   // Default task.
-  grunt.registerTask('default', 'lint mocha concat min');
+  grunt.registerTask('default', 'lint concat min');
 
 };

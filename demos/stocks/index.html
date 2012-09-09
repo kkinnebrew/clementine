@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+
+<title>TickerType</title>
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="lib/md5.min.js"></script>
+<script type="text/javascript" src="../../build/0.5.0/orange-0.5.0.js"></script>
+
+<script type="text/javascript" src="js/config.js"></script>
+<script type="text/javascript" src="js/controllers.js"></script>
+<script type="text/javascript" src="js/models.js"></script>
+<script type="text/javascript" src="js/services.js"></script>
+
+<script type="text/javascript">
+
+Orange.use('tickertype-models', 'tickertype-services', function() {
+    
+  var Account      = include('tickertype-models').Account;
+  var Portfolio    = include('tickertype-models').Portfolio;
+  var Position     = include('tickertype-models').Position;
+  var PositionLine = include('tickertype-models').PositionLine;
+  var Symbol       = include('tickertype-models').Symbol;
+    
+  var a = new Account({
+    id: 1,
+    username: 'kevin.kinnebrew@gmail.com',
+    firstName: 'Kevin',
+    lastName: 'Kinnebrew',
+    createDate: '2012-08-08',
+    loginDate: new Date(2012, 9, 8)
+  });
+  
+  console.log(a.toObject());
+  
+  var pt = new Portfolio({
+    id: 2,
+    name: 'My Portfolio',
+    shortRate: '0.25',
+    longRate: '0.18',
+    carryLoss: '$3,150.00'
+  });
+  
+  console.log(pt.toObject());
+  
+  var po = new Position({
+    id: 2,
+    symbol: 'AAPL',
+    quantity: '6',
+    cost: '$459.33'
+  });
+  
+  console.log(po.toObject());
+  
+  var pl = new PositionLine({
+    id: 5,
+    symbol: 'BAC',
+    tradeDate: '5/16/2011',
+    quantity: '45',
+    cost: '24.56'
+  });
+  
+  console.log(pl.toObject());
+  
+  var s = new Symbol({
+    id: 4,
+    symbol: 'BAC',
+    price: '28.44',
+    priceChange: '0.56',
+    percentChange: '0.0156',
+    marketCap: '1454754501',
+    peRatio: '12.98',
+    lastTradeDate: new Date(2012, 9, 7),
+    volume: '251006500'
+  });
+  
+  console.log(s.toObject());
+  
+  console.log(s.get('symbol'));
+  
+  console.log(s.get('price'));
+  
+  s.set('price', '$26.04');
+  
+  console.log(s.get('price'));
+  
+  console.log(s.toObject());
+  
+  s.clear('marketCap');
+  
+  console.log(s.toObject());
+  
+  
+  var AccountService = include('tickertype-services').AccountService;
+  
+  var as = new AccountService();
+  
+  var context = {
+    test: 'test'
+  };
+  
+  function success(data) {
+    console.log('succeeded', data.toObject(), this.test);
+  }
+  
+  function failure() {
+    console.log("failed");
+  }
+  
+  as.authenticate('kevin.kinnebrew@gmail.com', 'pass', success, failure, context);
+  
+  setTimeout(function() {
+      as.authenticate('kevin.kinnebrew@gmail.com', 'pass', success, failure, context);
+  }, 500);
+  
+});
+
+</script>
+
+<link type="text/css" rel="stylesheet" href="css/app.css"
+
+</head>
+
+<body>
+
+<h1>TickerType</h1>
+
+</body>
+
+</html>

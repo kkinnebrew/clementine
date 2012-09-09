@@ -31,10 +31,10 @@ Orange.add('tickertype-models', function(exports) {
     
     getFields: function() {
       return {
-        id:          { type: Field.KEY, numeric: true },
-        username:    { type: Field.TEXT },
-        firstName:   { type: Field.TEXT },
-        lastName:    { type: Field.TEXT },
+        id:          { type: Field.KEY, required: true, numeric: true },
+        username:    { type: Field.TEXT, required: true },
+        firstName:   { type: Field.TEXT, required: true },
+        lastName:    { type: Field.TEXT, required: true },
         createDate:  { type: Field.DATE },
         loginDate:   { type: Field.DATE }
       };
@@ -50,8 +50,8 @@ Orange.add('tickertype-models', function(exports) {
     
     getFields: function() {
       return {
-        id:          { type: Field.KEY },
-        name:        { type: Field.TEXT },
+        id:          { type: Field.KEY, required: true, numeric: true },
+        name:        { type: Field.TEXT, required: true },
         shortRate:   { type: Field.PERCENT, precision: 0 },
         longRate:    { type: Field.PERCENT, precision: 0 },
         carryLoss:   { type: Field.MONEY, currency: 'USD' }
@@ -68,8 +68,9 @@ Orange.add('tickertype-models', function(exports) {
     
     getFields: function() {
       return {
-        id:              { type: Field.KEY },
-        symbol:          { type: Field.MODEL, model: 'symbol' },
+        id:              { type: Field.KEY, required: true, numeric: true },
+        price:           { type: Field.MONEY, required: true, currency: 'USD' },
+        symbol:          { type: Field.MODEL, required: true, model: 'symbol' },
         quantity:        { type: Field.NUMBER },
         cost:            { type: Field.MONEY, currency: 'USD' }
       };

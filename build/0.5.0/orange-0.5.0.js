@@ -996,24 +996,26 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       this._id = null;
       this._data = {};
       this._changed = false;
+      
+      var isKey = false;
             
-      // process data
+      // fetch fields
       var fields = this.getFields();
-      for (var field in fields) {
-        if (data.hasOwnProperty(field)) {
-          if (fields[field].hasOwnProperty('required')) {
-            if (fields[field].required && (typeof data[field] === 'undefined' || data[field] === null)) {
-              throw 'Field Missing: "' + field + '" on model "' + this.getType() + '"';
-            }
-          }
-          if (fields[field].type === Model.Field.KEY) {
-            this._id = Model.clean(data[field], fields[field]);
+      
+      // process data
+      for (var i in fields) {
+        isKey = fields[i].type === Model.Field.KEY;
+        if (data.hasOwnProperty(i) && typeof data[i] !== 'undefined') {
+          if (isKey) {
+            this._id = Model.clean(data[i], fields[i]);
           } else {
-            this._data[field] = Model.clean(data[field], fields[field]);
+            this._data[i] = Model.clean(data[i], fields[i]);
           }
+        } else if (fields[i].hasOwnProperty('required') && fields[i].required || isKey) {
+          throw 'Field Missing: "' + i + '" on model "' + this.getType() + '"';
         }
       }
-            
+          
     },
     
     getType: function() {
@@ -1228,6 +1230,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
   });
   
   Model.registerType(Model.Field.PERCENT, function(data, params) {
+    if (typeof data === 'string') {
+      data = data.replace(/[%]/g, '');
+    }
     return !isNaN(data) ? parseFloat(data) : undefined;
   });
   
@@ -1426,12 +1431,12 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     var objects = [];
     var object;
   
-    if (typeof data !== 'Array') {
+    if (!(data instanceof Array)) {
       return false;
     }
     
     for (var i=0; i<data.length; i++) {
-      object = mapObjectToModel(data, map);
+      object = mapObjectToModel(map, data[i]);
       if (object) {
         objects.push(object);
       }
@@ -1445,9 +1450,10 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     
     var list = [];
     for (var i in data) {
-      list.push(data);
+      list.push(data[i]);
     }
-    mapArrayToCollection(list, map);
+    
+    return mapArrayToCollection(map, list);
     
   }
   
@@ -1505,7 +1511,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     request: function(path, method, params, conf, success, failure, context) {
       
       // build request url
-      var url = this.getPath() + path;
+      var base = this.getPath();
+      
+      var url = (base.charAt(0) === '/' ? base.substr(1) : base) + path;
       var response;
       
       // validate method
@@ -1527,7 +1535,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       }
             
       // build error function
-      function onError(err) {
+      function onError(err, e) {
         
         var msg;
         
@@ -1543,7 +1551,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         }
         
         // call failure
-        failure.call(context, msg);
+        failure.call(context || this, e);
         
       }
       
@@ -1562,7 +1570,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
           
           // if it exists, call success
           if (response) {
-            success.call(context, response);
+            success.call(context || this, response);
             return;
           }
           
@@ -1585,7 +1593,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
           
           // if it exists, call success
           if (response) {
-            success.call(context, response);
+            success.call(context || this, response);
             return;
           }
           
@@ -1607,11 +1615,23 @@ Array.prototype.indexOf = [].indexOf || function(item) {
           
           // map result
           if (conf.from === 'array' && conf.to === 'collection') {
-            data = mapArrayToCollection(conf.map, data);
+            if (data instanceof Array) {
+              data = mapArrayToCollection(conf.map, data);
+            } else {
+              throw 'Invalid Response: Service "' + url + '" expected an array';
+            }
           } else if (conf.from === 'object' && conf.to === 'collection') {
-            data = mapObjectToCollection(conf.map, data);
+            if (typeof data === 'object' && !(data instanceof Array)) {
+              data = mapObjectToCollection(conf.map, data);
+            } else {
+              throw 'Invalid Response: Service "' + url + '" expected an object';
+            }
           } else if (conf.from === 'object' && conf.to === 'model') {
-            data = mapObjectToModel(conf.map, data);
+            if (typeof data === 'object') {
+              data = mapObjectToModel(conf.map, data);
+            } else {
+              throw 'Invalid Response: Service "' + url + '" expected an object';
+            }
           }
           
           // cache result
@@ -1621,13 +1641,14 @@ Array.prototype.indexOf = [].indexOf || function(item) {
             this.cacheResponse(key, data);
             
           }
-          
-          // call success
-          success.call(context, data);
         
         } catch(e) {
-          onError('parse');
+          onError('parse', e);
+          return;
         }
+        
+        // call success
+        success.call(context || this, data);
       
       }
       

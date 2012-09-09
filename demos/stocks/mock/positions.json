@@ -1,0 +1,58 @@
+{ 
+  "positions": [{
+    "positionId": "342",
+    "price": "$36.22",
+    "symbol": "BAC",
+    "quantity": "37",
+    "costBasis": "$45.32"
+  },
+  {
+    "positionId": "344",
+    "price": "$36.22",
+    "symbol": "COL",
+    "quantity": "46",
+    "costBasis": "$28.97"
+  },
+  {
+    "positionId": "345",
+    "price": "$68.71",
+    "symbol": "DE",
+    "quantity": "22",
+    "costBasis": "$38.40"
+  },
+  {
+    "positionId": "346",
+    "price": "$16.45",
+    "symbol": "GM",
+    "quantity": "76",
+    "costBasis": "$45.32"
+  },
+  {
+    "positionId": "347",
+    "price": "$18.98",
+    "symbol": "MON",
+    "quantity": "87",
+    "costBasis": "$12.31"
+  },
+  {
+    "positionId": "348",
+    "price": "$45.33",
+    "symbol": "ORCL",
+    "quantity": "65",
+    "costBasis": "$50.60"
+  },
+  {
+    "positionId": "349",
+    "price": "$73.12",
+    "symbol": "RIG",
+    "quantity": "34",
+    "costBasis": "$58.78"
+  },
+  {
+    "positionId": "350",
+    "price": "$44.03",
+    "symbol": "WFC",
+    "quantity": "34",
+    "costBasis": "$41.20"
+  }]
+}

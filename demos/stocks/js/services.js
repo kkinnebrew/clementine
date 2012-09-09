@@ -35,11 +35,70 @@ Orange.add('tickertype-services', function(exports) {
     
   };
   
+  var PortfolioMap = {
+  
+    model: 'portfolio',
+    params: {
+      id: 'portfolioId',
+      name: 'portfolioName',
+      shortRate: 'shortRate',
+      longRate: 'longRate',
+      carryLoss: 'carryLoss'
+    }
+    
+  };
+  
+  var PositionMap = {
+  
+    model: 'position',
+    params: {
+      id: 'positionId',
+      price: 'price',
+      symbol: 'symbol',
+      quantity: 'quantity',
+      cost: 'costBasis'
+    }
+    
+  };
+  
+  var PositionLineMap = {
+  
+    model: 'position-line',
+    params: {
+      id: 'accountId',
+      username: 'email',
+      firstName: 'first',
+      lastName: 'last',
+      createDate: 'createdDate',
+      loginDate: 'loginDate'
+    }
+    
+  };
+  
+  var SymbolMap = {
+  
+    model: 'symbol',
+    params: {
+      id: 'accountId',
+      username: 'email',
+      firstName: 'first',
+      lastName: 'last',
+      createDate: 'createdDate',
+      loginDate: 'loginDate'
+    }
+    
+  };
+  
   
   // ------------------------------------------------------------------------------------------------
   // Service Definitions
   // ------------------------------------------------------------------------------------------------
 
+  /**
+   * @name account
+   * @requires account
+   * @endpoint authenticate
+   */
   AccountService = Service.extend({
     
     getType: function() {
@@ -47,7 +106,7 @@ Orange.add('tickertype-services', function(exports) {
     },
     
     getPath: function() {
-      return 'account';
+      return '/mock';
     },
     
     authenticate: function(email, password, success, error, context) {
@@ -56,8 +115,8 @@ Orange.add('tickertype-services', function(exports) {
         map: AccountMap,
         from: 'object',
         to: 'model',
-        offline: true,
-        cache: true,
+        offline: false,
+        cache: false,
         callback: function(source) {
           return source.account;
         }
@@ -70,38 +129,62 @@ Orange.add('tickertype-services', function(exports) {
       
       this.request('/account.json', 'GET', params, map, success, error, context);
       
+    }
+    
+  });
+  
+  /**
+   * @name portfolio
+   * @requires portfolio
+   * @requires position
+   * @endpoint getPortfolio
+   */
+  PortfolioService = Service.extend({
+    
+    getType: function() {
+      return 'portfolio';
     },
     
-    register: function(params, success, error, context) {
-      
+    getPath: function() {
+      return '/mock';
+    },
+    
+    getPortfolio: function(success, error, context) {
+    
       var map = {
-        map: AccountMap,
+        map: PortfolioMap,
         from: 'object',
         to: 'model',
         offline: true,
         cache: true,
         callback: function(source) {
-          return source;
+          return source.portfolio;
         }
       };
       
-      var data = {
-        email: params.email,
-        password: params.password,
-        first: params.firstName,
-        last: params.lastName
+      this.request('/portfolio.json', 'GET', {}, map, success, error, context);
+      
+    },
+    
+    getPositionsForPortfolio: function(portfolio, success, error, context) {
+      
+      var map = {
+        map: PositionMap,
+        from: 'array',
+        to: 'collection',
+        offline: true,
+        cache: true,
+        callback: function(source) {
+          return source.positions;
+        }
       };
       
-      //this.request('/account.json', 'GET', data, map, success, error, context);
+      var params = {
+        portfolioId: modelOrId(portfolio)
+      };
       
-    }
+      this.request('/positions.json', 'GET', params, map, success, error, context);
     
-  });
-  
-  PortfolioService = Service.extend({
-    
-    getType: function() {
-      return 'portfolio';
     }
     
   });
@@ -129,7 +212,7 @@ Orange.add('tickertype-services', function(exports) {
   // ------------------------------------------------------------------------------------------------
 
   exports.AccountService   = AccountService;
-  exports.PorfolioService  = PortfolioService;
+  exports.PortfolioService = PortfolioService;
   exports.QuoteService     = QuoteService;
   
 

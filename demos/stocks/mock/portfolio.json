@@ -1,0 +1,9 @@
+{ 
+  "portfolio": {
+    "portfolioId": "12",
+    "portfolioName": "My Portfolio",
+    "shortRate": "25%",
+    "longRate": "15%",
+    "carryLoss": "3150"
+  }
+}

@@ -78,12 +78,16 @@ Orange.add('tickertype-services', function(exports) {
   
     model: 'symbol',
     params: {
-      id: 'accountId',
-      username: 'email',
-      firstName: 'first',
-      lastName: 'last',
-      createDate: 'createdDate',
-      loginDate: 'loginDate'
+      id: 'symbolId',
+      symbol: 'symbol',
+      name: 'name',
+      price: 'price',
+      priceChange: 'priceChange',
+      percentChange: 'priceChangePercent',
+      marketCap: 'marketCap',
+      peRatio: 'peRatio',
+      lastTradeDate: 'lastTrade',
+      volume: 'volume'
     }
     
   };
@@ -213,6 +217,35 @@ Orange.add('tickertype-services', function(exports) {
     
     getType: function() {
       return 'quote';
+    },
+    
+    getPath: function() {
+      return '/mock';
+    },
+    
+    getSymbol: function(symbol, success, error, context) {
+            
+      var map = {
+        map: SymbolMap,
+        from: 'object',
+        to: 'model',
+        offline: true,
+        cache: true,
+        callback: function(source) {
+          return source.quote;
+        }
+      };
+      
+      if (typeof symbol !== 'string') {
+        return error.call(this);
+      }
+      
+      var params = {
+        symbol: symbol
+      };
+      
+      this.request('/quote.json', 'GET', params, map, success, error, context);
+      
     }
     
   });

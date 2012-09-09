@@ -1237,6 +1237,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
   });
   
   Model.registerType(Model.Field.NUMBER, function(data, params) {
+    if (typeof data === 'string') {
+      data = data.replace(/[,]/g, '');
+    }
     return !isNaN(data) ? parseFloat(data) : undefined;
   });
   

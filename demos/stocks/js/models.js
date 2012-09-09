@@ -106,6 +106,7 @@ Orange.add('tickertype-models', function(exports) {
       return {
         id:            { type: Field.KEY },
         symbol:        { type: Field.TEXT },
+        name:          { type: Field.TEXT },
         price:         { type: Field.MONEY, currency: 'USD' },
         priceChange:   { type: Field.MONEY, currency: 'USD' },
         percentChange: { type: Field.PERCENT, precision: 2 },

@@ -22,6 +22,7 @@ Orange.use('tickertype-models', 'tickertype-services', function() {
 
   var AccountService = include('tickertype-services').AccountService;
   var PortfolioService = include('tickertype-services').PortfolioService;
+  var QuoteService = include('tickertype-services').QuoteService;
   
   var as = new AccountService();
   
@@ -66,6 +67,10 @@ Orange.use('tickertype-models', 'tickertype-services', function() {
     }, failure);
   
   }, failure);
+  
+  var qs = new QuoteService();
+  
+  qs.getSymbol('BAC', success, failure);
   
   
 });

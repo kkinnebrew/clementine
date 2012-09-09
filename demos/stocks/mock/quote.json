@@ -5,10 +5,10 @@
     "name": "Bank of America",
     "price": "24.65",
     "priceChange": ".78",
-    "percentChange": "1.45%",
+    "priceChangePercent": "1.45%",
     "marketCap": "24,600,400,200",
     "peRatio": "26.4",
-    "lastTradeDate": "2012-09-09",
+    "lastTrade": "2012-09-09",
     "volume": "150,040,320"
   }
 }

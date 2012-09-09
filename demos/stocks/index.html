@@ -36,6 +36,8 @@ Orange.use('tickertype-models', 'tickertype-services', function() {
   
   as.authenticate('kevin.kinnebrew@gmail.com', 'pass', success, failure);
   
+  as.getActiveUser(success, failure);
+  
   var ps = new PortfolioService();
   
   ps.getPortfolio(function(data) {

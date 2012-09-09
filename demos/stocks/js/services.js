@@ -132,6 +132,23 @@ Orange.add('tickertype-services', function(exports) {
       
       this.request('/account.json', 'GET', params, map, success, error, context);
       
+    },
+    
+    getActiveUser: function(success, error, context) {
+      
+      var map = {
+        map: AccountMap,
+        from: 'object',
+        to: 'model',
+        offline: false,
+        cache: false,
+        callback: function(source) {
+          return source.account;
+        }
+      };
+      
+      this.request('/account.json', 'GET', {}, map, success, error, context);
+    
     }
     
   });

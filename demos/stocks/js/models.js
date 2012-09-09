@@ -109,7 +109,7 @@ Orange.add('tickertype-models', function(exports) {
         name:          { type: Field.TEXT, required: true },
         price:         { type: Field.MONEY, required: true, currency: 'USD' },
         priceChange:   { type: Field.MONEY, required: true, currency: 'USD' },
-        percentChange: { type: Field.PERCENT, required: true, precision: 2 },
+        percentChange: { type: Field.PERCENT, required: true, precision: 2, basis: 'percent' },
         marketCap:     { type: Field.NUMBER },
         peRatio:       { type: Field.NUMBER },
         lastTradeDate: { type: Field.DATE },

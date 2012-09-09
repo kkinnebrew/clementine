@@ -32,14 +32,53 @@
 
 </head>
 
-<body>
+<body class="preload">
 
-<h1>TickerType</h1>
+<div data-control="contacts-app" data-root>
 
-<div data-control="view" data-name="ticker-type-app" data-root>
-
-  <p>Hello</p>
-
+  <header>
+    <h1>Ticker Type</h1>
+    <div data-name="add-btn"></div>
+  </header>
+  
+  <div data-name="first" class="hidden">First <span data-name="id">0</span></div>
+  <div data-name="second" class="hidden">Second</div>
+  
+  <div data-control="between">
+  
+    <div data-control="contacts-list" data-default="one">
+      
+      <div data-name="plus-btn"></div>
+      <div data-name="minus-btn" style="background: #F00;">-</div>
+      
+      <ul>
+        <li><a href="#/5">Contact One</a></li>
+        <li><a href="#/second">Contact Two</a></li>
+        <li><a href="#/second/two">Contact Three</a></li>
+        <li><a href="#/3/two">Contact Four</a></li>
+      </ul>
+      
+      <div data-name="one" class="hidden">One</div>
+      <div data-name="two" class="hidden">Two</div>
+      
+      <section data-name="bind-spot">
+        <h3>Title</h3>
+        <div itemprop="one"></div>
+        <div itemprop="two"></div>
+        
+        <ul itemprop="list">
+          <li itemscope>
+            <div itemprop="first"></div>
+            <div itemprop="second"></div>
+          </li>
+        </ul>
+        
+      </section>
+      
+    </div>
+  
+  </div>
+  
 </div>
 
 </body>

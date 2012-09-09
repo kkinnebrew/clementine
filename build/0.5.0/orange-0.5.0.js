@@ -3488,6 +3488,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         this.root.goOffline();
       }
             
+      // bind hash change
+      $(window).on('hashchange', proxy(this.onHashChange, this));
+      
       // trigger hash change
       $(window).trigger('hashchange');
       

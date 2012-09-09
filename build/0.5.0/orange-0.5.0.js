@@ -1610,9 +1610,17 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         
         try {
         
+          var exists = !!data;
+        
           // process result
           data = conf.callback(data);
           
+          var existsAfter = !!data;
+          
+          if (existsAfter !== exists) {
+            throw 'Invalid Mapping: Service callback returning no data';
+          }
+            
           // map result
           if (conf.from === 'array' && conf.to === 'collection') {
             if (data instanceof Array) {

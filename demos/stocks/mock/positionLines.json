@@ -1,0 +1,30 @@
+{ 
+  "positionLines": [{
+    "positionLineId": "72778",
+    "symbol": "$36.22",
+    "tradeDate": "2012-04-06",
+    "quantity": "7",
+    "cost": "$49.75"
+  },
+  {
+    "positionLineId": "72779",
+    "symbol": "$36.22",
+    "tradeDate": "2011-06-07",
+    "quantity": "10",
+    "cost": "$48.90"
+  },
+  {
+    "positionLineId": "72780",
+    "symbol": "$36.22",
+    "tradeDate": "2011-01-30",
+    "quantity": "11",
+    "cost": "$37.08"
+  },
+  {
+    "positionLineId": "72781",
+    "symbol": "$36.22",
+    "tradeDate": "2010-09-13",
+    "quantity": "9",
+    "cost": "$35.12"
+  }]
+}

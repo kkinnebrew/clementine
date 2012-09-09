@@ -65,12 +65,11 @@ Orange.add('tickertype-services', function(exports) {
   
     model: 'position-line',
     params: {
-      id: 'accountId',
-      username: 'email',
-      firstName: 'first',
-      lastName: 'last',
-      createDate: 'createdDate',
-      loginDate: 'loginDate'
+      id: 'positionLineId',
+      symbol: 'symbol',
+      tradeDate: 'tradeDate',
+      quantity: 'quantity',
+      cost: 'cost'
     }
     
   };
@@ -185,6 +184,27 @@ Orange.add('tickertype-services', function(exports) {
       
       this.request('/positions.json', 'GET', params, map, success, error, context);
     
+    },
+    
+    getLinesForPosition: function(position, success, error, context) {
+      
+      var map = {
+        map: PositionLineMap,
+        from: 'array',
+        to: 'collection',
+        offline: true,
+        cache: true,
+        callback: function(source) {
+          return source.positionLines;
+        }
+      };
+      
+      var params = {
+        positionId: modelOrId(position)
+      };
+      
+      this.request('/positionLines.json', 'GET', params, map, success, error, context);
+    
     }
     
   });
@@ -203,7 +223,13 @@ Orange.add('tickertype-services', function(exports) {
   // ------------------------------------------------------------------------------------------------
   
   function modelOrId(object) {
-    return object instanceof Model ? object.getId() : object;
+    if (object instanceof Model) {
+      return object.getId();
+    } else if (typeof object !== 'object') {
+      return object;
+    } else {
+      throw new Error('Invalid Input: Expecting model or id', object);
+    }
   }
   
   

@@ -51,6 +51,18 @@ Orange.use('tickertype-models', 'tickertype-services', function() {
       
       console.log('success', collection);
       
+      ps.getLinesForPosition(data[1], function(data) {
+      
+        var collection = [];
+        
+        for (var i=0; i<data.length; i++) {
+          collection.push(data[i].toObject());
+        }
+        
+        console.log('success', collection);
+      
+      }, failure);
+      
     }, failure);
   
   }, failure);

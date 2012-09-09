@@ -3492,7 +3492,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       $(window).trigger('hashchange');
       
       // show the application
-      $('body').removeClass('preload');
+      $('body').show();
             
     },
     
@@ -3571,6 +3571,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
   function config(fn) {
     if (typeof fn === 'function') {
       $(document).ready(function() {
+        $('body').hide();
         var config = $('[data-app]').text();
         if (config) {
           config = JSON.parse(config);

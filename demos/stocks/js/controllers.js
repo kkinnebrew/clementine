@@ -222,8 +222,7 @@ Orange.add('tt-controllers', function(exports) {
       var code = (e.keyCode ? e.keyCode : e.which);
       if (code === 13) { // enter keycode
         e.preventDefault();
-        this.getParam('positions').clearFilters(true);
-        this.getParam('positions').filter('symbol', this.getElement('symbol').val());
+        this.getParam('positions').clearFilters(true).filter('symbol', this.getElement('symbol').val());
       }
     },
     

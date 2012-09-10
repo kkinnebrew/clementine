@@ -1263,6 +1263,8 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       
       if (!direction) {
         direction = this.direction;
+      } else {
+        this.direction = direction;
       }
       
       if (field instanceof Array) {

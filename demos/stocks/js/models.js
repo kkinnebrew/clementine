@@ -75,9 +75,35 @@ Orange.add('tt-models', function(exports) {
         id:              { type: Field.KEY, numeric: true },
         price:           { type: Field.MONEY, required: true, currency: 'USD' },
         symbol:          { type: Field.MODEL, required: true, model: 'symbol' },
-        quantity:        { type: Field.NUMBER },
+        quantity:        { type: Field.NUMBER, required: true },
         cost:            { type: Field.MONEY, currency: 'USD' }
       };
+    },
+    
+    getCustomFields: function() {
+    
+      function marketValue(data) {
+        return data.price * data.quantity;
+      }
+      
+      function gainLoss(data) {
+        var cost = data.cost * data.quantity;
+        var market = data.price * data.quantity;
+        return market - cost;
+      }
+      
+      function gainLossPercent(data) {
+        var cost = data.cost * data.quantity;
+        var market = data.price * data.quantity;
+        return (market - cost) / cost;
+      }
+    
+      return {
+        marketValue:     { type: Field.MONEY, currency: 'USD', value: marketValue },
+        gainLoss:        { type: Field.MONEY, currency: 'USD', value: gainLoss },
+        gainLossPercent: { type: Field.PERCENT, precision: 2, value: gainLossPercent }
+      };
+      
     }
     
   });

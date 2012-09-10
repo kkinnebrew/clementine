@@ -119,13 +119,14 @@ Orange.add('tt-controllers', function(exports) {
     getBindings: function() {
       return {
         'plus-btn': { 'touchclick': this.$onPlus },
-        'minus-btn': { 'touchclick': this.$onMinus }
+        'minus-btn': { 'touchclick': this.$onMinus },
+        'symbol': { 'keypress': this.$onKeyPress }
       };
     },
     
     getOutlets: function() {
       return {
-        elements: ['one', 'two', 'plus-btn', 'minus-btn', 'bind-spot', 'account', 'positions']
+        elements: ['one', 'two', 'plus-btn', 'minus-btn', 'bind-spot', 'account', 'positions', 'symbol']
       };
     },
     
@@ -154,6 +155,8 @@ Orange.add('tt-controllers', function(exports) {
     
     onDidAppear: function(e) {
     
+      this.getElement('positions').on('click', '[data-column]', proxy(this.$columnPress, this));
+      
       function success(user) {
       
         var user2 = user.clone();
@@ -186,14 +189,16 @@ Orange.add('tt-controllers', function(exports) {
       this.app.getService('account').getActiveUser(success, failure, this);
       
       function positionsSuccess(positions) {
-      
+                        
         this.bind('positions', positions);
+        
+        this.setParam('positions', positions);
                 
         setTimeout(function() {
+                
+          positions.get('342').set('price', 100);
         
-          positions[2].set('price', 100);
-        
-        }, 1000);
+        }, 10000);
       
       }
       
@@ -210,6 +215,30 @@ Orange.add('tt-controllers', function(exports) {
     
     $onMinus: function(e) {
       this.setRoute('two').setState('state-one', 500).setState('state-two', 500).setState('state-three', 500);
+    },
+    
+    $onKeyPress: function(e) {
+      
+      var code = (e.keyCode ? e.keyCode : e.which);
+      if (code === 13) { // enter keycode
+          e.preventDefault();
+          this.getParam('positions').sort('quantity', this.direction);
+          this.getParam('positions').clearFilters(true);
+          this.getParam('positions').filter('symbol', this.getElement('symbol').val());
+      }
+    },
+    
+    $columnPress: function(e) {
+      if (!this.hasParam('positions')) {
+        return;
+      }
+      if (!this.direction) {
+        this.direction = 1;
+      } else {
+        this.direction = this.direction * -1;
+      }
+      var column = $(e.currentTarget).attr('data-column');
+      this.getParam('positions').sort(column, this.direction);
     }
   
   });

@@ -87,14 +87,18 @@
         
       </section>
       
+      <form name="search">
+        <input data-name="symbol" name="symbol" placeholder="Symbol" />
+      </form>
+      
       <table data-name="positions">
         
-        <td>
-          <th>Symbol</th>
-          <th>Quantity</th>
-          <th>Price</th>
-          <th>Cost</th>
-        </td>
+        <tr>
+          <th data-column="symbol">Symbol</th>
+          <th data-column="quantity">Quantity</th>
+          <th data-column="price">Price</th>
+          <th data-column="cost">Cost</th>
+        </tr>
         
         <tr itemscope>
         

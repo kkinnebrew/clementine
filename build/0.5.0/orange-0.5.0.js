@@ -1266,6 +1266,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       }
       
       if (field instanceof Array) {
+        if (field.length === 0) {
+          return;
+        }
         this.sortFields = field;
       } else {
         this.sortFields = [field];
@@ -1374,7 +1377,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       }
       
       if (this.sort) {
-        this.sort(this.sort, this.direction, true);
+        this.sort(this.sortFields, this.direction, true);
       }
       
       // fire filtered event

@@ -80,3 +80,7 @@ div.hidden {
 .contacts-list.state-three {
   background: #00F;
 }
+
+table th {
+  cursor: pointer;
+}

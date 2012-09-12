@@ -32,10 +32,7 @@ To use OrangeUI on your project, all you need to do is include the [orangeui] li
 
 Depending on the features you choose to use, OrangeUI is dependent on the following libraries:
 
-* Log4js - for logging
-* Modernizr - for feature detection
 * jQuery - for AJAX and DOM Selectors
-* Socket.io - for real time data
 
 ## Documentation
 

@@ -96,7 +96,7 @@ Orange.add('tt-controllers', function(exports) {
       });
       
       // build view stack
-      this.stack = new List(this.active);
+      this.stack = [this.active];
       
       // set animating
       this.animating = false;
@@ -122,7 +122,7 @@ Orange.add('tt-controllers', function(exports) {
     onDisappear: function() {
       
       // hide children
-      this.stack.deferEach(function(view) {
+      _.deferEach(this.stack, function(view) {
         return view.hide().promise();
       }).then(function() {
         this.fire('_disappeared');
@@ -133,7 +133,7 @@ Orange.add('tt-controllers', function(exports) {
     onUnload: function() {
       
       // unload children
-      this.stack.deferEach(function(view) {
+      _.deferEach(this.stack, function(view) {
         return view.unload().promise();
       }).then(function() {
         this.target.remove();
@@ -249,8 +249,8 @@ Orange.add('tt-controllers', function(exports) {
       this.animating = true;
       
       // clear the stack
-      for (var i = 1, stack = this.stack.toArray(), l = stack.size(); i < l; i++) {
-        stack[i].hide().remove().unload();
+      for (var i = 1, l = this.stack.length; i < l; i++) {
+        this.stack[i].hide().remove().unload();
       }
       
       // unload the view
@@ -268,7 +268,7 @@ Orange.add('tt-controllers', function(exports) {
         this.active = this.stack.first();
         
         // push view stack
-        this.stack = new List(this.active);
+        this.stack = [this.active];
         
       }
       

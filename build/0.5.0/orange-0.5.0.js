@@ -467,79 +467,26 @@ jQuery.fn.outerHTML = function(s) {
   
   
   // ------------------------------------------------------------------------------------------------
-  // List Object
+  // Underscore Helpers
   // ------------------------------------------------------------------------------------------------
   
-  var List = (function() {
+  if (!_) {
+    _ = {};
+  }
   
-    function List(list) {
-      this.array = (list instanceof Array) ? list : (list ? [list] : []);
+  _.deferEach = function(arr, fn, context) {
+    var defers = [], result;
+    if (typeof fn !== 'function') {
+      return;
     }
-    
-    List.prototype.add = function(item) {
-      this.array.push(item);
-    };
-    
-    List.prototype.clear = function(item) {
-      this.array = [];
-    };
-    
-    List.prototype.clone = function() {
-      return this.array.slice(0);
-    };
-    
-    List.prototype.contains = function(item) {
-      return this.array.indexOf(item) !== -1;
-    };
-    
-    List.prototype.deferEach = function(fn, context) {
-      var defers = [], result;
-      if (typeof fn !== 'function') {
-        return;
+    for (var i = 0, l = arr.length; i < l; i++) {
+      result = fn.call(context, arr[i], i, arr);
+      if (result instanceof Deferred) {
+        defers.push(result);
       }
-      for (var i = 0, l = this.array.length; i < l; i++) {
-        result = fn.call(context, this.array[i], i, this.array);
-        if (result instanceof Deferred) {
-          defers.push(result);
-        }
-      }
-      return Orange.when.call(context, defers);
-    };
-    
-    List.prototype.each = function(fn, context) {
-      if (typeof fn !== 'function') {
-        return;
-      }
-      for (var i = 0, l = this.array.length; i < l; i++) {
-        if (i in this.array && fn.call(context, this.array[i], i, this.array) === {}) {
-          return;
-        }
-      }
-    };
-    
-    List.prototype.first = function() {
-      return this.array[0];
-    };
-    
-    List.prototype.indexOf = function(item) {
-      return this.array.indexOf(item);
-    };
-    
-    List.prototype.last = function() {
-      return this.array[this.array.length-1];
-    };
-    
-    List.prototype.size = function() {
-      return this.array.length;
-    };
-    
-    List.prototype.toArray = function() {
-      return this.array;
-    };
-    
-    return List;
-  
-  }());
+    }
+    return Orange.when.call(context, defers);
+  };
   
   
   // ------------------------------------------------------------------------------------------------
@@ -599,9 +546,9 @@ jQuery.fn.outerHTML = function(s) {
   
   Orange.Browser      = Browser = Browser;
   Orange.Class        = this.Class = Class;
+  Orange.Deferred     = Deferred;
   Orange.Events       = this.Events = Events;
   Orange.EventHandle  = EventHandle;
-  Orange.List         = List;
   Orange.Loader       = Loader;
   Orange.Log          = this.Log = new Log();
     
@@ -620,6 +567,14 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     if (i in this && this[i] === item) { return i; }
   }
   return -1;
+};
+
+Array.prototype.first = [].first || function() {
+  return this.length ? this[0] : null;
+};
+
+Array.prototype.last = [].last || function() {
+  return this.length ? this[this.length-1] : null;
 };
 // ------------------------------------------------------------------------------------------------
 // Cache Object
@@ -2999,10 +2954,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       if (!this._running) { this.next(); }
       return this;
     },
-    
-    /**
-     * executes the next item in the queue
-     */
+
     next: function() {
       this._running = true;
       var next = this._queue.shift();
@@ -3031,7 +2983,11 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       return Orange.when.apply(this, arguments);
     },
     
-    defer: function() {
+    then: function() {
+      return this.promise().then.apply(this, arguments);
+    },
+    
+    promise: function() {
       var deferred = new Deferred(this);
       function resolve() {
         deferred.resolve();

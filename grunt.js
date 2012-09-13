@@ -63,7 +63,7 @@ module.exports = function(grunt) {
     jshint: {
       options: {
         bitwise: true,
-        curly: true,
+        curly: false,
         eqeqeq: true,
         forin: false,
         immed: true,

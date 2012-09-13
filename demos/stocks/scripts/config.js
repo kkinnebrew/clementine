@@ -38,7 +38,7 @@ Orange.config(function(app) {
   
   // register views
   app.registerViews([
-    'html/view.html'
+    'templates/view.html'
   ]);
   
 });

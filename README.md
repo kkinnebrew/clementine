@@ -2,11 +2,11 @@
 
 OrangeUI is a javascript framework for building dynamic, interactive web applications in the browser.
 
-Many of the features of OrangeUI are stable, however the framework is still in active development and things are bound to change. Try it out on a project and make suggestions or report bugs [here].
+Many of the features of OrangeUI are stable, however the framework is still in active development and things are bound to change. Try it out on a project and contribute or report bugs [here].
 
 ## Why choose OrangeUI?
 
-OrangeUI is a rapid development javascript framework for soundly built web applications. It is meant as a tool to rapidly develop web based applications, giving the developer a pattern for organizing individual views and decoupling their interaction logic. It provides a base set of modules handling HTML5 features in its Commons package, classes for interacting with webservices, and an Model-ViewController-View like structure to create more complex UI controls. OrangeUI provides the following:
+OrangeUI is a rapid development javascript framework for soundly built web applications. It is meant as a tool to develop highly interactive, maintainable applications in the browser, giving the developer a pattern for organizing their interaction logic, views, and styles into a library of modular, decoupled components. OrangeUI provides the following:
 
 - Object-oriented javascript objects
 - Event mixin for objects
@@ -14,13 +14,13 @@ OrangeUI is a rapid development javascript framework for soundly built web appli
 - Module dependency management
 - A real-time or RESTful data persistence layer w/offline mode
 - Customizeable models
-- Controllers with DOM helper functions
-- View fragment loader w/ templating
-- Live data bindings
+- Hierarchical ViewControllers with DOM helper functions
+- View fragment loading w/ templating
+- Live DOM model bindings
 - History and route management
 - Standardized UI controls
 
-The goal of this framework is to give you a customizable base for building your web application that completely decouples your data sources from your controller logic and presentation. In addition, it allows the creation of reusable components to speed up development time. OrangeUI sets up standards for how to organize your application code, decouple your styles and UI elements, and interact with web services. For a walkthrough of the basics, start with the [Getting Started] guide.
+The goal of OrangeUI is to give you a customizable scaffold for building your web application that completely decouples your data sources from your controller logic and presentation and styling. OrangeUI sets up standards for how to organize your application code, standardize your styles and UI elements, and interact with web services. For a walkthrough of the basics, start by reading the [Getting Started] guide.
 
 ## Including OrangeUI
 

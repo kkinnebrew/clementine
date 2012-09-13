@@ -1,3 +1,5 @@
+/*globals Map: false, List: false*/
+
 // ------------------------------------------------------------------------------------------------
 // TickerType Controllers
 // ------------------------------------------------------------------------------------------------
@@ -7,6 +9,8 @@ Orange.add('tt-controllers', function(exports) {
   var BetweenController;
   var ContactsAppController;
   var ContactsListController;
+  var NavigationViewController;
+  var ModalViewController;
   
   
   // ------------------------------------------------------------------------------------------------
@@ -19,6 +23,260 @@ Orange.add('tt-controllers', function(exports) {
   // ------------------------------------------------------------------------------------------------
   // Controller Definitions
   // ------------------------------------------------------------------------------------------------
+  
+  /**
+   * @name modal
+   */
+  ModalViewController = ViewController.extend({
+    
+    // configuration
+    
+    getType: function() {
+      return 'modal';
+    },
+    
+    setup: function() {
+      this.setState('invisible');
+    },
+    
+    // public methods
+    
+    presentModalView: function() {
+      this.add(this._presentModalView);
+      return this;
+    },
+    
+    dismissModalView: function() {
+      this.add(this._dismissModalView);
+      return this;
+    },
+    
+    // private methods
+    
+    _presentModalView: function() {
+      this.append().show().setState('showing', 300).setState('visible');
+    },
+    
+    _dismissModalView: function() {
+      this.setState('hiding', 300).setState('invisible').hide().remove();
+    }
+  
+  });
+  
+  
+  /**
+   * @name navigation
+   */
+  NavigationViewController = ViewController.extend({
+  
+    // configuration
+  
+    getType: function() {
+      return 'navigation';
+    },
+    
+    validate: function() {
+    
+      if (!this.attr('default')) {
+        throw 'ViewController "' + this.attr('name') + '" missing attribute default';
+      } else if (!this.getView(this.attr('default'))) {
+        throw 'ViewController "' + this.attr('name') + '" missing view "' + this.attr('default') + '"';
+      }
+
+    },
+    
+    setup: function() {
+    
+      // store active view
+      this.active = this.getView(this.attr('default'));
+      
+      // remove all others
+      this.views.each(function(view, name) {
+        return this.attr('default') !== name ? view.remove() : false;
+      });
+      
+      // build view stack
+      this.stack = new List(this.active);
+      
+      // set animating
+      this.animating = false;
+      
+    },
+    
+    // state handlers
+    
+    onLoad: function() {
+    
+      // load active view
+      this.active.load().then(this.fire, '_loaded');
+      
+    },
+    
+    onAppear: function() {
+      
+      // show active view
+      this.activeView.show().then(this.fire, '_appeared');
+      
+    },
+    
+    onDisappear: function() {
+      
+      // hide children
+      this.stack.each(function(view) {
+        view.hide();
+      }).then(this.fire, '_disappeared');
+      
+    },
+    
+    onUnload: function() {
+      
+      // unload children
+      this.stack.each(function(view) {
+        view.unload();
+      }).then(function() {
+        this.target.remove();
+        this.fire('_unloaded');
+      });
+      
+    },
+    
+    // public methods
+    
+    pushView: function(name) {
+      this.add(this._pushView, [name]);
+      return this;
+    },
+    
+    popView: function() {
+      this.add(this._popView);
+      return this;
+    },
+    
+    popToRootView: function() {
+      this.add(this._popToRootView);
+      return this;
+    },
+    
+    // private methods
+    
+    _pushView: function(name) {
+      
+      if (!this.hasView(name)) {
+        throw 'Cannot push view, not found';
+      } else if (this.is('animating')) {
+        return;
+      }
+
+      // set as animating
+      this.animating = true;
+      
+      // check for view
+      var invalid = this.stack.reduce(function(memo, view) {
+        return memo || view.attr('name') === name;
+      }, false);
+      
+      // return if invalid
+      if (invalid) {
+        console.log("Can't repush view controller");
+        return;
+      }
+      
+      function finish() {
+      
+        // stop animation
+        this.animating = false;
+        
+        // deactivate current view
+        this.active = this.getView(name);
+        
+        // push view stack
+        this.stack.push(this.active);
+      
+      }
+      
+      function push() {
+        
+        // activate the new view
+        var pushed = this.getView(name).show().setState('loading', 300).setState('active').promise();
+        
+        // inactivate the old view
+        var hidden = this.activeView.setState('inactivating', 300).setState('inactive').hide().promise();
+        
+        // return deferred
+        this.when(pushed, hidden).then(finish);
+        
+      }
+      
+      // load the view
+      var loaded = this.getView(name).load().setState('preloaded').append().promise();
+      
+      // bind promise
+      this.when(loaded).then(push);
+      
+    },
+    
+    _popView: function() {
+    
+      if (this.is('animating') || this.stack.length < 2) {
+        return;
+      }
+      
+      // set as animating
+      this.animating = true;
+      
+      // unload the view
+      var hidden = this.stack.pop().setState('unloading', 300).setState('preloaded').remove().unload().promise();
+      
+      // show the underlying view
+      var visible = this.stack.last().show().setState('loading', 300).setState('active').promise();
+      
+      // bind promise
+      this.when(hidden, visible).then(function() {
+        this.animating = false;
+      });
+    
+    },
+    
+    _popToRootView: function() {
+      
+      if (this.is('animating') || this.stack.length < 2) {
+        return;
+      }
+      
+      // set as animating
+      this.animating = true;
+      
+      // clear the stack
+      for (var i = 1, stack = this.stack.toArray(); i < stack.length-1; i++) {
+        stack[i].hide().remove().unload();
+      }
+      
+      // unload the view
+      var hidden = this.stack.pop().setState('unloading', 300).setState('preloaded').remove().unload().promise();
+      
+      // show the underlying view
+      var visible = this.stack.first().show().setState('loading', 300).setState('active').promise();
+      
+      function finish() {
+        
+        // stop animation
+        this.animating = false;
+        
+        // deactivate current view
+        this.active = this.stack.first();
+        
+        // push view stack
+        this.stack = new List(this.active);
+        
+      }
+      
+      // bind promise
+      this.when(hidden, visible).then(finish);
+      
+    }
+  
+  });
+  
   
   /**
    * @name contacts-app
@@ -192,7 +450,7 @@ Orange.add('tt-controllers', function(exports) {
                         
         this.bind('positions', positions);
         
-        this.setParam('positions', positions);
+        this.attr('positions', positions);
                 
         setTimeout(function() {
                 
@@ -222,12 +480,12 @@ Orange.add('tt-controllers', function(exports) {
       var code = (e.keyCode ? e.keyCode : e.which);
       if (code === 13) { // enter keycode
         e.preventDefault();
-        this.getParam('positions').clearFilters(true).filter('symbol', this.getElement('symbol').val());
+        this.attr('positions').clearFilters(true).filter('symbol', this.getElement('symbol').val());
       }
     },
     
     $columnPress: function(e) {
-      if (!this.hasParam('positions')) {
+      if (!this.attr('positions')) {
         return;
       }
       if (!this.direction) {
@@ -236,7 +494,7 @@ Orange.add('tt-controllers', function(exports) {
         this.direction = this.direction * -1;
       }
       var column = $(e.currentTarget).attr('data-column');
-      this.getParam('positions').sort(column, this.direction);
+      this.attr('positions').sort(column, this.direction);
     }
   
   });

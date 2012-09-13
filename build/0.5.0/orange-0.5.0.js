@@ -1,5 +1,5 @@
 /**
- * OrangeUI | 0.5.0 | 09.09.2012
+ * OrangeUI | 0.5.0 | 09.12.2012
  * https://github.com/brew20k/orangeui
  * Copyright (c) 2012 Kevin Kinnebrew
  */
@@ -62,6 +62,7 @@ jQuery.fn.outerHTML = function(s) {
 
   var Browser;
   var Class;
+  var Deferred;
   var Events;
   var EventTarget;
   var EventHandle;
@@ -414,6 +415,58 @@ jQuery.fn.outerHTML = function(s) {
   
   
   // ------------------------------------------------------------------------------------------------
+  // Deferred Object
+  // ------------------------------------------------------------------------------------------------
+  
+  Deferred = (function() {
+  
+    function Deferred(context) {
+      this.context = context;
+      this.resolved = false;
+      this.bindings = [];
+    }
+    
+    Deferred.prototype.resolve = function() {
+      this.resolved = true;
+      for (var i=0; i<this.bindings.length; i++) {
+        this.bindings[i].fn.apply(this.context, this.bindings[i].args);
+      }
+      this.bindings = [];
+    };
+    
+    Deferred.prototype.then = function(fn, args) {
+      if (this.resolved) {
+        fn.apply(this.context, args || []);
+      } else {
+        this.bindings.push({ fn: fn, args: args || [] });
+      }
+    };
+  
+    return Deferred;
+  
+  }());
+  
+  function when() {
+  
+    var deferred = new Deferred(this);
+    var count = arguments.length;
+      
+    function resolve() {
+      if (--count === 0) {
+        deferred.resolve();
+      }
+    }
+    
+    for (var i=0; i<arguments.length; i++) {
+      arguments[i].then(resolve);
+    }
+    
+    return deferred;
+  
+  }
+  
+  
+  // ------------------------------------------------------------------------------------------------
   // Browser Object
   // ------------------------------------------------------------------------------------------------
   
@@ -466,6 +519,7 @@ jQuery.fn.outerHTML = function(s) {
   Orange.add          = add;
   Orange.use          = use;
   Orange.include      = this.include = include;
+  Orange.when         = when;
   
   Orange.Browser      = Browser = Browser;
   Orange.Class        = this.Class = Class;
@@ -2441,10 +2495,11 @@ Array.prototype.indexOf = [].indexOf || function(item) {
   
   var Binding     = Orange.Binding;
   var Browser     = Orange.Browser;
+  var Deferred    = Orange.Deferred;
   var Form        = Orange.Form;
   var Model       = Orange.Model;
   var View        = Orange.View;
-  
+    
   
   // ------------------------------------------------------------------------------------------------
   // Functions
@@ -2510,6 +2565,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     return skip ? null : def;
   }
   
+  
   // ------------------------------------------------------------------------------------------------
   // Class Definition
   // ------------------------------------------------------------------------------------------------
@@ -2571,6 +2627,9 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       if (typeof this.target === 'object') {
         this.target.addClass('hidden');
       }
+      
+      // call validate
+      this.validate();
       
       // call setup
       this.setup();
@@ -2735,7 +2794,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
             
       // print errors
       if (errors.length > 0) {
-        throw ('Invalid Syntax: ViewController "' + this.getParam('name') + '" missing outlets [' + errors.join(', ') + ']');
+        throw ('Invalid Syntax: ViewController "' + this.attr('name') + '" missing outlets [' + errors.join(', ') + ']');
       }
       
       // get routes
@@ -2743,13 +2802,13 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       
       var def = getRouteForKey.call(this, '');
             
-      if (!def && !this.getParam('default') && Object.keys(routes).length > 0) {
-        throw ('Invalid Syntax: View Controller "' + this.getParam('name') + '" must define either a [data-default] or generic / route');
+      if (!def && !this.attr('default') && Object.keys(routes).length > 0) {
+        throw ('Invalid Syntax: View Controller "' + this.attr('name') + '" must define either a [data-default] or generic / route');
       }
       
       for (var route in routes) {
         if (route.charAt(0) !== '/') {
-          throw ('Invalid Syntax: Route "' + route + '" in ' + this.getParam('name') + ' must begin with forward slash');
+          throw ('Invalid Syntax: Route "' + route + '" in ' + this.attr('name') + ' must begin with forward slash');
         }
       }
       
@@ -2837,6 +2896,12 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     },
     
     /**
+     * called after the view controller is initialized to validate
+     * controller integrity
+     */
+    validate: function() {},
+    
+    /**
      * called after the view controller is initialized
      */
     setup: function() {},
@@ -2855,6 +2920,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     add: function(fn, args, wait) {
       this._queue.push({fn: fn, args: args, wait: wait});
       if (!this._running) { this.next(); }
+      return this;
     },
     
     /**
@@ -2884,14 +2950,26 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       return this;
     },
     
+    when: function() {
+      return Orange.when.apply(this, arguments);
+    },
+    
+    defer: function() {
+      var deferred = new Deferred(this);
+      function resolve() {
+        deferred.resolve();
+      }
+      this.add(resolve);
+      return deferred;
+    },
+    
     
     // ------------------------------------------------------------------------------------------------
     // Route Management
     // ------------------------------------------------------------------------------------------------
   
     setRoute: function(route) {
-      this.add(this._setRoute, [route], 0);
-      return this;
+      return this.add(this._setRoute, [route], 0);
     },
     
     getRoute: function() {
@@ -2969,7 +3047,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
       }
       
       if (!key) {
-        key = getRouteForKey.call(this, this.getParam('default'));
+        key = getRouteForKey.call(this, this.attr('default'));
       }
       
       var parts = key.substr(1).split('/');
@@ -2989,7 +3067,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
         if (parts[i].charAt(0) === ':') {
           param = routes.shift() || null;
           params[parts[i].substr(1)] = param;
-          this.setParam(parts[i].substr(1), param);
+          this.attr(parts[i].substr(1), param);
           subhash += '/' + param;
         }
       }
@@ -3020,13 +3098,11 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     },
     
     setState: function(state, wait) {
-      this.add(this._setState, [state], wait || 0);
-      return this;
+      return this.add(this._setState, [state], wait || 0);
     },
     
     clearState: function(wait) {
-      this.add(this._clearState, [], wait || 0);
-      return this;
+      return this.add(this._clearState, [], wait || 0);
     },
     
     _setState: function(state, force) {
@@ -3053,33 +3129,27 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     // ------------------------------------------------------------------------------------------------
     
     load: function() {
-      this.add(this._load);
-      return this;
+      return this.add(this._load);
     },
     
     show: function() {
-      this.add(this._show);
-      return this;
+      return this.add(this._show);
     },
     
     hide: function() {
-      this.add(this._hide);
-      return this;
+      return this.add(this._hide);
     },
     
     unload: function() {
-      this.add(this._unload);
-      return this;
+      return this.add(this._unload);
     },
     
     append: function() {
-      this.add(this._append);
-      return this;
+      return this.add(this._append);
     },
     
     remove: function() {
-      this.add(this._remove);
-      return this;
+      return this.add(this._remove);
     },
     
     
@@ -3153,7 +3223,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     onWillLoad: function() {
           
       // DEBUG
-      // console.log(this.getParam('name') + ' ' + "Will Load");
+      // console.log(this.attr('name') + ' ' + "Will Load");
       
       // fire load event
       this.fire('_load');
@@ -3185,8 +3255,8 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     onDidLoad: function() {
 
       // DEBUG
-      // console.log(this.getParam('name') + ' ' + "Did Load");
-      console.log(this.getParam('name') + " Loaded");
+      // console.log(this.attr('name') + ' ' + "Did Load");
+      console.log(this.attr('name') + " Loaded");
       
       // mark as loaded
       this._loaded = true;
@@ -3202,7 +3272,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     onWillUnload: function() {
     
       // run functions
-      // console.log(this.getParam('name') + ' ' + "Will Unload");
+      // console.log(this.attr('name') + ' ' + "Will Unload");
       
       // ex. clear data
       
@@ -3238,8 +3308,8 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     onDidUnload: function() {
     
       // DEBUG
-      // console.log(this.getParam('name') + ' ' + "Did Unload");
-      console.log(this.getParam('name') + " Unloaded");
+      // console.log(this.attr('name') + ' ' + "Did Unload");
+      console.log(this.attr('name') + " Unloaded");
 
       // mark unloaded
       this._loaded = false;
@@ -3258,7 +3328,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     onWillAppear: function() {
             
       // run functions
-      // console.log(this.getParam('name') + ' ' + "Will Appear");
+      // console.log(this.attr('name') + ' ' + "Will Appear");
             
       // bind events
       var views = this.getBindings();
@@ -3319,8 +3389,8 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     onDidAppear: function(e) {
         
       // DEBUG
-      // console.log(this.getParam('name') + ' ' + "Did Appear");
-      console.log(this.getParam('name') + " Appeared");
+      // console.log(this.attr('name') + ' ' + "Did Appear");
+      console.log(this.attr('name') + " Appeared");
       
       // mark as visible
       this._visible = true;
@@ -3336,7 +3406,7 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     onWillDisappear: function() {
       
       // run functions
-      // console.log(this.getParam('name') + ' ' + "Will Disappear");
+      // console.log(this.attr('name') + ' ' + "Will Disappear");
       
       // unbind events
       for (var view in this._views) { this.getView(view).detach(); }
@@ -3373,8 +3443,8 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     onDidDisappear: function(e) {
       
       // DEBUG
-      // console.log(this.getParam('name') + ' ' + "Did Disappear");
-      console.log(this.getParam('name') + " Disappeared");
+      // console.log(this.attr('name') + ' ' + "Did Disappear");
+      console.log(this.attr('name') + " Disappeared");
       
       // remove hidden class
       this.target.addClass('hidden');
@@ -3395,16 +3465,13 @@ Array.prototype.indexOf = [].indexOf || function(item) {
     // Attribute Management
     // ------------------------------------------------------------------------------------------------
     
-    setParam: function(name, value) {
-      this._attrs[name] = value;
-    },
-    
-    getParam: function(name) {
-      return this._attrs.hasOwnProperty(name) ? this._attrs[name] : null;
-    },
-    
-    hasParam: function(name) {
-      return this._attrs.hasOwnProperty(name);
+    attr: function() {
+      var args = arguments;
+      if (args.length === 1) {
+        return this._attrs.hasOwnProperty(args[0]) ? this._attrs[args[0]] : false;
+      } else if (args.length === 2) {
+        this._attrs[args[0]] = args[1];
+      }
     },
     
     

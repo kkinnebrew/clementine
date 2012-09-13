@@ -32,10 +32,7 @@ To use OrangeUI on your project, all you need to do is include the [orangeui] li
 
 Depending on the features you choose to use, OrangeUI is dependent on the following libraries:
 
-* Log4js - for logging
-* Modernizr - for feature detection
 * jQuery - for AJAX and DOM Selectors
-* Socket.io - for real time data
 
 ## Documentation
 
@@ -44,6 +41,7 @@ Depending on the features you choose to use, OrangeUI is dependent on the follow
 
 ## Release History
 
+* 9/9/2012 - v0.5.0 - Dynamic chainable view states, custom routes, live microdata DOM bindings.
 * 8/1/2012 - v0.4.0 - Adding web service persistence, view controller hide/show states.
 * 5/16/2012 - v0.3.0 - Including view controller event helper functions, auto context proxying.
 * 3/30/2012 - v0.2.0 - Updated view inheritance, bug fixes from prior version.

@@ -2,15 +2,9 @@
 
 ## Motivation
 
-OrangeUI is not simply an MVC framework. It was created in an attempt to improve the organization and modularity of front-end code, specifically that for single page web applications. OrangeUI uses view controllers to emulate the hierarchical structure of the DOM while decoupling individual code components so they can be reused. It provides custom Javascript event bindings to manage communication between view controllers, view lifecycle management, all the while decoupling interaction logic, data, structure, and style.
+OrangeUI is not simply an MVC framework. It was created in an attempt to improve the organization and modularity of front-end code, specifically that of single page web applications. OrangeUI uses view controllers to emulate the native hierarchical structure of the DOM while decoupling individual code components so they can be reused. It provides custom Javascript event bindings to manage communication between view controllers, view lifecycle management, all the while separating interaction logic, data, structure, and style.
 
-## Rules
-
-1. For every view is a view controller instance
-2. A controller instance should manage only one view
-3. Controllers only call methods on their children
-4. Controllers fire events to communicate with their parents
-5. Manually unbind all manually bound events
+OrangeUI takes a broader approach by looking at all parts of web application development: HTML, CSS and JavaScript. A number of frameworks choose to give more weight to one than another, by either building all markup with Javascript or using an abundance of custom HTML attributes. In OrangeUI, the expectation is that each technology is given equal weight for what it is designed for: HTML for view layout and semantics, CSS for presentation (including animation), and Javascript for DOM manipulation and event binding.
 
 ## Tutorial 1: View Controllers
 
@@ -112,14 +106,14 @@ var SearchFieldController = ViewController.extend({
 		return 'search-field';
 	}
 	onDidAppear: function(e) {
-		this.target.on('keypress', this.onKeyPress, this);
+		this.target.on('keypress', this.$onKeyPress, this);
 		this._super();
 	},
 	onWillDisappear: function(e) {
 		this.target.off();
 		this._super();
 	},
-	onKeyPress: function(e) {
+	$onKeyPress: function(e) {
 		var code = (e.keyCode ? e.keyCode : e.which);
 		if (code === 13) {
 			var keyword = this.target.val();
@@ -267,7 +261,7 @@ We've now bound an event to the *search-field* to listen for the press of the en
 ```js
 var ContactsListController = ViewController.extend({
 	getType: function() {
-		return 'contacts-list'
+		return 'contacts-list';
 	},
 	filter: function(keyword) {
 		var pattern = new RegExp(keyword, 'i');
@@ -322,7 +316,7 @@ var InputFieldController = ViewController.extend({
 		return 'input-field'
 	},
 	getBindings: function() {
-		return { 'target': { keypress: true } }
+		return { 'target': { keypress: true } };
 	},
 	onKeyPress: function(e) {
 		var code = (e.keyCode ? e.keyCode : e.which);
@@ -340,9 +334,9 @@ var SearchableListController = ViewController.extend({
 		return 'searchable-list'
 	},
 	getBindings: function() {
-		return { 'input-field': { 'enter': 'onSearch' } }
+		return { 'input-field': { 'enter': this.$onSearch } };
 	},
-	onSearch: function(e, data) {
+	$onSearch: function(e, data) {
 		this.getView('list').filter(data);
 	}
 });
@@ -351,7 +345,7 @@ var SearchableListController = ViewController.extend({
 ```js
 var ListController = ViewController.extend({
 	getType: function() {
-		return 'item-list'
+		return 'item-list';
 	},
 	filter: function(keyword) {
 		var pattern = new RegExp(keyword, 'i');
@@ -462,10 +456,10 @@ Notice we've added a new attribute to the *contacts-app* element, the `data-root
 ```js
 var ContactsAppController = ViewController.extend({
 	getType: function() {
-		return 'contacts-app'
+		return 'contacts-app';
 	},
 	getBindings: function() {
-		'searchable-list': { 'select': true; }}
+		'searchable-list': { 'select': true; }};
 	},
 	onDidAppear: function() {
 		
@@ -492,15 +486,15 @@ var ContactsAppController = ViewController.extend({
 ```js
 var SearchableListController = ViewController.extend({
 	getType: function() {
-		return 'searchable-list'
+		return 'searchable-list';
 	},
 	getBindings: function() {
-		return { 'input-field': { 'enter': 'onSearch' } }
+		return { 'input-field': { 'enter': this.$onSearch } };
 	},
 	setData: function(data) {
 		this.getView('list').setData(data);
 	},
-	onSearch: function(e, data) {
+	$onSearch: function(e, data) {
 		this.getView('list').filter(data);
 	}
 });
@@ -509,10 +503,10 @@ var SearchableListController = ViewController.extend({
 ```js
 var ListController = ListController.extend({
 	getType: function() {
-		return 'mutable-list'
+		return 'mutable-list';
 	},
 	getBindings: function() {
-		return { 'li': { 'click': 'onSelect' }}
+		return { 'li': { 'click': 'onSelect' }};
 	}
 	setData: function(data) {
 		this.data = data;
@@ -533,7 +527,7 @@ var ListController = ListController.extend({
 ```js
 var ContactDetailController = ViewController.extend({
 	getType: function() {
-		return 'contact-detail'
+		return 'contact-detail';
 	},
 	setContact: function(data) {
 		this.target.find('first-name').text(data.firstName);
@@ -545,13 +539,19 @@ var ContactDetailController = ViewController.extend({
 
 We've added a *select* event to the list and passed our mock data to the populate the list items. When the user clicks on an `<li>` item the *select* event is fired with a payload of the contact object. This propagates up the hierarchy until it reaches the **ContactsAppController**. When that controller receives the *select* event it passes the payload data to the **ContactDetailController**, which renders it in the view.
 
-Our last step is simply to instantiate the application. We simply register a new **Application** in a Javascript block in our view.
+Our last step is simply to instantiate the application. We simply register a new [data-app] script block in our index.html file.
 
 ```html
-<script type="text/javascript">
-var contacts = new Application({ name: 'contacts' });
+<script type="text/json" data-app>
+{
+  "name": "contacts-app",
+  "title": "Contacts App",
+  "description": "A contact list application",
+  "version": "1.0.0",
+  "required": []
+}
 </script>
 ```
 
-This will bind a handler for our `document.onload` that will initialize the application one all the page's assets are loaded. In our next tutorial, we'll discuss interacting with web services and defining models.
+This will automatically bind a listener for our `document.onload` that will initialize the application once all the page's assets are loaded. In our next tutorial, we'll discuss interacting with web services and defining models.
 

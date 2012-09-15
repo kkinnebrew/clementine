@@ -1,5 +1,5 @@
 /**
- * OrangeUI | 0.5.0 | 09.12.2012
+ * OrangeUI | 0.5.0 | 09.14.2012
  * https://github.com/brew20k/orangeui
  * Copyright (c) 2012 Kevin Kinnebrew
  */
@@ -2201,9 +2201,6 @@ Array.prototype.last = [].last || function() {
       // store template
       this.template = target.html();
       
-      // store list template
-      this.listTemplate = null;
-      
       // store data reference
       this.data = null;
       
@@ -2650,7 +2647,6 @@ Array.prototype.last = [].last || function() {
       // store states
       this._loaded = false;
       this._visible = false;
-      this._stopping = false;
       
       // setup events
       this.setupTransitions();

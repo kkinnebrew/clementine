@@ -48,7 +48,7 @@ Array.prototype.last = [].last || function() {
 // -------------------------------------------------------------------------------------------------
 
 /**
- * The OrangeUI Core Module containing all required base classes, objects
+ * The OrangeUI Core Module contains all required base classes, objects
  * and function dependencies.
  *
  * @module Core
@@ -110,12 +110,12 @@ Array.prototype.last = [].last || function() {
      * Includes a mixin containing functions and methods into the
      * class' prototype. This does not affect inheritance.
      *
-     * @method include
+     * @method includes
      * @static
      * @param {object} def  An object of functions and properties.
      * @return {Class}  The class object with the mixin included.
      */
-    Class.include = function(def) {
+    Class.includes = function(def) {
       
       var key;
       var value;
@@ -215,7 +215,7 @@ Array.prototype.last = [].last || function() {
      *
      * @method on
      * @requires EventHandle
-     * @param {string} ev  The name of the event.
+     * @param {string} ev  The name of the event. An event prefixed with an underscore won't bubble.
      * @param {function} call  The listener to bind to the event.
      * @param {context} [context]  The optional context to bind to the function.
      * @return {EventHandle}  The EventHandle object referencing the bound event.
@@ -240,7 +240,7 @@ Array.prototype.last = [].last || function() {
      * fired, the event is immediately detached.
      *
      * @method once
-     * @param {string} ev  The name of the event.
+     * @param {string} ev  The name of the event. An event prefixed with an underscore won't bubble.
      * @param {function} call  The listener to bind to the event.
      * @param {context} [context]  The optional context to bind to the function.
      */
@@ -781,7 +781,7 @@ Array.prototype.last = [].last || function() {
     
     }
   
-  }).include(Events);
+  }).includes(Events);
   
   
   // -------------------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 // ------------------------------------------------------------------------------------------------
-// Model Class
+// Collection Class
 // ------------------------------------------------------------------------------------------------
 
 /** 
@@ -7,20 +7,48 @@
  */
 (function(Orange) {
 
-  var Model;
+  var Collection;
   
   
   // ------------------------------------------------------------------------------------------------
   // Dependencies
   // ------------------------------------------------------------------------------------------------
   
-  var Collection       = Orange.Collection;
   var Events           = Orange.Events;
-  
-  
+  var Model            = Orange.Model;
+
+
   // ------------------------------------------------------------------------------------------------
   // Events
   // ------------------------------------------------------------------------------------------------
+  
+  /**
+   * Fired when an item is added to a collection.
+   * @event add
+   * @param {*} item  The item added to the collection.
+   * @param {*} index  The index of the item to append after. Defaults to the end.
+   */
+  var EVENT_ADD = 'add';
+  
+  /**
+   * Fired when an item is removed from the collection.
+   * @event remove
+   * @param {int} index  The index or id of the item removed from the collection.
+   */
+  var EVENT_REMOVE = 'remove';
+  
+  /**
+   * Fired when a change in the sorting of the collection occurs.
+   * @param {bool} asc  Whether the sort is ascending.
+   * @event sort
+   */
+  var EVENT_SORT = 'sort';
+  
+  /**
+   * Fired when a change in the collection occurs.
+   * @event update
+   */
+  var EVENT_UPDATE = 'update';
   
   /**
    * Fired when a change in model data occurs.
@@ -36,16 +64,16 @@
    * @param {string|number} new  The new id to update.
    */
   var EVENT_SYNC = 'sync';
-
+  
   
   // ------------------------------------------------------------------------------------------------
   // Class Definition
   // ------------------------------------------------------------------------------------------------
 
-  Model = Class.extend({
+  Collection = Class.extend({
     
     /**
-     * @class Model
+     * @class Collection
      * @constructor
      */  
     initialize: function() {
@@ -59,7 +87,7 @@
   // Exports
   // ------------------------------------------------------------------------------------------------
   
-  Orange.Model = Model;
+  Orange.Collection = Collection;
     
   
 }(Orange));

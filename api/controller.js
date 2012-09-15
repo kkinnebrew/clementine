@@ -3,7 +3,10 @@
 // ------------------------------------------------------------------------------------------------
 
 /** 
- * @module Core
+ * The UI Module contains classes for managing application interaction logic. This includes
+ * manipulation the DOM, loading view, managing routes, and event bindings.
+ *
+ * @module UI
  */
 (function(Orange) {
 
@@ -16,10 +19,10 @@
   
   var Binding     = Orange.Binding;
   var Browser     = Orange.Browser;
-  var Deferred    = Orange.Deferred;
   var Form        = Orange.Form;
   var Model       = Orange.Model;
   var Module      = Orange.Module;
+  var Queue       = Orange.Queue;
   var View        = Orange.View;
   
   
@@ -621,26 +624,68 @@
     // Reference Handling
     // ------------------------------------------------------------------------------------------------
     
+    /**
+     * Returns a child view controller instance by the name corresponding to its **[data-name]** tag.
+     *
+     * @method getView
+     * @param {string} name  The name of the view controller.
+     * @return {ViewController}  The view controller instance.
+     */
     getView: function(name) {
     
     },
     
+    /**
+     * Returns a child form instance by the name corresponding to its **name=""** attribute.
+     *
+     * @method getForm
+     * @param {string} name  The name of the form.
+     * @return {Form}  The form instance.
+     */
     getForm: function(name) {
     
     },
     
+    /**
+     * Returns a element instance by the name corresponding to its **[data-name]** tag.
+     *
+     * @method getElement
+     * @param {string} name  The name of the element.
+     * @return {jQuery}  The jQuery object referencing the element.
+     */
     getElement: function(name) {
     
     },
     
+    /**
+     * Checks if a view controller exists with a given name.
+     *
+     * @method hasView
+     * @param {string} name  The name of the view controller.
+     * @return {bool}  Whether the view exists as a child of the view controller.
+     */
     hasView: function(name) {
     
     },
     
+    /**
+     * Checks if a form exists with a given name.
+     *
+     * @method hasForm
+     * @param {string} name  The name of the form.
+     * @return {bool}  Whether the form exists as a child of the view controller.
+     */
     hasForm: function(name) {
     
     },
     
+    /**
+     * Checks if a element exists with a given name.
+     *
+     * @method hasElement
+     * @param {string} name  The name of the element.
+     * @return {bool}  Whether the element exists in the view.
+     */
     hasElement: function(name) {
     
     },
@@ -650,10 +695,26 @@
     // Adhoc References
     // ------------------------------------------------------------------------------------------------
     
-    addView: function(control, name, path) {
+    /**
+     * Adds a new view controller as a child of the current view controller.
+     *
+     * @method addView
+     * @param {string} control  The type of the view controller.
+     * @param {string} name  The name to give the view controller.
+     * @param {string} path  The path to load the view from.
+     * @param {bool} setup  If true, it will be loaded to the same state of the parent.
+     * @return {ViewController}  The ViewController that was just added.
+     */
+    addView: function(control, name, path, setup) {
     
     },
     
+    /**
+     * Removes a child view controller by name from the current view controller.
+     *
+     * @method removeView
+     * @param {string} name  The name of the view controller to remove.
+     */
     removeView: function(name) {
     
     },
@@ -663,11 +724,28 @@
     // Data Bindings
     // ------------------------------------------------------------------------------------------------
     
+    /**
+     * Binds data to an element within the view controller. Bindings use the HTML5 microdata
+     * tagging system to bind data to the DOM. The **[itemprop]** attribute corresponds to a model
+     * field and the **[itemscope]** attribute anticipates receiving a model as its binding.
+     *
+     * @method bind
+     * @param {string} element  The name of the element to bind the data to.
+     * @param {object|array|Model|Collection|Date|string|number} data  The data to bind to the DOM.
+     * @param {bool} [live]  Whether any model changes should update the DOM automatically.
+     */
     bind: function(element, data, live) {
     
     },
     
-    unbind: function(element, data, live) {
+    /**
+     * Unbinds an existing binding from an element by name. Only one binding can exist on an
+     * element at a given time.
+     *
+     * @method unbind
+     * @param {string} element  The name of the element to unbind the data from.
+     */
+    unbind: function(element) {
     
     },
     
@@ -676,25 +754,69 @@
     // Connection Management
     // ------------------------------------------------------------------------------------------------
     
+    /**
+     * Called when the connection state of the application goes online, or manually if the application
+     * is not managing connection state. Any changes that should occur to the view when the
+     * connection goes offline should be setup here.
+     *
+     * @method goOnline
+     */
     goOnline: function() {
     
     },
     
+    /**
+     * Called when the connection state of the application goes offline, or manually if the application
+     * is not managing connection state. Any changes that should occur to the view when the
+     * connection goes offline should be setup here.
+     *
+     * @method goOnline
+     */
     goOffline: function() {
     
     },
     
+    /**
+     * Checks if the current connection is online.
+     *
+     * @method isOnline
+     * @return {bool}  A boolean representing the connection status.
+     */
     isOnline: function() {
     
     }
     
     
-  });
+  }).includes(Queue);
   
   
   // ------------------------------------------------------------------------------------------------
   // Object Methods
   // ------------------------------------------------------------------------------------------------
+  
+  /**
+   * Finds a view controller by it's type string.
+   * @method find
+   * @static
+   * @param {string} type  The type string to lookup on.
+   * @return {ViewController}  The class object for the view controller.
+   */
+   
+  /**
+   * Extends an existing view controller class.
+   * @method extend
+   * @static
+   * @param {object} def  The definition object for the class.
+   * @return {ViewController}  The class object for the new view controller.
+   */
+   
+  /**
+   * Includes a mixin in an existing view controller class.
+   * @method includes
+   * @static
+   * @param {object} def  The mixin object to apply.
+   * @return {ViewController}  The updated class object for the view controller.
+   */
   
   
   // ------------------------------------------------------------------------------------------------

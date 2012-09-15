@@ -50,33 +50,33 @@
   /**
    * Checks if the current location is expired.
    *
-   * @method _isExpired
+   * @method isExpired
    * @private
    * @return {bool}  Whether the coordinates are expired.
    */
-  function _isExpired() {
+  function isExpired() {
   
   }
   
   /**
    * Called when the geolocation request is successful.
    *
-   * @method _onSuccess
+   * @method onSuccess
    * @private
    * @param {Coordinates} coords  The coordinates object returned.
    */
-  function _onSuccess() {
+  function onSuccess() {
   
   }
   
   /**
    * Called when the geolocation request fails.
    *
-   * @method _onFailure
+   * @method onFailure
    * @private
    * @param {Exception} ex  The exception object returned.
    */
-  function _onFailure() {
+  function onFailure() {
   
   }
   

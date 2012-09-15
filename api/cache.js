@@ -15,7 +15,8 @@
   // ------------------------------------------------------------------------------------------------
   
   var Deferred = Orange.Deferred;
-  var Promise = Orange.Promise;
+  var Events   = Orange.Events;
+  var Promise  = Orange.Promise;
   
   
   // ------------------------------------------------------------------------------------------------
@@ -46,7 +47,6 @@
      * when a change in network connectivity has occurred.
      *
      * @class Cache
-     * @static
      * @requires Deferred
      * @requires Promise
      * @uses Events

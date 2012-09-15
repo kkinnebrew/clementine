@@ -55,6 +55,7 @@ Array.prototype.last = [].last || function() {
  */
 (function() {
 
+  var Browser;
   var Class;
   var Deferred;
   var Events;
@@ -782,6 +783,19 @@ Array.prototype.last = [].last || function() {
     }
   
   }).includes(Events);
+  
+  
+  // -------------------------------------------------------------------------------------------------
+  // Browser
+  // -------------------------------------------------------------------------------------------------
+  
+  /**
+   * The Browser object stores many commonly checked feature detection results.
+   *
+   * @class Browser
+   * @static
+   */
+  Browser = {};
   
   
   // -------------------------------------------------------------------------------------------------

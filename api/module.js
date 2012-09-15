@@ -15,6 +15,7 @@
   // ------------------------------------------------------------------------------------------------
   
   var Deferred = Orange.Deferred;
+  var Events   = Orange.Events;
   var Promise = Orange.Promise;
   
   

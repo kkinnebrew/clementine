@@ -1,6 +1,6 @@
-// ------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // Global Functions
-// ------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 function noop() {}
 
@@ -12,18 +12,18 @@ function proxy(fn, context) {
 }
 
 
-// ------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // jQuery Extensions
-// ------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 jQuery.fn.outerHTML = function(s) {
   return s ? this.before(s).remove() : jQuery('<p>').append(this.eq(0).clone()).html();
 };
 
 
-// ------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // Array Extensions
-// ------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 Array.prototype.clone = function() { return this.slice(0); };
 
@@ -43,9 +43,9 @@ Array.prototype.last = [].last || function() {
 };
 
 
-// ------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // Core Module
-// ------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 /**
  * The OrangeUI Core Module containing all required base classes, objects
@@ -63,6 +63,7 @@ Array.prototype.last = [].last || function() {
   var Loader;
   var Log;
   var Orange = {};
+  var Promise;
   
   var keyFilterRegex = /[^A-Za-z:0-9_\[\]]/g;
   var modFilterRegex = /[^A-Za-z\-_]/g;
@@ -126,9 +127,9 @@ Array.prototype.last = [].last || function() {
   }());
   
   
-  // ------------------------------------------------------------------------------------------------
+  // -------------------------------------------------------------------------------------------------
   // EventTarget Object
-  // ------------------------------------------------------------------------------------------------
+  // -------------------------------------------------------------------------------------------------
   
   EventTarget = (function() {
     
@@ -161,9 +162,9 @@ Array.prototype.last = [].last || function() {
   }());
   
   
-  // ------------------------------------------------------------------------------------------------
+  // -------------------------------------------------------------------------------------------------
   // EventHandle Object
-  // ------------------------------------------------------------------------------------------------
+  // -------------------------------------------------------------------------------------------------
 
   EventHandle = (function() {
   
@@ -197,9 +198,9 @@ Array.prototype.last = [].last || function() {
   }());
 
   
-  // ------------------------------------------------------------------------------------------------
+  // -------------------------------------------------------------------------------------------------
   // Events Mixin
-  // ------------------------------------------------------------------------------------------------
+  // -------------------------------------------------------------------------------------------------
   
   /**
    * A mixin for adding custom event functionality to an object. Events may be
@@ -293,9 +294,9 @@ Array.prototype.last = [].last || function() {
   };
   
   
-  // ------------------------------------------------------------------------------------------------
+  // -------------------------------------------------------------------------------------------------
   // Deferred Object
-  // ------------------------------------------------------------------------------------------------
+  // -------------------------------------------------------------------------------------------------
   
   Deferred = (function() {
     
@@ -465,7 +466,7 @@ Array.prototype.last = [].last || function() {
     };
     
     /**
-     * Accepts a callback to bind to the either deferred's resolve or reject
+     * Accepts a callback to bind to the either the deferred's resolve or reject
      * notifications.
      *
      * @method always
@@ -503,31 +504,282 @@ Array.prototype.last = [].last || function() {
   }());
   
   
-  // ------------------------------------------------------------------------------------------------
+  // -------------------------------------------------------------------------------------------------
   // Promise Object
-  // ------------------------------------------------------------------------------------------------
-  
-  /**
-   * Provides promise objects to more easily handle asynchronous function calls.
-   *
-   * @class Promise
-   */
-  Promise = (function() {
-  
-    function Promise() {
+  // -------------------------------------------------------------------------------------------------
 
+  Promise = (function() {
+    
+    /**
+     * Provides promise objects to more easily handle asynchronous function calls.
+     *
+     * @class Promise
+     * @constructor
+     * @param {Deferred} deferred  A deferred object to listen for
+     */
+    function Promise(deferred) {
+      
+      /**
+       * Stores the state of the promise object.
+       * @property _resolved
+       * @type {boolean}
+       * @default false
+       * @private
+       */
+      this._resolved = false;
+      
+      /**
+       * Stores callbacks to execute when resolved.
+       * @property _whenDone
+       * @type {array}
+       * @default []
+       * @private
+       */
+      this._whenDone = [];
+      
+      /**
+       * Stores callbacks to execute when rejected.
+       * @property _whenFail
+       * @type {array}
+       * @default []
+       * @private
+       */
+      this._whenFail = [];
+      
+      /**
+       * Stores callbacks to execute when notified.
+       * @property _whenProgress
+       * @type {array}
+       * @default []
+       * @private
+       */
+      this._whenProgress = [];
+      
+      /**
+       * Stores callbacks to execute for resolved and rejected states.
+       * @property _whenThen
+       * @type {array}
+       * @default []
+       * @private
+       */
+      this._whenThen = [];
+      
+      /**
+       * Stores callbacks to execute when finished.
+       * @property _whenAlways
+       * @type {array}
+       * @default []
+       * @private
+       */
+      this._whenAlways = [];
+      
     }
     
-    Promise.prototype.resolve = function() {
-
-    };
-    
-    Promise.prototype.then = function(fn, args) {
-
-    };
-  
-    return Deferred;
+    /**
+     * Accepts a callback to bind to the promise's progress notification.
+     *
+     * @method progress
+     * @chainable
+     * @param {function} progress*  One or more callbacks to bind to progress.
+     * @param {*} [context]  An optional context to bind to the callbacks.
+     * @returns {Promise} A chainable promise object.
+     */
+    Promise.prototype.progress = Deferred.prototype.progress;
+        
+    /**
+     * Accepts a callback to bind to the promise's resolve notification.
+     *
+     * @method done
+     * @chainable
+     * @param {function} done*  One or more callbacks to bind to resolve.
+     * @param {*} [context]  An optional context to bind to the callbacks.     
+     * @returns {Promise} A chainable promise object.
+     */
+    Promise.prototype.done = Deferred.prototype.done;
+        
+    /**
+     * Accepts a callback to bind to the promise's reject notification.
+     *
+     * @method fail
+     * @chainable
+     * @param {function} fail*  One or more callbacks to bind to reject.
+     * @param {*} [context]  An optional context to bind to the callbacks.
+     * @returns {Promise} A chainable promise object.
+     */
+    Promise.prototype.fail = Deferred.prototype.fail;
+        
+    /**
+     * Accepts a callback to bind to the promise's resolve or reject notifications.
+     *
+     * @method then
+     * @chainable
+     * @param {function} done  A callback to execute on resolve.
+     * @param {function} fail  A callback to execute on reject.
+     * @param {*} [context]  An optional context to bind to the callbacks.
+     * @returns {Promise} A chainable promise object.
+     */
+    Promise.prototype.then = Deferred.prototype.then;
+        
+    /**
+     * Accepts a callback to bind to the either the promise's resolve or reject
+     * notifications.
+     *
+     * @method always
+     * @chainable
+     * @param {function} always*  One or more callbacks to bind to completion.
+     * @param {*} [context]  An optional context to bind to the callbacks.
+     * @returns {Promise} A chainable promise object.
+     */
+    Promise.prototype.always = Deferred.prototype.always;
+        
+    /**
+     * Checks if the promise is currently resolved.
+     *
+     * @method isResolved
+     * @returns {boolean} Whether the promise is resolved
+     */
+    Promise.prototype.isResolved = Deferred.prototype.isResolved;
+        
+    /**
+     * Checks if the promise is currently rejected.
+     *
+     * @method isRejected
+     * @returns {boolean} Whether the promise is rejected.
+     */
+    Promise.prototype.isRejected = Deferred.prototype.isRejected;
+      
+    return Promise;
   
   }());
+  
+  
+  // -------------------------------------------------------------------------------------------------
+  // Loader Object
+  // -------------------------------------------------------------------------------------------------
+  
+  /**
+   * Handles dependency loading for each module.
+   *
+   * @class Loader
+   */
+  Loader = (function() {
+    
+    /**
+     * Stores references to each module and its exports object by name.
+     * @property _modules
+     * @type {object}
+     * @default {}
+     * @private
+     */
+    var _modules = {};
+
+        
+    return {
+      
+      /**
+       * Add a given module and its configuration parameters.
+       *
+       * @method addModule
+       * @param {string} name  The name of the module to add.
+       * @param {function} fn  The function containing the module's code.
+       * @param {array} [required]  An array of required module dependencies.
+       * @return {void}
+       */
+      addModule: function(name, fn, required) {
+        
+        var mod;
+        
+      },
+      
+      /**
+       * Loads a given module and it's dependent modules by name.
+       *
+       * @method loadModule
+       * @param {string} name  The name of the module to load.
+       * @return {void}
+       */
+      loadModule: function(name) {
+        
+      }
+      
+    };
+    
+  }());
+  
+  
+  // -------------------------------------------------------------------------------------------------
+  // Module Functions
+  // -------------------------------------------------------------------------------------------------
+  
+  /**
+   * Adds a new module and it's dependencies by name.
+   *
+   * @method add
+   * @param {string} name  The name of the module.
+   * @param {function} fn  The function containing the module's code.
+   * @param {array} [required]  An array of required modules to load.
+   * @return {void}
+   */
+  function add() {
+
+  }
+  
+  /**
+   * Loads a set of modules by name and then executes an optional
+   * function using those modules.
+   *
+   * @method use
+   * @param {string} [modules]*  A set of modules to load.
+   * @param {function} [fn] An optional function to call using those modules.
+   * @return {void}
+   */
+  function use() {
+
+  }
+  
+  /**
+   * Includes a module in another and returns the exports object of that module.
+   *
+   * @method include
+   * @param {string} name  The name of the module to include.
+   * @return {void}
+   */
+  function include(name) {
+
+  }
+  
+  /**
+   * Returns a new deferred object that resolves when two existing promises or
+   * deferreds have resolved.
+   *
+   * @method when
+   * @param {Deferred|Promise} deferred*  A set of deferreds to build the new object from.
+   * @return {Deferred}
+   */
+  function when() {
+  
+  }
+  
+  
+  // -------------------------------------------------------------------------------------------------
+  // Exports
+  // -------------------------------------------------------------------------------------------------
+  
+  Orange              = this.Orange = { modules: {} };
+  Orange.version      = '0.6.0';
+  
+  Orange.add          = this.add = add;
+  Orange.use          = this.use = use;
+  Orange.include      = this.include = include;
+  Orange.when         = this.when = when;
+  
+  Orange.Class        = Class;
+  Orange.Deferred     = Deferred;
+  Orange.Events       = Events;
+  Orange.EventHandle  = EventHandle;
+  Orange.Loader       = Loader;
+  Orange.Log          = new Log();
+  Orange.Promise      = Promise;
+  
 
 }).call(this);

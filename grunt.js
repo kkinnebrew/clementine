@@ -33,6 +33,7 @@ module.exports = function(grunt) {
       dist: {
         src: [
           '<banner:meta.banner>',
+          'api/orange.js',
           'lib/orange.js',
           'lib/cache.js',
           'lib/form.js',

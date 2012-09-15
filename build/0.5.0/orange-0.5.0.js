@@ -100,8 +100,8 @@ Array.prototype.last = [].last || function() {
      *
      * @method extend
      * @static
-     * @param {object} def An object of functions and properties.
-     * @return {Class}
+     * @param {object} def  An object of functions and properties.
+     * @return {Class}  The newly created class object.
      */
     Class.extend = function(def) {
       
@@ -118,8 +118,8 @@ Array.prototype.last = [].last || function() {
      *
      * @method include
      * @static
-     * @param {object} def An object of functions and properties.
-     * @return {Class}
+     * @param {object} def  An object of functions and properties.
+     * @return {Class}  The class object with the mixin included.
      */
     Class.include = function(def) {
       
@@ -145,9 +145,9 @@ Array.prototype.last = [].last || function() {
      * @class EventTarget
      * @constructor
      * @param {string} type  the name of the event.
-     * @param {*} currentTarget  the current target set to each bubble level.
-     * @param {*} target  the target that originally fired the event.
-     * @param {*} data  the data payload passed along with the event.
+     * @param {*} currentTarget  The current target set to each bubble level.
+     * @param {*} target  The target that originally fired the event.
+     * @param {*} data  The data payload passed along with the event.
      */
     function EventTarget(type, currentTarget, target, data) {
     
@@ -157,7 +157,6 @@ Array.prototype.last = [].last || function() {
      * Stops the event from bubbling to the currentTarget's parent.
      *
      * @method stopPropagation
-     * @return {void}
      */
     EventTarget.prototype.stopPropagation = function() {
     
@@ -180,9 +179,9 @@ Array.prototype.last = [].last || function() {
      *
      * @class EventHandle
      * @constructor
-     * @param {string} type  the name of the event.
-     * @param {function} call  the function bound to the event.
-     * @param {*} target  the target the event is bound to.
+     * @param {string} type The name of the event.
+     * @param {function} call  The function bound to the event.
+     * @param {*} target  The target the event is bound to.
      */
     function EventHandle(type, call, target) {
       
@@ -193,7 +192,6 @@ Array.prototype.last = [].last || function() {
      * time use class and should be removed following detachment.
      *
      * @method detach
-     * @return {void}
      */
     EventHandle.prototype.detach = function() {
       
@@ -213,6 +211,7 @@ Array.prototype.last = [].last || function() {
    * bound, fired, and detached dynamically directly on objects.
    *
    * @class Events
+   * @static
    * @requires EventTarget
    */
   Events = {
@@ -222,11 +221,10 @@ Array.prototype.last = [].last || function() {
      *
      * @method on
      * @requires EventHandle
-     * @static
-     * @param {string} ev  the name of the event.
-     * @param {function} call  the listener to bind to the event.
-     * @param {context} [context]  the optional context to bind to the function.
-     * @return {EventHandle}
+     * @param {string} ev  The name of the event.
+     * @param {function} call  The listener to bind to the event.
+     * @param {context} [context]  The optional context to bind to the function.
+     * @return {EventHandle}  The EventHandle object referencing the bound event.
      */
     on: function(ev, call, context) {
       
@@ -248,11 +246,9 @@ Array.prototype.last = [].last || function() {
      * fired, the event is immediately detached.
      *
      * @method once
-     * @static
-     * @param {string} ev  the name of the event.
-     * @param {function} call  the listener to bind to the event.
-     * @param {context} [context]  the optional context to bind to the function.
-     * @return {void}
+     * @param {string} ev  The name of the event.
+     * @param {function} call  The listener to bind to the event.
+     * @param {context} [context]  The optional context to bind to the function.
      */
     once: function(ev, call, context) {
     
@@ -266,10 +262,8 @@ Array.prototype.last = [].last || function() {
      * that object and parent object's event to execute.
      *
      * @method fire
-     * @static
-     * @param {string} ev  the name of the event.
-     * @param {*} [data]  the optional data payload to pass to all callbacks.
-     * @return {void}
+     * @param {string} ev  The name of the event.
+     * @param {*} [data]  The optional data payload to pass to all callbacks.
      */
     fire: function(ev, data) {
     
@@ -286,10 +280,8 @@ Array.prototype.last = [].last || function() {
      * remove all bound listeners to the object.
      *
      * @method detach
-     * @static
-     * @param {string} [ev]  the optional name of the event to unbind.
-     * @param {function} [call]  the option listener to unbind.
-     * @return {void}
+     * @param {string} [ev]  The optional name of the event to unbind.
+     * @param {function} [call]  The option listener to unbind.
      */
     detach: function(ev, fn) {
         
@@ -376,7 +368,7 @@ Array.prototype.last = [].last || function() {
      * @method resolve
      * @chainable
      * @param {*} [args]*  Arguments to pass to the resolve callbacks.
-     * @returns {Deferred}
+     * @returns {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.resolve = function() {
 
@@ -388,7 +380,7 @@ Array.prototype.last = [].last || function() {
      * @method reject
      * @chainable
      * @param {*} [args]*  Arguments to pass to the resolve callbacks.
-     * @returns {Deferred}
+     * @returns {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.reject = function() {
     
@@ -401,7 +393,7 @@ Array.prototype.last = [].last || function() {
      * @method notify
      * @chainable
      * @param {*} [args]*  Arguments to pass to the resolve callbacks.
-     * @returns {Deferred}
+     * @returns {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.notify = function() {
     
@@ -425,7 +417,7 @@ Array.prototype.last = [].last || function() {
      * @chainable
      * @param {function} progress*  One or more callbacks to bind to progress.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Deferred}
+     * @returns {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.progress = function() {
     
@@ -438,7 +430,7 @@ Array.prototype.last = [].last || function() {
      * @chainable
      * @param {function} done*  One or more callbacks to bind to resolve.
      * @param {*} [context]  An optional context to bind to the callbacks.     
-     * @returns {Deferred}
+     * @returns {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.done = function() {
     
@@ -451,7 +443,7 @@ Array.prototype.last = [].last || function() {
      * @chainable
      * @param {function} fail*  One or more callbacks to bind to reject.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Deferred}
+     * @returns {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.fail = function() {
     
@@ -465,7 +457,7 @@ Array.prototype.last = [].last || function() {
      * @param {function} done  A callback to execute on resolve.
      * @param {function} fail  A callback to execute on reject.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Deferred}
+     * @returns {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.then = function(done, fail, context) {
     
@@ -479,7 +471,7 @@ Array.prototype.last = [].last || function() {
      * @chainable
      * @param {function} always*  One or more callbacks to bind to completion.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Deferred}
+     * @returns {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.always = function() {
     
@@ -588,7 +580,7 @@ Array.prototype.last = [].last || function() {
      * @chainable
      * @param {function} progress*  One or more callbacks to bind to progress.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Promise} A chainable promise object.
+     * @returns {Promise}  A chainable promise object.
      */
     Promise.prototype.progress = Deferred.prototype.progress;
         
@@ -599,7 +591,7 @@ Array.prototype.last = [].last || function() {
      * @chainable
      * @param {function} done*  One or more callbacks to bind to resolve.
      * @param {*} [context]  An optional context to bind to the callbacks.     
-     * @returns {Promise} A chainable promise object.
+     * @returns {Promise} =  A chainable promise object.
      */
     Promise.prototype.done = Deferred.prototype.done;
         
@@ -610,7 +602,7 @@ Array.prototype.last = [].last || function() {
      * @chainable
      * @param {function} fail*  One or more callbacks to bind to reject.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Promise} A chainable promise object.
+     * @returns {Promise}  A chainable promise object.
      */
     Promise.prototype.fail = Deferred.prototype.fail;
         
@@ -622,7 +614,7 @@ Array.prototype.last = [].last || function() {
      * @param {function} done  A callback to execute on resolve.
      * @param {function} fail  A callback to execute on reject.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Promise} A chainable promise object.
+     * @returns {Promise}  A chainable promise object.
      */
     Promise.prototype.then = Deferred.prototype.then;
         
@@ -634,7 +626,7 @@ Array.prototype.last = [].last || function() {
      * @chainable
      * @param {function} always*  One or more callbacks to bind to completion.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Promise} A chainable promise object.
+     * @returns {Promise}  A chainable promise object.
      */
     Promise.prototype.always = Deferred.prototype.always;
         
@@ -642,7 +634,7 @@ Array.prototype.last = [].last || function() {
      * Checks if the promise is currently resolved.
      *
      * @method isResolved
-     * @returns {boolean} Whether the promise is resolved
+     * @returns {boolean}  Whether the promise is resolved
      */
     Promise.prototype.isResolved = Deferred.prototype.isResolved;
         
@@ -650,7 +642,7 @@ Array.prototype.last = [].last || function() {
      * Checks if the promise is currently rejected.
      *
      * @method isRejected
-     * @returns {boolean} Whether the promise is rejected.
+     * @returns {boolean}  Whether the promise is rejected.
      */
     Promise.prototype.isRejected = Deferred.prototype.isRejected;
       
@@ -689,7 +681,6 @@ Array.prototype.last = [].last || function() {
        * @param {string} name  The name of the module to add.
        * @param {function} fn  The function containing the module's code.
        * @param {array} [required]  An array of required module dependencies.
-       * @return {void}
        */
       addModule: function(name, fn, required) {
         
@@ -702,7 +693,6 @@ Array.prototype.last = [].last || function() {
        *
        * @method loadModule
        * @param {string} name  The name of the module to load.
-       * @return {void}
        */
       loadModule: function(name) {
         
@@ -711,6 +701,93 @@ Array.prototype.last = [].last || function() {
     };
     
   }());
+  
+  
+  // -------------------------------------------------------------------------------------------------
+  // Log Object
+  // -------------------------------------------------------------------------------------------------
+  
+ 
+  Log = Class.extend({
+  
+      
+    /**
+     * A wrapper around logging. Allows the application to intercept log
+     * event messages and display them to the user.
+     *
+     * @class Log
+     * @constructor
+     * @uses Events
+     */
+    initialize: function(name) {
+      
+      /**
+       * Stores the level of the logger.
+       * @property _level
+       * @type {string}
+       * @default DEBUG
+       * @private
+       */
+      this._level = 'DEBUG';
+      
+    },
+    
+    /**
+     * A wrapper around logging. Allows the application to intercept log
+     * event messages and display them to the user.
+     *
+     * @method setLevel
+     * @param {string} level  The level to set the logger to.
+     */
+    setLevel: function(level) {
+    
+    },
+    
+    /**
+     * Logs a debug message to the console.
+     *
+     * @method debug
+     * @param {string} message  The message to log to the console.
+     * @param {object} ex  An optional exception or object to log.
+     */
+    debug: function(message, ex) {
+    
+    },
+    
+    /**
+     * Logs a info message to the console.
+     *
+     * @method info
+     * @param {string} message  The message to log to the console.
+     * @param {object} ex  An optional exception or object to log.
+     */
+    info: function(message, ex) {
+    
+    },
+    
+    /**
+     * Logs a warn message to the console.
+     *
+     * @method warn
+     * @param {string} message  The message to log to the console.
+     * @param {object} ex  An optional exception or object to log.
+     */
+    warn: function(message, ex) {
+    
+    },
+    
+    /**
+     * Logs a error message to the console.
+     *
+     * @method error
+     * @param {string} message  The message to log to the console.
+     * @param {object} ex  An optional exception or object to log.
+     */
+    error: function(message, ex) {
+    
+    }
+  
+  }).include(Events);
   
   
   // -------------------------------------------------------------------------------------------------
@@ -724,7 +801,6 @@ Array.prototype.last = [].last || function() {
    * @param {string} name  The name of the module.
    * @param {function} fn  The function containing the module's code.
    * @param {array} [required]  An array of required modules to load.
-   * @return {void}
    */
   function add() {
 
@@ -737,7 +813,6 @@ Array.prototype.last = [].last || function() {
    * @method use
    * @param {string} [modules]*  A set of modules to load.
    * @param {function} [fn] An optional function to call using those modules.
-   * @return {void}
    */
   function use() {
 
@@ -748,7 +823,6 @@ Array.prototype.last = [].last || function() {
    *
    * @method include
    * @param {string} name  The name of the module to include.
-   * @return {void}
    */
   function include(name) {
 
@@ -760,7 +834,7 @@ Array.prototype.last = [].last || function() {
    *
    * @method when
    * @param {Deferred|Promise} deferred*  A set of deferreds to build the new object from.
-   * @return {Deferred}
+   * @return {Deferred}  A Deferred object that resolves when the arguments resolve.
    */
   function when() {
   

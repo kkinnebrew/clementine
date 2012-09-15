@@ -795,7 +795,7 @@
   // ------------------------------------------------------------------------------------------------
   
   /**
-   * Finds a view controller by it's type string.
+   * Finds a view controller by its type string.
    * @method find
    * @static
    * @param {string} type  The type string to lookup on.

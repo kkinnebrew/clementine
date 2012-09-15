@@ -74,13 +74,14 @@
     
     /**
      * @class Collection
+     * @uses Events
      * @constructor
      */  
     initialize: function() {
       
     }
   
-  });
+  }).includes(Events);
   
   
   // ------------------------------------------------------------------------------------------------

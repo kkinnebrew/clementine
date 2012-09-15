@@ -78,7 +78,7 @@
    * @param {jQuery} target  The jQuery target to bind to.
    * @param {Collection} collection  The collection object to bind.
    */
-  function _bindCollection(target, collection) {
+  function bindCollection(target, collection) {
   
   }
   

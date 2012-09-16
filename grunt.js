@@ -5,7 +5,7 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: '<json:package.json>',
     meta: {
-      banner: '/**\n * <%= pkg.title || pkg.name %> | <%= pkg.version %> | ' + '<%= grunt.template.today("mm.dd.yyyy") %>\n' + ' * <%= pkg.homepage ? pkg.homepage : "" %>\n' + ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author %>\n */'
+      banner: '/*!\n * <%= pkg.title || pkg.name %> | <%= pkg.version %> | ' + '<%= grunt.template.today("mm.dd.yyyy") %>\n' + ' * <%= pkg.homepage ? pkg.homepage : "" %>\n' + ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author %>\n */'
     },
     lint: {
       files: ['grunt.js', 'lib/*.js', 'demos/stocks/js/*.js', 'spec/**/*.js']
@@ -33,7 +33,6 @@ module.exports = function(grunt) {
       dist: {
         src: [
           '<banner:meta.banner>',
-          'api/orange.js',
           'lib/orange.js',
           'lib/cache.js',
           'lib/form.js',
@@ -108,7 +107,9 @@ module.exports = function(grunt) {
         QUOTA_EXCEEDED_ERR: true
       }
     },
-    uglify: {}
+    uglify: {
+      mangle: { toplevel: true }
+    }
   });
 
   // load tasks

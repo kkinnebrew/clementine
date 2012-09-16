@@ -2,7 +2,7 @@
 // Cache Class
 // ------------------------------------------------------------------------------------------------
 
-/** 
+/**
  * @module HTML5
  */
 (function(Orange) {
@@ -51,7 +51,7 @@
      * @requires Promise
      * @uses Events
      * @constructor
-     */  
+     */
     initialize: function() {
       
       /**
@@ -87,13 +87,13 @@
        * @type {bool}
        * @private
        */
-      this._process;
+      this._process = null;
       
     },
     
     /**
      * Pings the network connection to check if it is active or inactive.
-     * 
+     *
      * @method ping
      * @return {Promise}  A promise that resolves when online and rejects when offline.
      */
@@ -132,3 +132,4 @@
     
   
 }(Orange));
+

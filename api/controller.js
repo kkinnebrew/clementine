@@ -2,7 +2,7 @@
 // ViewController Class
 // ------------------------------------------------------------------------------------------------
 
-/** 
+/**
  * The UI Module contains classes for managing application interaction logic. This includes
  * manipulation the DOM, loading view, managing routes, and event bindings.
  *
@@ -106,7 +106,7 @@
        * @type {jQuery}
        * @private
        */
-      this._target;
+      this._target = target;
       
       
       /**
@@ -161,7 +161,7 @@
        * @type {string}
        * @private
        */
-      this._source;
+      this._source = null;
       
       
       /**
@@ -258,7 +258,7 @@
      * This is a helper method that stores all expected child view controllers, forms, and elements
      * that can be referenced in the view. Implement this for any custom controllers you build, for
      * it will warn the user that they are missing specific required [data-name] outlets in their
-     * view. The method should return an object with up to three keys, views, forms, and elements, 
+     * view. The method should return an object with up to three keys, views, forms, and elements,
      * each with an array of the expected **[data-name]** attribute values.
      *
      * @method getOutlets
@@ -300,7 +300,7 @@
      * @method setHash
      * @chainable
      * @param {array} routes  An array of the hash split by its forward slash.
-     * @param {string} subhash  The remaining hash string. 
+     * @param {string} subhash  The remaining hash string.
      * @return {ViewController}  Returns the view controller for chaining.
      */
     setHash: function(routes, subhash) {
@@ -451,7 +451,7 @@
     },
     
     /**
-     * Appends the view controller's target to the DOM. 
+     * Appends the view controller's target to the DOM.
      *
      * @method append
      * @chainable
@@ -827,3 +827,4 @@
     
   
 }(Orange));
+

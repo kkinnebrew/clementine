@@ -363,7 +363,7 @@ Array.prototype.last = [].last || function() {
      * @method resolve
      * @chainable
      * @param {*} [args]*  Arguments to pass to the resolve callbacks.
-     * @returns {Deferred} A chainable reference to the deferred.
+     * @return {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.resolve = function() {
 
@@ -375,7 +375,7 @@ Array.prototype.last = [].last || function() {
      * @method reject
      * @chainable
      * @param {*} [args]*  Arguments to pass to the resolve callbacks.
-     * @returns {Deferred} A chainable reference to the deferred.
+     * @return {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.reject = function() {
     
@@ -388,7 +388,7 @@ Array.prototype.last = [].last || function() {
      * @method notify
      * @chainable
      * @param {*} [args]*  Arguments to pass to the resolve callbacks.
-     * @returns {Deferred} A chainable reference to the deferred.
+     * @return {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.notify = function() {
     
@@ -399,7 +399,7 @@ Array.prototype.last = [].last || function() {
      *
      * @method promise
      * @chainable
-     * @returns {Promise} The promise object representing the deferred.
+     * @return {Promise} The promise object representing the deferred.
      */
     Deferred.prototype.promise = function() {
     
@@ -412,7 +412,7 @@ Array.prototype.last = [].last || function() {
      * @chainable
      * @param {function} progress*  One or more callbacks to bind to progress.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Deferred} A chainable reference to the deferred.
+     * @return {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.progress = function() {
     
@@ -424,8 +424,8 @@ Array.prototype.last = [].last || function() {
      * @method done
      * @chainable
      * @param {function} done*  One or more callbacks to bind to resolve.
-     * @param {*} [context]  An optional context to bind to the callbacks.     
-     * @returns {Deferred} A chainable reference to the deferred.
+     * @param {*} [context]  An optional context to bind to the callbacks.
+     * @return {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.done = function() {
     
@@ -438,7 +438,7 @@ Array.prototype.last = [].last || function() {
      * @chainable
      * @param {function} fail*  One or more callbacks to bind to reject.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Deferred} A chainable reference to the deferred.
+     * @return {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.fail = function() {
     
@@ -452,7 +452,7 @@ Array.prototype.last = [].last || function() {
      * @param {function} done  A callback to execute on resolve.
      * @param {function} fail  A callback to execute on reject.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Deferred} A chainable reference to the deferred.
+     * @return {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.then = function(done, fail, context) {
     
@@ -466,7 +466,7 @@ Array.prototype.last = [].last || function() {
      * @chainable
      * @param {function} always*  One or more callbacks to bind to completion.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Deferred} A chainable reference to the deferred.
+     * @return {Deferred} A chainable reference to the deferred.
      */
     Deferred.prototype.always = function() {
     
@@ -476,7 +476,7 @@ Array.prototype.last = [].last || function() {
      * Checks if the deferred is currently resolved.
      *
      * @method isResolved
-     * @returns {boolean}
+     * @return {boolean}
      */
     Deferred.prototype.isResolved = function() {
     
@@ -486,7 +486,7 @@ Array.prototype.last = [].last || function() {
      * Checks if the deferred is currently rejected.
      *
      * @method isRejected
-     * @returns {boolean}
+     * @return {boolean}
      */
     Deferred.prototype.isRejected = function() {
     
@@ -575,7 +575,7 @@ Array.prototype.last = [].last || function() {
      * @chainable
      * @param {function} progress*  One or more callbacks to bind to progress.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Promise}  A chainable promise object.
+     * @return {Promise}  A chainable promise object.
      */
     Promise.prototype.progress = Deferred.prototype.progress;
         
@@ -585,8 +585,8 @@ Array.prototype.last = [].last || function() {
      * @method done
      * @chainable
      * @param {function} done*  One or more callbacks to bind to resolve.
-     * @param {*} [context]  An optional context to bind to the callbacks.     
-     * @returns {Promise} =  A chainable promise object.
+     * @param {*} [context]  An optional context to bind to the callbacks.
+     * @return {Promise} =  A chainable promise object.
      */
     Promise.prototype.done = Deferred.prototype.done;
         
@@ -597,7 +597,7 @@ Array.prototype.last = [].last || function() {
      * @chainable
      * @param {function} fail*  One or more callbacks to bind to reject.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Promise}  A chainable promise object.
+     * @return {Promise}  A chainable promise object.
      */
     Promise.prototype.fail = Deferred.prototype.fail;
         
@@ -609,7 +609,7 @@ Array.prototype.last = [].last || function() {
      * @param {function} done  A callback to execute on resolve.
      * @param {function} fail  A callback to execute on reject.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Promise}  A chainable promise object.
+     * @return {Promise}  A chainable promise object.
      */
     Promise.prototype.then = Deferred.prototype.then;
         
@@ -621,7 +621,7 @@ Array.prototype.last = [].last || function() {
      * @chainable
      * @param {function} always*  One or more callbacks to bind to completion.
      * @param {*} [context]  An optional context to bind to the callbacks.
-     * @returns {Promise}  A chainable promise object.
+     * @return {Promise}  A chainable promise object.
      */
     Promise.prototype.always = Deferred.prototype.always;
         
@@ -629,7 +629,7 @@ Array.prototype.last = [].last || function() {
      * Checks if the promise is currently resolved.
      *
      * @method isResolved
-     * @returns {boolean}  Whether the promise is resolved
+     * @return {boolean}  Whether the promise is resolved
      */
     Promise.prototype.isResolved = Deferred.prototype.isResolved;
         
@@ -637,7 +637,7 @@ Array.prototype.last = [].last || function() {
      * Checks if the promise is currently rejected.
      *
      * @method isRejected
-     * @returns {boolean}  Whether the promise is rejected.
+     * @return {boolean}  Whether the promise is rejected.
      */
     Promise.prototype.isRejected = Deferred.prototype.isRejected;
       
@@ -870,4 +870,5 @@ Array.prototype.last = [].last || function() {
   Orange.Promise      = Promise;
   
 
-}).call(this);
+}.call(this));
+

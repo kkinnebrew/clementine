@@ -2,7 +2,7 @@
 // Service Class
 // ------------------------------------------------------------------------------------------------
 
-/** 
+/**
  * @module Data
  */
 (function(Orange) {
@@ -18,7 +18,6 @@
   var Events           = Orange.Events;
   var Model            = Orange.Model;
   var Module           = Orange.Module;
-  var Service          = Orange.Service;
   
   
   // ------------------------------------------------------------------------------------------------
@@ -144,7 +143,7 @@
      * @class Service
      * @constructor
      * @param {object} config  The config object for the service.
-     */  
+     */
     initialize: function(config) {
       
       /**
@@ -153,7 +152,7 @@
        * @type {string}
        * @private
        */
-      this._baseUrl;
+      this._baseUrl = '';
       
       /**
        * Stores a reference to the auth service.
@@ -161,7 +160,7 @@
        * @type {Service}
        * @private
        */
-      this._authService;
+      this._authService = null;
       
       /**
        * Whether the service is currently online or offline.
@@ -169,13 +168,14 @@
        * @type {bool}
        * @private
        */
-      this._isOnline;
+      this._isOnline = false;
       
     },
     
     /**
      * Should return the path fragment to be used for all endpoints of the service.
      *
+     * @method getPath
      * @return {string}  The path to add to the baseUrl.
      */
     getPath: function() {
@@ -288,3 +288,4 @@
     
   
 }(Orange));
+

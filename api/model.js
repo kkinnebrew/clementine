@@ -2,7 +2,7 @@
 // Model Class
 // ------------------------------------------------------------------------------------------------
 
-/** 
+/**
  * @module Data
  */
 (function(Orange) {
@@ -40,11 +40,11 @@
   
   /**
    * Fired when a change in a model is request.
-   * @event sync
+   * @event refresh
    * @param {string} model  The type of the model to refresh.
    * @param {string|number} id  The id to update from the service.
    */
-  var EVENT_SYNC = 'refresh';
+  var EVENT_REFRESH = 'refresh';
 
   
   // ------------------------------------------------------------------------------------------------
@@ -58,7 +58,7 @@
      * @extends Module
      * @constructor
      * @param {object} data  The source data for the model.
-     */  
+     */
     initialize: function(data) {
       
       /**
@@ -67,7 +67,7 @@
        * @type {string|int}
        * @private
        */
-      this._id;
+      this._id = null;
       
       /**
        * Stores the formatted data of the model.
@@ -75,7 +75,7 @@
        * @type {object}
        * @private
        */
-      this._data;
+      this._data = {};
       
       /**
        * Stores an array of the updates to the model, for undo purposes.
@@ -83,7 +83,7 @@
        * @type {array}
        * @private
        */
-      this._changes;
+      this._changes = [];
       
       /**
        * Whether the module is currently changed and has not saved that change
@@ -92,14 +92,14 @@
        * @type {bool}
        * @private
        */
-      this._isChanged;
+      this._isChanged = false;
       
     },
     
     /**
      * This method must be implemented, laying out the model's fields and their
      * properties and types. The fields object returned is keyed by the field name.
-     * The value is an object, implementing various properties associated with the 
+     * The value is an object, implementing various properties associated with the
      * specific type of that field. The **type** property is required. Supported field
      * types can be found in the Model.Fields object as constants.
      *
@@ -283,3 +283,4 @@
     
   
 }(Orange));
+

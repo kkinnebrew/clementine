@@ -2,7 +2,7 @@
 // Application Class
 // ------------------------------------------------------------------------------------------------
 
-/** 
+/**
  * @module UI
  */
 (function(Orange) {
@@ -33,7 +33,7 @@
      * @class Application
      * @constructor
      * @param {object} config  The application is passed your app.json file.
-     */  
+     */
     initialize: function(config) {
       
     }
@@ -49,3 +49,4 @@
     
   
 }(Orange));
+

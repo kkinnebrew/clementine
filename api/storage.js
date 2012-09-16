@@ -2,7 +2,7 @@
 // Storage Object
 // ------------------------------------------------------------------------------------------------
 
-/** 
+/**
  * @module HTML5
  */
 (function(Orange) {
@@ -48,7 +48,7 @@
      * Returns the value for a key from localStorage.
      *
      * @method get
-     * @param {string} key  
+     * @param {string} key
      * @param {*} [alt]  An alternate to return if the key is not found.
      * @return
      */
@@ -81,7 +81,7 @@
     },
     
     /**
-     * Flushes all object from the localStorage object. Objects will not be flushed when 
+     * Flushes all object from the localStorage object. Objects will not be flushed when
      * offline unless force is set to true.
      *
      * @method flushExpired
@@ -92,7 +92,7 @@
     },
     
     /**
-     * Flushes all expired objects from the localStorage object. Objects will not be flushed 
+     * Flushes all expired objects from the localStorage object. Objects will not be flushed
      * when offline unless force is set to true.
      *
      * @method flush
@@ -152,3 +152,4 @@
     
   
 }(Orange));
+

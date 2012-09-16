@@ -2,7 +2,7 @@
 // Queue Mixin
 // ------------------------------------------------------------------------------------------------
 
-/** 
+/**
  * @module Core
  */
 (function(Orange) {
@@ -69,11 +69,11 @@
        * @type {bool}
        * @private
        */
-      this._process;
+      this._process = null;
     
     },
     
-    /** 
+    /**
      * Clears the queue and returns after the currently executing process
      * has finished. Any waits will be immediately terminated.
      *
@@ -85,7 +85,7 @@
     
     },
     
-    /** 
+    /**
      * Calls the next process waiting in the queue. This should be called at
      * the end of every queued function to tell the queue to continue. Missing
      * the **next()** call will pause the queue.
@@ -131,3 +131,4 @@
     
   
 }(Orange));
+

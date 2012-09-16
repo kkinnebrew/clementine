@@ -42,8 +42,8 @@
   /**
    * Registers a list of view paths, retrieves the source of each view asynchronously,
    * and caches the view markup for later use. This should be run before your application
-   * has launched if you are using any view fragements *(ie. **[data-template]** attributes)*.
-   * By default, the paths registered are relative to the *templates/* directory.
+   * has launched if you are using any view fragements *(ie. [data-template] attributes)*.
+   * By default, the paths registered are relative to the `templates/` directory.
    *
    * @method register
    * @static
@@ -63,3 +63,4 @@
   
 
 }(Orange));
+

@@ -2,7 +2,10 @@
 // Binding Class
 // ------------------------------------------------------------------------------------------------
 
-/** 
+/**
+ * The Data Module handles all service connections, data models for the client, live data
+ * bindings to the DOM, and caching.
+ *
  * @module Data
  */
 (function(Orange) {
@@ -136,7 +139,7 @@
   
   /**
    * Called when a collection emits an add event. Inserts a new
-   * item into the DOM at a specific index. 
+   * item into the DOM at a specific index.
    *
    * @method onAdd
    * @private
@@ -151,7 +154,7 @@
   
   /**
    * Called when a collection emits a remove. Removes an existing
-   * item from the DOM at a specific index. 
+   * item from the DOM at a specific index.
    *
    * @method onRemove
    * @private
@@ -165,7 +168,7 @@
   
   /**
    * Called when a collection emits a remove event. Removes an existing
-   * item from the DOM at a specific index. 
+   * item from the DOM at a specific index.
    *
    * @method onSort
    * @private
@@ -179,7 +182,7 @@
   
   /**
    * Called when a collection emits an update event. This will refresh the DOM
-   * and replace the existing data with fresh data. 
+   * and replace the existing data with fresh data.
    *
    * @method onUpdate
    * @private
@@ -234,7 +237,7 @@
      * @class Binding
      * @constructor
      * @param {jQuery} target  A reference to a DOM element that will be used for binding.
-     */  
+     */
     initialize: function(target) {
       
       /**
@@ -243,7 +246,7 @@
        * @type {jQuery}
        * @private
        */
-      this._target;
+      this._target = target;
       
       /**
        * Stores the html text of the original target. Unbinding reverts to this markup.
@@ -251,7 +254,7 @@
        * @type {string}
        * @private
        */
-      this._template;
+      this._template = null;
       
       /**
        * Stores a reference to the data being bound.
@@ -259,7 +262,7 @@
        * @type {object|array|Model|Collection|Date|string|number}
        * @private
        */
-      this._data;
+      this._data = null;
       
       /**
        * Stores handles to all the items bound to listen for model changes.
@@ -277,7 +280,7 @@
        * @default false
        * @private
        */
-      this._isBinding;
+      this._isBinding = false;
       
       /**
        * Whether the target is already bound with data.
@@ -286,7 +289,7 @@
        * @default false
        * @private
        */
-      this._isBound;
+      this._isBound = false;
       
     },
     
@@ -331,3 +334,4 @@
     
   
 }(Orange));
+

@@ -4,6 +4,8 @@ OrangeUI is a javascript framework for building dynamic, interactive web applica
 
 Many of the features of OrangeUI are stable, however the framework is still in active development and things are bound to change. Try it out on a project and contribute or report bugs [here].
 
+View the full [API Docs] here. Documentation is currently valid for prereleasef0.6.0.
+
 ## Why choose OrangeUI?
 
 OrangeUI is a rapid development javascript framework for soundly built web applications. It is meant as a tool to develop highly interactive, maintainable applications in the browser, giving the developer a pattern for organizing their interaction logic, views, and styles into a library of modular, decoupled components. OrangeUI provides the following:
@@ -58,3 +60,4 @@ Licensed under the MIT license.
 [orangeui]: https://github.com/brew20k/orangeui/tree/master/build
 [Commons]: https://github.com/brew20k/orangeui/blob/master/docs/Commons.md
 [MVC]: https://github.com/brew20k/orangeui/blob/master/docs/MVC.md
+[API Docs]: http://brew20k.github.com/orangeui/api/

@@ -20,6 +20,46 @@ jQuery.fn.outerHTML = function(s) {
   return s ? this.before(s).remove() : jQuery('<p>').append(this.eq(0).clone()).html();
 };
 
+jQuery.fn.firstChildren = function(selector) {
+	var children = [];
+	this.find(selector).each(function() {
+	  var include = false, parent = $(this).parent();
+	  while (parent.length !== 0 && !include) {
+	    if ($(parent).not($(this)).length === 0) {
+	      include = true; break;
+	    } else if ($(parent).not('[data-control]').length === 0) {
+	      include = false; break;
+	    } parent = $(parent).parent();
+	  }
+	  if (include) {
+	  	children.push($(this));
+	  }
+	});
+	return children;
+};
+
+
+// -------------------------------------------------------------------------------------------------
+// Object Extensions
+// -------------------------------------------------------------------------------------------------
+
+Object.prototype.clone = function() {
+	var i, newObj = (o instanceof Array) ? [] : {};
+	for (i in o) {
+	  if (i === 'clone') {
+	    continue;
+	  }
+	  if (o[i] && o[i] instanceof Date) {
+	    newObj[i] = new Date(o[i]);
+	  } else if (o[i] && typeof o[i] === "object") {
+	    newObj[i] = clone(o[i]);
+	  } else {
+	    newObj[i] = o[i];
+	  }
+	}
+	return newObj;
+};
+
 
 // -------------------------------------------------------------------------------------------------
 // Array Extensions
@@ -76,8 +116,8 @@ Array.prototype.last = [].last || function() {
   
   Class = (function() {
   
-    var initializing;
-    var superRegex;
+    var initializing = false;
+    var fnTest = /\b_super\b/;
     
     /**
      * A generic class providing oop and inheritance
@@ -87,6 +127,7 @@ Array.prototype.last = [].last || function() {
      * @constructor
      */
     function Class() {}
+    
     
     /**
      * Extends an existing class with additional properties
@@ -103,7 +144,37 @@ Array.prototype.last = [].last || function() {
       var prototype;
       var name;
       
-      var _super;
+      var _super = this.prototype;
+      
+      initializing = true;
+      prototype = new this();
+      initializing = false;
+      
+      for (name in def) {
+        prototype[name] = typeof def[name] === "function" && typeof _super[name] === "function" && fnTest.test(def[name]) ? (function(name, fn) {
+          return function() {
+            var tmp = this._super;
+            this._super = _super[name];
+            var ret = fn.apply(this, arguments);
+            this._super = tmp;
+            return ret;
+          };
+        }(name, def[name])) : def[name];
+      }
+      
+      function c() {
+        if (!initializing && this.initialize) {
+          this.initialize.apply(this, arguments);
+        }
+      }
+  
+      c.prototype = prototype;
+      c.prototype.constructor = c;
+      
+      c.extend = Class.extend;
+      c.include = Class.include;
+  
+      return c;
       
     };
     
@@ -120,6 +191,19 @@ Array.prototype.last = [].last || function() {
       
       var key;
       var value;
+      
+      if (!def) {
+        throw 'Missing definition';
+      }
+      
+      for (key in def) {
+        value = def[key];
+        if (Array.prototype.indexOf.call(['extend', 'includes'], key) < 0) {
+          this.prototype[key] = value;
+        }
+      }
+        
+      return this;
       
     };
     
@@ -145,7 +229,13 @@ Array.prototype.last = [].last || function() {
      * @param {*} data  The data payload passed along with the event.
      */
     function EventTarget(type, currentTarget, target, data) {
-    
+    	
+    	this.bubbles         = true;
+    	this.currentTarget   = currentTarget;
+    	this.data            = data;
+    	this.target          = target;
+    	this.type            = type;
+    	
     }
     
     /**
@@ -154,7 +244,7 @@ Array.prototype.last = [].last || function() {
      * @method stopPropagation
      */
     EventTarget.prototype.stopPropagation = function() {
-    
+    	this.bubbles = false;
     };
     
     return EventTarget;
@@ -180,6 +270,10 @@ Array.prototype.last = [].last || function() {
      */
     function EventHandle(type, call, target) {
       
+      this.call      = call;
+      this.ev        = ev;
+      this.target    = target;
+      
     }
     
     /**
@@ -189,6 +283,12 @@ Array.prototype.last = [].last || function() {
      * @method detach
      */
     EventHandle.prototype.detach = function() {
+      
+      this.target.detach(this.ev, this.call);
+      
+      delete this.target;
+      delete this.ev;
+      delete this.call;
       
     };
     
@@ -223,7 +323,7 @@ Array.prototype.last = [].last || function() {
      */
     on: function(ev, call, context) {
       
-      var fn;
+      var fn = typeof context !== 'undefined' ? proxy(call, context) : call;
       
       /**
        * An object containing references to each listener.
@@ -232,7 +332,15 @@ Array.prototype.last = [].last || function() {
        * @default {}
        * @private
        */
-      this._listeners = {};
+      this._listeners = this._listeners || {};
+      
+      if (!this._listeners.hasOwnProperty(ev)) {
+      	this._listeners[ev] = [];
+      }
+      
+      this._listeners[ev].push(fn);
+      
+      return new EventHandle(this, ev, fn);
       
     },
     
@@ -247,8 +355,14 @@ Array.prototype.last = [].last || function() {
      */
     once: function(ev, call, context) {
     
-      var fn;
-      var wrap;
+      var fn = typeof context !== 'undefined' ? proxy(call, context) : call;
+      
+      var wrap = function() {
+        call.apply(this, arguments);
+        this.detach(ev, fn);
+      };
+      
+      this.on(ev, wrap);
       
     },
     
@@ -262,9 +376,29 @@ Array.prototype.last = [].last || function() {
      */
     fire: function(ev, data) {
     
-      var parent;
-      var type;
-      var listeners;
+      var parent = this.parent || null;
+      
+      if (typeof ev === 'string') {
+        ev = new EventTarget(ev, this, this, data);
+      }
+      
+      if (typeof ev.type !== 'string') {
+        throw "Error: Invalid 'type' when firing event";
+      }
+      
+      this._listeners = this._listeners || {};
+      
+      if (this._listeners[ev.type] instanceof Array) {
+        var listeners = this._listeners[ev.type];
+        for (var i = 0, len = listeners.length; i < len; i++) {
+          listeners[i].call(this, ev, data);
+        }
+      }
+      
+      if (parent != null && ev.bubbles && ev.type[0] !== '_') {
+        ev.currentTarget = this.parent;
+        parent.fire.call(parent, ev, data);
+      }
       
     },
     
@@ -280,7 +414,25 @@ Array.prototype.last = [].last || function() {
      */
     detach: function(ev, fn) {
         
-      var listeners;
+      var listeners = [];
+      
+      this._listeners = this._listeners || {};
+      
+      if (typeof ev === 'undefined') {
+        this._listeners = {};
+      } else if (this._listeners[ev] instanceof Array) {
+        if (typeof fn !== 'undefined') {
+          listeners = this._listeners[ev];
+          for (var i = 0, len = listeners.length; i < len; i++) {
+            if (listeners[i] === fn) {
+              listeners.splice(i, 1);
+              break;
+            }
+          }
+        } else {
+          this._listeners[ev] = [];
+        }
+      }
       
     }
     
@@ -665,6 +817,15 @@ Array.prototype.last = [].last || function() {
      * @private
      */
     var _modules = {};
+    
+    /**
+     * Stores a list of modules that have already been invoked.
+     * @property _active
+     * @type {array}
+     * @default []
+     * @private
+     */
+    var _active = [];
 
         
     return {
@@ -681,6 +842,16 @@ Array.prototype.last = [].last || function() {
         
         var mod;
         
+        if (!name.match(/[\^\-A-Za-z_]/g)) { throw 'Invalid module name'; }
+        
+        mod = {
+          name: name,
+          fn: fn,
+          required: required || []
+        };
+        
+        _modules[name] = mod;
+        
       },
       
       /**
@@ -690,6 +861,26 @@ Array.prototype.last = [].last || function() {
        * @param {string} name  The name of the module to load.
        */
       loadModule: function(name) {
+        
+        var exports = {};
+        
+        if (_active.hasOwnProperty(name)) {
+          return;
+        }
+        
+        if (_modules[name] !== undefined) {
+        
+          _active[name] = true;
+          
+          for (var i = 0, len = _modules[name].req.length; i < len; i++) {
+            if (_modules[name].req[i] === name) { continue; }
+            this.loadModule(_modules[name].req[i]);
+          }
+          
+          _modules[name].fn.call(window, exports);
+          Orange.modules[name] = exports;
+          
+        }
         
       }
       
@@ -795,7 +986,10 @@ Array.prototype.last = [].last || function() {
    * @class Browser
    * @static
    */
-  Browser = {};
+  Browser = {
+    touch: ('ontouchstart' in window) || (window.hasOwnProperty('DocumentTouch') && document instanceof DocumentTouch),
+    location: 'geolocation' in navigator
+  };
   
   
   // -------------------------------------------------------------------------------------------------
@@ -811,7 +1005,11 @@ Array.prototype.last = [].last || function() {
    * @param {array} [required]  An array of required modules to load.
    */
   function add() {
-
+		var args = arguments,
+		  name = args[0],
+		  fn = ( typeof args[1] === 'function' ) ? args[1] : null,
+		  req = args[2];
+		Orange.Loader.addModule(name, fn, req);
   }
   
   /**
@@ -823,7 +1021,15 @@ Array.prototype.last = [].last || function() {
    * @param {function} [fn] An optional function to call using those modules.
    */
   function use() {
-
+		var args = Array.prototype.slice.call(arguments),
+		  fn = args[args.length-1],
+		  req = clone(args).splice(0, args.length-1);
+		if (typeof req[0] !== 'function') {
+		  for (var i = 0, len = req.length; i < len; i++) {
+		    Orange.Loader.loadModule(req[i]);
+		  }
+		}
+		fn.call(window, Orange);
   }
   
   /**
@@ -833,7 +1039,11 @@ Array.prototype.last = [].last || function() {
    * @param {string} name  The name of the module to include.
    */
   function include(name) {
-
+		if (typeof Orange.modules[name] !== undefined) {
+		  return Orange.modules[name];
+		} else {
+		  throw 'Could not require module';
+		}
   }
   
   /**
@@ -845,7 +1055,26 @@ Array.prototype.last = [].last || function() {
    * @return {Deferred}  A Deferred object that resolves when the arguments resolve.
    */
   function when() {
-  
+  	
+  	var deferred = new Deferred(this);
+  	var count = arguments.length;
+  	  
+  	function resolve() {
+  	  if (--count === 0) {
+  	    deferred.resolve();
+  	  }
+  	}
+  	
+  	function reject() {
+  		deferred.reject();
+  	}
+  	
+  	for (var i=0; i<arguments.length; i++) {
+  	  arguments[i].then(resolve, reject);
+  	}
+  	
+  	return deferred;
+  	
   }
   
   

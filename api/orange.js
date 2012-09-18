@@ -21,21 +21,21 @@ jQuery.fn.outerHTML = function(s) {
 };
 
 jQuery.fn.firstChildren = function(selector) {
-	var children = [];
-	this.find(selector).each(function() {
-		var include = false, parent = $(this).parent();
-		while (parent.length !== 0 && !include) {
-			if ($(parent).not($(this)).length === 0) {
-				include = true; break;
-			} else if ($(parent).not('[data-control]').length === 0) {
-				include = false; break;
-			} parent = $(parent).parent();
-		}
-		if (include) {
-			children.push($(this));
-		}
-	});
-	return children;
+  var children = [];
+    this.find(selector).each(function() {
+    var include = false, parent = $(this).parent();
+    while (parent.length !== 0 && !include) {
+      if ($(parent).not($(this)).length === 0) {
+        include = true; break;
+      } else if ($(parent).not('[data-control]').length === 0) {
+        include = false; break;
+      } parent = $(parent).parent();
+    }
+    if (include) {
+      children.push($(this));
+    }
+  });
+  return children;
 };
 
 
@@ -44,20 +44,20 @@ jQuery.fn.firstChildren = function(selector) {
 // -------------------------------------------------------------------------------------------------
 
 Object.prototype.clone = function() {
-	var i, newObj = (o instanceof Array) ? [] : {};
-	for (i in o) {
-		if (i === 'clone') {
-			continue;
-		}
-		if (o[i] && o[i] instanceof Date) {
-			newObj[i] = new Date(o[i]);
-		} else if (o[i] && typeof o[i] === "object") {
-			newObj[i] = clone(o[i]);
-		} else {
-			newObj[i] = o[i];
-		}
-	}
-	return newObj;
+  var i, newObj = (o instanceof Array) ? [] : {};
+  for (i in o) {
+    if (i === 'clone') {
+      continue;
+    }
+    if (o[i] && o[i] instanceof Date) {
+      newObj[i] = new Date(o[i]);
+    } else if (o[i] && typeof o[i] === "object") {
+      newObj[i] = clone(o[i]);
+    } else {
+      newObj[i] = o[i];
+    }
+  }
+  return newObj;
 };
 
 
@@ -230,11 +230,11 @@ Array.prototype.last = [].last || function() {
      */
     function EventTarget(type, currentTarget, target, data) {
     	
-			this.bubbles         = true;
-			this.currentTarget   = currentTarget;
-			this.data            = data;
-			this.target          = target;
-			this.type            = type;
+      this.bubbles         = true;
+      this.currentTarget   = currentTarget;
+      this.data            = data;
+      this.target          = target;
+      this.type            = type;
     	
     }
     
@@ -244,7 +244,7 @@ Array.prototype.last = [].last || function() {
      * @method stopPropagation
      */
     EventTarget.prototype.stopPropagation = function() {
-			this.bubbles = false;
+      this.bubbles = false;
     };
     
     return EventTarget;
@@ -1005,11 +1005,11 @@ Array.prototype.last = [].last || function() {
    * @param {array} [required]  An array of required modules to load.
    */
   function add() {
-		var args = arguments,
-			name = args[0],
-			fn = ( typeof args[1] === 'function' ) ? args[1] : null,
-			req = args[2];
-		Orange.Loader.addModule(name, fn, req);
+    var args = arguments,
+      name = args[0],
+      fn = ( typeof args[1] === 'function' ) ? args[1] : null,
+      req = args[2];
+    Orange.Loader.addModule(name, fn, req);
   }
   
   /**
@@ -1021,15 +1021,15 @@ Array.prototype.last = [].last || function() {
    * @param {function} [fn] An optional function to call using those modules.
    */
   function use() {
-		var args = Array.prototype.slice.call(arguments),
-			fn = args[args.length-1],
-			req = clone(args).splice(0, args.length-1);
-		if (typeof req[0] !== 'function') {
-			for (var i = 0, len = req.length; i < len; i++) {
-				Orange.Loader.loadModule(req[i]);
-			}
-		}
-		fn.call(window, Orange);
+    var args = Array.prototype.slice.call(arguments),
+      fn = args[args.length-1],
+      req = clone(args).splice(0, args.length-1);
+    if (typeof req[0] !== 'function') {
+      for (var i = 0, len = req.length; i < len; i++) {
+        Orange.Loader.loadModule(req[i]);
+      }
+    }
+    fn.call(window, Orange);
   }
   
   /**
@@ -1039,11 +1039,11 @@ Array.prototype.last = [].last || function() {
    * @param {string} name  The name of the module to include.
    */
   function include(name) {
-		if (typeof Orange.modules[name] !== undefined) {
-			return Orange.modules[name];
-		} else {
-			throw 'Could not require module';
-		}
+    if (typeof Orange.modules[name] !== undefined) {
+      return Orange.modules[name];
+    } else {
+      throw 'Could not require module';
+    }
   }
   
   /**
@@ -1056,24 +1056,24 @@ Array.prototype.last = [].last || function() {
    */
   function when() {
   	
-		var deferred = new Deferred(this);
-		var count = arguments.length;
-		
-		function resolve() {
-			if (--count === 0) {
-				deferred.resolve();
-			}
-		}
-		
-		function reject() {
-			deferred.reject();
-		}
-		
-		for (var i=0; i<arguments.length; i++) {
-			arguments[i].then(resolve, reject);
-		}
-		
-		return deferred;
+    var deferred = new Deferred(this);
+    var count = arguments.length;
+    
+    function resolve() {
+      if (--count === 0) {
+        deferred.resolve();
+      }
+    }
+    
+    function reject() {
+      deferred.reject();
+    }
+    
+    for (var i=0; i<arguments.length; i++) {
+      arguments[i].then(resolve, reject);
+    }
+    
+    return deferred;
   	
   }
   

@@ -12,9 +12,9 @@ Suppose we're building a simple address book web application. We want to have a 
 
 ### Part 1: Building Hierarchy with Views
 
-In OrangeUI, views are simply HTML. Our views should follow the conventions of good HTML; they exist strictly to describe the structure, not the style our application.
+In OrangeUI, views are simply HTML. Our views should follow the conventions of good HTML; they exist strictly to describe the structure, not the style of our application.
 
-We first want to outline what views we need and how the will be organized. Even though we haven't ironed out the details, we know the basic structure and arrangement of our application's views. In a traditional, page like application, we might start with something like this,
+We first want to outline what views we need and how they will be organized. Even though we haven't ironed out the details, we know the basic structure and arrangement of our application's views. In a traditional, page-like application, we might start with something like this,
 
 ```html
 <body>
@@ -34,7 +34,7 @@ We first want to outline what views we need and how the will be organized. Even 
 
 This works fine for our simple application, but imagine we implementing several other features in the future (managing a list of todo's, sending messages, etc). It would be helpful to abstract out our standardized components (lists, buttons, toolbars), to use again in other application features that follow a similar pattern.
 
-To take the forward thinking approach, we would first break the above HTML into its logical components, ie views. In principle, each component should have only one function (a list, a search field, a table) or should simply combine simple components to make more complex ones (a searchable list, a slideshow). Each of these are views. OrangeUI denotes each of these logical sections with a `data-control` attribute. This attribute will ultimately correspond to the Javascript controller that manages the associated view. Writing our HTML in this new pattern, 
+To take the forward thinking approach, first break the above HTML into its logical components, ie views. In principle, each component should have only one function (a list, a search field, a table) or should simply combine simple components to make more complex ones (a searchable list, a slideshow). Each of these are views. OrangeUI denotes each of these logical sections with a `data-control` attribute. This attribute will ultimately correspond to the Javascript controller that manages the associated view. Writing our HTML in this new pattern, 
 
 ```html
 <body>
@@ -52,7 +52,7 @@ To take the forward thinking approach, we would first break the above HTML into 
 </body>
 ```
 
-we've now broken everything into a logical components. Given the DOM's tree structure, we see that our views are also nested in a similar way. Our view *contacts-app* wraps the entire application as a logical group. It's two child views, *contacts-list-search* and *contact-detail* wrap together the search and list functionality, and the contact detail pane respectively. The children of *contacts-list-search* contain their logic sections as well, *search-field* handling the HTML input field, and the *contacts-list* wrapping a list of individual contact list items.
+we've now broken everything into its logical components. Given the DOM's tree structure, we see that our views are also nested in a similar way. Our view *contacts-app* wraps the entire application as a logical group. It's two child views, *contacts-list-search* and *contact-detail* wrap together the search and list functionality, and the contact detail pane respectively. The children of *contacts-list-search* contain their logical sections as well, *search-field* handling the HTML input field, and the *contacts-list* wrapping a list of individual contact list items.
 
 We begin to see how the tree structure allows us flexibility, to swap components and their decendents in and out. This may seem like overkill, and it probably is for this simple example, but as we'll see soon, it will illustrate that as applications become more complex, having reusable components such as lists and fields become more valuable.
 
@@ -68,13 +68,13 @@ Now that we have our views organized, we need to discuss interactivity. How do w
 
 It is clear that the *search-field* will need to filter the *contacts-list* when the enter key is pressed. The *contacts-list* will need to tell the *contact-detail* pane to display a specific contact when it's selected from the list. 
 
-These are fairly simple interactions, however it is quite easy to write messy, coupled code as the complexity of single page apps such as this expand. Particularly when nested callbacks get out of control or when there is no longer a transparent way to see how events are being bound and unbound, its easy to leak memory, create bugs, and altogether write unmaintainable code. This is where we begin to involve **View Controllers**.
+These are fairly straightforward behaviors, however it is quite easy to write messy, coupled code as the complexity of single-page apps such as this expand. Particularly when nested callbacks get out of control or when there is no longer a transparent way to see how events are being bound and unbound, it's easy to leak memory, create bugs, and altogether write unmaintainable code. This is where we begin to involve **View Controllers**.
 
 ### Part 2: Taming Code with Controllers
 
-OrangeUI's *View Controller* class acts as both a helper in the lifecycle of each of your applications views, and as a scaffold to enforce coding best practices. Those `data-control` attributes we added earlier, each of those corresponds to a view controller. We've managed to logically separate our views, now we're logically separating our interaction logic as well. 
+OrangeUI's *View Controller* class acts as both a helper in the lifecycle of each of your applications views, and as a scaffold to better organize your code. Those `data-control` attributes we added earlier, each one corresponds to a view controller. We've already managed to logically separate our views, now we're logically separating our interaction logic as well. 
 
-Let's take a look at the five different views we created in the previous step, and now make their associated controllers. Just as we traced out the hierarchy of our views within the DOM, we do the same for our controllers. In fact, when our application is initialized, a tree of view controllers instances is built to exactly match that of our DOM view hierarchy. The five associated view controllers would be initialized as follows,
+Let's take a look at the five different views we created in the previous step, and now make their associated controllers. Just as we traced out the hierarchy of our views within the DOM, we'll do the same for our controllers. In fact, when our application is initialized, a tree of view controllers instances is built to exactly match that of our DOM view hierarchy. The five associated view controllers would be initialized as follows,
 
 - ContactsAppController
    - ContactsSearchListController
@@ -82,9 +82,9 @@ Let's take a look at the five different views we created in the previous step, a
       - ContactsListController
 - ContactDetailController
 
-matching that of each view. Each view controller instance and each view controller have a one-to-one relationship. The section of the DOM represented by the view will be managed and manipulated only my this one view controller. Now let's define these view controller classes. When the page is first loaded, an instance of each class is instantiated as OrangeUI traverses down the DOM tree, reading off each `data-control` attribute. We therefore can use each of these `data-control` attributes multiple times, (ie. two `data-control="search-field`'s on one page if we wanted). 
+matching that of each view. Each view controller instance and each view have a one-to-one relationship. The section of the DOM represented by the view will be managed and manipulated only by this one view controller. Now let's define these view controller classes. When the page is first loaded, an instance of each view controller class is instantiated as OrangeUI traverses down the DOM tree, reading off each `data-control` attribute. We therefore can use each of these `data-control` attributes multiple times, (ie. two `data-control="search-field`'s on one page if we wanted). 
 
-Let's define the **ContactSearchListController** as an example.
+We'll define the **ContactSearchListController** as an example.
 
 ```js
 var ContactsSearchListController = ViewController.extend({
@@ -94,7 +94,7 @@ var ContactsSearchListController = ViewController.extend({
 });
 ```
 
-That's it, we've defined our first view controller. The only method on the view controller you are required to implement is `getType()`, which returns a string matching the name of the view we defined earlier. When OrangeUI traverses down the DOM tree looking for `data-control` attributes, it reads off each attribute value and looks to see if a **View Controller** is defined having a matching `getType()` string. If there is, it instantiates an instance of the that view controller, and then moves on to its immediate children repeating the process until it can't find any more views.
+That's it, we've defined our first view controller. The only method on the view controller you are required to implement is `getType()`, which returns a string matching the `data-control` name of the view we defined earlier. When OrangeUI traverses down the DOM tree looking for `data-control` attributes, it reads off each attribute value and looks to see if a **View Controller** is defined having a matching `getType()` string. If there is, it instantiates an instance of the that view controller, and then moves on to its immediate children repeating the process until it can't find any more views.
 
 *Additionally, it converts the `data-control` attribute to a class name, so that adding a redundant class is unnecessary.*
 
@@ -129,7 +129,7 @@ Let's step through this code method by method. First, the **ViewController** cla
 <input data-control="search-field" type="search" name="keyword" />
 ```
 
-The `this.target` enforces **Rule #2, "A controller instance should manage only one view."** In this case, the target is the search field itself. The view controller only has access to its own part of the DOM, nothing more.
+The `this.target` enforces the rule that a controller instance should manage only one view. In this case, the target is the search field itself. The view controller only has access to its own part of the DOM, nothing more.
 
 The **ViewController** class also allows us to implement the following methods that manage the view lifecycle.
 
@@ -142,7 +142,7 @@ The **ViewController** class also allows us to implement the following methods t
 * willUnload()
 * didUnload()
 
-These methods allow you to more precisely tie actions to the view state, to bind and unbind events and manipulate the DOM. In our case, we've retrieved the view controller's target and bound a `keypress` event to it in the `onDidAppear()` method. We've added a `onKeyPress()` event handler method to the controller, and bound it to the `keypress` event. Finally, we've unbound the event in the `onWillDisappear()` method, enforcing our **Rule #5: "Manually unbind all manually bound events."**
+These methods allow you to more precisely tie actions to the view state, to bind and unbind events and manipulate the DOM. In our case, we've retrieved the view controller's target and bound a `keypress` event to it in the `onDidAppear()` method. We've added a `onKeyPress()` event handler method to the controller, and bound it to the `keypress` event. Finally, we've unbound the event in the `onWillDisappear()` method, enforcing our rule that you need to manually unbind all manually bound events.
 
 Now we need to tell the other views that the user has pressed the enter key and wants to search for something. In the `onKeyPress()` event, we're checking the keycode of the keypress and calling the following if it's an enter key.
 
@@ -151,7 +151,7 @@ var keyword = this.target.val();
 this.fire('search', keyword);
 ```
 
-By firing a custom event from the view controller, parent view controller can subscribe to and listen for when that event is fired. The keyword is passed as an optional second argument to the `this.fire()` method, which will be received by all callbacks bound to the event. We'll discuss this in more depth in a moment. For now, we have a **SearchFieldController** that simply fires a 'search' event when the enter key is pressed.
+By firing a custom event from the view controller, parent view controller can subscribe to and listen for when that event is fired. The keyword is passed as an optional second argument to the `this.fire()` method, which will be received by all callbacks bound to the event by the `e.data` parameter. We'll discuss this in more depth in a moment. For now, we have a **SearchFieldController** that simply fires a 'search' event when the enter key is pressed.
 
 Stepping away from the **SearchFieldController**, we move up the hierarchy to its parent, the **ContactsSearchListController**. This view controller corresponds to the view containing both the *search-field* and *contact-list* views as its children. We can write this controller in the same way we've written the prior.
 
@@ -164,8 +164,8 @@ var ContactsSearchListController = ViewController.extend({
 		this.getView('search-field').on('search', this.onSearch, this);
 		this._super();
 	},
-	onSearch: function(e, data) {
-		this.getView('contact-list').filter(data);
+	onSearch: function(e) {
+		this.getView('contact-list').filter(e.data);
 	}
 });
 ```
@@ -174,12 +174,12 @@ We've used a few new methods in the above code. This controller looks very simil
 
 ### Part 3: Decoupling Communication between Views
 
-The goal of OrangeUI is the decoupling and reusing components, specifically views and view controllers. Up until now our app is too simple to reuse anything. The primary adversary to decoupling our view controllers is managing how they communicate with each other. When the **SearchFieldController** wants to tell the **ContactListController** to filter its list items, the code for that shouldn't exist in either controller, otherwise the become unreusable. Instead, we look back to **Rule #3: Controllers only call methods on their children**. All interaction between views should be done only by the parent controller, in this case, the **ContactsSearchListController**.
+The goal of OrangeUI is the decoupling and reusing components, specifically views and view controllers. Up until now our app is too simple to reuse anything. The primary difficulty in decoupling our view controllers is managing how they communicate with each other. When the **SearchFieldController** wants to tell the **ContactListController** to filter its list items, the code for that shouldn't exist in either controller, otherwise they become unreusable. Instead, we look back to the rule that **controllers only call methods on their children**. All interaction between views should be done only by the parent controller, in this case, the **ContactsSearchListController**.
 
 Interaction between view controllers can take two forms. When view controllers want to communicate with their child view controllers, they may simply call methods on their children. 
-However when child views want to communicate with their parent, in enforce reusability, they should not have any knowledge of what form their parent takes. Thus to communicate up the hierarchy to a parent view, a view controller will fire a custom event using the `this.fire()` method.
+However when child views want to communicate with their parent, to enforce reusability, they should not have any knowledge of what form their parent takes. Thus to communicate up the hierarchy to a parent view, a view controller will fire a custom event using the `this.fire()` method.
 
-OrangeUI provides helper methods to make children view controllers accessible to the parent. The `this.getView()` method will return the child view of the parent with a given type.
+OrangeUI provides helper methods to make children view controllers accessible to the parent. The `this.getView()` method will return the child view of the parent with a given type or name.
 
 Now what if a view controller had two child views of the same type, for example two search fields with a `data-control="search-field"`. How would that parent view controller access them using the `this.getView()` method. Let's refactor our view markup from earlier to make this possible.
 
@@ -242,7 +242,7 @@ Getting back to our **ContactsSearchListController**, we see that in the `onDidA
 this.getView('contact-keyword').on('search', this.onSearch, this);
 ```
 
-Notice, however, that we have not created a separate `onWillDisappear()` method to unbind that listener, as we've seen should be done in **Rule #5: Manually unbind all manually bound events**. OrangeUI will automatically unbind all the event handlers bound to any child view in the `onWillDisappear()` method. 
+Notice, however, that we have not created a separate `onWillDisappear()` method to unbind that listener, since you must manually unbind all manually bound events. OrangeUI will automatically unbind all the event handlers bound to any child view in the `onWillDisappear()` method. 
 
 Let's take a moment to talk about events. Every view controller gives you the ability to bind, fire, and detach events. Just as you would bind an event to an input field or a button, you can bind custom handlers to events on a view controller. The view controller includes the following methods for event binding:
 

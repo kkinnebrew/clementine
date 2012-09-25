@@ -1,5 +1,5 @@
 /*!
- * OrangeUI | 0.5.0 | 09.16.2012
+ * OrangeUI | 0.5.0 | 09.25.2012
  * https://github.com/brew20k/orangeui
  * Copyright (c) 2012 Kevin Kinnebrew
  */
@@ -3362,6 +3362,10 @@ Array.prototype.last = [].last || function() {
       // bind events
       var views = this.getBindings();
       
+      // store replacements
+      var replaced;
+      var matches;
+      
       for (var view in views) {
         var events = views[view];
         for (var event in events) {
@@ -3373,14 +3377,25 @@ Array.prototype.last = [].last || function() {
             var name = event.charAt(0).toUpperCase() + event.slice(1);
             func = (events[event] === true && typeof this['on' + name] === 'function') ? this['on' + name] : null;
           }
-          if (view === '$target') {
-            this.target.on(event, proxy(func, this));
+          matches = view.match(/\(.+\)/gi);
+          if (view.match(/\$target/)) {
+            if (matches && matches.length > 0) {
+              this.target.on(event, matches.pop().replace(/[()]/g, ''), proxy(func, this));
+            } else {
+              this.target.on(event, proxy(func, this));
+            }
           } else if (func !== null && this.hasView(view)) {
             this.getView(view).on(event, proxy(func, this));
           } else if (func !== null && this.hasForm(view)) {
             this.getForm(view).on(event, proxy(func, this));
           } else if (func !== null && this.hasElement(view)) {
             this.getElement(view).on(event, proxy(func, this));
+            if (matches && matches.length > 0) {
+              replaced = view.replace(/\(.+\)/gi, '');
+              this.getElement(replaced).on(event, matches.pop().replace(/[()]/g, ''), proxy(func, this));
+            } else {
+              this.getElement(view).on(event, proxy(func, this));
+            }
           }
         }
       }

@@ -43,6 +43,7 @@ Depending on the features you choose to use, OrangeUI is dependent on the follow
 
 ## Release History
 
+* 10/1/2012 - v0.6.0 - Code standardization, naming conventions, full documentation.
 * 9/9/2012 - v0.5.0 - Dynamic chainable view states, custom routes, live microdata DOM bindings.
 * 8/1/2012 - v0.4.0 - Adding web service persistence, view controller hide/show states.
 * 5/16/2012 - v0.3.0 - Including view controller event helper functions, auto context proxying.

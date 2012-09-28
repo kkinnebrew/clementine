@@ -20,10 +20,10 @@ module.exports = function(grunt) {
       dist: {
         src: [
           '<banner:meta.banner>',
-          'src/clemetine.js',
-          'src/view.js',
-          'src/binding.js',
+          'src/clementine.js',
           'src/controller.js',
+          'src/view.js',
+          'src/service.js',
           'src/app.js'
         ],
         dest: 'build/<%= pkg.version %>/clementine-<%= pkg.version %>.js'
@@ -79,6 +79,6 @@ module.exports = function(grunt) {
   });
     
   // Default task.
-  grunt.registerTask('default', 'lint concat min');
+  grunt.registerTask('default', 'concat min');
 
 };

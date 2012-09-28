@@ -43,7 +43,7 @@
       contentType: "text/html; charset=utf-8",
       dataType: "text",
       timeout: 10000,
-      url: path,
+      url: 'templates/' + path,
       success: function(html) {
         success(path, html);
       },

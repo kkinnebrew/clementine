@@ -2,7 +2,7 @@
 // Application Class
 // ------------------------------------------------------------------------------------------------
 
-(function(Clementine) {
+(function(Orange) {
 
   var Application;
   
@@ -11,9 +11,10 @@
   // Dependencies
   // ------------------------------------------------------------------------------------------------
   
-  var Loader           = Clementine.Loader;
-  var View             = Clementine.View;
-  var ViewController   = Clementine.ViewController;
+  var Loader           = Orange.Loader;
+  var Service          = Orange.Service;
+  var View             = Orange.View;
+  var ViewController   = Orange.ViewController;
   
   
   // ------------------------------------------------------------------------------------------------
@@ -21,98 +22,50 @@
   // ------------------------------------------------------------------------------------------------
   
   Application = Class.extend({
-      
-    // constructors
-    
-    initialize: function(config) {
-          
-      // validate configs
-      if (!config.hasOwnProperty('name') || !config.hasOwnProperty('required')) { throw 'Invalid application'; }
-    
-      // store configs
-      this.name = config.name;
-      this.required = config.required;
-      this.loaded = false;
-      this.online = false;
-      this.env = 'PROD';
-       
-      // load dependencies
-      for (var i = 0, len = this.config.required.length; i < len; i++) {
-        Loader.loadModule(this.config.required[i]);
+      initialize: function (a) {
+          if (!a.hasOwnProperty("name") || (new RegExp(/[^A-Za-z:0-9_\[\]]/g)).test(a.name)) {
+              throw "Invalid application name";
+          }
+          this.loaded = false;
+          this.registered = false;
+          this.config = a;
+          if (a.hasOwnProperty('views')) {
+            View.register(a.views, Class.proxy(function() {
+              this.registered = true;
+              if (this.loaded) { this.onLoad(); }
+            }, this));
+          }
+          window.onload = Class.proxy(function() {
+            this.loaded = true;
+            if (this.registered) { this.onLoad(); }
+          }, this);
+      },
+      onLoad: function () {
+          var b = $("[data-root]"),
+              e = b.attr("data-control"),
+              d = b.attr("data-name");
+          if (typeof e === "undefined" || typeof d === "undefined") {
+              throw "Root view not found";
+          }
+          b.removeAttr("data-root");
+          var f = ViewController.get(e);
+          var a = new f(null, b);
+          a.on("load", function () {
+              a.show();
+          });
+          a.load();
+          this.root = a;
+          $(window).bind('hashchange', Class.proxy(this.onHashChange, this));
+          $(window).trigger('hashchange');
+      },
+      onHashChange: function() {
+        var hash = location.hash;
+        if (!hash) {
+          this.root.setState();
+        } else {
+          this.root.setState(hash.replace('#', '').split('/'));
+        }
       }
-      
-    },
-    
-    // environment setup
-    
-    setEnvironment: function(env) {
-      this.env = env;
-    },
-    
-    setLogging: function(levels) {
-      this.levels = levels;
-    },
-
-    // view management
-    
-    registerViews: function(views) {
-      View.load(views); // handle callback
-    },
-    
-    // event handling
-    
-    onHashChange: function(last) {
-    
-      // parse the hash
-      var hash = location.hash.replace('#').split('/');
-      
-      // pass to controllers
-      this.root.setRoute(hash, last);
-    
-    },
-    
-    onReady: function() {
-      
-      // find root element
-      this.rootEl = $('[data-root]');
-      
-      // find root controller
-      var c = ViewController.get(this.rootEl.attr('data-control'));
-      
-      // initialize root
-      this.root = new c(null, this.rootEl, this);
-      
-      // load the app
-      this.root.load().show();
-      
-      // set network status
-      if (this.online) {
-        this.root.goOnline();
-      } else {
-        this.root.goOffline();
-      }
-      
-      // set route if it exists
-      this.onHashChange();
-      
-    },
-    
-    // application execution
-    
-    launch: function() {
-    
-      // prevent duplicate launches
-      if (this.loaded) { return; }
-      
-      // set levels
-      if (!this.levels || !this.levels.hasOwnProperty(this.env)) {
-        Log.setLevel('DEBUG');
-      } else {
-        Log.setLevel(this.levels[this.env]);
-      }
-    
-    }
-    
   });
   
   
@@ -120,7 +73,7 @@
   // Exports
   // ------------------------------------------------------------------------------------------------
   
-  Clementine.Application = Application;
+  Orange.Application  = Application;
   
 
 }(Clementine));

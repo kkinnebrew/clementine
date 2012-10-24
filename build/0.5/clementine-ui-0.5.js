@@ -409,6 +409,10 @@ Clementine.add('ui', function(exports) {
       
       // load view
       for (var i in this._views) {
+        if (this._views[i].attr('overlay')) {
+          this._views[i].load();
+          continue;
+        }
         if (this._views[i].attr('name') === view) {
           this.getView(view)._target.addClass('active');
           this.getView(view).load();
@@ -432,6 +436,12 @@ Clementine.add('ui', function(exports) {
       // show view
       this.activeView.show();
       
+      for (var i in this._views) {
+        if (this._views[i].attr('overlay')) {
+          this._views[i].show();
+        }
+      }
+      
       // remove animating class
       setTimeout(proxy(function() {
         this._target.addClass('animated');
@@ -447,6 +457,12 @@ Clementine.add('ui', function(exports) {
       // hide views
       for (var i = 0; i < this.viewStack.length; i++) {
         this.viewStack[i].hide();
+      }
+      
+      for (var i in this._views) {
+        if (this._views[i].attr('overlay')) {
+          this._views[i].hide();
+        }
       }
       
       this._target.addClass("hidden");
@@ -466,8 +482,12 @@ Clementine.add('ui', function(exports) {
         this.viewStack[i].unload();
       }
       
-      // load view
+      // unload view
       for (var j in this._views) {
+        if (this._views[j].attr('overlay')) {
+          this._views[j].unload();
+          continue;
+        }
         this._views[j]._target.removeClass('unload').removeClass('active').addClass('preload');
       }
             

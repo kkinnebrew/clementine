@@ -486,7 +486,7 @@ Array.prototype.last = [].last || function() {
     
     /** Route Management */
     
-    getDefaultState: function() {
+    getDefaultRoute: function() {
       return null;
     },
     
@@ -494,11 +494,11 @@ Array.prototype.last = [].last || function() {
       return null;
     },
     
-    setState: function(states) {
+    setRoute: function(states) {
       var first = false;
       if (!states || states.length === 0) {
-        if (this.getDefaultState()) {
-          states = [this.getDefaultState()];
+        if (this.getDefaultRoute()) {
+          states = [this.getDefaultRoute()];
         } else {
           states = [];
         }
@@ -506,11 +506,11 @@ Array.prototype.last = [].last || function() {
       var original = states.slice(0);
       var state = states.shift();
       var statesArray = states.slice(0);
-      var current = this.state || this.getDefaultState();
-      var callbacks = this.getStates();
+      var current = this.state || this.getDefaultRoute();
+      var callbacks = this.getRoutes();
       if (Object.keys(callbacks).length === 0) {
         for (var i in this.views) {
-          this.getView(i).setState(original.slice(0));
+          this.getView(i).setRoute(original.slice(0));
         }
         return;
       }
@@ -532,7 +532,7 @@ Array.prototype.last = [].last || function() {
       return {};
     },
         
-    getStates: function() {
+    getRoutes: function() {
       return {};
     },
     
@@ -572,7 +572,7 @@ Array.prototype.last = [].last || function() {
       var next = this._queue.shift();
       if (next) {
         next.fn.apply(this, next.args);
-        if (next.fn === this._setState || next.fn === this._clearState) {
+        if (next.wait && next.wait > 0) {
           this._process = setTimeout(proxy(function() {
             this.next();
           }, this), next.wait);
@@ -1122,10 +1122,10 @@ Array.prototype.last = [].last || function() {
             }
           } else if (children[i].get(0).tagName === 'SELECT' || children[i].get(0).tagName === 'INPUT') {
             if (data.hasOwnProperty(prop)) {
-              children[i].val(data[prop]);
+              children[i].val('');
             }
           } else {
-            if (data.hasOwnProperty(prop)) { children[i].text(data[prop]);
+            if (data.hasOwnProperty(prop) && data[prop]) { children[i].text(data[prop]);
             } else if (!multi) { children[i].text(''); }
           }
         }
@@ -1832,9 +1832,9 @@ Array.prototype.last = [].last || function() {
     onHashChange: function() {
       var hash = location.hash;
       if (!hash) {
-        this.root.setState();
+        this.root.setRoute();
       } else {
-        this.root.setState(hash.replace('#', '').split('/'));
+        this.root.setRoute(hash.replace('#', '').split('/'));
       }
     },
     

@@ -1378,23 +1378,23 @@ Array.prototype.last = [].last || function() {
 
   var Service = Class.extend({
     
-    initialize: function(prefix) {
-      this.prefix = prefix;
+    initialize: function(path) {
+      this.path = path;
     },
     
     getType: function() {
       return 'service';
     },
     
-    setPrefx: function(prefix) {
-      this.prefix = prefix;
+    getPrefix: function() {
+      return '';
     },
     
-    getPrefix: function() {
-      if (!this.prefix) {
+    _getPrefix: function() {
+      if (!this.path) {
         throw { type: 'Configuration Error', message: 'Missing base url' };
       }
-      return this.prefix;
+      return (this.path || '') + this.getPrefix();
     },
     
     request: function(path, method, params, map, success, failure, context) {
@@ -1404,12 +1404,12 @@ Array.prototype.last = [].last || function() {
       map = map || function(data) { return data; };
       context = context || this;
       $.ajax({
-        url: this.getPrefix() + path,
+        url: this._getPrefix() + path,
         type: method,
         timeout: 60000,
         data: params,
         success: function(data) {
-          if (data === null || data === 'null') {
+          if (data === null || data === 'null' || data === false || data === 'false') {
             failure.call(context);
             return;
           }
@@ -1580,7 +1580,7 @@ Array.prototype.last = [].last || function() {
       }
       
       // store configs
-      this.config = {};
+      this.config = config;
       
       // store states
       this.ready = false;
@@ -1617,6 +1617,10 @@ Array.prototype.last = [].last || function() {
       // store ready listener
       $(document).ready(proxy(this.onReady, this));
       
+    },
+    
+    getPath: function() {
+      return this.config.paths[this.env];
     },
     
     authenticate: function() {

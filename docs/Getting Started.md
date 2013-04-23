@@ -104,7 +104,7 @@ For the moment our view controller doesn't do anything; we haven't added any met
 var SearchFieldController = ViewController.extend({
 	getType: function() {
 		return 'search-field';
-	}
+	},
 	onDidAppear: function(e) {
 		this.target.on('keypress', this.$onKeyPress, this);
 		this._super();

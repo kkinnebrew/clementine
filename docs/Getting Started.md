@@ -1,5 +1,5 @@
 # Getting Started
-
+ 
 ## Motivation
 
 OrangeUI is not simply an MVC framework. It was created in an attempt to improve the organization and modularity of front-end code, specifically that of single page web applications. OrangeUI uses view controllers to emulate the native hierarchical structure of the DOM while decoupling individual code components so they can be reused. It provides custom Javascript event bindings to manage communication between view controllers, view lifecycle management, all the while separating interaction logic, data, structure, and style.

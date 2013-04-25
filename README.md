@@ -42,4 +42,4 @@ Licensed under the MIT license.
 
 [here]: https://github.com/brew20k/clementine/issues?labels=&sort=created&state=open
 [OrangeUI]:https://github.com/brew20k/orangeui
-[Getting Started]: https://github.com/brew20k/orangeui/blob/master/docs/Getting%20Started.md
+[Getting Started]: https://github.com/brew20k/clementine/wiki/Getting-Started

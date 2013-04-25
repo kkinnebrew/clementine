@@ -6,6 +6,18 @@ Many of the features of OrangeUI are still available in Clementine, specifically
 
 To start using Clementine, check out the [Getting Started] guide.
 
+## Why choose Clementine?
+
+Clementine is a rapid development javascript framework for soundly built web applications. It is meant as a tool to develop highly interactive, maintainable applications, giving the developer a pattern for organizing their interaction logic, views, and styles into a library of modular, decoupled components. Clementine provides the following:
+
+- Object-oriented javascript objects
+- Event mixin for objects
+- Module dependency management
+- Hierarchical ViewControllers with DOM helper functions
+- View fragment loading w/ templating
+- History and route management
+- Standardized UI components
+
 ## Including Clementine
 
 To use Clementine on your project, all you need to do is include the clementine library at the top of your root html file.
@@ -34,3 +46,4 @@ Licensed under the MIT license.
 
 [here]: https://github.com/brew20k/clementine/issues?labels=&sort=created&state=open
 [OrangeUI]:https://github.com/brew20k/orangeui
+[Getting Started]: https://github.com/brew20k/orangeui/blob/master/docs/Getting%20Started.md

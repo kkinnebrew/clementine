@@ -1,14 +1,10 @@
 # Clementine
 
-Clementine is a stripped down build of the OrangeUI javascript framework for building dynamic, interactive web applications in the browser.
+Clementine is a rapid development javascript framework for soundly built web applications. It is meant as a tool to develop highly interactive, maintainable applications, giving the developer a pattern for organizing their interaction logic, views, and styles into a library of modular, decoupled components.
 
-Many of the features of OrangeUI are still available in Clementine, specifically base utility methods and the ViewController hierarchy. Try it out on a project and make suggestions or report bugs [here].
-
-To start using Clementine, check out the [Getting Started] guide.
+To start using Clementine, check out the [Getting Started] guide. Try it out on a project and make suggestions or report bugs [here].
 
 ## Why choose Clementine?
-
-Clementine is a rapid development javascript framework for soundly built web applications. It is meant as a tool to develop highly interactive, maintainable applications, giving the developer a pattern for organizing their interaction logic, views, and styles into a library of modular, decoupled components. Clementine provides the following:
 
 - Object-oriented javascript objects
 - Event mixin for objects

@@ -12,6 +12,9 @@
     "type" : "git",
     "url": "https://github.com/brew20k/orangeui.git"
   },
+  "scripts": {
+    "test": "grunt test"
+  },
   "dependencies": {
     "jquery": "1.7.x"
   },

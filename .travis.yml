@@ -8,4 +8,4 @@ node_js:
 # whitelist
 branches:
   only:
-    - 0.7.0
+    - 0.6.0

@@ -13,22 +13,6 @@ module.exports = function(grunt) {
     qunit: {
       files: []
     },
-    mocha: {
-      files: [
-        'spec/orange/orange.html',
-        'spec/location/location.html',
-        'spec/cache/cache.html',
-        'spec/storage/storage.html',
-        'spec/view/view.html',
-        'spec/binding/binding.html',
-        'spec/model/model.html',
-        'spec/collection/collection.html',
-        'spec/form/form.html',
-        'spec/service/service.html',
-        'spec/controller/controller.html',
-        'spec/app/app.html'
-      ]
-    },
     concat: {
       dist: {
         src: [
@@ -42,7 +26,6 @@ module.exports = function(grunt) {
           'lib/storage.js',
           'lib/service.js',
           'lib/view.js',
-          'lib/auth.js',
           'lib/binding.js',
           'lib/controller.js',
           'lib/app.js'
@@ -111,9 +94,6 @@ module.exports = function(grunt) {
       mangle: { toplevel: true }
     }
   });
-
-  // load tasks
-  grunt.loadNpmTasks('grunt-mocha');
   
   // Default task.
   grunt.registerTask('default', 'lint concat min');

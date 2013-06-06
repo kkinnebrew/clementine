@@ -4,7 +4,7 @@ OrangeUI is a javascript framework for building dynamic, interactive web applica
 
 Many of the features of OrangeUI are stable, however the framework is still in active development and things are bound to change. Try it out on a project and contribute or report bugs [here].
 
-View the full [API Docs] here. Documentation is currently valid for prerelease 0.5.0.
+View the full [API Docs] here. Documentation is currently valid for prerelease 0.5.
 
 ## Why choose OrangeUI?
 

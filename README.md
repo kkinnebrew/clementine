@@ -43,5 +43,5 @@ Licensed under the MIT license.
 <https://github.com/brew20k/clementine/blob/master/LICENSE>
 
 [here]: https://github.com/brew20k/clementine/issues?labels=&sort=created&state=open
-[OrangeUI]:https://github.com/brew20k/orangeui
+[OrangeUI]: https://github.com/brew20k/orangeui
 [Getting Started]: https://github.com/brew20k/clementine/wiki/Getting-Started

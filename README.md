@@ -8,7 +8,7 @@ To start using Clementine, check out the [Getting Started] guide. Try it out on 
 
 ## Why choose Clementine?
 
-- Object-oriented javascript objects
+- Object-oriented javascript classes
 - Event mixin for objects
 - Module dependency management
 - Hierarchical ViewControllers with DOM helper functions

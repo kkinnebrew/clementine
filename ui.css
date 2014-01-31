@@ -1,0 +1,60 @@
+/* navigation view */
+
+.navigation-view {
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  width: 100%;
+}
+
+.navigation-view > .view {
+  position: absolute;
+  width: 100%;
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+  -o-background-size-backface-visibility: hidden;
+}
+
+.navigation-view.animated > .view {
+  -webkit-transition: -webkit-transform 300ms ease-in-out 0s;
+  -moz-transition: -webkit-transform 300ms ease-in-out 0s;
+  -o-transition: -o-transform 300ms ease-in-out;
+  -ms-transition: -o-transform 300ms ease-in-out;
+  transition: -webkit-transform 300ms ease-in-out 0s;
+}
+
+.navigation-view > .view.preload {
+  -webkit-transform: translateX(100%);
+  -moz-transform: translateX(100%);
+  -o-transform: translate(100%);
+  -ms-transform: translate(100%);
+  transform: translateX(100%);
+}
+
+.navigation-view.animated > .view.pushed.hidden {
+  display: block;
+}
+
+.navigation-view > .view.active {
+  -webkit-transform: translateX(0);
+  -moz-transform: translateX(0);
+  -o-transform: translate(0);
+  -ms-transform: translate(0);
+  transform: translateX(0);
+}
+
+.navigation-view.animated > .view.active.hidden {
+  display: block;
+}
+
+.navigation-view > .view.unload {
+  -webkit-transform: translateX(-100%);
+  -moz-transform: translateX(-100%);
+  -o-transform: translate(-100%);
+  -ms-transform: translate(-100%);
+  transform: translateX(-100%);
+}
+
+.navigation-view.animated > .view.unload.hidden {
+  display: block;
+}

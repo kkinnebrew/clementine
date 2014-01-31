@@ -1,19 +1,23 @@
 {
-    "name": "ClementineJS",
-    "description": "A lightweight companion to OrangeUI, a rapid development javascript framework for soundly built web applications",
-    "version": "0.3.1",
-    "author": "Kevin Kinnebrew",
-    "homepage": "https://github.com/brew20k/clementine",
-    "license": {
-      "type": "MIT",
-      "url": "https://github.com/brew20k/clementine/blob/master/LICENSE"
-    },
-    "repository": {
-      "type" : "git",
-      "url": "https://github.com/brew20k/clementine.git"
-    },
-    "dependencies": {
-        "jquery": "1.7.x"
-    },
-    "devDependencies": {}
+  "name": "clementine",
+  "description": "An event driving javascript mixin library",
+  "version": "0.3.0",
+  "author": "Kevin Kinnebrew",
+  "homepage": "https://github.com/kkinnebrew/clementine",
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/kkinnebrew/clementine/blob/master/LICENSE"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kkinnebrew/clementine.git"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-jshint": "~0.6.3",
+    "grunt-contrib-nodeunit": "~0.2.0",
+    "grunt-contrib-uglify": "~0.2.2",
+    "grunt-contrib-copy": "~0.5.0"
+  }
 }

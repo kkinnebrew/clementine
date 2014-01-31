@@ -21,7 +21,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-Clementine.add('ui', function(exports) {
+Clementine.add('ui', function(module) {
   
   // @region Declarations
   
@@ -143,11 +143,10 @@ Clementine.add('ui', function(exports) {
     
     setup: function() {
       
-      var view = this.target.attr('data-default');
+      var view = this._attrs['default'];
       if (this.hasView(view)) {
         this.activeView = this.getView(view);
         this.activeName = view;
-        this.target.removeAttr('data-default');
       }
       
       this._super();
@@ -173,12 +172,10 @@ Clementine.add('ui', function(exports) {
   
         // hide old view
         this.activeView.hide();
-        this.activeView.unload();
   
         this.activeView = this.getView(name);
   
         // show new view
-        this.activeView.load();
         this.activeView.show();
   
       }
@@ -196,11 +193,6 @@ Clementine.add('ui', function(exports) {
   
     // @region State Handlers
   
-    onLoad: function() {
-      this.activeView.load();
-      this.fire("_loaded");
-    },
-  
     onAppear: function() {
       this.activeView.show();
       this.target.removeClass("hidden");
@@ -210,11 +202,6 @@ Clementine.add('ui', function(exports) {
     onDisappear: function() {
       this.activeView.hide();
       this.fire("_disappeared");
-    },
-  
-    onUnload: function() {
-      this.activeView.unload();
-      this.fire("_unloaded");
     }
   
   });
@@ -225,7 +212,7 @@ Clementine.add('ui', function(exports) {
    @extends ViewController
    */
   NavigationController = ViewController.extend({
-        
+
     // @region Configuration
     
     getType: function() {
@@ -261,7 +248,7 @@ Clementine.add('ui', function(exports) {
       
       // get prior view
       var prior = this.viewStack.last();
-      
+            
       // load prior view
       prior._target.addClass('active').removeClass('unload');
       prior.show();
@@ -288,18 +275,18 @@ Clementine.add('ui', function(exports) {
     },
     
     _pushView: function(view, duration, callback, context) {
-      
+            
       // return if animating
       if (this.animating) {
         this.next();
         return false;
       }
       
-      console.log('Pushing: ' + view);
-      
       // mark animating
       this.animating = true;
       
+      console.log('Pushing: ' + view);
+            
       // get active view
       var active = this.activeView;
       
@@ -344,11 +331,11 @@ Clementine.add('ui', function(exports) {
     _popToRootView: function(duration, callback, context) {
             
       // return if animating
-      if (this.animating || this.viewStack.length < 2) {
+      if (!this._loaded || this.animating || this.viewStack.length < 2) {
         this.next();
         return false;
       }
-            
+      
       // mark animating
       this.animating = true;
 
@@ -507,8 +494,8 @@ Clementine.add('ui', function(exports) {
   
   // @region Exports
   
-  exports.MultiViewController   = MultiViewController;
-  exports.NavigationController  = NavigationController;
-  exports.ModalViewController   = ModalViewController;  
+  module.exports.MultiViewController   = MultiViewController;
+  module.exports.NavigationController  = NavigationController;
+  module.exports.ModalViewController   = ModalViewController;  
 
 }, []);

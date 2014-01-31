@@ -32,6 +32,22 @@ if (typeof (console) == "undefined") {
   }
 }
 
+function firstChildren(obj, selector, stop) {
+  var childList = [];
+  obj.find(selector).each(function() {
+    var include = false, parent = $(this).parent();
+    while (parent.length !== 0 && !include) {
+      if ($(parent).not($(obj)).length === 0) {
+        include = true; break;
+      } else if ($(parent).not(stop).length === 0) {
+        include = false; break;
+      } parent = $(parent).parent();
+    }
+    if (include) { childList.push($(this)); }
+  });
+  return childList;
+}
+
 function noop() {}
 
 function clone(o) {
@@ -372,6 +388,227 @@ Array.prototype.last = [].last || function() {
   return this.length ? this[this.length-1] : null;
 };
 
+
+// ------------------------------------------------------------------------------------------------
+// Binding Class
+// ------------------------------------------------------------------------------------------------
+
+(function(Clementine) {
+
+  var Binding;
+
+  
+  // ------------------------------------------------------------------------------------------------
+  // Class Definition
+  // ------------------------------------------------------------------------------------------------
+  
+  Binding = Class.extend({
+  
+    initialize: function(target) {
+    
+      // store reference
+      this.target = target;
+      
+      // store template
+      this.template = target.html();
+      
+      // store data reference
+      this.data = null;
+      
+      // set state
+      this.bound = false;
+      this.binding = false;
+    
+    },
+    
+    bind: function(data) {
+      
+      // skip if already binding
+      if (this.binding) {
+        console.log('Error: Already binding');
+        return;
+      }
+      
+      // set as binding
+      this.binding = true;
+      
+      // unbind if already bound
+      if (this.bound) {
+        this.unbind();
+      }
+      
+      // set as bound
+      this.bound = true;
+      
+      // store data
+      this.data = data;
+            
+      // replace dom
+      this.target.html(this.template);
+      
+      // process by type
+      if (data instanceof Array) {
+        this.bindList(this.target, data);
+      } else if (typeof data === 'object') {
+        this.bindData(this.target, data);
+      }
+      
+      // set as done
+      this.binding = false;
+      
+    },
+    
+    bindList: function(target, list) {
+                      
+      // find and store list template
+      var itemscope = target.find('[itemscope]:first');
+      var template = itemscope.clone();
+      var output = target.clone().empty();
+      var instance;
+      
+      // return if not found
+      if (!itemscope.length) {
+        throw 'Invalid Markup: Cannot bind collection to view missing [itemscope]';
+      }
+      
+      // remove itemscope
+      itemscope.remove();
+      itemscope = null;
+            
+      // iterate over list
+      for (var i=0; i<list.length; i++) {
+                
+        // create instance
+        instance = template.clone();
+        
+        // bind individual items
+        this.bindData(instance, list[i]);
+                
+        // append to output
+        output.append(instance);
+      
+      }
+                  
+      // replace the target
+      target.html(output.html());
+            
+    },
+    
+    bindData: function(target, data) {
+            
+      var items = [];
+      var prop;
+            
+      // if data is string or date, return
+      if (typeof data === 'string' && target.has('[itemscope]')) {
+        this.bindItem(target, data); return;
+      } else if (data instanceof Date) {
+        this.bindItem(target, data); return;
+      }
+            
+      // get immediate [itemprop] elements
+      items = firstChildren(target, '[itemprop]', '[itemprop]');
+            
+      // bind each item
+      for (var i=0; i<items.length; i++) {
+        prop = items[i].attr('itemprop') || null;
+          if (prop && data.hasOwnProperty(prop)) {
+          if (!prop || !data[prop]) {
+            items[i].hide();
+            continue;
+          } else {
+            items[i].show();
+          }
+          if (data[prop] instanceof Array) {
+            this.bindList(items[i], data[prop]);
+          } else if (data[prop] instanceof Date) {
+            this.bindItem(items[i], data[prop]);
+          } else if (typeof data[prop] === 'object') {
+            this.bindData(items[i], data[prop]);
+          } else {
+            this.bindItem(items[i], data[prop]);
+          }
+        }
+      }
+      
+    },
+    
+    bindItem: function(target, data) {
+        
+      if (data instanceof Date) {
+            
+        // add microdata attributes
+        target.attr('datetime', data.toString());
+        var format = target.attr('data-format');
+        if (format && format.length > 0) {
+          target.text(data.format(format.toLowerCase()));
+        } else {
+          target.text(data.getMonth() + '/' + data.getDate() + '/' + data.getFullYear());
+        }
+        
+      } else if (typeof data === 'string' || typeof data === 'number') {
+                        
+        // apply content attribute if meta tag
+        if (target.prop('tagName') === 'META') {
+          target.attr('content', data);
+        } else if (target.attr('data-content') === 'tel') {
+          target.text(data);
+          target.attr('href', 'tel:' + (data ? data.replace(/[\s\n\r]/g, '-').replace(/[+()]/g, '') : ''));
+        } else if (target.attr('data-content') === 'url') {
+          target.text(data);
+          target.attr('href', data);
+        } else if (target.attr('data-content') === 'address') {
+          target.text(data);
+          var url = data ? data.replace('\n', ', ') : '';
+          target.attr('href', 'http://maps.apple.com/?q=' + encodeURIComponent(url));
+        } else if (target.attr('data-content') === 'email') {
+          target.text(data);
+          target.attr('href', 'mailto:' + data);
+        } else {
+          target.text(data);
+        }
+        
+      }
+    
+    },
+        
+    unbind: function() {
+      
+      // null out reference
+      this.data = null;
+      
+      // replace target
+      this.target.html(this.template);
+      
+    },
+    
+    destroy: function() {
+      
+      delete this.target;
+      delete this.template;
+      delete this.data;
+      delete this.bound;
+      delete this.binding;
+      
+    }
+    
+  });
+  
+  
+  // ------------------------------------------------------------------------------------------------
+  // Exports
+  // ------------------------------------------------------------------------------------------------
+  
+  Clementine.Binding = Binding;
+  
+
+}(Clementine));
+
+
+// ------------------------------------------------------------------------------------------------
+// ViewController
+// ------------------------------------------------------------------------------------------------
+
 (function(Clementine) {
 
   var ViewController;
@@ -463,6 +700,9 @@ Array.prototype.last = [].last || function() {
       this._unloadEvts = [];
       this._showEvts = [];
       this._hideEvts = [];
+      
+      // bindings
+      this._bindings = [];
       
       // queue
       this._queue = [];
@@ -713,13 +953,13 @@ Array.prototype.last = [].last || function() {
     },
     
     _unload: function() {
-      
+            
       // return if already unloading
       if (!this._loaded) {
         this.next();
         return;
       } else if (this._visible) {
-        throw new Error('Invalid Request: Cannot unload visible ViewController');
+        throw new Error('Invalid Request: Cannot unload visible ViewController ' + this._attrs.name);
       }
       
       this._unloadEvts.push(this.on("_unload", this.onUnload, this));
@@ -867,7 +1107,7 @@ Array.prototype.last = [].last || function() {
       var matches;
       
       function applyBindings(pattern, events) {
-        
+              
         // parse pattern
         var target = pattern.match(/^([#$\.A-Za-z0-9\-_]+)(?:\((.*)\))?/);
         
@@ -887,6 +1127,7 @@ Array.prototype.last = [].last || function() {
         } else if (this.hasElement(node)) {
           node = this.getElement(node);
         } else {
+          throw 'Missing binding target ' + node + ' for ' + this._attrs.name;
           return;
         }
 
@@ -914,7 +1155,7 @@ Array.prototype.last = [].last || function() {
       for (var binding in bindings) {
         applyBindings.call(this, binding, bindings[binding]);
       }
-      
+            
       // remove hidden class
       this._target.removeClass('hidden');
       
@@ -1109,29 +1350,12 @@ Array.prototype.last = [].last || function() {
       delete this._params[name];
     },
     
-    bindData: function(name, data, multi) {
+    bindData: function(name, data) {
       var target = (name === '$target') ? this._target : this.getElement(name);
-      var children = target.childrenTo('[itemprop]');
-      var prop;
-      for (var i=0; i<children.length; i++) {
-        prop = children[i].attr('itemprop');
-        if (prop) {
-          if (children[i].get(0).tagName === 'IMG') {
-            if (data.hasOwnProperty(prop)) {
-              children[i].attr('src', data[prop]);
-            }
-          } else if (children[i].get(0).tagName === 'SELECT' || children[i].get(0).tagName === 'INPUT') {
-            if (data.hasOwnProperty(prop)) {
-              children[i].val('');
-            }
-          } else {
-            if (data.hasOwnProperty(prop) && data[prop]) { children[i].text(data[prop]);
-            } else if (!multi) { children[i].text(''); }
-          }
-        }
-      }
+      var binding = new Clementine.Binding(target);
+      binding.bind(data);
+      return binding;
     },
-    
     
     /** Connection Management */
   
@@ -1326,6 +1550,7 @@ Array.prototype.last = [].last || function() {
     
       return $.ajax({
         async: sync !== true,
+        cache: false,
         contentType: "text/html; charset=utf-8",
         dataType: "text",
         timeout: 10000,
@@ -1407,12 +1632,13 @@ Array.prototype.last = [].last || function() {
         url: this._getPrefix() + path,
         type: method,
         timeout: 60000,
+        cache: false,
         data: params,
         success: function(data) {
-          if (data === null || data === 'null' || data === false || data === 'false') {
-            failure.call(context);
-            return;
-          }
+//          if (data === null || data === 'null' || data === false || data === 'false') {
+//            failure.call(context);
+//            return;
+//          }
           try {
             data = JSON.parse(data);
           } catch(e) {
@@ -1433,7 +1659,53 @@ Array.prototype.last = [].last || function() {
           failure.call(context, true);
         }
       });
-    },  
+    },
+    
+    deferRequest: function(path, method, params, map) {
+      
+      var deferred = jQuery.Deferred();
+      
+      map = map || function(data) {
+        return data;
+      };
+            
+      $.ajax({
+        url: this._getPrefix() + path,
+        type: method,
+        timeout: 60000,
+        data: params,
+        cache: false,
+        success: function(data) {
+          if (!data) {
+            deferred.reject();
+            return;
+          }
+          if (typeof data !== 'object') {
+            try {
+              data = JSON.parse(data);
+            } catch(e) {
+              deferred.reject();
+              return;
+            }
+          }
+          var clean;
+          try {
+            clean = map.call(this, data);
+          } catch(ex) {
+            deferred.reject(ex);
+            throw ex;
+            return;
+          }
+          deferred.resolve(clean);
+        },
+        error: function() {
+          deferred.reject(true);
+        }
+      });
+      
+      return deferred.promise();
+      
+    },
     
     modelOrId: function(model) {
       if (model && typeof model === 'object' && model.hasOwnProperty('id')) {
@@ -1514,14 +1786,15 @@ Array.prototype.last = [].last || function() {
         if (active.hasOwnProperty(name)) {
           return;
         }
+        var module = { exports: {} };
         if (modules[name] !== undefined) {
           active[name] = true;
           for (var i = 0, len = modules[name].req.length; i < len; i++) {
             if (modules[name].req[i] === name) { continue; }
             this.loadModule(modules[name].req[i]);
           }
-          modules[name].fn.call(window, exports);
-          Clementine.modules[name] = exports;
+          modules[name].fn.call(window, module);
+          Clementine.modules[name] = module.exports;
         }
       }
       

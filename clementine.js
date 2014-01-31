@@ -1,945 +1,9 @@
 /**
- * ClementineJS | 0.3.1 | 09.27.2012
+ * ClementineJS | 0.4 | 08.23.2012
  * https://github.com/brew20k/clementine
  * Copyright (c) 2012 Kevin Kinnebrew
  */
 
-// ------------------------------------------------------------------------------------------------
-// Global Functions
-// ------------------------------------------------------------------------------------------------
-
-function noop() {}
-
-function clone(o) {
-  var i, newObj = (o instanceof Array) ? [] : {};
-  for (i in o) {
-    if (i === 'clone') {
-      continue;
-    }
-    if (o[i] && o[i] instanceof Date) {
-      newObj[i] = new Date(o[i]);
-    } else if (o[i] && typeof o[i] === "object") {
-      newObj[i] = clone(o[i]);
-    } else {
-      newObj[i] = o[i];
-    }
-  }
-  return newObj;
-}
-
-function proxy(fn, context) {
-  var that = context;
-  return function() {
-    return fn.apply(that, arguments);
-  };
-}
-
-function firstChildren(obj, selector) {
-  var childList = [];
-  obj.find(selector).each(function() {
-    var include = false, parent = $(this).parent();
-    while (parent.length !== 0 && !include) {
-      if ($(parent).not($(obj)).length === 0) {
-        include = true; break;
-      } else if ($(parent).not('[data-control]').length === 0) {
-        include = false; break;
-      } parent = $(parent).parent();
-    }
-    if (include) { childList.push($(this)); }
-  });
-  return childList;
-}
-
-jQuery.fn.outerHTML = function(s) {
-  return s ? this.before(s).remove() : jQuery('<p>').append(this.eq(0).clone()).html();
-};
-
-
-// ------------------------------------------------------------------------------------------------
-// Core Module
-// ------------------------------------------------------------------------------------------------
-
-(function() {
-  
-  var Browser;
-  var Class;
-  var Deferred;
-  var Events;
-  var EventTarget;
-  var EventHandle;
-  var Loader;
-  var Clementine = {};
-  
-  var keyFilterRegex = /[^A-Za-z:0-9_\[\]]/g;
-  var modFilterRegex = /[^A-Za-z\-_]/g;
-  
-  
-  // ------------------------------------------------------------------------------------------------
-  // Class Object
-  // ------------------------------------------------------------------------------------------------
-  
-  Class = (function() {
-  
-    var initializing = false;
-    var fnTest = /\b_super\b/;
-  
-    function Class() {}
-  
-    Class.extend = function(def) {
-  
-      var prototype;
-      var name;
-      var _super = this.prototype;
-      
-      initializing = true;
-      prototype = new this();
-      initializing = false;
-      
-      for (name in def) {
-        prototype[name] = typeof def[name] === "function" && typeof _super[name] === "function" && fnTest.test(def[name]) ? (function(name, fn) {
-          return function() {
-            var tmp = this._super;
-            this._super = _super[name];
-            var ret = fn.apply(this, arguments);
-            this._super = tmp;
-            return ret;
-          };
-        }(name, def[name])) : def[name];
-      }
-      
-      function c() {
-        if (!initializing && this.initialize) {
-          this.initialize.apply(this, arguments);
-        }
-      }
-  
-      c.prototype = prototype;
-      c.prototype.constructor = c;
-      
-      c.extend = Class.extend;
-      c.include = Class.include;
-  
-      return c;
-  
-    };
-  
-    Class.include = function(def) {
-    
-      var key;
-      var value;
-      var ref;
-      
-      if (!def) {
-        throw 'Missing definition';
-      }
-      
-      for (key in def) {
-        value = def[key];
-        if (Array.prototype.indexOf.call(['extend', 'include'], key) < 0) {
-          this.prototype[key] = value;
-        }
-      }
-        
-      return this;
-      
-    };
-  
-    return Class;
-  
-  }());
-  
-  
-  // ------------------------------------------------------------------------------------------------
-  // EventTarget Object
-  // ------------------------------------------------------------------------------------------------
-  
-  EventTarget = (function() {
-  
-    function EventTarget(type, currentTarget, target, data) {
-    
-      this.bubbles         = true;
-      this.currentTarget   = currentTarget;
-      this.data            = data;
-      this.target          = target;
-      this.type            = type;
-      
-    }
-    
-    EventTarget.prototype.stopPropagation = function() {
-      this.bubbles = false;
-    };
-    
-    return EventTarget;
-  
-  }());
-  
-  
-  // ------------------------------------------------------------------------------------------------
-  // EventHandle Object
-  // ------------------------------------------------------------------------------------------------
-  
-  EventHandle = (function() {
-  
-    function EventHandle(target, ev, call) {
-    
-      this.call      = call;
-      this.ev        = ev;
-      this.target    = target;
-      
-    }
-    
-    EventHandle.prototype.detach = function() {
-    
-      this.target.detach(this.ev, this.call);
-      
-      delete this.target;
-      delete this.ev;
-      delete this.call;
-      
-    };
-    
-    return EventHandle;
-  
-  }());
-  
-  
-  // ------------------------------------------------------------------------------------------------
-  // Events Mixin
-  // ------------------------------------------------------------------------------------------------
-  
-  Events = {
-  
-    on: function(ev, call, context) {
-      
-      var fn = typeof context !== 'undefined' ? proxy(call, context) : call;
-      
-      if (!this._listeners) { this._listeners = {}; }
-      if (!this._listeners.hasOwnProperty(ev)) { this._listeners[ev] = []; }
-      this._listeners[ev].push(fn);
-      
-      return new EventHandle(this, ev, fn);
-      
-    },
-    
-    once: function(ev, call, context) {
-    
-      var fn = typeof context !== 'undefined' ? proxy(call, context) : call;
-    
-      var wrap = function() {
-        call.apply(this, arguments);
-        this.detach(ev, fn);
-      };
-      
-      this.on(ev, wrap);
-      
-    },
-    
-    fire: function(ev, data) {
-    
-      var parent = this.parent || null;
-      var evName = ev;
-      
-      if (typeof ev === 'string') {
-        ev = new EventTarget(ev, this, this, data);
-      }
-      
-      if (typeof ev.type !== 'string') {
-        throw "Error: Invalid 'type' when firing event";
-      }
-      
-      if (!this._listeners) { this._listeners = {}; }
-      if (this._listeners[ev.type] instanceof Array) {
-        var listeners = this._listeners[ev.type];
-        for (var i = 0, len = listeners.length; i < len; i++) {
-          listeners[i].call(this, ev, data);
-        }
-      }
-      
-      if (parent != null && ev.bubbles && evName[0] !== '_') {
-        ev.currentTarget = this.parent;
-        parent.fire.call(parent, ev, data);
-      }
-      
-    },
-    
-    detach: function(ev, fn) {
-        
-      var listeners = [];
-    
-      if (!this._listeners) {
-        this._listeners = {};
-      }
-      
-      if (typeof ev === 'undefined') {
-        this._listeners = {};
-      } else if (this._listeners[ev] instanceof Array) {
-        if (typeof fn !== 'undefined') {
-          listeners = this._listeners[ev];
-          for (var i = 0, len = listeners.length; i < len; i++) {
-            if (listeners[i] === fn) {
-              listeners.splice(i, 1);
-              break;
-            }
-          }
-        } else {
-          this._listeners[ev] = [];
-        }
-      }
-      
-    }
-    
-  };
-  
-  
-  // ------------------------------------------------------------------------------------------------
-  // Loader Object
-  // ------------------------------------------------------------------------------------------------
-
-  Loader = (function() {
-    
-    var modules = {};
-    var active = {};
-    var exports = {};
-    
-    Clementine.modules = {};
-    
-    return {
-    
-      addModule: function(name, fn, req) {
-      
-        if (!name.match(/[\^\-A-Za-z_]/g)) { throw 'Invalid module name'; }
-        
-        var mod = {
-          name: name,
-          fn: fn,
-          req: (req !== undefined) ? req : []
-        };
-        
-        modules[name] = mod;
-        
-      },
-      
-      loadModule: function(name) {
-                
-        if (active.hasOwnProperty(name)) {
-          return;
-        }
-        
-        if (modules[name] !== undefined) {
-        
-          active[name] = true;
-          
-          for (var i = 0, len = modules[name].req.length; i < len; i++) {
-            if (modules[name].req[i] === name) { continue; }
-            this.loadModule(modules[name].req[i]);
-          }
-          
-          modules[name].fn.call(window, exports);
-          Clementine.modules[name] = exports;
-        }
-        
-      }
-      
-    };
-    
-  }());
-  
-  
-  // ------------------------------------------------------------------------------------------------
-  // Deferred Object
-  // ------------------------------------------------------------------------------------------------
-  
-  Deferred = (function() {
-  
-    function Deferred(context) {
-      this.context = context;
-      this.resolved = false;
-      this.bindings = [];
-    }
-    
-    Deferred.prototype.resolve = function() {
-      this.resolved = true;
-      for (var i=0; i<this.bindings.length; i++) {
-        this.bindings[i].fn.apply(this.context, this.bindings[i].args);
-      }
-      this.bindings = [];
-    };
-    
-    Deferred.prototype.then = function(fn, args) {
-      if (this.resolved) {
-        fn.apply(this.context, args || []);
-      } else {
-        this.bindings.push({ fn: fn, args: args || [] });
-      }
-    };
-  
-    return Deferred;
-  
-  }());
-  
-  function when() {
-  
-    var deferred = new Deferred(this);
-    var count = arguments.length;
-      
-    function resolve() {
-      if (--count === 0) {
-        deferred.resolve();
-      }
-    }
-    
-    for (var i=0; i<arguments.length; i++) {
-      arguments[i].then(resolve);
-    }
-    
-    return deferred;
-  
-  }
-  
-  
-  // ------------------------------------------------------------------------------------------------
-  // Browser Object
-  // ------------------------------------------------------------------------------------------------
-  
-  Browser = {
-    touch: ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch,
-    location: 'geolocation' in navigator
-  };
-  
-    
-  // ------------------------------------------------------------------------------------------------
-  // Module Functions
-  // ------------------------------------------------------------------------------------------------
-  
-  function add() {
-    var args = arguments,
-      name = args[0],
-      fn = ( typeof args[1] === 'function' ) ? args[1] : null,
-      req = args[2];
-    Clementine.Loader.addModule(name, fn, req);
-  }
-  
-  function use() {
-    var args = Array.prototype.slice.call(arguments),
-      fn = args[args.length-1],
-      req = clone(args).splice(0, args.length-1);
-    if (typeof req[0] !== 'function') {
-      for (var i = 0, len = req.length; i < len; i++) {
-        Clementine.Loader.loadModule(req[i]);
-      }
-    }
-    fn.call(window, Clementine);
-  }
-  
-  function include(name) {
-    if (typeof Clementine.modules[name] !== undefined) {
-      return Clementine.modules[name];
-    } else {
-      throw 'Could not require module';
-    }
-  }
-  
-  
-  // ------------------------------------------------------------------------------------------------
-  // Exports
-  // ------------------------------------------------------------------------------------------------
-  
-  Clementine            = this.Clementine = {};
-  Clementine.version    = '0.5.0';
-  
-  Clementine.add        = add;
-  Clementine.use        = use;
-  Clementine.include      = this.include = include;
-  Clementine.when         = when;
-  
-  Clementine.Browser    = Browser = Browser;
-  Clementine.Class      = this.Class = Class;
-  Clementine.Deferred       = Deferred;
-  Clementine.Events     = this.Events = Events;
-  Clementine.Loader     = Loader;
-    
-  
-}.call(this));
-
-
-// ------------------------------------------------------------------------------------------------
-// Array Extensions
-// ------------------------------------------------------------------------------------------------
-
-Array.prototype.clone = function() { return this.slice(0); };
-
-Array.prototype.indexOf = [].indexOf || function(item) {
-  for (var i = 0, l = this.length; i < l; i++) {
-    if (i in this && this[i] === item) { return i; }
-  }
-  return -1;
-};
-
-Array.prototype.first = [].first || function() {
-  return this.length ? this[0] : null;
-};
-
-Array.prototype.last = [].last || function() {
-  return this.length ? this[this.length-1] : null;
-};
-// ------------------------------------------------------------------------------------------------
-// ViewController Class
-// ------------------------------------------------------------------------------------------------
-
-(function(Clementine) {
-
-  var ViewController;
-  
-
-  // ------------------------------------------------------------------------------------------------
-  // Dependencies
-  // ------------------------------------------------------------------------------------------------
-  
-  var Binding  = Clementine.Binding;
-  var Browser  = Clementine.Browser;
-  var View     = Clementine.View;
-
-
-  // ------------------------------------------------------------------------------------------------
-  // Class Definition
-  // ------------------------------------------------------------------------------------------------
-  
-  ViewController = Class.extend({
-    initialize: function (q, l) {
-        var j = this,
-            r = [],
-            d = [];
-        this.loading = false;
-        this.unloading = false;
-        this.loaded = false;
-        this.visible = false;
-        this.appearing = false;
-        this.disappearing = false;
-        this.changing = false;
-        this.loadEvts = [];
-        this.unloadEvts = [];
-        this.showEvts = [];
-        this.hideEvts = [];
-        this.views = {};
-        this.elements = {};
-        this.events = [];
-        this.data = {};
-        this.params = {};
-        this.source = l.clone();
-        if (typeof l !== "undefined") {
-            this.target = $(l);
-            var f = $(l).get(0)
-        } else {
-            this.target = View.get(this.getDefaultView());
-            if(this.target === null) {
-              throw "Invalid target"
-            }
-        }
-        this.parent = (typeof q !== "undefined") ? q : null;
-        if (this.parent === null) {
-            this.target.removeAttr("data-root")
-        }
-        for (var h = 0, k = f.attributes.length; h < k; h++) {
-            if (f.attributes[h].name.match(/data-/)) {
-                this.data[f.attributes[h].name.replace(/data-/, "")] = f.attributes[h].value
-            }
-        }
-        var b = function (c) {
-            var t = [];
-            this.target.find(c).each(function () {
-                var u = false,
-                    v = $(this).parent();
-                while (v.length !== 0 && !u) {
-                    if ($(v).not($(j.target)).length === 0) {
-                        u = true;
-                        break
-                    } else {
-                        if ($(v).not("[data-control]").length === 0) {
-                            u = false;
-                            break
-                        }
-                    }
-                    v = $(v).parent()
-                }
-                if (u) {
-                    t.push(this)
-                }
-            });
-            return t
-        };
-        r = b.call(this, "[data-control]");
-        d = b.call(this, "[data-name]:not([data-control])");
-        if (!this.data.name) this.data.name = this.data.control;
-        console.log(this.data.name + " Initialized");
-        for (var h = 0, k = r.length; h < k; h++) {
-            var p = $(r[h]),
-                e = p.attr("data-name"),
-                n = p.attr("data-control"),
-                s = p.attr("data-template"),
-                o = (typeof s !== "undefined" && s.length > 0);
-            if (o) {
-                var a = View.get(s);
-                p.html($(a).html());
-                cloneAttributes(a, p);
-                p.removeAttr("data-template")
-            }
-            var m = ViewController.get(n);
-            if (!e) { e = n; }
-            this.views[e] = new m(this, p)
-        }
-        for (var h = 0, k = d.length; h < k; h++) {
-            var g = $(d[h]),
-                e = g.attr("data-name");
-            if (typeof e !== "undefined" && e.length > 0) {
-                this.elements[e] = g.removeAttr("data-name").addClass(e)
-            }
-        }
-        this.addClasses();
-        this.target.removeAttr("data-control").removeAttr("data-name");
-        this.target.addClass("hidden");
-        this.type = this.getType();
-        this.name = this.data.name;
-        this.setup();
-    },
-    setup: function() {},
-    getType: function () {
-        return "ui-view"
-    },
-    getStates: function() {
-      return {};
-    },
-    getDefaultState: function() {
-      return null;
-    },
-    getDefaultView: function() {
-      return null;
-    },
-    setState: function(states) {
-      if (!states || states.length === 0) {
-        if (this.getDefaultState()) {
-          states = [this.getDefaultState()];
-        } else {
-          states = [];
-        }
-      }
-      var original = states.slice(0);
-      var state = states.shift();
-      var statesArray = states.slice(0);
-      var current = this.state || this.getDefaultState();
-      var callbacks = this.getStates();
-      if (Object.keys(callbacks).length === 0) {
-        for (var i in this.views) {
-          this.getView(i).setState(original.slice(0));
-        }
-        return;
-      }
-      if (callbacks.hasOwnProperty(state)) {
-        callbacks[state].call(this, current, statesArray);
-      }
-      this.state = state;
-    },
-    addClasses: function () {
-      this.target.addClass(this.target.get(0).className + ' ' + this.types + ' ' + this.data.name);
-    },
-    getTriggers: function () {
-        return []
-    },
-    getBindings: function () {
-        return {}
-    },
-    load: function () {
-        if (this.loading || this.loaded) {
-            return
-        }
-        this.loading = true;
-        this.loadEvts.push(this.on("_load", this.onLoad, this));
-        this.loadEvts.push(this.on("_loaded", this.onDidLoad, this));
-        this.onWillLoad();
-        return this
-    },
-    onWillLoad: function () {
-        this.fire("_load")
-    },
-    onLoad: function () {
-        for (var a in this.views) {
-            this.views[a].load()
-        }
-        this.fire("_loaded")
-    },
-    onDidLoad: function () {
-        for (var b = 0, a = this.loadEvts.length; b < a; b++) {
-            this.loadEvts[b].detach()
-        }
-        this.loadEvts = [];
-        this.loading = false;
-        this.loaded = true;
-        this.fire("load")
-    },
-    unload: function () {
-        if (this.unloading || !this.loaded) {
-            return
-        }
-        if (this.visible && !this.disappearing) {
-            this.vEvt = this.on("disappear", function (a) {
-                this.unload();
-                this.vEvt.detach()
-            }, this);
-            this.hide();
-            return
-        }
-        this.unloadEvts.push(this.on("_unload", this.onUnload, this));
-        this.unloadEvts.push(this.on("_unloaded", this.onDidUnload, this));
-        this.unloading = true;
-        this.onWillUnload();
-        return this
-    },
-    onWillUnload: function () {
-        this.fire("_unload")
-    },
-    onUnload: function () {
-        for (var a in this.views) {
-            this.views[a].unload()
-        }
-        //this.target.remove();
-        this.fire("_unloaded")
-    },
-    onDidUnload: function () {
-        for (var b = 0, a = this.unloadEvts.length; b < a; b++) {
-            this.unloadEvts[b].detach()
-        }
-        this.unloadEvts = [];
-        this.unloading = false;
-        this.loaded = false;
-        this.fire("unload")
-    },
-    show: function () {
-        if (this.visible || this.appearing) {
-            return
-        }
-        this.appearing = true;
-        this.showEvts.push(this.on("_appear", this.onAppear, this));
-        this.showEvts.push(this.on("_appeared", this.onDidAppear, this));
-        this.onWillAppear();
-        return this
-    },
-    onWillAppear: function () {
-        var b = this.getBindings();
-        var replaced;
-        var matches;
-        for (var a in b) {
-            var d = b[a];
-            for (var f in d) {
-                var e = null;
-                if (typeof d[f] === "function") { e = d[f]; }
-                else if (this.hasOwnProperty(d[f])) { e = this[d[f]]; }
-                if (f == "touchclick") {
-                    f = (Browser && Browser.touch) ? "touchend" : "click"
-                }
-                if (e === null) {
-                    var c = f.charAt(0).toUpperCase() + f.slice(1);
-                    e = (d[f] === true && typeof this["on" + c] === "function") ? this["on" + c] : null
-                }
-                matches = a.match(/\(.+\)/gi);
-                if (a.match(/\$target/)) {
-                  if (matches && matches.length > 0) {
-                    this.target.on(f, matches.pop().replace(/[()]/g, ''), $.proxy(e, this));
-                  } else {
-                    this.target.on(f, $.proxy(e, this));
-                  }
-                } else if (e !== null && this.views.hasOwnProperty(a)) {
-                    this.getView(a).on(f, $.proxy(e, this))
-                } else if (e !== null) {
-                  if (matches && matches.length > 0) {
-                    replaced = a.replace(/\(.+\)/gi, '');
-                    this.getElement(replaced).on(f, matches.pop().replace(/[()]/g, ''), $.proxy(e, this));
-                  } else if (this.elements.hasOwnProperty(a)) {
-                    this.getElement(a).on(f, $.proxy(e, this))
-                  }
-                }
-            }
-        }
-        this.fire("_appear")
-    },
-    onAppear: function () {
-        for (var a in this.views) {
-            this.views[a].show()
-        }
-        this.target.removeClass("hidden");
-        this.fire("_appeared")
-    },
-    onDidAppear: function () {
-        for (var b = 0, a = this.showEvts.length; b < a; b++) {
-            this.showEvts[b].detach()
-        }
-        this.showEvts = [];
-        this.appearing = false;
-        this.visible = true;
-        this.fire("appear")
-    },
-    hide: function () {
-        if (!this.visible || this.disappearing) {
-            return
-        }
-        this.disappearing = true;
-        this.hideEvts.push(this.on("_disappear", this.onDisappear, this));
-        this.hideEvts.push(this.on("_disappeared", this.onDidDisappear, this));
-        this.onWillDisappear();
-        return this
-    },
-    onWillDisappear: function () {
-        for (var a in this.views) {
-            this.getView(a).detach()
-        }
-        for (var b in this.elements) {
-            this.getElement(b).unbind()
-        }
-        this.fire("_disappear")
-    },
-    onDisappear: function () {
-        this.target.addClass("hidden");
-        for (var a in this.views) {
-            this.views[a].hide()
-        }
-        this.fire("_disappeared")
-    },
-    onDidDisappear: function () {
-        for (var b = 0, a = this.hideEvts.length; b < a; b++) {
-            this.hideEvts[b].detach()
-        }
-        this.hideEvts = [];
-        this.disappearing = false;
-        this.visible = false;
-        this.fire("disappear")
-    },
-    getView: function (a) {
-        if (a instanceof ViewController) {
-            return a
-        } else {
-            if (typeof this.views[a] !== "undefined") {
-                return this.views[a]
-            }
-        }
-        throw 'Error: View "' + a + '" not found'
-    },
-    getElement: function (a) {
-        if (typeof this.elements[a] !== "undefined") {
-            return this.elements[a]
-        }
-        throw 'Error: Element "' + a + '" not found'
-    },
-    hasView: function (a) {
-        return typeof this.views[a] !== "undefined"
-    },
-    hasElement: function (a) {
-        return typeof this.elements[a] !== "undefined"
-    },
-    setView: function (b, a) {
-        console.log(this);
-        if (this.views.hasOwnProperty(b)) {
-            throw "View already exists"
-        }
-        this.views[b] = a
-    },
-    clearView: function (a) {
-        if (this.views.hasOwnProperty(a)) {
-            this.views[a].destroy();
-            delete this.views[a]
-        }
-    },
-    bindData: function(name, data, multi) {
-      var target = (name === '$target') ? this.target : this.getElement(name);
-      var children = firstChildren(target, '[itemprop]');
-      var prop;
-      for (var i=0; i<children.length; i++) {
-        prop = children[i].attr('itemprop');
-        if (prop) {
-          if (children[i].get(0).tagName === 'IMG') {
-            if (data.hasOwnProperty(prop)) {
-              children[i].attr('src', data[prop]);
-            }
-          } else if (children[i].get(0).tagName === 'SELECT' || children[i].get(0).tagName === 'INPUT') {
-            if (data.hasOwnProperty(prop)) {
-              children[i].val(data[prop]);
-            }
-          } else {
-            if (data.hasOwnProperty(prop)) { children[i].text(data[prop]);
-            } else if (!multi) { children[i].text(''); }
-          }
-        }
-      }
-    },
-    setParam: function(name, value) {
-      this.params[name] = value;
-    },
-    getParam: function(name) {
-      return this.params[name];
-    },
-    clearParam: function(name) {
-      delete this.params[name];
-    },
-    toString: function () {
-        return "[" + this.getType() + " " + this.data.name + "]"
-    },
-    find: function (a) {
-        return $(this.target).find(a)
-    },
-    destroy: function () {
-        for (var a in this._views) {
-            this.views[a].destroy()
-        }
-        for (var a in this._elements) {
-            delete this.elements[a]
-        }
-        delete this.target;
-        delete this.parent;
-    }
-  }).include(Events);
-
-
-  // ------------------------------------------------------------------------------------------------
-  // Object Methods
-  // ------------------------------------------------------------------------------------------------
-  
-  ViewController.views = {
-    view: ViewController
-  };
-  
-  ViewController.prototype.types = "ui-view ";
-  
-  ViewController.extend = function(e) {
-    var b = Class.extend.call(this, e),
-      d = e.getType();
-    var f = ["getType"];
-    for (var c = 0, a = f.length; c < a; c++) {
-      if (!e.hasOwnProperty(f[c])) {
-        throw "Class missing '" + f[c] + "()' implementation"
-      }
-      b[f[c]] = e[f[c]]
-    }
-    b.prototype.types += d + " ";
-    b.extend = arguments.callee;
-    return ViewController.views[d] = b
-  };
-  
-  ViewController.get = function(a) {
-    if (a == "ui-view") {
-      return this
-    }
-    if (!this.views.hasOwnProperty(a)) {
-      throw "View '" + a + '" not found'
-    }
-    return this.views[a]
-  };
-
-
-  // ------------------------------------------------------------------------------------------------
-  // Exports
-  // ------------------------------------------------------------------------------------------------
-  
-  Clementine.ViewController = ViewController;
-
-
-}(Clementine));
 // ------------------------------------------------------------------------------------------------
 // View Object
 // ------------------------------------------------------------------------------------------------
@@ -985,7 +49,7 @@ Array.prototype.last = [].last || function() {
       contentType: "text/html; charset=utf-8",
       dataType: "text",
       timeout: 10000,
-      url: 'templates/' + path,
+      url: path,
       success: function(html) {
         success(path, html);
       },
@@ -1021,96 +85,917 @@ Array.prototype.last = [].last || function() {
 
 }(Clementine));
 // ------------------------------------------------------------------------------------------------
-// View Object
+// Binding Class
 // ------------------------------------------------------------------------------------------------
 
 (function(Clementine) {
 
-  var Service = {};
-
+  var Binding;
+  
+  // ------------------------------------------------------------------------------------------------
+  // Dependencies
+  // ------------------------------------------------------------------------------------------------
+  
+  var Collection  = Clementine.Collection;
+  var Model       = Clementine.Model;
   
   // ------------------------------------------------------------------------------------------------
   // Class Definition
   // ------------------------------------------------------------------------------------------------
   
-  Service = Class.extend({
-  
-    initialize: function(prefix) {
-      this.prefix = prefix;
-    },
-  
-    setPrefx: function(prefix) {
-      this.prefix = prefix;
-    },
+  Binding = Class.extend({
     
-    getPrefix: function() {
-      if (!this.prefix) {
-        throw { type: 'Configuration Error', message: 'Missing base url' };
-      }
-      return this.prefix;
-    },
-  
-    request: function(path, method, params, map, success, failure, context) {
-    
-      if (!success || !failure) {
-        throw { type: 'Invalid Request', message: 'Missing callback function' };
-      }
+    initialize: function(target) {
       
-      map = map || function(data) { return data; };
-      
-      context = context || this;
-    
-      $.ajax({
-        url: this.getPrefix() + path,
-        type: method,
-        timeout: 30000,
-        data: params,
-        success: function (data) {
-          if (data === null) {
-            failure.call(context);
-            return;
-          }
-          try {
-            data = JSON.parse(data);
-          } catch(e) {
-            failure.call(context);
-            return;
-          }
-          var clean;
-          try {
-            clean = map(data);
-          } catch(ex) {
-            failure.call(context, ex);
-            return;
-          }
-          success.call(context, clean);
-        },
-        error: function() {
-          failure.call(context, true);
-        }
-      });
+      // store target
+      this.target = target;
+      this.template = target.clone();
+      this.loaded = false;
       
     },
     
-    modelOrId: function(model) {
-      if (model && typeof model === 'object' && model.hasOwnProperty('id')) {
-        model = model.id;
+    bind: function(data, callback) {
+    
+      if (this.loaded) {
+        this.unbind();
       }
-      if (!model) {
+      
+      if (data instanceof Array) {
+        this.bindList(this.target, data);
+      } else if (typeof data === 'object') {
+        this.bindData(this.target, data);
+      } else { return; }
+      
+      this.loaded = true;
+      
+      if (typeof callback === 'function') { callback.call(this); }
+      
+    },
+    
+    bindList: function(target, list, field) {
+
+      var instance;
+      var template;
+      var fieldVal;
+      var itemscope = target.find('[itemscope]:first');
+      var output = target.clone().empty();
+      
+      if (!itemscope.length) {
+        target.remove();
         return;
-      } else {
-        return model;
       }
-    }
-  
-  });
+          
+      // clone the template, remove the root
+      itemscope.remove();
+      template = itemscope.clone();
+            
+      if (list instanceof Array) {
+        for (var i=0; i<list.length; i++) {
+          instance = template.clone();
+          output.append(instance);
+          try {
+            fieldVal = list[i][field];
+          } catch(e) {
+            fieldVal = undefined;
+          }
+          this.bindData(instance, list[i], fieldVal);
+        }
+      }
+      
+      // replace the target
+      target.replaceWith(output);
+      
+    },
+
+    bindData: function(target, data, id) {
+      
+      var items = [];
+      var item;
+      var name;
+      
+      if (id) {
+        target.attr('itemid', id);
+      }
+      
+      function childFunc(selector) {
+      
+        var childList = [];
+        target.find(selector).each(function() {
+        
+          var include = false;
+          var parent = $(this).parent();
+          
+          while (parent.length !== 0 && !include) {
+            if ($(parent).not(target).length === 0) {
+                include = true; break;
+            } else if ($(parent).not('[data-control]').length === 0) {
+              include = false; break;
+            } parent = $(parent).parent();
+          }
+          
+          if (include) { childList.push($(this)); }
+          
+        });
+        
+        return childList;
+        
+      }
+      
+      if (typeof data === 'string' && target.has('[itemscope]')) {
+        target.text(data);
+        return;
+      }
+      
+      items = childFunc.call(this, '[itemprop]');
+            
+      for (var i=0; i<items.length; i++) {
+      
+        item = items[i];
+        name = item.attr('itemprop');
+        
+        if (data.hasOwnProperty(name)) {
+          if (data[name] instanceof Array) {
+            this.bindList(item, data[name]);
+          } else if (typeof data[name] === 'object') {
+            this.bindData(item, data[name]);
+          } else if (typeof data[name] === 'string') {
+            item.text(data[name]);
+          }
+        } else {
+          item.remove();
+        }
+      }
+      
+    },
     
+    unbind: function() {
+      this.target.replaceWith(this.template.clone());
+    },
+    
+    destroy: function() {
+      delete this.target;
+      delete this.template;
+      delete this.loaded;
+    }
+    
+  });
+  
   
   // ------------------------------------------------------------------------------------------------
   // Exports
   // ------------------------------------------------------------------------------------------------
   
-  Clementine.Service = Service;
+  Clementine.Binding = Binding;
+  
+
+}(Clementine));
+// ------------------------------------------------------------------------------------------------
+// ViewController Class
+// ------------------------------------------------------------------------------------------------
+
+(function(Clementine) {
+
+  var ViewController;
+  
+  // ------------------------------------------------------------------------------------------------
+  // Dependencies
+  // ------------------------------------------------------------------------------------------------
+  
+  var Binding     = Clementine.Binding;
+  var Browser     = Clementine.Browser;
+  var View        = Clementine.View;
+  
+  
+  // ------------------------------------------------------------------------------------------------
+  // Functions
+  // ------------------------------------------------------------------------------------------------
+  
+  function cloneAttributes(source, destination) {
+    destination = $(destination).eq(0);
+    source = $(source)[0];
+    for (var i = 0; i < source.attributes.length; i++) {
+      var a = source.attributes[i];
+      destination.attr(a.name, a.value);
+    }
+  }
+  
+  
+  // ------------------------------------------------------------------------------------------------
+  // Class Definition
+  // ------------------------------------------------------------------------------------------------
+  
+  ViewController = Class.extend({
+      
+    // constructors
+    
+    initialize: function(parent, target, app) {
+      
+      // set vars
+      var that = this, views = [], elements = [];
+      
+      // store application
+      this.app = app;
+      
+      // states
+      this.views = {};
+      this.elements = {};
+      this.data = {};
+      this.source = target.clone();
+      this.state = '';
+      
+      // set load statuses
+      this.loading = false;
+      this.unloading = false;
+      this.loaded = false;
+      
+      // setup display statuses
+      this.visible = false;
+      this.appearing = false;
+      this.disappearing = false;
+      
+      // create arrays
+      this.loadEvts = [];
+      this.unloadEvts = [];
+      this.showEvts = [];
+      this.hideEvts = [];
+      
+      // event queue
+      this.queue = [];
+      this.running = false;
+      
+      // bindings
+      this.bindings = {};
+      
+      
+      // validate target
+      var _target;
+      if (typeof target !== 'undefined') {
+        this.target = $(target);
+        _target = $(target).get(0);
+      } else {
+        throw 'Invalid target';
+      }
+      
+      // check if parent
+      this._parent = (typeof parent !== 'undefined') ? parent : null;
+      if (this._parent === null) { this.target.removeAttr('data-root'); }
+      
+      // validate arguments
+      for (var i = 0, len = _target.attributes.length; i < len; i++) {
+        if (_target.attributes[i].name.match(/data-/)) {
+          this.data[_target.attributes[i].name.replace(/data-/, '')] = _target.attributes[i].value;
+        }
+      }
+      
+      // finds immediate descendant children
+      var childFunc = function(selector) {
+        var childList = [];
+        this.target.find(selector).each(function() {
+          var include = false, parent = $(this).parent();
+          while (parent.length !== 0 && !include) {
+            if ($(parent).not($(that.target)).length === 0) {
+              include = true; break;
+            } else if ($(parent).not('[data-control]').length === 0) {
+              include = false; break;
+            } parent = $(parent).parent();
+          }
+          if (include) { childList.push(this); }
+        });
+        return childList;
+      };
+      
+      // populate child views
+      views = childFunc.call(this, '[data-control]');
+      elements = childFunc.call(this, '[data-name]:not([data-control])');
+      
+      // DEBUG
+      console.log(this.data.name + ' ' + "Initialized");
+      
+      // process views
+      for (i = 0, len = views.length; i < len; i++) {
+        var view = $(views[i]), name = view.attr('data-name'),
+            type = view.attr('data-control'), path = view.attr('data-template'),
+            isRemote = (typeof path !== 'undefined' && path.length > 0);
+        
+        if (!name) { name = view.attr('data-control'); }
+        if (isRemote) {
+          var source = View.get(path, type, name);
+          view.html($(source).html());
+          cloneAttributes(source, view);
+          view.removeAttr('data-template');
+        }
+        
+        var c = ViewController.get(type);
+        this.views[name] = new c(this, view, app);
+      }
+      
+      // process elements
+      for (i = 0, len = elements.length; i < len; i++) {
+        var el = $(elements[i]), elName = el.attr('data-name');
+        if (typeof elName !== 'undefined' && elName.length > 0) {
+          this.elements[elName] = el.removeAttr('data-name').addClass(elName);
+        }
+      }
+      
+      // store for debugging
+      this.type = this.getType();
+      this.data.name = this.data.name || this.data.control;
+      if (this.data.state) { this.state = this.data.state; }
+      
+      // process types
+      this.target.addClass(this.getClasses());
+      this.target.removeAttr('data-control').removeAttr('data-name').removeAttr('data-state');
+
+    },
+    
+    
+    // queue handling
+    
+    add: function(fn, args, wait) {
+      this.queue.push({fn: fn, args: args, wait: wait});
+      if (!this.running) { this.next(); }
+    },
+    
+    next: function() {
+      this.running = true;
+      var next = this.queue.shift();
+      if (next) {
+        next.fn.apply(this, next.args);
+        if (next.fn === this._setState) {
+          setTimeout(proxy(function() {
+            this.next();
+          }, this), next.wait);
+        }
+      } else {
+        this.running = false;
+      }
+    },
+    
+    
+    // configuration
+    
+    getType: function() {
+      return 'view';
+    },
+
+    getClasses: function() {
+      var classes = typeof this.typeList !== 'undefined' ? this.typeList : '';
+      return classes + ' ' + this.data.name ? this.data.name : '';
+    },
+
+    getBindings: function() {
+      return {};
+    },
+  
+    getRoutes: function() {
+      return {};
+    },
+    
+    
+    // route management
+    
+    setRoute: function(url, last) {
+      var routes = this.getRoutes(), hash = url.clone(), route = hash.shift();
+      if (routes.hasOwnProperty(route)) {
+        var views = routes[route];
+        for (var view in views) {
+          var sequence = views[view];
+          if (last) { sequence = [sequence.pop()]; }
+          for (var i=0; i<sequence.length; i++) {
+            var state = sequence[i];
+            if (typeof state === 'object') {
+              var name = Object.keys(state).pop();
+              this.getView(view).setState(name, state[name]);
+            } else if (typeof state === 'string') {
+              this.getView(view).setState(state);
+            }
+          }
+          if (hash.length > 0) { this.getView(view).setRoute(hash, last); }
+        }
+      }
+    },
+    
+    
+    // state management
+    
+    getState: function() {
+      return this.state;
+    },
+    
+    setState: function(state, wait) {
+      this.add(this._setState, [state], wait || 0);
+      return this;
+    },
+    
+    _setState: function(state, force) {
+      if ((this.hasState(state) || !this.loaded) && !force) { return; }
+      if (state) { console.log(this.data.name + ' state is ' + state); }
+      this.target.removeClass(this.state);
+      this.target.addClass(state);
+      this.state = state;
+    },
+  
+    hasState: function(state) {
+      return this.state === state;
+    },
+    
+    
+    // state handlers
+    
+    load: function() {
+      this.add(this._load);
+      return this;
+    },
+    
+    show: function() {
+      this.add(this._show);
+      return this;
+    },
+    
+    hide: function() {
+      this.add(this._hide);
+      return this;
+    },
+    
+    unload: function() {
+      this.add(this._unload);
+      return this;
+    },
+    
+    _load: function() {
+      
+      // return if already loading
+      if (this.loading || this.loaded) {
+        this.next(); // fire the next call in the queue
+        return;
+      }
+      
+      // set statuses
+      this.loading = true;
+      
+      // set default state if it exists
+      this._setState(this.state, true);
+      
+      // bind event handlers
+      this.loadEvts.push(this.on('_load', this.onLoad, this));
+      this.loadEvts.push(this.on('_loaded', this.onDidLoad, this));
+      
+      // call onWillLoad
+      this.onWillLoad();
+      
+    },
+    
+    _show: function() {
+      
+      // return if already visible or appearing
+      if (this.visible || this.appearing || !this.loaded) {
+        this.next();
+        return;
+      }
+      
+      // set statuses
+      this.appearing = true;
+      
+      // bind event handlers
+      this.showEvts.push(this.on('_appear', this.onAppear, this));
+      this.showEvts.push(this.on('_appeared', this.onDidAppear, this));
+      
+      // call onWillAppear
+      this.onWillAppear();
+      
+    },
+    
+    _hide: function() {
+      
+      // return if already hidden or hiding
+      if (!this.visible || this.disappearing) {
+        this.next();
+        return;
+      }
+      
+      // set statuses
+      this.disappearing = true;
+      
+      this.hideEvts.push(this.on('_disappear', this.onDisappear, this));
+      this.hideEvts.push(this.on('_disappeared', this.onDidDisappear, this));
+      
+      // call onWillDisappear
+      this.onWillDisappear();
+      
+    },
+    
+    _unload: function() {
+      
+      // return if already unloading
+      if (this.unloading || !this.loaded) {
+        this.next();
+        return;
+      }
+      
+      // hide first if visible
+      if (this.visible && !this.disappearing) {
+        this.hide().unload();
+        return;
+      }
+      
+      // bind event handlers
+      this.unloadEvts.push(this.on('_unload', this.onUnload, this));
+      this.unloadEvts.push(this.on('_unloaded', this.onDidUnload, this));
+      
+      // set statuses
+      this.unloading = true;
+      
+      // call onWillUnload
+      this.onWillUnload();
+      
+    },
+    
+    
+    // state transitions
+    
+    onWillLoad: function() {
+      
+      // DEBUG
+      console.log(this.data.name + ' ' + "Will Load");
+      
+      // fire load event
+      this.fire('_load');
+      
+    },
+    
+    onLoad: function() {
+      
+      var count = Object.keys(this.views).length;
+      
+      // load children
+      if (count === 0) {
+        this.fire('_loaded');
+      } else {
+        for (var name in this.views) {
+          var view = this.views[name];
+          view.once('load', proxy(function() {
+            count--;
+            if (count === 0) {
+              this.fire('_loaded');
+            }
+          }, this));
+          view.load();
+        }
+      }
+
+    },
+    
+    onDidLoad: function() {
+    
+      // unbind all event handlers
+      for (var i = 0, len = this.loadEvts.length; i < len; i++) {
+        this.loadEvts[i].detach();
+      }
+      
+      // DEBUG
+      console.log(this.data.name + ' ' + "Did Load");
+      
+      // allow unloading
+      this.loadEvts = [];
+      this.loading = false;
+      this.loaded = true;
+      
+      // fire public load event
+      this.fire('load');
+      
+      // run next item
+      this.next();
+    
+    },
+    
+    onWillUnload: function() {
+    
+      // run functions
+      console.log(this.data.name + ' ' + "Will Unload");
+      
+      // ex. clear data
+      
+      // fire unload event
+      this.fire('_unload');
+    
+    },
+    
+    onUnload: function() {
+      
+      var count = Object.keys(this.views).length;
+      
+      // unload children
+      if (count === 0) {
+        this.target.remove();
+        this.fire('_unloaded');
+      } else {
+        for (var name in this.views) {
+          var view = this.views[name];
+          view.once('unload', proxy(function() {
+            count--;
+            if (count === 0) {
+              this.target.remove();
+              this.fire('_unloaded');
+            }
+          }, this));
+          view.unload();
+        }
+      }
+      
+    },
+    
+    onDidUnload: function() {
+    
+      // run functions
+      console.log(this.data.name + ' ' + "Did Unload");
+      
+      // unbind all event handlers
+      for (var i = 0, len = this.unloadEvts.length; i < len; i++) {
+        this.unloadEvts[i].detach();
+      }
+      
+      // allow loading
+      this.unloadEvts = [];
+      this.unloading = false;
+      this.loaded = false;
+      
+      // fire public unload event
+      this.fire('unload');
+      
+      // call next
+      this.next();
+    
+    },
+    
+    
+    // display transitions
+    
+    onWillAppear: function() {
+            
+      // run functions
+      console.log(this.data.name + ' ' + "Will Appear");
+      
+      // bind events
+      var views = this.getBindings();
+      
+      for (var view in views) {
+        var events = views[view];
+        for (var event in events) {
+          var func = null;
+          if (typeof events[event] === "function") { func = events[event]; }
+          else if (this.hasOwnProperty(events[event])) { func = this[events[event]]; }
+          if (event === 'touchclick') { event = Browser.touch ? 'touchend' : 'click'; }
+          if (func === null) {
+            var name = event.charAt(0).toUpperCase() + event.slice(1);
+            func = (events[event] === true && typeof this['on' + name] === 'function') ? this['on' + name] : null;
+          }
+          if (view === '$target') {
+            this.target.on(event, $.proxy(func, this));
+          } else if (func !== null && this.views.hasOwnProperty(view)) {
+            this.getView(view).on(event, $.proxy(func, this));
+          } else if (func !== null && this.elements.hasOwnProperty(view)) {
+            this.getElement(view).on(event, $.proxy(func, this));
+          }
+        }
+      }
+      
+      // fire appear event
+      this.fire('_appear');
+      
+    },
+    
+    onAppear: function(e) {
+                  
+      var count = Object.keys(this.views).length;
+      
+      // show children
+      if (count === 0) {
+        this.fire('_appeared');
+      } else {
+        for (var name in this.views) {
+          var view = this.views[name];
+          view.once('appear', proxy(function() {
+            count--;
+            if (count === 0) {
+              this.fire('_appeared');
+            }
+          }, this));
+          view.show();
+        }
+      }
+      
+    },
+    
+    onDidAppear: function(e) {
+        
+      // run functions
+      console.log(this.data.name + ' ' + "Did Appear");
+      
+      // unbind all event handlers
+      for (var i = 0, len = this.showEvts.length; i < len; i++) {
+        this.showEvts[i].detach();
+      }
+      
+      // allow hiding
+      this.showEvts = [];
+      this.appearing = false;
+      this.visible = true;
+      
+      // fire public appear event
+      this.fire('appear');
+      
+      // call next
+      this.next();
+
+    },
+    
+    onWillDisappear: function() {
+      
+      // run functions
+      console.log(this.data.name + ' ' + "Will Disappear");
+      
+      // unbind events
+      for (var view in this.views) { this.getView(view).detach(); }
+      for (var el in this.elements) { this.getElement(el).unbind(); }
+      
+      // fire disappear event
+      this.fire('_disappear');
+      
+    },
+    
+    onDisappear: function(e) {
+            
+      var count = Object.keys(this.views).length;
+      
+      // hide children
+      if (count === 0) {
+        this.fire('_disappeared');
+      } else {
+        for (var name in this.views) {
+          var view = this.views[name];
+          view.once('disappear', proxy(function() {
+            count--;
+            if (count === 0) {
+              this.fire('_disappeared');
+            }
+          }, this));
+          view.hide();
+        }
+      }
+      
+    },
+    
+    onDidDisappear: function(e) {
+      
+      // run functions
+      console.log(this.data.name + ' ' + "Did Disappear");
+      
+      // unbind all event handlers
+      for (var i = 0, len = this.hideEvts.length; i < len; i++) {
+        this.hideEvts[i].detach();
+      }
+      
+      // allow showing
+      this.hideEvts = [];
+      this.disappearing = false;
+      this.visible = false;
+      
+      // fire public disappear event
+      this.fire('disappear');
+      
+      // call next
+      this.next();
+    
+    },
+    
+    
+    // reference handling
+    
+    getViews: function() {
+      return this.views;
+    },
+    
+    getView: function(name) {
+      if (name instanceof ViewController) { return name; }
+      else if (typeof this.views[name] !== 'undefined') { return this.views[name]; }
+      throw 'Error: View "' + name + '" not found';
+    },
+  
+    getElement: function(name) {
+      if (typeof this.elements[name] !== 'undefined') { return this.elements[name]; }
+      throw 'Error: Element "' + name + '" not found';
+    },
+    
+    
+    // reference merging
+    
+    addView: function(control, name, template) {
+      var c = ViewController.get(control);
+      var v = View.get(template, control, name);
+      if (c) {
+        this.views[name] = new c(this, v, this.app);
+      }
+      return this.views[name];
+    },
+    
+    removeView: function(name) {
+      if (this.hasView(name)) {
+        this.views[name].hide().unload().destroy();
+        delete this.views[name];
+      }
+    },
+    
+    
+    // reference validation
+    
+    hasView: function(name) {
+      return typeof this.views[name] !== 'undefined';
+    },
+    
+    hasElement: function(name) {
+      return typeof this.elements[name] !== 'undefined';
+    },
+    
+    
+    // data bindings
+    
+    bind: function(element, data) {
+      if (!this.hasElement(element)) { return; }
+      if (this.bindings.hasOwnProperty(element)) {
+       this.bindings[element].unbind();
+       delete this.bindings[element];
+      }
+      this.bindings[element] = new Binding(this.getElement(element));
+      this.bindings[element].bind(data);
+    },
+  
+    unbind: function(element) {
+      if (!this.hasElement(element)) { return; }
+      if (this.bindings.hasOwnProperty(element)) {
+       this.bindings[element].unbind();
+       delete this.bindings[element];
+      }
+    },
+    
+    
+    // common methods and destructors
+    
+    toString: function() {
+      return '[' + this.getType() + ' ' + this.data.name + ']';
+    },
+    
+    destroy: function() {
+            
+      // destroy views
+      for (var view in this.views) { this.views[view].destroy(); delete this.views[view]; }
+      for (var element in this.elements) { delete this.elements[element]; }
+          
+      // clear references
+      delete this.target;
+      delete this._parent;
+      
+    }
+  
+  }).include(Events);
+  
+  
+  // ------------------------------------------------------------------------------------------------
+  // Object Methods
+  // ------------------------------------------------------------------------------------------------
+  
+  ViewController.views = { 'view': ViewController };
+  
+  ViewController.prototype.typeList = '';
+  
+  ViewController.extend = function(def) {
+  
+    var m = Class.extend.call(this, def),
+        type = def.getType();
+  
+    var required = ['getType'];
+    for (var i = 0, len = required.length; i < len; i++) {
+      if (!def.hasOwnProperty(required[i])) { throw "Class missing '" + required[i] + "()' implementation"; }
+      m[required[i]] = def[required[i]];
+    }
+    m.prototype.typeList += ((m.prototype.typeList === '') ? '' : ' ') + type;
+    m.extend = ViewController.extend;
+    
+    return ViewController.views[type] = m;
+  
+  };
+  
+  ViewController.get = function(name) {
+    if (name === 'view') { return this; }
+    if (!this.views.hasOwnProperty(name)) { throw "View '" + name + '" not found'; }
+    return this.views[name];
+  };
+  
+  
+  // ------------------------------------------------------------------------------------------------
+  // Exports
+  // ------------------------------------------------------------------------------------------------
+  
+  Clementine.ViewController = ViewController;
   
 
 }(Clementine));
@@ -1118,7 +1003,7 @@ Array.prototype.last = [].last || function() {
 // Application Class
 // ------------------------------------------------------------------------------------------------
 
-(function(Orange) {
+(function(Clementine) {
 
   var Application;
   
@@ -1127,10 +1012,9 @@ Array.prototype.last = [].last || function() {
   // Dependencies
   // ------------------------------------------------------------------------------------------------
   
-  var Loader           = Orange.Loader;
-  var Service          = Orange.Service;
-  var View             = Orange.View;
-  var ViewController   = Orange.ViewController;
+  var Loader           = Clementine.Loader;
+  var View             = Clementine.View;
+  var ViewController   = Clementine.ViewController;
   
   
   // ------------------------------------------------------------------------------------------------
@@ -1138,50 +1022,98 @@ Array.prototype.last = [].last || function() {
   // ------------------------------------------------------------------------------------------------
   
   Application = Class.extend({
-      initialize: function (a) {
-          if (!a.hasOwnProperty("name") || (new RegExp(/[^A-Za-z:0-9_\[\]]/g)).test(a.name)) {
-              throw "Invalid application name";
-          }
-          this.loaded = false;
-          this.registered = false;
-          this.config = a;
-          if (a.hasOwnProperty('views')) {
-            View.register(a.views, Class.proxy(function() {
-              this.registered = true;
-              if (this.loaded) { this.onLoad(); }
-            }, this));
-          }
-          window.onload = Class.proxy(function() {
-            this.loaded = true;
-            if (this.registered) { this.onLoad(); }
-          }, this);
-      },
-      onLoad: function () {
-          var b = $("[data-root]"),
-              e = b.attr("data-control"),
-              d = b.attr("data-name");
-          if (typeof e === "undefined" || typeof d === "undefined") {
-              throw "Root view not found";
-          }
-          b.removeAttr("data-root");
-          var f = ViewController.get(e);
-          var a = new f(null, b);
-          a.on("load", function () {
-              a.show();
-          });
-          a.load();
-          this.root = a;
-          $(window).bind('hashchange', Class.proxy(this.onHashChange, this));
-          $(window).trigger('hashchange');
-      },
-      onHashChange: function() {
-        var hash = location.hash;
-        if (!hash) {
-          this.root.setState();
-        } else {
-          this.root.setState(hash.replace('#', '').split('/'));
-        }
+      
+    // constructors
+    
+    initialize: function(config) {
+          
+      // validate configs
+      if (!config.hasOwnProperty('name') || !config.hasOwnProperty('required')) { throw 'Invalid application'; }
+    
+      // store configs
+      this.name = config.name;
+      this.required = config.required;
+      this.loaded = false;
+      this.online = false;
+      this.env = 'PROD';
+       
+      // load dependencies
+      for (var i = 0, len = this.config.required.length; i < len; i++) {
+        Loader.loadModule(this.config.required[i]);
       }
+      
+    },
+    
+    // environment setup
+    
+    setEnvironment: function(env) {
+      this.env = env;
+    },
+    
+    setLogging: function(levels) {
+      this.levels = levels;
+    },
+
+    // view management
+    
+    registerViews: function(views) {
+      View.load(views); // handle callback
+    },
+    
+    // event handling
+    
+    onHashChange: function(last) {
+    
+      // parse the hash
+      var hash = location.hash.replace('#').split('/');
+      
+      // pass to controllers
+      this.root.setRoute(hash, last);
+    
+    },
+    
+    onReady: function() {
+      
+      // find root element
+      this.rootEl = $('[data-root]');
+      
+      // find root controller
+      var c = ViewController.get(this.rootEl.attr('data-control'));
+      
+      // initialize root
+      this.root = new c(null, this.rootEl, this);
+      
+      // load the app
+      this.root.load().show();
+      
+      // set network status
+      if (this.online) {
+        this.root.goOnline();
+      } else {
+        this.root.goOffline();
+      }
+      
+      // set route if it exists
+      this.onHashChange();
+      
+    },
+    
+    // application execution
+    
+    launch: function() {
+    
+      // prevent duplicate launches
+      if (this.loaded) { return; }
+      
+      // set levels
+      if (!this.levels || !this.levels.hasOwnProperty(this.env)) {
+        Log.setLevel('DEBUG');
+      } else {
+        Log.setLevel(this.levels[this.env]);
+      }
+    
+    }
+    
   });
   
   
@@ -1189,7 +1121,7 @@ Array.prototype.last = [].last || function() {
   // Exports
   // ------------------------------------------------------------------------------------------------
   
-  Orange.Application  = Application;
+  Clementine.Application = Application;
   
 
 }(Clementine));

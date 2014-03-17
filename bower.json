@@ -14,8 +14,7 @@
     "**/*.txt"
   ],
   "dependencies": {
-    "jquery": "latest",
-    "requirejs": "latest"
+    "jquery": "latest"
   },
   "devDependencies": {}
 }

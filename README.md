@@ -66,4 +66,4 @@ Licensed under the MIT license.
 [Commons]: https://github.com/kkinnebrew/orangeui/blob/master/docs/Commons.md
 [MVC]: https://github.com/kkinnebrew/orangeui/blob/master/docs/MVC.md
 [API Docs]: http://kkinnebrew.github.com/orangeui/api/
-[Clementine]: http://kkinnebrew.github.com/clementine
+[Clementine]: https://github.com/kkinnebrew/clementine

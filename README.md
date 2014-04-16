@@ -30,6 +30,7 @@ Depending on the features you choose to use, Clementine is dependent on the foll
 
 ## Release History
 
+* 1/10/2013 - v0.5.1 - Ajax deferred support.
 * 12/8/2012 - v0.5.0 - Minor updates for stability, service handling.
 * 9/9/2012 - v0.4.0 - Dynamic chainable view states, custom routes, live microdata DOM bindings.
 * 7/8/2012 - v0.3.0 - Branching clementine into separate project
@@ -38,7 +39,7 @@ Depending on the features you choose to use, Clementine is dependent on the foll
 
 ## License
 
-Copyright (c) 2009-12 Kevin Kinnebrew
+Copyright (c) 2009-14 Kevin Kinnebrew
 Licensed under the MIT license.
 <https://github.com/kkinnebrew/clementine/blob/master/LICENSE>
 

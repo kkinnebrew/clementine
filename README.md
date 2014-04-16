@@ -1,5 +1,7 @@
 # OrangeUI
 
+*OrangeUI has been deprecated and replaced by [Clementine], a lightweight more stable alternative.*
+
 OrangeUI is a javascript framework for building dynamic, interactive web applications in the browser.
 
 Many of the features of OrangeUI are stable, however the framework is still in active development and things are bound to change. Try it out on a project and contribute or report bugs [here].
@@ -58,10 +60,10 @@ Copyright (c) 2009-12 Kevin Kinnebrew
 Licensed under the MIT license.
 <https://github.com/brew20k/orangeui/blob/master/LICENSE>
 
-[Getting Started]: https://github.com/brew20k/orangeui/blob/master/docs/Getting%20Started.md
-[here]: https://github.com/brew20k/orangeui/issues?labels=&sort=created&state=open
-[orangeui]: https://github.com/brew20k/orangeui/tree/master/build
-[Commons]: https://github.com/brew20k/orangeui/blob/master/docs/Commons.md
-[MVC]: https://github.com/brew20k/orangeui/blob/master/docs/MVC.md
-[API Docs]: http://brew20k.github.com/orangeui/api/
-
+[Getting Started]: https://github.com/kkinnebrew/orangeui/blob/master/docs/Getting%20Started.md
+[here]: https://github.com/kkinnebrew/orangeui/issues?labels=&sort=created&state=open
+[orangeui]: https://github.com/kkinnebrew/orangeui/tree/master/build
+[Commons]: https://github.com/kkinnebrew/orangeui/blob/master/docs/Commons.md
+[MVC]: https://github.com/kkinnebrew/orangeui/blob/master/docs/MVC.md
+[API Docs]: http://kkinnebrew.github.com/orangeui/api/
+[Clementine]: http://kkinnebrew.github.com/clementine

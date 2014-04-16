@@ -5,7 +5,8 @@
   "keywords": [
     "jquery",
     "events",
-    "javascript"
+    "javascript",
+    "mvc"
   ],
   "main": "clementine.js",
   "license": "MIT",

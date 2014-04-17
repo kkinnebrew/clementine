@@ -1,6 +1,6 @@
 {
   "name": "clementine",
-  "description": "An event driving javascript mixin library",
+  "description": "Clementine is a rapid development framework for building well structured web applications.",
   "version": "0.5.3",
   "author": "Kevin Kinnebrew",
   "homepage": "https://github.com/kkinnebrew/clementine",

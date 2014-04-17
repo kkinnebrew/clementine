@@ -1,7 +1,7 @@
 {
   "name": "clementine",
   "description": "An event driving javascript mixin library",
-  "version": "0.5.1",
+  "version": "0.5.3",
   "author": "Kevin Kinnebrew",
   "homepage": "https://github.com/kkinnebrew/clementine",
   "license": {

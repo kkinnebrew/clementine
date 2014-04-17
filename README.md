@@ -1,69 +1,48 @@
-# OrangeUI
+# Clementine
 
-*OrangeUI has been deprecated and replaced by [Clementine], a lightweight more stable alternative.*
+Clementine is a rapid development javascript library for soundly built web applications. It is meant as a tool to develop highly interactive, maintainable applications, giving the developer a pattern for organizing their interaction logic, views, and styles into a library of modular, decoupled components.
 
-OrangeUI is a javascript framework for building dynamic, interactive web applications in the browser.
+Clementine is now the official release-ready version of OrangeUI.
 
-Many of the features of OrangeUI are stable, however the framework is still in active development and things are bound to change. Try it out on a project and contribute or report bugs [here].
+To start using Clementine, check out the [Getting Started] guide. Try it out on a project and make suggestions or report bugs [here].
 
-View the full [API Docs] here. Documentation is currently valid for prerelease 0.5.
+## Why choose Clementine?
 
-## Why choose OrangeUI?
-
-OrangeUI is a rapid development javascript framework for soundly built web applications. It is meant as a tool to develop highly interactive, maintainable applications in the browser, giving the developer a pattern for organizing their interaction logic, views, and styles into a library of modular, decoupled components. OrangeUI provides the following:
-
-- Object-oriented javascript objects
+- Object-oriented javascript classes
 - Event mixin for objects
-- HTML5 wrapper functions
 - Module dependency management
-- A real-time or RESTful data persistence layer w/offline mode
-- Customizeable models
 - Hierarchical ViewControllers with DOM helper functions
 - View fragment loading w/ templating
-- Live DOM model bindings
 - History and route management
-- Standardized UI controls
+- Standardized UI components
 
-The goal of OrangeUI is to give you a customizable scaffold for building your web application that completely decouples your data sources from your controller logic and presentation and styling. OrangeUI sets up standards for how to organize your application code, standardize your styles and UI elements, and interact with web services. For a walkthrough of the basics, start by reading the [Getting Started] guide.
+## Including Clementine
 
-## Including OrangeUI
-
-To use OrangeUI on your project, all you need to do is include the [orangeui] library at the top of your root html file.
+To use Clementine on your project, all you need to do is include the clementine library at the top of your root html file.
 
 ```html
-<script type="text/javascript" href="orangeui.js"></script>
+<script type="text/javascript" href="clementine.js"></script>
 ```
 
-Depending on the features you choose to use, OrangeUI is dependent on the following libraries:
+Depending on the features you choose to use, Clementine is dependent on the following libraries:
 
 * jQuery - for AJAX and DOM Selectors
 
-## Documentation
-
-* [Commons]
-* [MVC]
-
-
 ## Release History
 
-* 10/2/2012 - v0.6.0 - Code standardization, naming conventions, full documentation.
-* 9/21/2012 - v0.5.2 - Adding deferreds to Ajax webservice calls.
-* 9/9/2012 - v0.5.0 - Dynamic chainable view states, custom routes, live microdata DOM bindings.
-* 8/1/2012 - v0.4.0 - Adding web service persistence, view controller hide/show states.
-* 5/16/2012 - v0.3.0 - Including view controller event helper functions, auto context proxying.
+* 1/10/2013 - v0.5.1 - Ajax deferred support.
+* 12/8/2012 - v0.5.0 - Minor updates for stability, service handling.
+* 9/9/2012 - v0.4.0 - Dynamic chainable view states, custom routes, live microdata DOM bindings.
+* 7/8/2012 - v0.3.0 - Branching clementine into separate project
 * 3/30/2012 - v0.2.0 - Updated view inheritance, bug fixes from prior version.
 * 7/21/2011 - v0.1.0 - Initial release, unstable.
 
 ## License
 
-Copyright (c) 2009-12 Kevin Kinnebrew
+Copyright (c) 2009-14 Kevin Kinnebrew
 Licensed under the MIT license.
-<https://github.com/brew20k/orangeui/blob/master/LICENSE>
+<https://github.com/kkinnebrew/clementine/blob/master/LICENSE>
 
-[Getting Started]: https://github.com/kkinnebrew/orangeui/blob/master/docs/Getting%20Started.md
-[here]: https://github.com/kkinnebrew/orangeui/issues?labels=&sort=created&state=open
-[orangeui]: https://github.com/kkinnebrew/orangeui/tree/master/build
-[Commons]: https://github.com/kkinnebrew/orangeui/blob/master/docs/Commons.md
-[MVC]: https://github.com/kkinnebrew/orangeui/blob/master/docs/MVC.md
-[API Docs]: http://kkinnebrew.github.com/orangeui/api/
-[Clementine]: https://github.com/kkinnebrew/clementine
+[here]: https://github.com/kkinnebrew/clementine/issues?labels=&sort=created&state=open
+[OrangeUI]: https://github.com/kkinnebrew/orangeui
+[Getting Started]: https://github.com/kkinnebrew/clementine/wiki/Getting-Started

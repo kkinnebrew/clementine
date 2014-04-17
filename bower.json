@@ -1,0 +1,21 @@
+{
+  "name": "clementine",
+  "version": "0.5.1",
+  "description": "An event driving javascript mixin library",
+  "keywords": [
+    "jquery",
+    "events",
+    "javascript",
+    "mvc"
+  ],
+  "main": "clementine.js",
+  "license": "MIT",
+  "ignore": [
+    ".jshintrc",
+    "**/*.txt"
+  ],
+  "dependencies": {
+    "jquery": "latest"
+  },
+  "devDependencies": {}
+}

@@ -44,5 +44,4 @@ Licensed under the MIT license.
 <https://github.com/kkinnebrew/clementine/blob/master/LICENSE>
 
 [here]: https://github.com/kkinnebrew/clementine/issues?labels=&sort=created&state=open
-[OrangeUI]: https://github.com/kkinnebrew/orangeui
-[Getting Started]: https://github.com/kkinnebrew/clementine/wiki/Getting-Started
+[Getting Started]: https://github.com/kkinnebrew/clementine/wiki/Home

@@ -22,6 +22,8 @@ To use Clementine on your project, all you need to do is include the clementine 
 <script type="text/javascript" href="clementine.js"></script>
 ```
 
+Clementine is also available via [Bower] by adding `clementine` to your `bower.json` file.
+
 Depending on the features you choose to use, Clementine is dependent on the following libraries:
 
 * jQuery - for AJAX and DOM Selectors
@@ -44,3 +46,4 @@ Licensed under the MIT license.
 
 [here]: https://github.com/kkinnebrew/clementine/issues?labels=&sort=created&state=open
 [Getting Started]: https://github.com/kkinnebrew/clementine/wiki/Home
+[Bower]: http://bower.io

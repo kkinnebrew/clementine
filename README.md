@@ -28,6 +28,7 @@ Depending on the features you choose to use, Clementine is dependent on the foll
 
 ## Release History
 
+* 4/17/2014 - v0.5.3 - Bug Fixes
 * 1/10/2013 - v0.5.1 - Ajax deferred support.
 * 12/8/2012 - v0.5.0 - Minor updates for stability, service handling.
 * 9/9/2012 - v0.4.0 - Dynamic chainable view states, custom routes, live microdata DOM bindings.

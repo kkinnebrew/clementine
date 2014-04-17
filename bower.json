@@ -1,6 +1,6 @@
 {
   "name": "clementine",
-  "version": "0.5.1",
+  "version": "0.5.3",
   "description": "An event driving javascript mixin library",
   "keywords": [
     "jquery",

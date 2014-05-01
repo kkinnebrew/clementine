@@ -1,6 +1,6 @@
 # Clementine
 
-Clementine is a rapid development javascript library for soundly built web applications. It is meant as a tool to develop highly interactive, maintainable applications, giving the developer a pattern for organizing their interaction logic, views, and styles into a library of modular, decoupled components.
+Clementine (formerly OrangeUI) is a rapid development javascript library for soundly built web applications. It is meant as a tool to develop highly interactive, maintainable applications, giving the developer a pattern for organizing their interaction logic, views, and styles into a library of modular, decoupled components.
 
 To start using Clementine, check out the [Getting Started] guide. Try it out on a project and make suggestions or report bugs [here].
 

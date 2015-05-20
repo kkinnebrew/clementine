@@ -22,7 +22,7 @@ To use Clementine on your project, all you need to do is include the clementine 
 <script type="text/javascript" href="clementine.js"></script>
 ```
 
-Clementine is also available via [Bower] by adding `clementine` to your `bower.json` file.
+Clementine is also available via [Bower] by adding `clementine` to your `bower.json` file or running the following in your terminal.
 
 ```
 bower install clementine

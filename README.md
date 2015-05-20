@@ -24,6 +24,10 @@ To use Clementine on your project, all you need to do is include the clementine 
 
 Clementine is also available via [Bower] by adding `clementine` to your `bower.json` file.
 
+```
+bower install clementine
+```
+
 Depending on the features you choose to use, Clementine is dependent on the following libraries:
 
 * jQuery - for AJAX and DOM Selectors

@@ -2,7 +2,7 @@
 
 Clementine is a rapid development javascript library for building complex single-page web applications. It is meant as a tool to develop highly interactive, maintainable applications, giving the developer a pattern for organizing their interaction logic, views, and styles into a library of modular, decoupled components.
 
-To start using Clementine, check out the [Getting Started] guide. Try it out on a project and make suggestions or report bugs [here].
+To start using Clementine, check out the [Getting Started] guide. Try it out on a project and make suggestions or report bugs [here]:
 
 ## Why choose Clementine?
 

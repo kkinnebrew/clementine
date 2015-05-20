@@ -1,7 +1,7 @@
 {
   "name": "clementine",
   "version": "0.5.3",
-  "description": "Clementine is a rapid development framework for building well structured web applications",
+  "description": "Clementine is a rapid development JavaScript library for building complex single-page web applications",
   "keywords": [
     "jquery",
     "events",

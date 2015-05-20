@@ -44,7 +44,7 @@ Depending on the features you choose to use, Clementine is dependent on the foll
 
 ## License
 
-Copyright (c) 2009-14 Kevin Kinnebrew
+Copyright (c) 2009-15 Kevin Kinnebrew
 Licensed under the MIT license.
 <https://github.com/kkinnebrew/clementine/blob/master/LICENSE>
 
